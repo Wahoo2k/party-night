@@ -21,10 +21,10 @@ import * as letters from './letters.js';
 import * as taboo from './taboo.js';
 import * as agents from './agents.js';
 import * as sketch from './sketch.js';
+import * as meld from './meld.js';
 
-export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch };
+export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld };
 
 export const COMING_SOON = [
-  { name: 'Mind Meld', blurb: 'One clue, a secret spot on a scale. Can the room read your mind?' },
   { name: 'Salad Bowl', blurb: 'Describe it, one word, then act it out. Same names, three rounds.' },
 ];

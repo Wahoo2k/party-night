@@ -560,3 +560,22 @@ svg.sk.phone{max-width:340px;margin:8px auto}
 .skw{width:40px;height:36px;display:grid;place-items:center;border-radius:10px;border:3px solid #fff3;background:#232a5c;cursor:pointer}
 .skw span{display:block;border-radius:50%;background:#fff}
 .btn.small{padding:6px 12px;min-height:0;font-size:14px}
+/* mind meld */
+.mscale{margin:14px 0}
+.mlabels{display:flex;justify-content:space-between;gap:10px;font:800 clamp(15px,1.4vw,24px)/1.1 Outfit,sans-serif}
+.mlabels span:first-child{color:#8fb8ff}.mlabels span:last-child{color:#ff9a7a;text-align:right}
+.mbar{position:relative;height:28px;margin:10px 0 40px;border-radius:99px;background:linear-gradient(90deg,#3d6fd8,#8a5fd1 50%,#e2603b)}
+.mscale.mbig .mbar{height:44px;margin-bottom:110px}
+.mband{position:absolute;top:0;bottom:0;display:grid;place-items:center;font:800 13px/1 Outfit,sans-serif;color:#0e1230}
+.mband.b2{background:#f4e9c1aa}.mband.b3{background:#ffcf6bdd}.mband.b4{background:#7fc8a9}
+.mband span{opacity:.8}
+.mtarget{position:absolute;top:-6px;bottom:-6px;width:4px;margin-left:-2px;background:#fff;box-shadow:0 0 12px #fff}
+.mpin{position:absolute;top:100%;transform:translateX(-50%);display:grid;justify-items:center;animation:rise .5s var(--d,0s) cubic-bezier(.2,.8,.2,1) both}
+.mpin::before{content:'';width:0;height:0;border:8px solid transparent;border-bottom:12px solid #f4e9c1}
+.mpin b{padding:2px 8px;border-radius:8px;background:#f4e9c1;color:#0e1230;font-size:clamp(11px,1vw,15px);white-space:nowrap}
+.mpin.p4 b{background:#7fc8a9}.mpin.p0 b{opacity:.6}
+.mdial{width:100%;height:56px;margin:8px 0 16px;accent-color:#ffcf6b;-webkit-appearance:none;appearance:none;background:transparent}
+.mdial::-webkit-slider-runnable-track{height:22px;border-radius:99px;background:linear-gradient(90deg,#3d6fd8,#8a5fd1 50%,#e2603b)}
+.mdial::-webkit-slider-thumb{-webkit-appearance:none;width:44px;height:44px;margin-top:-11px;border-radius:50%;background:#f4e9c1;border:4px solid #0e1230;box-shadow:0 3px 10px #0008}
+.mdial::-moz-range-track{height:22px;border-radius:99px;background:linear-gradient(90deg,#3d6fd8,#8a5fd1 50%,#e2603b)}
+.mdial::-moz-range-thumb{width:40px;height:40px;border-radius:50%;background:#f4e9c1;border:4px solid #0e1230}
