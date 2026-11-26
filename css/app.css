@@ -201,3 +201,29 @@ button.chip.on{outline:3px solid var(--moon)}
 .recent div{display:flex;justify-content:space-between;gap:10px;padding:10px 14px;border-radius:10px;background:#1f2553}
 .recent span{color:var(--dim)}
 #cf .btn,#gf .btn{width:100%;margin-top:12px}
+
+/* bluff */
+.fact{font:400 clamp(30px,3.4vw,54px)/1.2 'Pirata One',serif;margin:6px 0 16px}
+.fact.small{font-size:26px}
+.blank{display:inline-block;min-width:3em;border-bottom:4px solid var(--moon);color:transparent;line-height:.8}
+.answers{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px;margin:14px 0}
+.ans{padding:16px 18px;border-radius:14px;background:#1f2553;font-weight:600;font-size:clamp(18px,1.6vw,26px);animation:rise .5s both}
+.reveals{display:grid;gap:10px;margin:14px 0}
+.rv{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 16px;padding:14px 18px;border-radius:14px;background:#1f2553;animation:rise .5s both;border-left:6px solid var(--line)}
+.rv.lie{border-left-color:var(--red)}
+.rv.truth{border-left-color:var(--moss);background:#1d3a40}
+.rv.now{box-shadow:0 0 0 3px var(--moon);transform:scale(1.02);transition:transform .3s}
+.rv.truth.now{box-shadow:0 0 0 3px var(--moss),0 0 40px #7fc8a966}
+.rv-text{font-weight:700;font-size:clamp(20px,1.8vw,30px)}
+.rv-tag{align-self:center;font-weight:700;color:var(--red);font-size:clamp(14px,1.1vw,18px)}
+.rv.truth .rv-tag{color:var(--moss)}
+.rv-who{grid-column:1/-1;color:var(--dim)}
+.chip.waiting{opacity:.5}
+.podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:end;margin:20px 0;max-width:560px}
+.pod{display:grid;justify-items:center;gap:6px;padding:16px 10px;border-radius:14px 14px 0 0;background:#1f2553;text-align:center;animation:rise .6s both}
+.pod b{font-size:clamp(18px,1.6vw,24px)}
+.pod span{color:var(--moon);font-variant-numeric:tabular-nums}
+.pod.p1{order:2;min-height:180px;background:#2b3470;box-shadow:0 0 30px #f4e9c140}
+.pod.p2{order:1;min-height:140px;animation-delay:.2s}
+.pod.p3{order:3;min-height:110px;animation-delay:.4s}
+#lf .btn{width:100%;margin-top:12px}
