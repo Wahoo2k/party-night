@@ -22,9 +22,11 @@ import * as taboo from './taboo.js';
 import * as agents from './agents.js';
 import * as sketch from './sketch.js';
 import * as meld from './meld.js';
+import * as bowl from './bowl.js';
+import * as crew from './crew.js';
 
-export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld };
+export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew };
 
 export const COMING_SOON = [
-  { name: 'Salad Bowl', blurb: 'Describe it, one word, then act it out. Same names, three rounds.' },
+  { name: 'Color Clash', blurb: 'Match the color or number, play action cards, empty your hand first.' },
 ];
