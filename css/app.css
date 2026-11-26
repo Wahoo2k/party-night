@@ -400,3 +400,20 @@ button.chip.on{outline:3px solid var(--moon)}
 .check input{width:22px;height:22px}
 .center{text-align:center}
 @media(max-width:900px){.bingotop{grid-template-columns:1fr;justify-items:center}}
+
+/* quick games */
+.wyr{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:16px;align-items:center;margin:10px 0 16px}
+.wyr div{display:grid;place-items:center;text-align:center;min-height:clamp(120px,18vh,200px);padding:18px;border-radius:18px;background:color-mix(in srgb,var(--c) 22%,#171c44);border:3px solid var(--c);font:800 clamp(22px,2.4vw,38px)/1.2 Outfit,sans-serif;animation:rise .5s both}
+.wyr div+b+div{animation-delay:.15s}
+.wyr b{font:400 clamp(30px,3vw,48px)/1 'Pirata One',serif;color:var(--moon)}
+.bars{display:grid;gap:10px;margin:12px 0 16px}
+.barrow{display:grid;grid-template-columns:minmax(0,14em) minmax(0,1fr) 3ch;gap:4px 12px;align-items:center}
+.barrow .bl{font-weight:700;font-size:clamp(16px,1.5vw,24px)}
+.barrow .bt{height:clamp(22px,3vh,34px);border-radius:8px;background:#0f1336;overflow:hidden}
+.barrow .bt span{display:block;height:100%;border-radius:8px;animation:grow 1.2s 1.6s cubic-bezier(.2,.8,.2,1) both;transform-origin:left}
+@keyframes grow{from{transform:scaleX(0)}}
+.barrow b{font-size:clamp(18px,1.6vw,26px);font-variant-numeric:tabular-nums}
+.barrow small{grid-column:2/-1;font-size:14px}
+.barrow.top .bl{color:var(--moon)}
+.barrow.top .bt{box-shadow:0 0 0 2px var(--moon)}
+@media(max-width:700px){.barrow{grid-template-columns:minmax(0,8em) minmax(0,1fr) 3ch}}
