@@ -598,3 +598,13 @@ svg.sk.phone{max-width:340px;margin:8px auto}
 .cclue.dead{background:#4a3b3b;color:#c99;text-decoration:line-through}
 .crewclues.small .cclue{font-size:24px;padding:10px 16px}
 .scores .tscore{font:800 clamp(40px,4vw,64px)/1 Outfit,sans-serif;font-variant-numeric:tabular-nums;margin:6px 0}
+/* picture charades */
+.chbig{display:grid;justify-items:center;gap:6px;padding:18px;margin:8px 0 12px;border-radius:20px;background:#f4e9c1;color:#0e1230;box-shadow:0 8px 22px #0006}
+.chbig span{font-size:120px;line-height:1}
+.chbig b{font:900 30px/1.1 Outfit,sans-serif}
+.chwho{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.chwho .btn{width:100%;padding:12px 8px;font-size:17px;background:var(--moss);border-color:var(--moss);color:#0e1230}
+.chcards{display:flex;flex-wrap:wrap;gap:12px;margin:14px 0}
+.chcard{display:grid;justify-items:center;gap:4px;width:clamp(110px,10vw,150px);padding:12px;border-radius:14px;background:#f4e9c1;color:#0e1230;animation:rise .45s cubic-bezier(.2,.8,.2,1) both}
+.chcard span{font-size:clamp(44px,4vw,64px);line-height:1}.chcard small{font-size:12px;opacity:.7}
+.chcard.skipped{opacity:.45}
