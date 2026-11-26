@@ -79,3 +79,4 @@ body.phone .panel>.btn{width:100%;margin-top:16px}
 .pick b{display:block;font:400 38px/1.1 'Pirata One',serif;margin-bottom:6px}
 @media(max-width:900px){.lobby,.stage{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.scene svg *,.meter span{transition:none}}
+.chip.bot{border-left-color:var(--dim);font-style:italic}

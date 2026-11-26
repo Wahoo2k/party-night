@@ -32,6 +32,7 @@ function viewFor(pid) {
 function sendViews(force) {
   if (!room) return;
   for (const p of host.players) {
+    if (p.bot) continue;
     const v = JSON.stringify(viewFor(p.pid));
     if (force || lastSent[p.pid] !== v) {
       lastSent[p.pid] = v;
@@ -80,9 +81,36 @@ function hostAction(a) {
   if (a === 'lobby') { host.state = null; document.body.classList.remove('day'); return changed(); }
   if (a === 'newcode') { host = { code: newCode(), players: [], gameId: host.gameId, state: null }; save(); return connect(); }
   if (a === 'voice') { voice.on = !voice.on; return render(); }
+  if (a === 'addbot' && !host.state && host.players.length < game().meta.max) {
+    const used = new Set(host.players.map(p => p.name));
+    const name = BOT_NAMES.find(n => !used.has(n)) || 'Bot ' + (host.players.length + 1);
+    host.players.push({ pid: 'bot-' + Math.random().toString(36).slice(2, 8), name, bot: true });
+    return changed();
+  }
+  if (a === 'clearbots' && !host.state) { host.players = host.players.filter(p => !p.bot); return changed(); }
   if (!host.state) return;
   game().hostAct(host.state, a, Date.now());
   changed();
+}
+
+const BOT_NAMES = ['Bot Ava', 'Bot Ben', 'Bot Cleo', 'Bot Dax', 'Bot Eli', 'Bot Fay', 'Bot Gus', 'Bot Hana', 'Bot Ivo', 'Bot Jo', 'Bot Kit', 'Bot Lu', 'Bot Max', 'Bot Nia', 'Bot Oz', 'Bot Pip'];
+
+// Bots act a few seconds after a phase starts, at a human-ish pace.
+let botWait = {};
+function runBots() {
+  const g = game();
+  if (!host.state || !g.botAct) return;
+  const now = Date.now();
+  let acted = false;
+  for (const p of host.players) {
+    if (!p.bot) continue;
+    const a = g.botAct(g.phoneView(host.state, p.pid));
+    if (!a) { delete botWait[p.pid]; continue; }
+    const key = host.state.phase + host.state.round;
+    if (!botWait[p.pid] || botWait[p.pid].key !== key) botWait[p.pid] = { key, at: now + 2000 + Math.random() * 6000 };
+    if (now >= botWait[p.pid].at) { g.act(host.state, p.pid, a, now); delete botWait[p.pid]; acted = true; }
+  }
+  if (acted) changed();
 }
 
 function qr(text) {
@@ -108,7 +136,7 @@ function renderLobby() {
     </section>
     <section class="panel">
       <h2>${n ? `${n} player${n === 1 ? '' : 's'} in` : 'Waiting for players'}</h2>
-      <div class="roster">${host.players.map(p => `<div class="chip">${esc(p.name)}</div>`).join('') || '<p class="muted">Names appear here as phones join.</p>'}</div>
+      <div class="roster">${host.players.map(p => `<div class="chip ${p.bot ? 'bot' : ''}">${esc(p.name)}</div>`).join('') || '<p class="muted">Names appear here as phones join.</p>'}</div>
       <h3>Game</h3>
       <div class="games">
         ${Object.values(GAMES).map(m => `<button class="game ${m.meta.id === host.gameId ? 'on' : ''}" data-game="${m.meta.id}"><b>${esc(m.meta.name)}</b><span>${esc(m.meta.blurb)}</span><small>${m.meta.min}–${m.meta.max} players</small></button>`).join('')}
@@ -118,6 +146,11 @@ function renderLobby() {
         <button class="btn" data-host="start" ${need ? 'disabled' : ''}>${need ? `Need ${need} more player${need === 1 ? '' : 's'}` : `Start ${esc(g.meta.name)}`}</button>
         <button class="btn ghost" data-host="voice">Narrator: ${voice.on ? 'on' : 'off'}</button>
         <button class="btn ghost" data-host="newcode">New room</button>
+      </div>
+      <div class="row">
+        <button class="btn ghost" data-host="addbot">Add a bot player</button>
+        ${host.players.some(p => p.bot) ? '<button class="btn ghost" data-host="clearbots">Remove bots</button>' : ''}
+        <span class="muted">Bots fill empty seats for testing. They play at random.</span>
       </div>
     </section>
   </div>`;
@@ -144,6 +177,7 @@ async function connect() {
 
 setInterval(() => {
   if (!host.state) return;
+  runBots();
   const before = JSON.stringify(host.state);
   game().tick(host.state, Date.now());
   if (JSON.stringify(host.state) !== before) changed();

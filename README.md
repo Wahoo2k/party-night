@@ -22,6 +22,7 @@ https://wahoo2k.github.io/party-night/ (GitHub Pages from `main`, root)
 ## Testing
 - `node test/engine.test.js` – simulates 2,000 random Werewolf games against the rules engine.
 - Add `?local=1` to the URL to skip Supabase and use BroadcastChannel between tabs of one browser.
+- `node test/bots.mjs` – one phone plus four bots, real timers.
 - `node test/e2e.mjs` – plays a full game in headless Chrome (TV + 6 phones) in local mode; needs a static server on port 8765.
 
 ## Known limits (prototype)

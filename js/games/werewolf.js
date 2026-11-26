@@ -223,6 +223,16 @@ export function phoneView(s, pid) {
   return v;
 }
 
+// What a bot player does with its phone view. Returns an action or null. Bots pick at random.
+export function botAct(v, rnd = Math.random) {
+  const any = list => list[Math.floor(rnd() * list.length)];
+  if (!v.alive) return null;
+  if (v.phase === 'roles' && !v.ready) return { type: 'ready' };
+  if (v.phase === 'night' && v.options && v.options.length && !v.picked) return { type: 'pick', target: any(v.options).pid };
+  if (v.phase === 'vote' && v.options && v.options.length && !v.voted) return { type: 'vote', target: any(v.options).pid };
+  return null;
+}
+
 // ---------- renderers ----------
 const roleIcon = r => ({
   W: '<path d="M20 78 30 24 44 44 52 40 60 44 74 24 82 78Q51 96 20 78Z" fill="#e2483d"/><circle cx="40" cy="58" r="4" fill="#fff"/><circle cx="62" cy="58" r="4" fill="#fff"/>',
