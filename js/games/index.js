@@ -20,9 +20,11 @@ import * as funny from './funny.js';
 import * as letters from './letters.js';
 import * as taboo from './taboo.js';
 import * as agents from './agents.js';
+import * as sketch from './sketch.js';
 
-export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents };
+export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch };
 
 export const COMING_SOON = [
-  { name: 'Sketch Telephone', blurb: 'Draw, guess, redraw. Watch the message fall apart.' },
+  { name: 'Mind Meld', blurb: 'One clue, a secret spot on a scale. Can the room read your mind?' },
+  { name: 'Salad Bowl', blurb: 'Describe it, one word, then act it out. Same names, three rounds.' },
 ];
