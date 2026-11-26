@@ -29,9 +29,9 @@ import * as clash from './clash.js';
 import * as blackjack from './blackjack.js';
 import * as gofish from './gofish.js';
 import * as bluffcards from './bluffcards.js';
+import * as hearts from './hearts.js';
 
-export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards };
+export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards, hearts };
 
 export const COMING_SOON = [
-  { name: 'Hearts', blurb: 'Four-player trick-taking. Dodge the hearts and the Queen of Spades.' },
 ];
