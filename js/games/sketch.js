@@ -199,7 +199,7 @@ export function cueEvent(s) {
 }
 
 // ---------- bots ----------
-function botDoodle(rnd) {
+export function botDoodle(rnd) {
   const strokes = [];
   const cx = 70 + rnd() * 110, cy = 70 + rnd() * 110, r = 30 + rnd() * 40;
   const ring = []; for (let a = 0; a <= 24; a++) ring.push(cx + r * Math.cos(a / 24 * Math.PI * 2), cy + r * Math.sin(a / 24 * Math.PI * 2));
@@ -323,44 +323,7 @@ export function renderPhone(v, el, send) {
     return;
   }
   if (v.phase === 'draw') {
-    if (pad.key !== key) pad = { key, strokes: [], c: pad.c || 1, w: pad.w ?? 1 };
-    el.innerHTML = `<p class="muted">Step ${v.step + 1} of ${v.steps} · draw this:</p><p class="tq small skwhat">${esc(v.task)}</p>
-      <canvas id="skc" width="512" height="512"></canvas>
-      <div class="sktools"><div class="skcolors">${COLORS.slice(1).map((c, i) => `<button class="skc ${pad.c === i + 1 ? 'on' : ''}" data-c="${i + 1}" style="--c:${c}" aria-label="color ${i + 1}"></button>`).join('')}<button class="skc eraser ${pad.c === 0 ? 'on' : ''}" data-c="0" aria-label="eraser">⌫</button></div>
-      <div class="skwidths">${WIDTHS.map((w, i) => `<button class="skw ${pad.w === i ? 'on' : ''}" data-w="${i}" aria-label="size ${i + 1}"><span style="width:${w + 3}px;height:${w + 3}px"></span></button>`).join('')}<button class="btn ghost small" id="undo">↶ Undo</button><button class="btn ghost small" id="clear">Clear</button></div></div>
-      <button class="btn" id="skdone">Done</button>`;
-    const cv = el.querySelector('#skc'), ctx = cv.getContext('2d');
-    const paint = () => {
-      ctx.fillStyle = COLORS[0]; ctx.fillRect(0, 0, 512, 512);
-      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-      for (const st of pad.strokes) {
-        ctx.strokeStyle = COLORS[st.c]; ctx.lineWidth = WIDTHS[st.w] * 2;
-        ctx.beginPath(); ctx.moveTo(st.p[0] * 2, st.p[1] * 2);
-        for (let i = 2; i < st.p.length; i += 2) ctx.lineTo(st.p[i] * 2, st.p[i + 1] * 2);
-        if (st.p.length === 2) ctx.lineTo(st.p[0] * 2 + 0.2, st.p[1] * 2);
-        ctx.stroke();
-      }
-    };
-    paint();
-    const draft = () => { clearTimeout(draftTimer); draftTimer = setTimeout(() => send({ type: 'draft', strokes: pad.strokes }), 1500); };
-    const pt = e => { const r = cv.getBoundingClientRect(); return [Math.max(0, Math.min(255, Math.round((e.clientX - r.left) / r.width * 256))), Math.max(0, Math.min(255, Math.round((e.clientY - r.top) / r.height * 256)))]; };
-    let cur = null;
-    cv.onpointerdown = e => { e.preventDefault(); cv.setPointerCapture(e.pointerId); cur = { c: pad.c, w: pad.c === 0 ? 2 : pad.w, p: pt(e) }; pad.strokes.push(cur); paint(); };
-    cv.onpointermove = e => {
-      if (!cur) return;
-      const [x, y] = pt(e), n2 = cur.p.length;
-      if (Math.hypot(x - cur.p[n2 - 2], y - cur.p[n2 - 1]) < 2) return;
-      cur.p.push(x, y);
-      ctx.strokeStyle = COLORS[cur.c]; ctx.lineWidth = WIDTHS[cur.w] * 2;
-      ctx.beginPath(); ctx.moveTo(cur.p[n2 - 2] * 2, cur.p[n2 - 1] * 2); ctx.lineTo(x * 2, y * 2); ctx.stroke();
-    };
-    cv.onpointerup = cv.onpointercancel = () => { if (cur) { cur = null; draft(); } };
-    el.querySelectorAll('[data-c]').forEach(b => (b.onclick = () => { pad.c = Number(b.dataset.c); el.querySelectorAll('[data-c]').forEach(x => x.classList.toggle('on', x === b)); }));
-    el.querySelectorAll('[data-w]').forEach(b => (b.onclick = () => { pad.w = Number(b.dataset.w); if (pad.c === 0) pad.c = 1; el.querySelectorAll('[data-w]').forEach(x => x.classList.toggle('on', x === b)); el.querySelectorAll('[data-c]').forEach(x => x.classList.toggle('on', Number(x.dataset.c) === pad.c)); }));
-    el.querySelector('#undo').onclick = () => { pad.strokes.pop(); paint(); draft(); };
-    const clr = el.querySelector('#clear');
-    clr.onclick = () => { if (clr.dataset.sure) { pad.strokes = []; paint(); draft(); clr.textContent = 'Clear'; delete clr.dataset.sure; } else { clr.dataset.sure = 1; clr.textContent = 'Sure?'; setTimeout(() => { clr.textContent = 'Clear'; delete clr.dataset.sure; }, 2500); } };
-    el.querySelector('#skdone').onclick = e => { clearTimeout(draftTimer); e.target.disabled = true; send({ type: 'draw', strokes: pad.strokes }); };
+    mountPad(el, key, `<p class="muted">Step ${v.step + 1} of ${v.steps} · draw this:</p><p class="tq small skwhat">${esc(v.task)}</p>`, send);
     return;
   }
   if (v.phase === 'reveal') {
@@ -369,4 +332,47 @@ export function renderPhone(v, el, send) {
     return;
   }
   if (v.phase === 'over') el.innerHTML = `<h2 class="${v.place === 1 && v.hearts ? 'win' : ''}">${v.place === 1 && v.hearts ? 'Most loved!' : 'Thanks for playing!'}</h2><p class="say">You got ❤️ ${v.hearts}.</p>`;
+}
+
+// A drawing pad on the phone: colors, eraser, sizes, undo, clear. Sends 'draft' while drawing and 'draw' on Done.
+// Strokes survive redraws as long as the key stays the same.
+export function mountPad(el, key, header, send) {
+  if (pad.key !== key) pad = { key, strokes: [], c: pad.c || 1, w: pad.w ?? 1 };
+  el.innerHTML = `${header}
+    <canvas id="skc" width="512" height="512"></canvas>
+    <div class="sktools"><div class="skcolors">${COLORS.slice(1).map((c, i) => `<button class="skc ${pad.c === i + 1 ? 'on' : ''}" data-c="${i + 1}" style="--c:${c}" aria-label="color ${i + 1}"></button>`).join('')}<button class="skc eraser ${pad.c === 0 ? 'on' : ''}" data-c="0" aria-label="eraser">⌫</button></div>
+    <div class="skwidths">${WIDTHS.map((w, i) => `<button class="skw ${pad.w === i ? 'on' : ''}" data-w="${i}" aria-label="size ${i + 1}"><span style="width:${w + 3}px;height:${w + 3}px"></span></button>`).join('')}<button class="btn ghost small" id="undo">↶ Undo</button><button class="btn ghost small" id="clear">Clear</button></div></div>
+    <button class="btn" id="skdone">Done</button>`;
+  const cv = el.querySelector('#skc'), ctx = cv.getContext('2d');
+  const paint = () => {
+    ctx.fillStyle = COLORS[0]; ctx.fillRect(0, 0, 512, 512);
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    for (const st of pad.strokes) {
+      ctx.strokeStyle = COLORS[st.c]; ctx.lineWidth = WIDTHS[st.w] * 2;
+      ctx.beginPath(); ctx.moveTo(st.p[0] * 2, st.p[1] * 2);
+      for (let i = 2; i < st.p.length; i += 2) ctx.lineTo(st.p[i] * 2, st.p[i + 1] * 2);
+      if (st.p.length === 2) ctx.lineTo(st.p[0] * 2 + 0.2, st.p[1] * 2);
+      ctx.stroke();
+    }
+  };
+  paint();
+  const draft = () => { clearTimeout(draftTimer); draftTimer = setTimeout(() => send({ type: 'draft', strokes: pad.strokes }), 1500); };
+  const pt = e => { const r = cv.getBoundingClientRect(); return [Math.max(0, Math.min(255, Math.round((e.clientX - r.left) / r.width * 256))), Math.max(0, Math.min(255, Math.round((e.clientY - r.top) / r.height * 256)))]; };
+  let cur = null;
+  cv.onpointerdown = e => { e.preventDefault(); cv.setPointerCapture(e.pointerId); cur = { c: pad.c, w: pad.c === 0 ? 2 : pad.w, p: pt(e) }; pad.strokes.push(cur); paint(); };
+  cv.onpointermove = e => {
+    if (!cur) return;
+    const [x, y] = pt(e), n2 = cur.p.length;
+    if (Math.hypot(x - cur.p[n2 - 2], y - cur.p[n2 - 1]) < 2) return;
+    cur.p.push(x, y);
+    ctx.strokeStyle = COLORS[cur.c]; ctx.lineWidth = WIDTHS[cur.w] * 2;
+    ctx.beginPath(); ctx.moveTo(cur.p[n2 - 2] * 2, cur.p[n2 - 1] * 2); ctx.lineTo(x * 2, y * 2); ctx.stroke();
+  };
+  cv.onpointerup = cv.onpointercancel = () => { if (cur) { cur = null; draft(); } };
+  el.querySelectorAll('[data-c]').forEach(b => (b.onclick = () => { pad.c = Number(b.dataset.c); el.querySelectorAll('[data-c]').forEach(x => x.classList.toggle('on', x === b)); }));
+  el.querySelectorAll('[data-w]').forEach(b => (b.onclick = () => { pad.w = Number(b.dataset.w); if (pad.c === 0) pad.c = 1; el.querySelectorAll('[data-w]').forEach(x => x.classList.toggle('on', x === b)); el.querySelectorAll('[data-c]').forEach(x => x.classList.toggle('on', Number(x.dataset.c) === pad.c)); }));
+  el.querySelector('#undo').onclick = () => { pad.strokes.pop(); paint(); draft(); };
+  const clr = el.querySelector('#clear');
+  clr.onclick = () => { if (clr.dataset.sure) { pad.strokes = []; paint(); draft(); clr.textContent = 'Clear'; delete clr.dataset.sure; } else { clr.dataset.sure = 1; clr.textContent = 'Sure?'; setTimeout(() => { clr.textContent = 'Clear'; delete clr.dataset.sure; }, 2500); } };
+  el.querySelector('#skdone').onclick = e => { clearTimeout(draftTimer); e.target.disabled = true; send({ type: 'draw', strokes: pad.strokes }); };
 }
