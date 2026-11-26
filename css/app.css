@@ -1,0 +1,81 @@
+:root{color-scheme:dark;--bg:#0e1230;--panel:#171c44;--ink:#f3ecd2;--dim:#b8b5cc;--red:#e2483d;--moss:#7fc8a9;--line:#2f3670;--sky1:#070a22;--sky2:#2a2f6b;--moon:#f4e9c1;--star:1;--hill1:#1b2152;--hill2:#121640;--house:#0b0e29;--lamp:#ffcf6b}
+body.day{--sky1:#f4b48a;--sky2:#9cc8e8;--moon:#fff6cf;--star:0;--hill1:#4f7a6a;--hill2:#2f5a4c;--house:#27303f;--lamp:#3a4456}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:17px/1.5 Outfit,system-ui,sans-serif;overflow-x:clip;min-height:100vh}
+.scene{position:relative;height:clamp(140px,26vh,280px)}
+.scene svg{position:absolute;inset:0;width:100%;height:100%}
+.scene svg *{transition:fill 1.2s,stop-color 1.2s,opacity 1.2s}
+.title{position:absolute;top:clamp(12px,2.5vw,28px);left:max(4vw,16px);margin:0;font:400 clamp(36px,5.5vw,72px)/1 'Pirata One',serif;text-shadow:0 2px 0 #0006}
+.title a{color:inherit;text-decoration:none}
+#status{position:absolute;right:max(4vw,16px);bottom:12px;font-size:14px;padding:6px 12px;border-radius:99px;background:#0008;color:var(--ink)}
+#status[data-s=offline]{background:var(--red)}
+.wrap{max-width:1500px;margin:0 auto;padding:24px max(4vw,16px) 56px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:clamp(18px,2.4vw,36px)}
+h2{font:400 clamp(30px,3.6vw,56px)/1.08 'Pirata One',serif;margin:0 0 12px}
+h3{margin:22px 0 10px;font-size:18px}
+.say{font-size:clamp(19px,2vw,30px);line-height:1.35;margin:0 0 18px}
+.muted{color:var(--dim)}
+.win{color:var(--moss)}.lose{color:var(--red)}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:18px}
+.btn{font:600 clamp(17px,1.4vw,22px) Outfit,sans-serif;min-height:56px;padding:0 24px;border-radius:12px;border:2px solid var(--red);background:var(--red);color:#fff;cursor:pointer}
+.btn.ghost{background:transparent;border-color:var(--line);color:var(--ink)}
+.btn[disabled]{background:#2a2f5e;border-color:#2a2f5e;color:var(--dim);cursor:default}
+.btn:focus-visible,button:focus-visible,.card:focus-visible,summary:focus-visible{outline:4px solid var(--moon);outline-offset:3px}
+label{display:block;font-weight:600;margin:16px 0 6px}
+input{font:18px Outfit,sans-serif;color:var(--ink);background:#0f1336;border:1px solid var(--line);border-radius:10px;padding:12px 14px;width:100%}
+.big{font-size:30px;letter-spacing:.2em;text-transform:uppercase;font-weight:800;width:7ch}
+form .btn{margin-top:22px;width:100%}
+.roster{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0}
+.chip{padding:10px 16px;border-radius:99px;background:#232a5c;font-weight:600;font-size:clamp(16px,1.3vw,22px);border-left:5px solid var(--rc,var(--moss))}
+.chip small{display:block;font-weight:400;color:var(--dim);font-size:14px}
+.chip.out{opacity:.55}
+.chip.out .nm{text-decoration:line-through}
+/* TV lobby */
+.lobby{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:24px;align-items:start}
+.join{text-align:center}
+.qr{background:#fff;border-radius:14px;padding:10px;width:min(100%,280px);margin:0 auto 14px;aspect-ratio:1}
+.qr:empty{display:none}
+.qr svg{width:100%;height:100%;display:block}
+.url{color:var(--ink);overflow-wrap:anywhere}
+.code{font:800 clamp(56px,7vw,120px)/1 Outfit,sans-serif;letter-spacing:.14em;color:var(--moon);margin-top:8px}
+.games{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.game{text-align:left;font:inherit;color:var(--ink);background:#1d2352;border:2px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:6px;cursor:pointer}
+.game b{font:400 28px/1 'Pirata One',serif}
+.game span{color:var(--dim);font-size:15px}
+.game small{color:var(--dim)}
+.game.on{border-color:var(--moss);background:#1f2e52}
+.game.soon{opacity:.55;cursor:default}
+/* TV in-game */
+.stage{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:24px;align-items:start}
+.stage .roster{flex-direction:column;align-items:stretch}
+.meter{height:14px;border-radius:99px;background:#0f1336;overflow:hidden;margin:6px 0}
+.meter span{display:block;height:100%;background:var(--moss);transition:width .4s}
+.clock{font:800 clamp(56px,7vw,110px)/1 Outfit,sans-serif;margin:8px 0;font-variant-numeric:tabular-nums}
+.tally{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+.tally div{padding:10px 16px;border-radius:12px;background:#1f2553;font-size:20px}
+.tally b{font-size:28px;margin-right:6px}
+/* Phone */
+body.phone .wrap{max-width:560px}
+body.phone .scene{height:120px}
+body.phone .title{font-size:34px}
+body.phone h2{font-size:34px}
+body.phone .say{font-size:20px}
+.opts{display:grid;gap:10px;margin:14px 0}
+.opt{font:600 19px Outfit,sans-serif;min-height:58px;border-radius:12px;border:2px solid var(--line);background:#1f2553;color:var(--ink);text-align:left;padding:0 18px;cursor:pointer}
+.opt.on{border-color:var(--moss);background:#1f3a48}
+.opt.on::after{content:' ✓';color:var(--moss)}
+body.phone .panel>.btn{width:100%;margin-top:16px}
+.panel>.btn{margin-top:8px}
+.card{user-select:none;-webkit-user-select:none;touch-action:none;margin:8px auto 0;max-width:340px;aspect-ratio:3/4;border-radius:22px;display:grid;place-items:center;text-align:center;padding:22px;border:2px solid var(--line);background:repeating-linear-gradient(45deg,#1c2150 0 14px,#181c47 14px 28px);cursor:pointer}
+.card.on{background:var(--panel);border-color:var(--rc)}
+.card svg{width:90px;height:90px}
+.card .rn{font:400 50px/1 'Pirata One',serif;color:var(--rc);margin:8px 0}
+.reveal{font:400 34px/1.1 'Pirata One',serif;padding:18px;border-radius:14px;background:#0f1336;margin:14px 0}
+/* Landing */
+.choose{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px;max-width:900px}
+.pick{display:block;text-decoration:none;color:var(--ink);padding:26px;border-radius:18px;border:2px solid var(--line);background:var(--panel)}
+.pick:hover,.pick:focus-visible{border-color:var(--moss)}
+.pick b{display:block;font:400 38px/1.1 'Pirata One',serif;margin-bottom:6px}
+@media(max-width:900px){.lobby,.stage{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.scene svg *,.meter span{transition:none}}

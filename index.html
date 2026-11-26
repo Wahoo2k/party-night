@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Party Night</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div class="scene"><svg id="sky" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg><h1 class="title">Party Night</h1></div>
+<main class="wrap">
+  <p class="say">Party games on your TV. Everyone plays on their own phone, nothing to install.</p>
+  <div class="choose">
+    <a class="pick" id="tv" href="tv.html"><b>This is the TV</b><span class="muted">Open this on the TV or the computer connected to it. It shows the room code.</span></a>
+    <a class="pick" id="phone" href="play.html"><b>This is my phone</b><span class="muted">Join with the 4-letter code shown on the TV.</span></a>
+  </div>
+</main>
+<script type="module">
+import { drawScene } from './js/ui.js';
+drawScene(document.getElementById('sky'));
+const q = location.search;
+if (new URLSearchParams(q).has('code')) location.replace('play.html' + q);
+if (q) for (const a of document.querySelectorAll('.pick')) a.href += q;
+document.getElementById('tv').focus();
+</script>
+</body>
+</html>
