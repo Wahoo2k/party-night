@@ -12,9 +12,9 @@ import * as ducks from './ducks.js';
 import * as trivia from './trivia.js';
 import * as spin from './spin.js';
 import * as crowd from './crowd.js';
+import * as bingo from './bingo.js';
 
-export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd };
+export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo };
 
 export const COMING_SOON = [
-  { name: 'Bingo', blurb: 'Cards on your phone, the TV calls the numbers. Shout it first!' },
 ];
