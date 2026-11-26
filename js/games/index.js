@@ -25,9 +25,11 @@ import * as meld from './meld.js';
 import * as bowl from './bowl.js';
 import * as crew from './crew.js';
 import * as charades from './charades.js';
+import * as clash from './clash.js';
 
-export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades };
+export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash };
 
 export const COMING_SOON = [
-  { name: 'Color Clash', blurb: 'Match the color or number, play action cards, empty your hand first.' },
+  { name: 'Blackjack', blurb: 'Everyone plays against the TV dealer. Hit, stand, double down.' },
+  { name: 'Go Fish', blurb: 'Ask for cards, make matches. Picture cards for little ones.' },
 ];
