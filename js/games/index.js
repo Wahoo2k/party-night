@@ -19,10 +19,10 @@ import * as cases from './cases.js';
 import * as funny from './funny.js';
 import * as letters from './letters.js';
 import * as taboo from './taboo.js';
+import * as agents from './agents.js';
 
-export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo };
+export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents };
 
 export const COMING_SOON = [
-  { name: 'Secret Agents', blurb: 'Spymasters give one-word clues to find their team\'s words.' },
   { name: 'Sketch Telephone', blurb: 'Draw, guess, redraw. Watch the message fall apart.' },
 ];

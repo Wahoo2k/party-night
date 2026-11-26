@@ -520,3 +520,21 @@ button.case:disabled{opacity:.5}
 .tbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .tbtns [data-got]{grid-column:1/-1;min-height:70px;font-size:26px;background:var(--moss);border-color:var(--moss);color:#0e1230}
 [data-start]{width:100%}
+/* secret agents */
+.agrid{display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(6px,.8vw,12px);margin:12px 0}
+.acard{position:relative;display:grid;place-items:center;min-height:clamp(64px,10vh,96px);padding:6px;border-radius:12px;background:#f4f1e6;color:#0e1230;border:0;font:800 clamp(15px,1.6vw,26px)/1.1 Outfit,sans-serif;text-transform:uppercase;letter-spacing:.02em;box-shadow:0 4px 0 #0005;transition:transform .3s,background .3s}
+.acard small{position:absolute;bottom:3px;left:4px;right:4px;font:600 11px/1.2 system-ui,sans-serif;text-transform:none;color:#5a4a00;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.acard.rev{color:#fff;text-shadow:0 1px 2px #0008}
+.acard.rev.k0{background:#e0a92e}.acard.rev.k1{background:#5a6fd8}.acard.rev.kn{background:#a39a85;color:#0e123088}.acard.rev.kx{background:#111;color:#f55}
+.acard.peek.k0{background:#f6d27a;box-shadow:inset 0 0 0 3px #c88e10,0 4px 0 #0005}.acard.peek.k1{background:#b8c3ff;box-shadow:inset 0 0 0 3px #3d52c4,0 4px 0 #0005}.acard.peek.kx{background:#111;color:#f77}.acard.peek.kn{background:#d9d4c4;opacity:.55}
+.acard.flipnow{animation:aflip .6s}
+@keyframes aflip{0%{transform:rotateY(90deg)}100%{transform:none}}
+.agrid.small{gap:4px}.agrid.small .acard{min-height:52px;font-size:11px;border-radius:8px;padding:3px;word-break:break-word}
+.agrid.small .acard small{font-size:10px;bottom:1px;color:#0e1230}
+.agrid.small .acard.mine{outline:3px solid var(--moon);outline-offset:1px}
+.clueline{display:flex;align-items:baseline;justify-content:center;gap:14px;flex-wrap:wrap;margin:6px 0}
+.clueline b{font:900 clamp(30px,4vw,56px)/1 Outfit,sans-serif;letter-spacing:.04em}
+.clueline i{font:900 clamp(30px,4vw,56px)/1 Outfit,sans-serif;font-style:normal;color:var(--moon)}
+.clueline.small b,.clueline.small i{font-size:30px}
+.num{max-width:80px}
+.btn.on{background:var(--moon);color:#0e1230}
