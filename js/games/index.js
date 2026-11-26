@@ -26,10 +26,12 @@ import * as bowl from './bowl.js';
 import * as crew from './crew.js';
 import * as charades from './charades.js';
 import * as clash from './clash.js';
+import * as blackjack from './blackjack.js';
 
-export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash };
+export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack };
 
 export const COMING_SOON = [
-  { name: 'Blackjack', blurb: 'Everyone plays against the TV dealer. Hit, stand, double down.' },
   { name: 'Go Fish', blurb: 'Ask for cards, make matches. Picture cards for little ones.' },
+  { name: 'Call My Bluff', blurb: 'Play cards face down, claim anything. Call out the liars.' },
+  { name: 'Hearts', blurb: 'Four-player trick-taking. Dodge the hearts and the Queen of Spades.' },
 ];

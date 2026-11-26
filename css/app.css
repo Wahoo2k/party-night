@@ -649,3 +649,26 @@ svg.sk.phone{max-width:340px;margin:8px auto}
 .ccpick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
 .ccpick button{padding:22px 10px;border-radius:14px;border:0;background:var(--cc);color:#fff;font:800 20px/1 Outfit,sans-serif;text-shadow:0 1px 2px #0006;cursor:pointer}
 .say .clock{display:inline-block;font-size:1em;margin:0 0 0 8px;padding:2px 10px;border-radius:99px;background:#232a5c}
+/* playing cards */
+.pc{position:relative;display:inline-grid;place-items:center;width:54px;aspect-ratio:5/7;border-radius:8px;background:#fffdf6;color:#1d1f2e;box-shadow:0 3px 8px #0006;flex:none;font-family:Outfit,sans-serif;animation:ccdrop .35s cubic-bezier(.2,.8,.2,1) both}
+.pc.red{color:#d23a2e}
+.pc .mid{font-size:26px}
+.pc b{position:absolute;display:grid;justify-items:center;font-size:13px;line-height:1}.pc b i{font-style:normal;font-size:11px}
+.pc .tl{top:4px;left:5px}.pc .br{bottom:4px;right:5px;transform:rotate(180deg)}
+.pc.back{background:repeating-linear-gradient(45deg,#5a6fd8 0 6px,#4a5ec8 6px 12px);border:3px solid #fffdf6;color:#fffdf6}
+.pc.big{width:clamp(80px,7vw,110px)}.pc.big .mid{font-size:clamp(38px,3.4vw,54px)}.pc.big b{font-size:20px}.pc.big b i{font-size:16px}
+.pcrow{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.pcrow.small .pc{width:42px}.pcrow.small .pc .mid{font-size:20px}
+/* blackjack */
+.bjtable{background:radial-gradient(ellipse at 50% 0,#1f6b4a,#123d2c 70%);border-color:#2c7b58}
+.bjdealer{display:grid;justify-items:center;margin-bottom:16px}
+.bjseats{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.bjseat{display:grid;justify-items:center;gap:4px;padding:10px 12px;border-radius:14px;background:#0e1230aa;min-width:130px}
+.bjseat.won{box-shadow:0 0 0 3px #7fc8a9}.bjseat.lost{opacity:.65}
+.bjseat span{font-weight:800}.bjseat small{opacity:.8}
+.bjbets{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.chipbtn{aspect-ratio:1;border-radius:50%;border:6px dashed #fffdf6;background:#e2473b;color:#fff;font:900 30px/1 Outfit,sans-serif;cursor:pointer;box-shadow:0 6px 14px #0007}
+.chipbtn:nth-child(2){background:#3f7fe0}.chipbtn:nth-child(3){background:#3fa34d}.chipbtn:nth-child(4){background:#1d1f2e}
+.chipbtn:disabled{opacity:.3}
+.bjbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bjbtns .btn:first-child{grid-column:1/-1;min-height:64px;font-size:24px}
+.pc b{white-space:nowrap;letter-spacing:-.04em;grid-auto-flow:row}
