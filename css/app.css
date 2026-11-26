@@ -508,3 +508,15 @@ button.case:disabled{opacity:.5}
 #lf2 label{margin-top:10px}
 #lf2 .btn{width:100%;margin-top:14px}
 @media(max-width:700px){.catlist{grid-template-columns:1fr}}
+
+/* taboo talk */
+.tabooclock{display:grid;place-items:center;margin:12px auto;width:clamp(140px,15vw,200px);aspect-ratio:1;border-radius:50%;border:8px solid #ffcf6b;box-shadow:0 0 30px #ffcf6b40}
+.tabooclock .clock{margin:0}
+.tabooclock.hurry{border-color:var(--red);animation:pulse 1s infinite}
+.tcard2{border-radius:18px;overflow:hidden;margin:10px 0;box-shadow:0 10px 24px #0006}
+.tword{padding:18px;background:#7fc8a9;color:#0e1230;text-align:center;font:900 34px/1.1 Outfit,sans-serif}
+.tban{display:grid;background:#f4f1e6}
+.tban span{padding:10px;text-align:center;font-weight:800;font-size:22px;color:#a8261c;border-top:1px solid #0001}
+.tbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tbtns [data-got]{grid-column:1/-1;min-height:70px;font-size:26px;background:var(--moss);border-color:var(--moss);color:#0e1230}
+[data-start]{width:100%}

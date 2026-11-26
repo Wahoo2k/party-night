@@ -53,7 +53,7 @@ export function setup(players, rnd = Math.random, prev = null) {
   if (pool.length < ROUNDS) pool = QUESTIONS.map((q, i) => i);
   const qs = shuffle(pool, rnd).slice(0, ROUNDS);
   // Split into two teams; keep last game's teams if the same people are playing.
-  const sameCrowd = prev?.teamOf && players.every(p => prev.teamOf[p.pid] !== undefined);
+  const sameCrowd = prev?.teamOf && players.every(p => prev.teamOf[p.pid] !== undefined) && Math.abs(players.filter(p => prev.teamOf[p.pid] === 0).length * 2 - players.length) <= 1;
   const order = shuffle(players.map(p => p.pid), rnd);
   const teamOf = {};
   if (sameCrowd) players.forEach(p => (teamOf[p.pid] = prev.teamOf[p.pid]));
