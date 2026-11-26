@@ -767,3 +767,17 @@ p.center .clock{display:inline-block;font-size:1em;margin:0 0 0 8px;padding:2px 
 .mwtable{display:grid;gap:8px;margin:12px 0}
 .mwrow{display:grid;grid-template-columns:minmax(90px,1fr) auto auto auto 80px;gap:10px;align-items:center}
 .mwrow .mwcard{min-width:120px;grid-auto-flow:column;padding:6px 10px}.mwrow .mwcard span{font-size:22px}
+/* missions */
+.mstrack{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:6px 0 10px}
+.msm{display:grid;justify-items:center;gap:4px;width:clamp(80px,9vw,120px);padding:10px 6px;border-radius:50%;aspect-ratio:1;align-content:center;background:#232a5c;border:3px solid #fff2}
+.msm b{font:900 clamp(26px,2.6vw,40px)/1 Outfit,sans-serif}.msm small{font-size:11px;opacity:.8;text-align:center}
+.msm.now{border-color:var(--moon);box-shadow:0 0 20px #f4e9c160}.msm.ok{background:#3fa34d}.msm.bad{background:#a8261c}
+.msrej{display:flex;gap:6px;justify-content:center;align-items:center;font-size:14px;opacity:.85;margin-bottom:10px}
+.msrej span{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#232a5c;font-size:12px}.msrej span.on{background:var(--red)}
+.msvotes{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:12px 0}
+.msvotes span{padding:8px 14px;border-radius:99px;font-weight:800}.msvotes .yes{background:#3fa34d}.msvotes .no{background:#a8261c}
+.mscards{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0}
+.mscard{display:grid;place-items:center;width:120px;aspect-ratio:5/7;border-radius:12px;border:0;font:900 18px/1 Outfit,sans-serif;color:#fff;animation:ccdrop .5s both;cursor:pointer}
+.mscard.ok{background:#3fa34d}.mscard.fail{background:#a8261c}
+.role.crew{padding:16px;border-radius:16px;background:#1f3a5a;border:2px solid #7fb4ff;margin-top:12px}
+.role.insider{margin-top:12px}
