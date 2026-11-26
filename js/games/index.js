@@ -15,9 +15,11 @@ import * as crowd from './crowd.js';
 import * as bingo from './bingo.js';
 import * as quick from './quick.js';
 import * as ladder from './ladder.js';
+import * as cases from './cases.js';
 
-export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder };
+export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases };
 
 export const COMING_SOON = [
-  { name: 'Pick a Case', blurb: 'Open cases, weigh the banker\'s offers. Deal or keep going?' },
+  { name: 'Funny Answers', blurb: 'Answer a prompt, then the room votes for the funniest.' },
+  { name: 'Scattergories', blurb: 'One letter, five categories. Duplicates don\'t count!' },
 ];
