@@ -239,10 +239,18 @@ export function renderTV(v, el) {
     const status = v.ending && !v.animating
       ? v.endReason === 'bank' ? `<p class="say win">Banked ${v.banked} points!</p>` : v.endReason === 'splash' ? `<p class="say lose">Splash! Lost ${v.lost} points this turn.</p>` : v.endReason === 'pile' ? `<p class="say lose">Duck pile! Back to zero.</p>` : '<p class="say">Turn skipped.</p>'
       : `<p class="say">This turn: <b class="turnpts">${v.turnPts}</b></p>`;
-    h = `<h2>${esc(v.who)}'s turn</h2>${pond}${result}${status}<div class="history">${v.tosses.map(t => `<span class="${t.splash || t.pile ? 'lose' : ''}">${esc(t.name)}${t.pts ? ' +' + t.pts : ''}</span>`).join('')}</div><button class="btn ghost" data-host="next">${v.ending ? 'Next player' : 'Skip / bank for them'}</button>`;
+    h = `<h2>${esc(v.who)}'s turn</h2>${pond}${result}${status}<div class="history">${v.tosses.map(t => `<span class="${t.splash || t.pile ? 'lose' : ''}">${esc(t.name)}${t.pts ? ' +' + t.pts : ''}</span>`).join('')}</div>${v.animating ? '' : `<button class="btn ghost" data-host="next">${v.ending ? 'Next player' : 'Skip / bank for them'}</button>`}`;
   }
   if (v.phase === 'over') h = `<h2 class="win">${esc(v.winner)} wins!</h2><div class="podium">${[...v.board].sort((a, b) => b.score - a.score).slice(0, 3).map((p, i) => `<div class="pod p${i + 1}"><b>${esc(p.name)}</b><span>${p.score}</span></div>`).join('')}</div><div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
-  el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel">${h}</div>${board}</div>`;
+  const legend = `<div class="scores legend"><h3>How ducks land</h3>
+    <div class="srow"><span>Matching sides</span><b>1</b></div>
+    <div class="srow"><span>Belly up · Sitting pretty</span><b>5</b></div>
+    <div class="srow"><span>Headstand</span><b>10</b></div>
+    <div class="srow"><span>Beak lean</span><b>15</b></div>
+    <div class="srow"><span>Doubles</span><b>×4</b></div>
+    <div class="srow lose"><span>Splash (sides don't match)</span><b>lose turn</b></div>
+    <div class="srow lose"><span>Duck pile</span><b>lose all</b></div></div>`;
+  el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel">${h}</div><div class="side">${board}${legend}</div></div>`;
 }
 
 export function renderPhone(v, el, send) {
@@ -254,7 +262,7 @@ export function renderPhone(v, el, send) {
     const locked = v.busy || v.ending;
     const msg = v.ending ? (v.endReason === 'splash' ? '<p class="say lose">Splash! Turn over.</p>' : v.endReason === 'pile' ? '<p class="say lose">Duck pile! Ouch.</p>' : '<p class="say">Turn over.</p>') : v.last ? `<p class="say">${esc(v.last.name)}${v.last.pts ? ` +${v.last.pts}` : ''}</p>` : '<p class="say">Your turn!</p>';
     h = `<h2>Your turn</h2>${msg}
-      <div class="swipe ${locked ? 'locked' : ''}" id="swipe"><div class="ducks-mini">🦆🦆</div><b>${locked ? '…' : 'Swipe up to toss'}</b><small>or tap</small></div>
+      <div class="swipe ${locked ? 'locked' : ''}" id="swipe"><div class="ducks-mini">${[0, 1].map(i => `<svg viewBox="-60 -60 120 120" width="64" height="64"${i ? ' style="transform:scaleX(-1)"' : ''}>${DUCK(true)}</svg>`).join('')}</div><b>${locked ? '…' : 'Swipe up to toss'}</b><small>or tap</small></div>
       <div class="turnbar"><div><small>This turn</small><b>${v.turnPts}</b></div><div><small>Banked</small><b>${v.score}</b></div><div><small>Need</small><b>${Math.max(0, v.target - v.score - v.turnPts)}</b></div></div>
       <button class="btn" data-bank ${v.turnPts > 0 && !locked ? '' : 'disabled'}>Bank ${v.turnPts} points</button>
       <p class="muted">Two plain/star sides that don't match is a Splash: you lose this turn's points.</p>`;

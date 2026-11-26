@@ -266,7 +266,7 @@ button.chip.on{outline:3px solid var(--moon)}
 .swipe{display:grid;justify-items:center;gap:6px;margin:14px 0;padding:34px 16px;border-radius:22px;border:2px dashed #ffd23f88;background:linear-gradient(#23628a,#163f5e);cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
 .swipe b{font-size:22px}
 .swipe small{color:#cde}
-.ducks-mini{font-size:48px;animation:bob 1.6s ease-in-out infinite}
+.ducks-mini{display:flex;gap:6px;animation:bob 1.6s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(-8px)}}
 .swipe.thrown .ducks-mini{animation:throw .5s ease-in forwards}
 @keyframes throw{to{transform:translateY(-240px) rotate(-40deg);opacity:0}}
@@ -275,3 +275,6 @@ button.chip.on{outline:3px solid var(--moon)}
 .turnbar div{display:grid;justify-items:center;padding:10px;border-radius:12px;background:#0f1336}
 .turnbar small{color:var(--dim)}
 .turnbar b{font-size:28px;font-variant-numeric:tabular-nums}
+.side{display:grid;gap:16px;align-content:start}
+.legend .srow{font-size:15px}
+.legend .srow.lose b{color:var(--red)}
