@@ -428,3 +428,30 @@ button.chip.on{outline:3px solid var(--moon)}
 .reacts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
 .reactbtn{font-size:40px;padding:14px 0;border-radius:16px;border:1px solid var(--line);background:#1f2553}
 .reactbtn.hit{animation:pop .3s cubic-bezier(.3,1.6,.5,1)}
+
+/* million ladder */
+.ladder{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:10px;display:grid;gap:3px}
+.rung{display:flex;justify-content:space-between;gap:8px;padding:5px 12px;border-radius:8px;font-variant-numeric:tabular-nums;color:var(--dim)}
+.rung span{width:2ch}
+.rung.safe{color:var(--ink);font-weight:700}
+.rung.done{color:#ffcf6b}
+.rung.cur{background:#ffcf6b;color:#1b1b2f;font-weight:800;animation:pulse 1.6s infinite}
+.lq{font:700 clamp(24px,2.6vw,40px)/1.25 Outfit,sans-serif;padding:20px 24px;border-radius:999px;background:linear-gradient(#20286a,#141a4f);border:2px solid #4b56b0;text-align:center;margin:8px 0 16px}
+.lopts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.lopt{display:flex;gap:12px;align-items:center;min-height:64px;padding:10px 22px;border-radius:999px;background:linear-gradient(#20286a,#141a4f);border:2px solid #4b56b0;font-size:clamp(18px,1.8vw,28px);font-weight:700;transition:background .4s}
+.lopt b{color:#ffcf6b}
+.lopt small{margin-left:auto;color:var(--dim);font-size:16px}
+.lopt.gone{opacity:.2}
+.lopt.locked{background:linear-gradient(#ff9d2e,#e07a00);border-color:#ffcf6b;color:#1b1b2f}
+.lopt.locked b{color:#1b1b2f}
+.lopt.right{background:linear-gradient(#5fd39d,#2e9e6a);border-color:#b8f0d6;color:#0e1230;animation:pulse .8s 3}
+.lopt.right b{color:#0e1230}
+.lopt.wrong{background:linear-gradient(#e2483d,#a8261c)}
+.lifes{display:flex;gap:10px;margin:14px 0}
+.life{padding:8px 14px;border-radius:99px;border:2px solid #ffcf6b;color:#ffcf6b;font-weight:700}
+.life.used{opacity:.25;text-decoration:line-through}
+.lifebtns .btn{flex:1;min-height:46px;padding:0 10px;font-size:15px}
+.opt.rightopt{border-color:var(--moss);background:#1f3a48}
+[data-lock]{width:100%;margin:6px 0}
+[data-walk]{width:100%;margin-top:8px}
+@media(max-width:700px){.lopts{grid-template-columns:1fr}}

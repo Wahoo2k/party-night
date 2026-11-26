@@ -14,10 +14,10 @@ import * as spin from './spin.js';
 import * as crowd from './crowd.js';
 import * as bingo from './bingo.js';
 import * as quick from './quick.js';
+import * as ladder from './ladder.js';
 
-export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick };
+export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder };
 
 export const COMING_SOON = [
-  { name: 'Million Ladder', blurb: 'Climb a ladder of harder questions. Use your lifelines wisely.' },
   { name: 'Pick a Case', blurb: 'Open cases, weigh the banker\'s offers. Deal or keep going?' },
 ];
