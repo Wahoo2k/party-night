@@ -34,4 +34,6 @@ import * as hearts from './hearts.js';
 export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards, hearts };
 
 export const COMING_SOON = [
+  { name: 'Spot the Shade', blurb: 'One-word clues, a wall of colors. Tap the exact shade.' },
+  { name: 'Estimate & Bet', blurb: 'Guess the number, then bet on whoever is closest.' },
 ];
