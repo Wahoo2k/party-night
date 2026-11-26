@@ -17,6 +17,14 @@ export const ROLES = {
   V: { name: 'Villager', color: '#f3ecd2', text: 'Find the werewolves. Talk, accuse and vote them out by day.' },
 };
 
+const DEATH_LINES = [
+  'The village wakes to find {n} gone. Claw marks lead into the forest.',
+  'A scream at midnight. By morning, {n} is no more.',
+  'The rooster crows, but {n} does not answer.',
+  'Muddy paw prints stop at {n}\'s door.',
+  'The wolves feasted well. {n} has been taken.',
+];
+
 export const TIMES = { nightMin: 15000, discuss: 180000, verdict: 15000 };
 
 const wolfCount = n => (n <= 6 ? 1 : n <= 10 ? 2 : 3);
@@ -86,9 +94,14 @@ function resolveNight(s, now, rnd) {
   if (victim && victim !== saved) {
     const v = P(s, victim);
     v.alive = false;
-    s.morning = `${v.name} was taken in the night. They were a ${ROLES[v.role].name}.`;
+    const line = DEATH_LINES[(s.round - 1) % DEATH_LINES.length];
+    s.morning = `${line.replace('{n}', v.name)} They were a ${ROLES[v.role].name}.`;
+    s.died = true;
+    s.reveal = { name: v.name, role: v.role };
   } else {
-    s.morning = victim ? 'The wolves attacked, but the Doctor saved their target. Everyone survived.' : 'Everyone survived the night.';
+    s.morning = victim ? 'Howls echoed through the night, but the Doctor got there first. Everyone survived!' : 'A quiet night. Everyone survived.';
+    s.died = false;
+    s.reveal = null;
   }
   s.log.push(`Night ${s.round}: ${s.morning}`);
   s.night = null;
@@ -113,7 +126,7 @@ function resolveVote(s, now) {
     text = ranked.length ? 'The vote was split, so nobody was voted out.' : 'Nobody voted, so nobody was voted out.';
   }
   s.log.push(`Day ${s.round}: ${text}`);
-  s.verdict = { text, tally, role: out ? out.role : null };
+  s.verdict = { text, tally, role: out ? out.role : null, name: out ? out.name : null };
   s.winner = winner(s);
   s.phase = 'verdict';
   s.deadline = now + TIMES.verdict;
@@ -163,15 +176,48 @@ export function tick(s, now = Date.now(), rnd = Math.random) {
 // What the TV narrator says when a phase begins.
 export function narration(s) {
   switch (s.phase) {
-    case 'roles': return 'Check your phones for your secret role. Keep it hidden.';
-    case 'night': return `Night ${s.round}. Everyone, look only at your own phone and make your choice.`;
-    case 'day': return `Good morning, village. ${s.morning} Discuss who you suspect.`;
-    case 'vote': return 'Time to vote. Choose on your phone.';
+    case 'roles': return 'Welcome to the village. Something is hunting among you. Check your phone for your secret role, and keep it hidden.';
+    case 'night': return s.round === 1
+      ? 'Night falls on the village. Look only at your own phone, and stay silent. Werewolves, choose your victim. Seer, choose someone to investigate. Doctor, choose someone to protect. Everyone else, pick who you suspect.'
+      : `Night ${s.round}. The village sleeps. Make your choice on your phone, and not a sound.`;
+    case 'day': return `Good morning, village. ${s.morning} Now talk it over. Who do you suspect?`;
+    case 'vote': return 'Time to vote. Choose who leaves the village on your phone.';
     case 'verdict': return s.verdict.text;
     case 'over': return s.winner === 'V' ? 'The village wins! Every werewolf has been found.' : 'The werewolves win! They now outnumber the village.';
   }
   return '';
 }
+
+// Sound effect to play when a phase begins, and how long to wait before the narrator speaks.
+export function cue(s) {
+  switch (s.phase) {
+    case 'roles': return { sound: 'join', wait: 600, title: 'Werewolf', sub: 'Check your phone for your secret role' };
+    case 'night': return { sound: 'night', wait: 2600, ambient: true, title: `Night ${s.round}`, sub: 'The village sleeps', tone: 'night' };
+    case 'day': return { sound: 'dawn', after: s.died ? 'death' : 'safe', wait: 2400, title: `Morning ${s.round}`, sub: s.died ? 'Someone didn\'t wake up…' : 'Everyone made it through', tone: 'dawn' };
+    case 'vote': return { sound: 'vote', wait: 500, title: 'The Vote', sub: 'Choose on your phone' };
+    case 'verdict': return { sound: 'drumroll', after: s.verdict.role ? 'death' : 'safe', wait: 2300 };
+    case 'over': return s.winner === 'V'
+      ? { sound: 'win', wait: 1600, title: 'The Village Wins', sub: 'Every wolf has been found', tone: 'dawn', fx: 'confetti' }
+      : { sound: 'lose', wait: 1600, title: 'The Wolves Win', sub: 'The village has fallen', tone: 'blood', fx: 'claws' };
+  }
+  return null;
+}
+
+// What each person should be doing right now, by role.
+const HINTS = {
+  day: {
+    W: 'Blend in. Act like a worried villager and steer suspicion toward someone else, but don\'t push too hard.',
+    S: 'You know something. Hint at it carefully. If the wolves work out you\'re the Seer, you\'re their next target.',
+    D: 'Keep a low profile. If the wolves learn you\'re the Doctor, they\'ll come for you first.',
+    V: 'Ask questions. Who\'s too quiet? Who\'s accusing too fast? Who changed their story?',
+  },
+  vote: {
+    W: 'Vote with the crowd so you don\'t stand out. Never vote for your packmate unless you must.',
+    S: 'Vote for a wolf you found, or for whoever seems most suspicious.',
+    D: 'Vote for whoever you trust least.',
+    V: 'Vote for whoever you trust least. Most votes is out. A tie means nobody leaves.',
+  },
+};
 
 // ---------- views ----------
 export function tvView(s, now = Date.now()) {
@@ -185,8 +231,8 @@ export function tvView(s, now = Date.now()) {
   if (s.phase === 'night') base.done = a.filter(p => s.night.picks[p.pid] !== undefined).length;
   if (s.phase === 'vote') base.done = a.filter(p => s.votes[p.pid]).length;
   base.total = s.phase === 'roles' ? s.players.length : a.length;
-  if (s.phase === 'day') base.morning = s.morning;
-  if (s.phase === 'verdict') base.verdict = s.verdict;
+  if (s.phase === 'day') { base.morning = s.morning; base.reveal = s.reveal || null; }
+  if (s.phase === 'verdict') { base.verdict = s.verdict; base.reveal = s.verdict.name ? { name: s.verdict.name, role: s.verdict.role } : null; }
   if (s.phase === 'over') { base.winner = s.winner; base.log = s.log; }
   return base;
 }
@@ -217,7 +263,8 @@ export function phoneView(s, pid) {
     }
   }
   if (s.phase === 'vote' && me.alive) { v.options = others; v.voted = s.votes[pid] || null; }
-  if (s.phase === 'day') v.morning = s.morning;
+  if (s.phase === 'day') { v.morning = s.morning; v.hint = HINTS.day[me.role]; }
+  if (s.phase === 'vote') v.hint = HINTS.vote[me.role];
   if (s.phase === 'verdict') v.verdict = s.verdict.text;
   if (s.phase === 'over') v.won = s.winner === (me.role === 'W' ? 'W' : 'V');
   return v;
@@ -248,13 +295,21 @@ export function renderTV(v, el) {
   const roster = `<div class="roster">${v.players.map(p => `<div class="chip ${p.alive ? '' : 'out'}" ${p.role ? `style="--rc:${ROLES[p.role].color}"` : ''}><span class="nm">${esc(p.name)}</span>${p.role ? `<small>${ROLES[p.role].name}</small>` : ''}</div>`).join('')}</div>`;
   const progress = `<div class="meter"><span style="width:${v.total ? (100 * v.done) / v.total : 0}%"></span></div><p class="muted">${v.done} of ${v.total}</p>`;
   let h = '';
-  if (v.phase === 'roles') h = `<h2>Check your phone</h2><p class="say">Hold your card to see your secret role, then tap <b>I've seen it</b>.</p>${progress}<button class="btn" data-host="next">Everyone's ready, start the night</button>`;
-  if (v.phase === 'night') h = `<h2>Night ${v.round}</h2><p class="say">Eyes on your own phone only. Everyone makes a choice.</p>${progress}<button class="btn ghost" data-host="next">Force the night to end</button>`;
-  if (v.phase === 'day') h = `<h2>Morning ${v.round}</h2><p class="say">${esc(v.morning)}</p><p class="clock">${mmss(v.left)}</p><p class="muted">Discuss. Voting starts when the clock runs out.</p><button class="btn" data-host="next">Start the vote now</button>`;
-  if (v.phase === 'vote') h = `<h2>Vote</h2><p class="say">Everyone still in, vote on your phone.</p>${progress}<button class="btn ghost" data-host="next">Close the vote</button>`;
+  if (v.phase === 'roles') h = `<h2>Check your phone</h2><p class="say">Press and hold your card to see your secret role. Don't let anyone see it. Then tap <b>I've seen it</b>.</p>${progress}
+    <div class="how"><h3>How to play</h3><ol>
+      <li><b>Night:</b> everyone looks only at their own phone. The <span style="color:${ROLES.W.color}">Werewolves</span> pick a victim, the <span style="color:${ROLES.S.color}">Seer</span> checks one player, the <span style="color:${ROLES.D.color}">Doctor</span> protects one player. Villagers pick a suspect, so nobody can tell who's tapping what.</li>
+      <li><b>Morning:</b> the TV reveals who was taken. Everyone talks: accuse, defend, bluff.</li>
+      <li><b>Vote:</b> everyone votes on their phone. Most votes is out, and their role is revealed.</li>
+      <li><b>Win:</b> the village wins by voting out every wolf. The wolves win when they equal the villagers.</li>
+    </ol></div>
+    <button class="btn" data-host="next">Everyone's ready, start the night</button>`;
+  if (v.phase === 'night') h = `<h2>Night ${v.round}</h2><p class="say">Shh. Eyes on your own phone only. Everyone makes a choice.</p>${progress}<p class="muted">Tip: tap at the same pace as everyone else, and keep a straight face.</p><button class="btn ghost" data-host="next">Force the night to end</button>`;
+  if (v.phase === 'day') h = `<h2>Morning ${v.round}</h2><p class="say">${esc(v.morning)}</p><p class="clock">${mmss(v.left)}</p><p class="muted">Talk it over. Who's been too quiet? Who's pointing fingers? Your phone has tips for your role. Voting starts when the clock runs out.</p><button class="btn" data-host="next">Start the vote now</button>`;
+  if (v.phase === 'vote') h = `<h2>Vote</h2><p class="say">Vote on your phone for who leaves the village. Most votes is out. A tie means nobody leaves.</p>${progress}<button class="btn ghost" data-host="next">Close the vote</button>`;
   if (v.phase === 'verdict') h = `<h2>The verdict</h2><p class="say">${esc(v.verdict.text)}</p><div class="tally">${v.verdict.tally.map(t => `<div><b>${t.count}</b> ${esc(t.name)}</div>`).join('') || '<div>No votes</div>'}</div><button class="btn" data-host="next">Continue</button>`;
   if (v.phase === 'over') h = `<h2 class="${v.winner === 'V' ? 'win' : 'lose'}">${v.winner === 'V' ? 'The village wins' : 'The werewolves win'}</h2><details><summary class="muted">What happened</summary><p>${v.log.map(esc).join('<br>')}</p></details><div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
-  el.innerHTML = `<div class="stage"><div class="panel">${h}</div>${roster}</div>`;
+  const reveal = v.reveal ? `<div class="reveal-card ${v.fresh ? 'flip' : 'shown'}" style="--rc:${ROLES[v.reveal.role].color}"><div class="rc-inner"><div class="rc-back"></div><div class="rc-front"><svg viewBox="0 0 100 100">${roleIcon(v.reveal.role)}</svg><b>${esc(v.reveal.name)}</b><span>${ROLES[v.reveal.role].name}</span></div></div></div>` : '';
+  el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel ${v.phase === 'night' ? 'dim' : ''}">${reveal}${h}</div>${roster}</div>`;
 }
 
 export function renderPhone(v, el, send) {
@@ -262,16 +317,16 @@ export function renderPhone(v, el, send) {
   const opts = (list, picked, type) => `<div class="opts">${list.map(o => `<button class="opt ${picked === o.pid ? 'on' : ''}" data-${type}="${esc(o.pid)}">${esc(o.name)}</button>`).join('')}</div>`;
   let h = '';
   if (v.phase === 'spectate') h = `<h2>Game in progress</h2><p>You'll join the next round.</p>`;
-  else if (!v.alive && v.phase !== 'over') h = `<h2>You're out</h2><p class="say">Stay quiet and enjoy the show. No hints!</p>${card(v.role)}`;
-  else if (v.phase === 'roles') h = `<h2>Your secret role</h2>${card(v.role)}<button class="btn" data-ready ${v.ready ? 'disabled' : ''}>${v.ready ? 'Waiting for others' : "I've seen it"}</button>`;
+  else if (!v.alive && v.phase !== 'over') h = `<h2>You're out</h2><p class="say">You can still watch, but no hints, no faces, no gasps. Ghosts stay silent.</p>${card(v.role)}`;
+  else if (v.phase === 'roles') h = `<h2>Your secret role</h2><p class="muted">Press and hold the card. Keep your screen hidden from others.</p>${card(v.role)}<button class="btn" data-ready ${v.ready ? 'disabled' : ''}>${v.ready ? 'Waiting for others' : "I've seen it"}</button>`;
   else if (v.phase === 'night') {
     h = `<h2>Night ${v.round}</h2><p>${esc(v.prompt)}</p>`;
     if (v.saw) h += `<div class="reveal ${v.saw.wolf ? 'lose' : 'win'}">${esc(v.saw.name)} is ${v.saw.wolf ? 'a werewolf' : 'not a werewolf'}</div><p class="muted">Remember it. Waiting for the night to end.</p>`;
     else h += opts(v.options, v.picked, 'pick');
     if (v.packPicks && v.packPicks.length) h += `<p class="muted">Your pack picked: ${v.packPicks.map(p => esc(p.who) + ' → ' + esc(p.target)).join(', ')}</p>`;
     if (v.picked && !v.saw) h += `<p class="muted">Locked in. You can change it until the night ends.</p>`;
-  } else if (v.phase === 'day') h = `<h2>Morning</h2><p class="say">${esc(v.morning)}</p><p class="muted">Discuss with everyone. Voting is next.</p>`;
-  else if (v.phase === 'vote') h = `<h2>Vote someone out</h2>${opts(v.options.concat([{ pid: 'skip', name: 'Skip vote' }]), v.voted, 'vote')}${v.voted ? '<p class="muted">Vote in. You can change it until everyone has voted.</p>' : ''}`;
+  } else if (v.phase === 'day') h = `<h2>Morning</h2><p class="say">${esc(v.morning)}</p><div class="hint" style="--rc:${ROLES[v.role].color}"><b>Your job as ${ROLES[v.role].name}</b><p>${esc(v.hint)}</p></div>${v.pack && v.pack.length ? `<p class="muted">Your pack: ${v.pack.map(esc).join(', ')}</p>` : ''}`;
+  else if (v.phase === 'vote') h = `<h2>Vote someone out</h2><p class="muted">${esc(v.hint)}</p>${opts(v.options.concat([{ pid: 'skip', name: 'Skip vote' }]), v.voted, 'vote')}${v.voted ? '<p class="muted">Vote in. You can change it until everyone has voted.</p>' : ''}`;
   else if (v.phase === 'verdict') h = `<h2>The verdict</h2><p class="say">${esc(v.verdict)}</p>`;
   else if (v.phase === 'over') h = `<h2 class="${v.won ? 'win' : 'lose'}">${v.won ? 'You won!' : 'You lost'}</h2><p>You were the ${ROLES[v.role].name}. Check the TV for everyone's roles.</p>`;
   el.innerHTML = h;

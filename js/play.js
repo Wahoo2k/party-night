@@ -2,6 +2,7 @@
 import { GAMES } from './games/index.js';
 import { openRoom } from './net.js';
 import { esc, store as localStore, uid, cleanCode, drawScene } from './ui.js';
+import { buzz } from './sfx.js';
 
 const app = document.getElementById('app');
 const statusEl = document.getElementById('status');
@@ -56,7 +57,14 @@ function onMessage(m) {
   render(m.view);
 }
 
+let lastPhaseSeen = '';
 function render(v) {
+  const key = v.phase + (v.round || '');
+  const isNew = key !== lastPhaseSeen;
+  if (isNew) { app.classList.remove('enter'); void app.offsetWidth; app.classList.add('enter'); }
+  document.body.classList.toggle('night', v.phase === 'night');
+  document.body.classList.toggle('day', ['day', 'vote', 'verdict'].includes(v.phase));
+  if (key !== lastPhaseSeen) { lastPhaseSeen = key; if (v.alive && ['roles', 'night', 'vote'].includes(v.phase)) buzz([80, 60, 80]); }
   if (v.phase === 'full') { app.innerHTML = `<div class="panel"><h2>That room is full</h2><button class="btn" id="back">Try another code</button></div>`; app.querySelector('#back').onclick = leave; return; }
   if (v.phase === 'lobby') {
     app.innerHTML = `<div class="panel"><h2>You're in, ${esc(v.me || name)}</h2><p class="say">Watch the TV. The game starts when the host is ready.</p>

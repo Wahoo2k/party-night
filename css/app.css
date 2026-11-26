@@ -80,3 +80,90 @@ body.phone .panel>.btn{width:100%;margin-top:16px}
 @media(max-width:900px){.lobby,.stage{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.scene svg *,.meter span{transition:none}}
 .chip.bot{border-left-color:var(--dim);font-style:italic}
+.how{margin:18px 0;padding:16px 20px;border-radius:14px;background:#0f1336}
+.how h3{margin:0 0 8px}
+.how ol{margin:0;padding-left:1.3em;display:grid;gap:8px;font-size:clamp(16px,1.3vw,21px)}
+.hint{margin:14px 0;padding:14px 16px;border-radius:12px;background:#0f1336;border-left:5px solid var(--rc)}
+.hint b{color:var(--rc)}
+.hint p{margin:6px 0 0}
+.clock.hurry{color:var(--red)}
+
+/* ---------- motion & effects ---------- */
+select{font:16px Outfit,sans-serif;color:var(--ink);background:#0f1336;border:1px solid var(--line);border-radius:10px;padding:12px;min-height:48px;max-width:100%}
+label.inline{display:inline;margin:0}
+.tw{animation:twinkle 4s ease-in-out infinite}
+.tw1{animation-delay:-1.3s;animation-duration:5s}
+.tw2{animation-delay:-2.6s;animation-duration:3.4s}
+.stars{opacity:var(--star);transition:opacity 1.2s}
+@keyframes twinkle{50%{opacity:.35}}
+.moon{transform-origin:930px 90px;animation:breathe 6s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.03)}}
+.win{animation:flicker 3s infinite}
+.w1{animation-delay:-1s}.w2{animation-delay:-2s;animation-duration:4s}
+@keyframes flicker{0%,100%{opacity:1}45%{opacity:.85}48%{opacity:.6}52%{opacity:.9}}
+.eyes{opacity:0;transition:opacity 2s;fill:#ffcf3a}
+body.night .eyes{opacity:1}
+.eye{animation:blink 5s infinite;transform-box:fill-box;transform-origin:center}
+.e1{animation-delay:-1.2s}.e2{animation-delay:-2.7s;animation-duration:6s}.e3{animation-delay:-.6s;animation-duration:7s}.e4{animation-delay:-3.3s}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+.fog{fill:#c9d3ff;opacity:0;transition:opacity 2s}
+body.night .fog{opacity:.09}
+.fog ellipse{animation:drift 26s ease-in-out infinite alternate}
+.fog ellipse+ellipse{animation-duration:34s;animation-direction:alternate-reverse}
+@keyframes drift{to{transform:translateX(160px)}}
+.wolf{opacity:0;transition:opacity 1.5s}
+body.night .wolf{opacity:1}
+/* night darkens the room */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 45%,#000a 100%);opacity:0;transition:opacity 1.5s;z-index:5}
+body.night::after{opacity:1}
+.panel.dim{box-shadow:0 0 0 1px #3a4290,0 0 60px #2a2f6b80}
+/* phase entrance */
+.stage.enter .panel{animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
+.stage.enter .roster .chip{animation:rise .5s cubic-bezier(.2,.8,.2,1) both}
+.stage.enter .roster .chip:nth-child(2){animation-delay:.04s}.stage.enter .roster .chip:nth-child(3){animation-delay:.08s}.stage.enter .roster .chip:nth-child(4){animation-delay:.12s}.stage.enter .roster .chip:nth-child(5){animation-delay:.16s}.stage.enter .roster .chip:nth-child(n+6){animation-delay:.2s}
+#app.enter>*{animation:rise .45s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}}
+.chip.pop{animation:pop .5s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes pop{from{opacity:0;transform:scale(.4)}}
+.meter span{background:linear-gradient(90deg,var(--moss),#b8f0d6);box-shadow:0 0 14px #7fc8a980}
+.clock.hurry{animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.06)}}
+.btn{transition:transform .12s,background .2s,box-shadow .2s}
+.btn:active,.opt:active{transform:scale(.96)}
+.btn:not(.ghost):not([disabled]):hover{box-shadow:0 0 24px #e2483d66}
+.opt{transition:transform .12s,border-color .2s,background .2s}
+.opt.on{animation:pop .3s cubic-bezier(.3,1.6,.5,1)}
+.tally div{animation:rise .5s both}
+/* title cards */
+.tcard{position:fixed;inset:0;z-index:20;display:grid;place-items:center;text-align:center;pointer-events:none;background:radial-gradient(ellipse at center,#0e1230ee 0,#05071aee 70%);animation:tcard 3.2s ease both}
+.tcard.night{background:radial-gradient(ellipse at center,#141a4aee 0,#020312f5 70%)}
+.tcard.dawn{background:radial-gradient(ellipse at center,#f4b48add 0,#5b3b52f0 75%)}
+.tcard.blood{background:radial-gradient(ellipse at center,#5a0d0aee 0,#120303f5 70%)}
+.tcard h2{font-size:clamp(56px,11vw,180px);margin:0;letter-spacing:.02em;text-shadow:0 4px 30px #000a;animation:tzoom 3.2s cubic-bezier(.2,.8,.2,1) both}
+.tcard p{font-size:clamp(20px,2.6vw,40px);margin:8px 0 0;opacity:.85;animation:rise 1s .3s both}
+@keyframes tcard{0%{opacity:0}12%{opacity:1}80%{opacity:1}100%{opacity:0}}
+@keyframes tzoom{from{transform:scale(1.25);letter-spacing:.2em;filter:blur(6px)}40%{filter:blur(0)}to{transform:scale(1);letter-spacing:.02em}}
+body.phone .tcard{display:none}
+/* elimination card */
+.reveal-card{float:right;width:clamp(150px,16vw,230px);aspect-ratio:3/4;margin:0 0 16px 20px;perspective:900px}
+.rc-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d}
+.reveal-card.flip .rc-inner{animation:flip 1.4s 2.2s cubic-bezier(.3,1.3,.4,1) both}
+.reveal-card.shown .rc-inner{transform:rotateY(180deg)}
+.rc-back,.rc-front{position:absolute;inset:0;border-radius:18px;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:2px solid var(--line)}
+.rc-back{background:repeating-linear-gradient(45deg,#1c2150 0 14px,#181c47 14px 28px)}
+.rc-front{transform:rotateY(180deg);background:var(--panel);border-color:var(--rc);display:grid;place-content:center;justify-items:center;gap:4px;text-align:center;padding:12px;box-shadow:0 0 40px color-mix(in srgb,var(--rc) 35%,transparent)}
+.rc-front svg{width:60%;height:auto}
+.rc-front b{font:400 clamp(24px,2.4vw,36px)/1 'Pirata One',serif}
+.rc-front span{color:var(--rc);font-weight:600}
+@keyframes flip{from{transform:rotateY(0)}to{transform:rotateY(180deg)}}
+/* effects layers */
+canvas.fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:30}
+.claws{position:fixed;inset:0;z-index:30;pointer-events:none;animation:tcard 5s both}
+.claws svg{width:100%;height:100%}
+.claws path{fill:none;stroke:#e2483d;stroke-width:26;stroke-linecap:round;stroke-dasharray:700;stroke-dashoffset:700;animation:slash .35s cubic-bezier(.6,0,.4,1) forwards;filter:drop-shadow(0 0 14px #e2483daa)}
+@keyframes slash{to{stroke-dashoffset:0}}
+/* phone card */
+.card{transition:transform .2s,border-color .2s,box-shadow .2s}
+.card.on{transform:scale(1.03);box-shadow:0 0 40px color-mix(in srgb,var(--rc) 40%,transparent)}
+.card.on .face>*{animation:rise .25s both}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}

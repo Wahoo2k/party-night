@@ -1,7 +1,8 @@
 // TV / host page: owns the room, the player list and the game state.
 import { GAMES, COMING_SOON } from './games/index.js';
 import { openRoom } from './net.js';
-import { esc, store, newCode, say, voice, enableDpad, autofocus, drawScene } from './ui.js';
+import { esc, store, newCode, say, voice, voices, enableDpad, autofocus, drawScene, titleCard, confetti, clawMarks } from './ui.js';
+import { play, sfx, startAmbient, stopAmbient } from './sfx.js';
 
 const app = document.getElementById('app');
 const statusEl = document.getElementById('status');
@@ -41,14 +42,35 @@ function sendViews(force) {
   }
 }
 
+let fresh = false;
 function changed() {
   save();
   if (host.state) {
     const key = host.state.phase + host.state.round;
-    if (key !== lastPhase) { lastPhase = key; say(game().narration(host.state)); }
+    if (key !== lastPhase) { lastPhase = key; fresh = true; announce(); }
   }
   render();
+  fresh = false;
   sendViews();
+}
+
+// Sound effect first, then the narrator once it has played.
+let sayTimer = null;
+function announce() {
+  const g = game(), s = host.state;
+  const c = g.cue ? g.cue(s) : null;
+  clearTimeout(sayTimer);
+  stopAmbient();
+  if (c && sfx.on) {
+    play(c.sound);
+    if (c.after) setTimeout(() => play(c.after), c.wait - 500);
+    if (c.ambient) setTimeout(startAmbient, c.wait);
+  }
+  if (c?.title) titleCard(c.title, c.sub, c.tone);
+  if (c?.fx === 'confetti') setTimeout(confetti, 900);
+  if (c?.fx === 'claws') setTimeout(clawMarks, 600);
+  const line = g.narration(s);
+  sayTimer = setTimeout(() => say(line), c && sfx.on ? c.wait : 0);
 }
 
 function onMessage(m) {
@@ -56,7 +78,7 @@ function onMessage(m) {
   const name = String(m.name || '').trim().slice(0, 20);
   if (m.t === 'hello') {
     let p = host.players.find(x => x.pid === m.pid);
-    if (!p && !host.state && name && host.players.length < game().meta.max) host.players.push((p = { pid: m.pid, name }));
+    if (!p && !host.state && name && host.players.length < game().meta.max) { host.players.push((p = { pid: m.pid, name })); play('join'); }
     else if (p && name && !host.state) p.name = name;
     if (p) { lastSent[p.pid] = null; changed(); }
     else room.send({ t: 'view', to: m.pid, view: { phase: host.state ? 'spectate' : 'full' } });
@@ -78,9 +100,11 @@ function startGame() {
 function hostAction(a) {
   if (a === 'start') return startGame();
   if (a === 'again') return startGame();
-  if (a === 'lobby') { host.state = null; document.body.classList.remove('day'); return changed(); }
+  if (a === 'lobby') { host.state = null; stopAmbient(); document.body.classList.remove('day'); return changed(); }
   if (a === 'newcode') { host = { code: newCode(), players: [], gameId: host.gameId, state: null }; save(); return connect(); }
   if (a === 'voice') { voice.on = !voice.on; return render(); }
+  if (a === 'testvoice') return say('Night falls on the village. Somewhere in the dark, the wolves are hungry.', true);
+  if (a === 'sfx') { sfx.on = !sfx.on; if (sfx.on) play('join'); return render(); }
   if (a === 'addbot' && !host.state && host.players.length < game().meta.max) {
     const used = new Set(host.players.map(p => p.name));
     const name = BOT_NAMES.find(n => !used.has(n)) || 'Bot ' + (host.players.length + 1);
@@ -122,6 +146,7 @@ function qr(text) {
   } catch { return ''; }
 }
 
+const seen = new Set();
 function renderLobby() {
   const g = game();
   const n = host.players.length;
@@ -136,7 +161,7 @@ function renderLobby() {
     </section>
     <section class="panel">
       <h2>${n ? `${n} player${n === 1 ? '' : 's'} in` : 'Waiting for players'}</h2>
-      <div class="roster">${host.players.map(p => `<div class="chip ${p.bot ? 'bot' : ''}">${esc(p.name)}</div>`).join('') || '<p class="muted">Names appear here as phones join.</p>'}</div>
+      <div class="roster">${host.players.map(p => `<div class="chip ${p.bot ? 'bot' : ''} ${seen.has(p.pid) ? '' : 'pop'}">${esc(p.name)}</div>`).join('') || '<p class="muted">Names appear here as phones join.</p>'}</div>
       <h3>Game</h3>
       <div class="games">
         ${Object.values(GAMES).map(m => `<button class="game ${m.meta.id === host.gameId ? 'on' : ''}" data-game="${m.meta.id}"><b>${esc(m.meta.name)}</b><span>${esc(m.meta.blurb)}</span><small>${m.meta.min}–${m.meta.max} players</small></button>`).join('')}
@@ -145,7 +170,13 @@ function renderLobby() {
       <div class="row">
         <button class="btn" data-host="start" ${need ? 'disabled' : ''}>${need ? `Need ${need} more player${need === 1 ? '' : 's'}` : `Start ${esc(g.meta.name)}`}</button>
         <button class="btn ghost" data-host="voice">Narrator: ${voice.on ? 'on' : 'off'}</button>
+        <button class="btn ghost" data-host="sfx">Sound effects: ${sfx.on ? 'on' : 'off'}</button>
         <button class="btn ghost" data-host="newcode">New room</button>
+      </div>
+      <div class="row">
+        <label class="inline" for="vsel">Narrator voice</label>
+        <select id="vsel">${voices().slice(0, 12).map(v => `<option ${v.name === voice.name ? 'selected' : ''}>${esc(v.name)}</option>`).join('') || '<option>Default</option>'}</select>
+        <button class="btn ghost" data-host="testvoice">Test voice</button>
       </div>
       <div class="row">
         <button class="btn ghost" data-host="addbot">Add a bot player</button>
@@ -154,12 +185,16 @@ function renderLobby() {
       </div>
     </section>
   </div>`;
+  host.players.forEach(p => seen.add(p.pid));
 }
 
 function render() {
   if (!host.state) renderLobby();
-  else game().renderTV(game().tvView(host.state, Date.now()), app);
+  else { const v = game().tvView(host.state, Date.now()); v.fresh = fresh; game().renderTV(v, app); }
+  document.body.classList.toggle('night', host.state?.phase === 'night');
   app.querySelectorAll('[data-host]').forEach(b => (b.onclick = () => hostAction(b.dataset.host)));
+  const vsel = app.querySelector('#vsel');
+  if (vsel) vsel.onchange = () => { voice.name = vsel.value; say('Good evening, villagers.', true); };
   app.querySelectorAll('[data-game]').forEach(b => (b.onclick = () => { host.gameId = b.dataset.game; changed(); }));
   autofocus(app);
 }
@@ -184,9 +219,16 @@ setInterval(() => {
   else if (host.state.phase === 'day') {
     const clock = app.querySelector('.clock');
     const left = Math.max(0, Math.ceil((host.state.deadline - Date.now()) / 1000));
-    if (clock) clock.textContent = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+    if (clock) {
+      clock.textContent = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+      clock.classList.toggle('hurry', left <= 10);
+      if (left <= 10 && left > 0) play('tick');
+      if (left === 30) say('Thirty seconds left.');
+    }
   }
 }, 1000);
+
+try { speechSynthesis.addEventListener('voiceschanged', () => { if (!host.state) render(); }); } catch {}
 
 if (host.state) lastPhase = host.state.phase + host.state.round;
 connect();
