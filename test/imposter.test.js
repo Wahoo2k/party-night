@@ -1,5 +1,6 @@
 import * as G from '../js/games/imposter.js';
 import assert from 'node:assert';
+for (const [c, ws] of Object.entries(G.WORDS)) for (const [w, hints] of Object.entries(ws)) { assert.ok(hints.length >= 3, w); for (const h of hints) assert.ok(G.cleanClue(h, w).ok, `bad hint ${h} for ${w}`); }
 let res = { caught: 0, escaped: 0, stole: 0 }, fails = 0;
 let prev = null;
 for (let g = 0; g < 3000; g++) {

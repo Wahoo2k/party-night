@@ -12,18 +12,181 @@ export const meta = {
   blurb: 'Everyone knows the secret word except one faker. Give clues, then find the imposter.',
 };
 
+// Each secret word, with a few good one-word hints (bots use these as clues).
 export const WORDS = {
-  Animals: ['Penguin', 'Giraffe', 'Kangaroo', 'Octopus', 'Elephant', 'Squirrel', 'Shark', 'Owl', 'Zebra', 'Turtle', 'Flamingo', 'Hedgehog', 'Camel', 'Dolphin', 'Spider'],
-  Food: ['Pizza', 'Pancakes', 'Tacos', 'Sushi', 'Popcorn', 'Spaghetti', 'Burrito', 'Waffles', 'Pretzel', 'Nachos', 'Lasagna', 'Cupcake', 'Hot dog', 'Pickle', 'Watermelon'],
-  Places: ['Beach', 'Airport', 'Library', 'Hospital', 'Zoo', 'Movie theater', 'Castle', 'Desert', 'Volcano', 'Museum', 'Space station', 'Farm', 'Gym', 'Bowling alley', 'Ski lodge'],
-  Jobs: ['Firefighter', 'Astronaut', 'Chef', 'Dentist', 'Pilot', 'Teacher', 'Plumber', 'Magician', 'Lifeguard', 'Detective', 'Farmer', 'Mail carrier', 'Barber', 'Referee', 'Zookeeper'],
-  Sports: ['Soccer', 'Basketball', 'Tennis', 'Golf', 'Hockey', 'Baseball', 'Bowling', 'Surfing', 'Skiing', 'Boxing', 'Volleyball', 'Swimming', 'Karate', 'Skateboarding', 'Archery'],
-  'Around the house': ['Toaster', 'Vacuum', 'Bathtub', 'Couch', 'Fridge', 'Lamp', 'Toothbrush', 'Pillow', 'Microwave', 'Doorbell', 'Ceiling fan', 'Laundry basket', 'Remote control', 'Mirror', 'Staircase'],
-  Things: ['Umbrella', 'Backpack', 'Bicycle', 'Guitar', 'Camera', 'Balloon', 'Candle', 'Scissors', 'Trampoline', 'Telescope', 'Skateboard', 'Snow globe', 'Kite', 'Compass', 'Headphones'],
-  Holidays: ['Thanksgiving', 'Halloween', 'Christmas', 'Birthday', 'New Year', 'Fourth of July', 'Valentine\'s Day', 'Easter', 'Graduation', 'Wedding', 'Hanukkah', 'Super Bowl', 'Mother\'s Day', 'April Fools', 'Snow day'],
-  Weather: ['Tornado', 'Rainbow', 'Blizzard', 'Thunderstorm', 'Heat wave', 'Fog', 'Hail', 'Hurricane', 'Drizzle', 'Sunset', 'Snowflake', 'Lightning', 'Breeze', 'Icicle', 'Puddle'],
-  Movies: ['Superhero', 'Cartoon', 'Horror', 'Musical', 'Western', 'Pirates', 'Dinosaurs', 'Robots', 'Aliens', 'Zombies', 'Spies', 'Princess', 'Wizard', 'Ninja', 'Car chase'],
+  "Animals": {
+    "Penguin": ["ice", "tuxedo", "waddle"],
+    "Giraffe": ["neck", "tall", "spots"],
+    "Kangaroo": ["pouch", "hop", "Australia"],
+    "Octopus": ["tentacles", "ink", "eight"],
+    "Elephant": ["trunk", "ivory", "memory"],
+    "Squirrel": ["acorn", "bushy", "tree"],
+    "Shark": ["fin", "teeth", "jaws"],
+    "Owl": ["hoot", "night", "wise"],
+    "Zebra": ["stripes", "Africa", "safari"],
+    "Turtle": ["shell", "slow", "pond"],
+    "Flamingo": ["pink", "leg", "lawn"],
+    "Hedgehog": ["spiky", "roll", "quills"],
+    "Camel": ["hump", "desert", "thirst"],
+    "Dolphin": ["flipper", "clicks", "smart"],
+    "Spider": ["web", "legs", "creepy"],
+  },
+  "Food": {
+    "Pizza": ["slice", "cheese", "delivery"],
+    "Pancakes": ["syrup", "stack", "flip"],
+    "Tacos": ["shell", "Tuesday", "salsa"],
+    "Sushi": ["rice", "raw", "chopsticks"],
+    "Popcorn": ["movie", "butter", "kernel"],
+    "Spaghetti": ["noodles", "meatballs", "twirl"],
+    "Burrito": ["wrap", "beans", "tortilla"],
+    "Waffles": ["squares", "syrup", "iron"],
+    "Pretzel": ["twist", "salty", "mall"],
+    "Nachos": ["chips", "melted", "stadium"],
+    "Lasagna": ["layers", "Garfield", "baked"],
+    "Cupcake": ["frosting", "sprinkles", "party"],
+    "Hot dog": ["bun", "mustard", "ballpark"],
+    "Pickle": ["dill", "sour", "jar"],
+    "Watermelon": ["seeds", "summer", "juicy"],
+  },
+  "Places": {
+    "Beach": ["sand", "waves", "towel"],
+    "Airport": ["gate", "luggage", "security"],
+    "Library": ["books", "quiet", "shush"],
+    "Hospital": ["nurse", "doctor", "emergency"],
+    "Zoo": ["cages", "animals", "exhibits"],
+    "Movie theater": ["screen", "popcorn", "seats"],
+    "Castle": ["king", "moat", "tower"],
+    "Desert": ["sand", "cactus", "dry"],
+    "Volcano": ["lava", "eruption", "ash"],
+    "Museum": ["exhibit", "statue", "history"],
+    "Space station": ["orbit", "astronaut", "gravity"],
+    "Farm": ["barn", "tractor", "cows"],
+    "Gym": ["weights", "sweat", "treadmill"],
+    "Bowling alley": ["pins", "strike", "shoes"],
+    "Ski lodge": ["fireplace", "slopes", "cocoa"],
+  },
+  "Jobs": {
+    "Firefighter": ["hose", "ladder", "siren"],
+    "Astronaut": ["rocket", "moon", "helmet"],
+    "Chef": ["kitchen", "recipe", "apron"],
+    "Dentist": ["teeth", "floss", "drill"],
+    "Pilot": ["cockpit", "wings", "runway"],
+    "Teacher": ["classroom", "homework", "chalk"],
+    "Plumber": ["pipes", "wrench", "leak"],
+    "Magician": ["wand", "rabbit", "tricks"],
+    "Lifeguard": ["whistle", "pool", "rescue"],
+    "Detective": ["clues", "magnifying", "mystery"],
+    "Farmer": ["crops", "tractor", "overalls"],
+    "Mail carrier": ["letters", "stamps", "mailbox"],
+    "Barber": ["haircut", "clippers", "pole"],
+    "Referee": ["whistle", "stripes", "foul"],
+    "Zookeeper": ["feeding", "animals", "cages"],
+  },
+  "Sports": {
+    "Soccer": ["goal", "kick", "cleats"],
+    "Basketball": ["hoop", "dribble", "court"],
+    "Tennis": ["racket", "serve", "love"],
+    "Golf": ["club", "hole", "tee"],
+    "Hockey": ["puck", "ice", "stick"],
+    "Baseball": ["bat", "diamond", "inning"],
+    "Bowling": ["pins", "strike", "lane"],
+    "Surfing": ["wave", "board", "wipeout"],
+    "Skiing": ["slopes", "poles", "lift"],
+    "Boxing": ["gloves", "ring", "punch"],
+    "Volleyball": ["spike", "net", "sand"],
+    "Swimming": ["laps", "goggles", "pool"],
+    "Karate": ["belt", "chop", "dojo"],
+    "Skateboarding": ["ramp", "wheels", "ollie"],
+    "Archery": ["arrow", "bow", "target"],
+  },
+  "Around the house": {
+    "Toaster": ["bread", "crumbs", "pop"],
+    "Vacuum": ["suction", "carpet", "dust"],
+    "Bathtub": ["bubbles", "soak", "faucet"],
+    "Couch": ["cushions", "sit", "nap"],
+    "Fridge": ["cold", "magnets", "leftovers"],
+    "Lamp": ["bulb", "shade", "light"],
+    "Toothbrush": ["bristles", "paste", "brush"],
+    "Pillow": ["fluffy", "sleep", "case"],
+    "Microwave": ["beep", "reheat", "zap"],
+    "Doorbell": ["ring", "visitor", "ding"],
+    "Ceiling fan": ["spin", "blades", "breeze"],
+    "Laundry basket": ["clothes", "hamper", "dirty"],
+    "Remote control": ["buttons", "channel", "clicker"],
+    "Mirror": ["reflection", "glass", "selfie"],
+    "Staircase": ["steps", "railing", "climb"],
+  },
+  "Things": {
+    "Umbrella": ["rain", "open", "handle"],
+    "Backpack": ["straps", "school", "zipper"],
+    "Bicycle": ["pedals", "wheels", "helmet"],
+    "Guitar": ["strings", "strum", "chords"],
+    "Camera": ["photo", "lens", "flash"],
+    "Balloon": ["helium", "float", "pop"],
+    "Candle": ["wax", "flame", "wick"],
+    "Scissors": ["cut", "blades", "paper"],
+    "Trampoline": ["bounce", "jump", "springs"],
+    "Telescope": ["stars", "lens", "planets"],
+    "Skateboard": ["wheels", "deck", "ramp"],
+    "Snow globe": ["shake", "glass", "flakes"],
+    "Kite": ["string", "wind", "tail"],
+    "Compass": ["north", "needle", "directions"],
+    "Headphones": ["music", "ears", "wireless"],
+  },
+  "Holidays": {
+    "Thanksgiving": ["turkey", "pie", "gratitude"],
+    "Halloween": ["costume", "candy", "pumpkin"],
+    "Christmas": ["tree", "Santa", "presents"],
+    "Birthday": ["cake", "candles", "party"],
+    "New Year": ["midnight", "countdown", "resolution"],
+    "Fourth of July": ["fireworks", "flag", "cookout"],
+    "Valentine's Day": ["hearts", "roses", "love"],
+    "Easter": ["eggs", "bunny", "basket"],
+    "Graduation": ["cap", "gown", "diploma"],
+    "Wedding": ["bride", "rings", "vows"],
+    "Hanukkah": ["menorah", "candles", "dreidel"],
+    "Super Bowl": ["football", "commercials", "halftime"],
+    "Mother's Day": ["flowers", "mom", "brunch"],
+    "April Fools": ["prank", "joke", "gotcha"],
+    "Snow day": ["sledding", "cancelled", "shovel"],
+  },
+  "Weather": {
+    "Tornado": ["funnel", "Kansas", "twister"],
+    "Rainbow": ["colors", "arc", "gold"],
+    "Blizzard": ["whiteout", "snow", "cold"],
+    "Thunderstorm": ["rumble", "lightning", "rain"],
+    "Heat wave": ["hot", "sweat", "sun"],
+    "Fog": ["mist", "gray", "hazy"],
+    "Hail": ["ice", "balls", "dents"],
+    "Hurricane": ["eye", "coast", "evacuate"],
+    "Drizzle": ["light", "sprinkle", "damp"],
+    "Sunset": ["orange", "evening", "horizon"],
+    "Snowflake": ["unique", "crystal", "frozen"],
+    "Lightning": ["bolt", "flash", "strike"],
+    "Breeze": ["gentle", "wind", "cool"],
+    "Icicle": ["drip", "frozen", "pointy"],
+    "Puddle": ["splash", "boots", "rain"],
+  },
+  "Movies": {
+    "Superhero": ["cape", "powers", "villain"],
+    "Cartoon": ["animated", "drawn", "Saturday"],
+    "Horror": ["scary", "scream", "ghost"],
+    "Musical": ["songs", "dance", "Broadway"],
+    "Western": ["cowboy", "horse", "saloon"],
+    "Pirates": ["treasure", "ship", "parrot"],
+    "Dinosaurs": ["fossil", "roar", "extinct"],
+    "Robots": ["metal", "beep", "machine"],
+    "Aliens": ["UFO", "space", "green"],
+    "Zombies": ["undead", "brains", "shuffle"],
+    "Spies": ["secret", "gadget", "agent"],
+    "Princess": ["crown", "castle", "tiara"],
+    "Wizard": ["wand", "spell", "robe"],
+    "Ninja": ["stealth", "stars", "black"],
+    "Car chase": ["speed", "police", "crash"],
+  },
 };
+
+const wordsIn = c => Object.keys(WORDS[c] || {});
 
 export const TIMES = { clue: 45000, discuss: 60000, guess: 30000, reveal: 4000 };
 const CLUE_ROUNDS = 2;
@@ -38,7 +201,8 @@ export function setup(players, rnd = Math.random, prev = null) {
   let category, word;
   for (let i = 0; i < 50; i++) {
     category = cats[Math.floor(rnd() * cats.length)];
-    word = WORDS[category][Math.floor(rnd() * WORDS[category].length)];
+    const list = wordsIn(category);
+    word = list[Math.floor(rnd() * list.length)];
     if (!used.has(word)) break;
   }
   used.add(word);
@@ -187,16 +351,44 @@ export function cue(s) {
 }
 
 export function botAct(v, rnd = Math.random) {
-  const list = WORDS[v.category] || [];
+  const words = WORDS[v.category] || {};
   const any = a => a[Math.floor(rnd() * a.length)];
+  const used = new Set((v.allClues || []).map(c => norm(c)));
   if (v.phase === 'roles' && !v.ready) return { type: 'ready' };
   if (v.phase === 'clues' && v.myTurn) {
-    const options = list.filter(w => !sameWord(w, v.word || '') && !w.includes(' '));
-    return { type: 'clue', text: any(options.length ? options : ['Hmm']) };
+    // Crew: a real hint for the word. Imposter: guess the word from the clues so far and hint at that.
+    const target = v.isImposter ? (rnd() < 0.6 ? bestGuess(v.category, v.allClues || [], rnd) : any(Object.keys(words))) : v.word;
+    const pool = (words[target] || []).filter(h => !used.has(norm(h)) && !sameWord(h, v.word || ''));
+    const mine = new Set((v.myClues || []).map(norm));
+    const fallback = (words[target] || ['Hmm']).filter(h => !sameWord(h, v.word || '') && !mine.has(norm(h)));
+    return { type: 'clue', text: any(pool.length ? pool : fallback.length ? fallback : ['Hmm']) };
   }
-  if (v.phase === 'vote' && !v.voted && v.options?.length) return { type: 'vote', target: any(v.options).pid };
-  if (v.phase === 'guess' && v.isImposter) return { type: 'guess', text: any(list) };
+  if (v.phase === 'vote' && !v.voted && v.options?.length) {
+    if (v.isImposter || !v.board) return { type: 'vote', target: any(v.options).pid };
+    // Crew: vote for whoever's clues fit the word worst.
+    const hints = new Set((words[v.word] || []).map(norm));
+    const fit = o => (v.board.find(b => b.pid === o.pid)?.clues || []).filter(c => hints.has(norm(c))).length;
+    const worst = Math.min(...v.options.map(fit));
+    return { type: 'vote', target: any(v.options.filter(o => fit(o) === worst)).pid };
+  }
+  if (v.phase === 'guess' && v.isImposter) {
+    // Bots aren't perfect: most of the time they guess a different word from the category.
+    const best = bestGuess(v.category, v.allClues || [], rnd);
+    return { type: 'guess', text: rnd() < 0.3 ? best : any(Object.keys(words)) };
+  }
   return null;
+}
+
+// Which word in the category do these clues point to?
+export function bestGuess(category, clues, rnd = Math.random) {
+  const words = WORDS[category] || {};
+  const said = new Set(clues.map(norm));
+  let best = [], top = -1;
+  for (const [w, hints] of Object.entries(words)) {
+    const n = hints.filter(h => said.has(norm(h))).length;
+    if (n > top) { top = n; best = [w]; } else if (n === top) best.push(w);
+  }
+  return best[Math.floor(rnd() * best.length)] || 'Hmm';
 }
 
 // ---------- views ----------
@@ -229,10 +421,15 @@ export function phoneView(s, pid) {
     v.myClues = s.clues.filter(c => c.pid === pid).map(c => c.text);
     v.lap = lap(s);
     v.recent = s.clues.slice(-4).map(c => ({ name: nameOf(s, c.pid), text: c.text }));
+    v.allClues = s.clues.map(c => c.text);
   }
   if (s.phase === 'discuss') v.all = s.order.map(p => ({ name: nameOf(s, p), clues: s.clues.filter(c => c.pid === p).map(c => c.text) }));
-  if (s.phase === 'vote') { v.options = s.players.filter(p => p.pid !== pid).map(p => ({ pid: p.pid, name: p.name })); v.voted = s.votes[pid] || null; }
-  if (s.phase === 'guess') v.imposterName = nameOf(s, s.imposter);
+  if (s.phase === 'vote') {
+    v.options = s.players.filter(p => p.pid !== pid).map(p => ({ pid: p.pid, name: p.name }));
+    v.voted = s.votes[pid] || null;
+    v.board = s.players.map(p => ({ pid: p.pid, clues: s.clues.filter(c => c.pid === p.pid).map(c => c.text) }));
+  }
+  if (s.phase === 'guess') { v.imposterName = nameOf(s, s.imposter); if (isImposter) v.allClues = s.clues.map(c => c.text); }
   if (s.phase === 'over') {
     v.word = s.word; v.result = s.result;
     v.won = isImposter ? s.result !== 'caught' : s.result === 'caught';

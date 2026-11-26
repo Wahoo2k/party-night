@@ -47,11 +47,19 @@ function sendViews(force) {
 }
 
 let fresh = false;
+let lastEventId = 0;
+let lastViewKey = '';
+const viewKey = v => JSON.stringify({ ...v, left: 0 });
 function changed() {
   save();
   if (host.state) {
     const key = host.state.phase + host.state.round;
     if (key !== lastPhase) { lastPhase = key; fresh = true; announce(); }
+    const ce = game().cueEvent?.(host.state);
+    if (ce && ce.id !== lastEventId) {
+      lastEventId = ce.id;
+      setTimeout(() => { if (sfx.on) play(ce.sound); if (ce.say) say(ce.say); }, ce.delay || 0);
+    }
   }
   render();
   fresh = false;
@@ -106,6 +114,7 @@ function onMessage(m) {
 function startGame() {
   const prev = host.state && host.state.game === host.gameId ? host.state : host.lastByGame?.[host.gameId];
   host.state = game().setup(host.players, Math.random, prev);
+  lastEventId = 0;
   lastPhase = '';
   changed();
 }
@@ -228,7 +237,7 @@ function renderLobby() {
 
 function render() {
   if (!host.state) renderLobby();
-  else { const v = game().tvView(host.state, Date.now()); v.fresh = fresh; game().renderTV(v, app); }
+  else { const v = game().tvView(host.state, Date.now()); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); }
   document.body.classList.toggle('night', host.state?.phase === 'night');
   app.querySelectorAll('[data-host]').forEach(b => (b.onclick = () => hostAction(b.dataset.host)));
   const vsel = app.querySelector('#vsel');
@@ -253,8 +262,11 @@ setInterval(() => {
   runBots();
   const before = JSON.stringify(host.state);
   game().tick(host.state, Date.now());
-  if (JSON.stringify(host.state) !== before) changed();
-  else if (host.state.deadline) {
+  if (JSON.stringify(host.state) !== before) return changed();
+  // Some views change with time alone (e.g. an animation finishing): redraw only when the view itself changes.
+  if (viewKey(game().tvView(host.state, Date.now())) !== lastViewKey) render();
+  sendViews();
+  if (host.state.deadline) {
     const clock = app.querySelector('.clock');
     const left = Math.max(0, Math.ceil((host.state.deadline - Date.now()) / 1000));
     if (clock) {
