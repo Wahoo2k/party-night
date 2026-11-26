@@ -31,9 +31,11 @@ import * as gofish from './gofish.js';
 import * as bluffcards from './bluffcards.js';
 import * as hearts from './hearts.js';
 import * as shade from './shade.js';
+import * as estimate from './estimate.js';
 
-export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards, hearts, shade };
+export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards, hearts, shade, estimate };
 
 export const COMING_SOON = [
-  { name: 'Estimate & Bet', blurb: 'Guess the number, then bet on whoever is closest.' },
+  { name: 'Two Truths & a Lie', blurb: 'Tell three things about yourself. Can the room spot the lie?' },
+  { name: 'Secret Word Hunt', blurb: 'Yes-or-no questions to find the word. Someone already knows it…' },
 ];

@@ -725,3 +725,12 @@ p.center .clock{display:inline-block;font-size:1em;margin:0 0 0 8px;padding:2px 
 .shopt{flex:1;aspect-ratio:1;border-radius:14px;border:4px solid transparent;cursor:pointer}.shopt.on{border-color:#fff;box-shadow:0 0 0 3px var(--moon)}
 .shswatch{height:90px;border-radius:14px;margin:10px 0}
 .shres{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;font-weight:800}
+/* estimate & bet */
+.ebboard{display:flex;gap:8px;overflow-x:auto;padding:8px 2px;margin:12px 0}
+.ebslot{flex:1 0 110px;display:grid;justify-items:center;gap:4px;padding:10px 8px;border-radius:14px;background:#232a5c;text-align:center;animation:rise .4s both}
+.ebslot.win{background:#7fc8a9;color:#0e1230;box-shadow:0 0 0 4px #fff,0 0 30px #7fc8a9}
+.ebodds{font:900 clamp(20px,2vw,30px)/1 Outfit,sans-serif;color:var(--moon)}.ebslot.win .ebodds{color:#0e1230}
+.ebnum{font:800 clamp(18px,1.8vw,28px)/1.1 Outfit,sans-serif}
+.ebchips{display:flex;flex-wrap:wrap;gap:3px;justify-content:center}
+.ebchips span{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#e2473b;border:2px dashed #fff;font:800 10px/1 system-ui;color:#fff}
+.center{text-align:center}
