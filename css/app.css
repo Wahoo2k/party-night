@@ -754,3 +754,16 @@ p.center .clock{display:inline-block;font-size:1em;margin:0 0 0 8px;padding:2px 
 .whbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
 .whbtns .wht{padding:20px 6px;font-size:20px;cursor:pointer}.whbtns .wht.yes{grid-column:1}.whbtns .wht.off{grid-column:1/-1}
 .role.insider{padding:16px;border-radius:16px;background:#3a2050;border:2px solid #c48fff}
+/* midnight wolves */
+.mwcard{display:inline-grid;justify-items:center;gap:4px;padding:10px 12px;border-radius:12px;background:#f4e9c1;color:#0e1230;min-width:92px}
+.mwcard span{font-size:34px;line-height:1}.mwcard b{font-size:13px}
+.mwcard.wolf{background:#5a1f2a;color:#ffd7d7}
+.mwcard.big{padding:24px;margin:10px auto;display:grid;max-width:220px}.mwcard.big span{font-size:90px}.mwcard.big b{font-size:24px}
+.mwroles{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.mwroles p{width:100%;margin:0}
+.mwroles span{padding:6px 12px;border-radius:99px;background:#232a5c;font-weight:700}
+.mwcenter{display:flex;gap:10px;margin:8px 0}
+.mwback{flex:1;aspect-ratio:5/7;border-radius:12px;border:3px solid #fffdf6;background:repeating-linear-gradient(45deg,#5a6fd8 0 6px,#4a5ec8 6px 12px);color:#fff;font:900 26px/1 Outfit,sans-serif;cursor:pointer}
+.mwback.on{box-shadow:0 0 0 4px var(--moon)}
+.mwtable{display:grid;gap:8px;margin:12px 0}
+.mwrow{display:grid;grid-template-columns:minmax(90px,1fr) auto auto auto 80px;gap:10px;align-items:center}
+.mwrow .mwcard{min-width:120px;grid-auto-flow:column;padding:6px 10px}.mwrow .mwcard span{font-size:22px}

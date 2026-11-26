@@ -34,10 +34,10 @@ import * as shade from './shade.js';
 import * as estimate from './estimate.js';
 import * as truths from './truths.js';
 import * as wordhunt from './wordhunt.js';
+import * as midnight from './midnight.js';
 
-export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards, hearts, shade, estimate, truths, wordhunt };
+export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards, hearts, shade, estimate, truths, wordhunt, midnight };
 
 export const COMING_SOON = [
-  { name: 'One Night Werewolf', blurb: 'One night, one vote, ten minutes. Who is the wolf?' },
   { name: 'Missions', blurb: 'Pick a team, run the mission. A traitor might fail it.' },
 ];
