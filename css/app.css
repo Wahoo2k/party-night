@@ -790,3 +790,7 @@ p.center .clock{display:inline-block;font-size:1em;margin:0 0 0 8px;padding:2px 
 .dmission p{font:800 19px/1.25 Outfit,sans-serif;margin:4px 0 10px}.dpts{color:#c88e10;letter-spacing:2px}
 .dmission .btn.ghost{color:#0e1230;border-color:#0e123044}
 .dmission .row{display:grid;grid-template-columns:2fr 1fr;gap:8px}.dmission .row .btn{margin:0;width:100%}
+/* split the room */
+.spfill{display:inline;padding:0 8px;border-radius:8px;background:#ffcf6b;color:#0e1230}
+.spbar{display:flex;height:64px;border-radius:14px;overflow:hidden;margin:16px 0;font:900 22px/64px Outfit,sans-serif;text-align:center}
+.spbar .yes{background:#3fa34d;transition:flex .8s}.spbar .no{background:#a8261c;transition:flex .8s}

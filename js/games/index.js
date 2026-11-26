@@ -37,8 +37,11 @@ import * as wordhunt from './wordhunt.js';
 import * as midnight from './midnight.js';
 import * as missions from './missions.js';
 import * as dares from './dares.js';
+import * as split from './split.js';
 
-export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards, hearts, shade, estimate, truths, wordhunt, midnight, missions, dares };
+export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards, hearts, shade, estimate, truths, wordhunt, midnight, missions, dares, split };
 
 export const COMING_SOON = [
+  { name: 'Doodle Bluff', blurb: 'Draw a weird title, everyone fakes one. Find the real one.' },
+  { name: 'Haunted Quiz', blurb: 'Trivia where wrong answers send you to the spooky basement.' },
 ];
