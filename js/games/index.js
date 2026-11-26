@@ -36,9 +36,9 @@ import * as truths from './truths.js';
 import * as wordhunt from './wordhunt.js';
 import * as midnight from './midnight.js';
 import * as missions from './missions.js';
+import * as dares from './dares.js';
 
-export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards, hearts, shade, estimate, truths, wordhunt, midnight, missions };
+export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards, hearts, shade, estimate, truths, wordhunt, midnight, missions, dares };
 
 export const COMING_SOON = [
-  { name: 'Secret Missions', blurb: 'Your phone gives you secret dares during the party. Pull them off!' },
 ];

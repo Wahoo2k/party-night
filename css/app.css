@@ -781,3 +781,12 @@ p.center .clock{display:inline-block;font-size:1em;margin:0 0 0 8px;padding:2px 
 .mscard.ok{background:#3fa34d}.mscard.fail{background:#a8261c}
 .role.crew{padding:16px;border-radius:16px;background:#1f3a5a;border:2px solid #7fb4ff;margin-top:12px}
 .role.insider{margin-top:12px}
+/* secret missions */
+.dclaim{padding:12px 16px;margin:10px 0;border-radius:14px;background:#ffcf6b;color:#0e1230;animation:rise .4s both}
+.dclaim small{display:block;margin-top:4px;font-weight:700}
+.dclaim .btn{margin-top:8px;width:100%}
+.dfeed{display:grid;gap:8px;margin:12px 0}.dfeed div{padding:10px 14px;border-radius:12px;background:#232a5c;animation:rise .4s both}.dfeed .no{opacity:.6}
+.dmission{padding:14px;margin:10px 0;border-radius:14px;background:#f4e9c1;color:#0e1230}
+.dmission p{font:800 19px/1.25 Outfit,sans-serif;margin:4px 0 10px}.dpts{color:#c88e10;letter-spacing:2px}
+.dmission .btn.ghost{color:#0e1230;border-color:#0e123044}
+.dmission .row{display:grid;grid-template-columns:2fr 1fr;gap:8px}.dmission .row .btn{margin:0;width:100%}
