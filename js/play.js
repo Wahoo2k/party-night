@@ -82,7 +82,7 @@ function render(v) {
   const wrap = document.createElement('div');
   wrap.className = 'panel';
   app.replaceChildren(wrap);
-  GAMES.werewolf.renderPhone(v, wrap, send);
+  (GAMES[v.game] || GAMES.werewolf).renderPhone(v, wrap, send);
 }
 
 function leave() {

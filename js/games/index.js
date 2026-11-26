@@ -5,11 +5,11 @@
 //   tvView(state) / phoneView(state, pid)   renderTV(view, el) / renderPhone(view, el, send)
 // Later: an `owned` list from the player's account decides which games unlock.
 import * as werewolf from './werewolf.js';
+import * as imposter from './imposter.js';
 
-export const GAMES = { werewolf };
+export const GAMES = { werewolf, imposter };
 
 export const COMING_SOON = [
-  { name: 'Price Guesser', blurb: 'Guess the price of real products. Closest without going over wins.' },
-  { name: 'Family Fact Trivia', blurb: 'Questions written from your own group\'s answers.' },
-  { name: 'Celebrity', blurb: 'Describe, one word, then act it out. Same names, three rounds.' },
+  { name: 'Bluff', blurb: 'Write a fake answer to a strange true fact, then sniff out the real one.' },
+  { name: 'Who Said That?', blurb: 'Answer questions about yourselves, then guess whose answer is whose.' },
 ];

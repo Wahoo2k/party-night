@@ -180,3 +180,24 @@ button.chip.on{outline:3px solid var(--moon)}
 .namebox input{flex:1}
 .dice{min-width:56px;padding:0;font-size:24px}
 .note{margin:0 0 10px;padding:8px 12px;border-radius:10px;background:#0f1336;color:var(--moss);font-size:15px}
+
+/* imposter */
+.cat{margin:0 0 4px;font-size:clamp(16px,1.4vw,22px);color:var(--dim)}
+.cat b{color:var(--moon)}
+.clueboard{display:grid;gap:8px;margin:16px 0}
+.cluerow{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:center;padding:10px 14px;border-radius:12px;background:#1f2553;transition:background .3s,box-shadow .3s}
+.cluerow b{font-size:clamp(16px,1.4vw,22px)}
+.cluerow.now{background:#2b3470;box-shadow:0 0 0 2px var(--moon)}
+.clue{min-height:36px;display:flex;align-items:center;padding:4px 12px;border-radius:8px;background:#0f1336;font-weight:600;font-size:clamp(16px,1.4vw,22px);color:var(--moon)}
+.clue.in{animation:pop .4s cubic-bezier(.3,1.6,.5,1) both}
+.scores{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px}
+.scores h3{margin:0 0 10px}
+.srow{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:clamp(16px,1.3vw,21px)}
+.srow b{font-variant-numeric:tabular-nums}
+.srow small{color:var(--moss)}
+.secret{margin:12px 0;padding:16px 20px;border-radius:14px;background:#0f1336;font-size:clamp(20px,2vw,30px)}
+.secret b{font:400 clamp(34px,4vw,60px)/1 'Pirata One',serif;color:var(--moon);margin-left:8px}
+.recent{display:grid;gap:6px;margin:12px 0}
+.recent div{display:flex;justify-content:space-between;gap:10px;padding:10px 14px;border-radius:10px;background:#1f2553}
+.recent span{color:var(--dim)}
+#cf .btn,#gf .btn{width:100%;margin-top:12px}

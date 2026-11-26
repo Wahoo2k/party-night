@@ -31,7 +31,7 @@ function viewFor(pid) {
     const me = host.players.find(p => p.pid === pid) || {};
     return { phase: 'lobby', players: host.players.map(p => p.name), game: game().meta.name, me: me.name, fixed: !!me.fixed, byHost: !!me.locked };
   }
-  return game().phoneView(host.state, pid);
+  return { ...game().phoneView(host.state, pid), game: host.gameId };
 }
 
 function sendViews(force) {
@@ -104,7 +104,8 @@ function onMessage(m) {
 }
 
 function startGame() {
-  host.state = game().setup(host.players);
+  const prev = host.state && host.state.game === host.gameId ? host.state : host.lastByGame?.[host.gameId];
+  host.state = game().setup(host.players, Math.random, prev);
   lastPhase = '';
   changed();
 }
@@ -112,7 +113,7 @@ function startGame() {
 function hostAction(a) {
   if (a === 'start') return startGame();
   if (a === 'again') return startGame();
-  if (a === 'lobby') { host.state = null; stopAmbient(); document.body.classList.remove('day'); return changed(); }
+  if (a === 'lobby') { host.lastByGame = { ...(host.lastByGame || {}), [host.gameId]: host.state }; host.state = null; stopAmbient(); document.body.classList.remove('day'); return changed(); }
   if (a === 'newcode') { host = { code: newCode(), players: [], gameId: host.gameId, state: null }; save(); return connect(); }
   if (a === 'voice') { voice.on = !voice.on; return render(); }
   if (a === 'testvoice') return say('Night falls on the village. Somewhere in the dark, the wolves are hungry.', true);
@@ -253,7 +254,7 @@ setInterval(() => {
   const before = JSON.stringify(host.state);
   game().tick(host.state, Date.now());
   if (JSON.stringify(host.state) !== before) changed();
-  else if (host.state.phase === 'day') {
+  else if (host.state.deadline) {
     const clock = app.querySelector('.clock');
     const left = Math.max(0, Math.ceil((host.state.deadline - Date.now()) / 1000));
     if (clock) {
