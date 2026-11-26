@@ -11,10 +11,10 @@ import * as whosaid from './whosaid.js';
 import * as ducks from './ducks.js';
 import * as trivia from './trivia.js';
 import * as spin from './spin.js';
+import * as crowd from './crowd.js';
 
-export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin };
+export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd };
 
 export const COMING_SOON = [
-  { name: 'Crowd Says', blurb: 'Guess the most popular answers. Three strikes and you\'re out.' },
   { name: 'Bingo', blurb: 'Cards on your phone, the TV calls the numbers. Shout it first!' },
 ];
