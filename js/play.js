@@ -3,6 +3,7 @@ import { GAMES } from './games/index.js';
 import { openRoom } from './net.js';
 import { esc, store as localStore, uid, cleanCode, drawScene } from './ui.js';
 import { buzz } from './sfx.js';
+import { cleanName, isRude, funName, MAX_NAME } from './names.js';
 
 const app = document.getElementById('app');
 const statusEl = document.getElementById('status');
@@ -30,16 +31,19 @@ function joinForm(err = '') {
     <label for="code">Room code from the TV</label>
     <input id="code" class="big" maxlength="4" autocomplete="off" autocapitalize="characters" value="${esc(code)}" required>
     <label for="name">Your name</label>
-    <input id="name" maxlength="20" autocomplete="nickname" value="${esc(name)}" required>
+    <div class="namebox"><input id="name" maxlength="${MAX_NAME}" autocomplete="nickname" value="${esc(name)}" required><button type="button" class="btn ghost dice" id="dice" aria-label="Pick a random name">🎲</button></div>
+    <p class="muted small">Up to ${MAX_NAME} characters. Tap 🎲 for a random name.</p>
     ${err ? `<p class="lose">${esc(err)}</p>` : ''}
-    <button class="btn">Join</button>
+    <button class="btn" id="join" type="submit">Join</button>
   </form>`;
+  app.querySelector('#dice').onclick = () => { const i = app.querySelector('#name'); i.value = funName(); i.focus(); };
   app.querySelector('#f').onsubmit = e => {
     e.preventDefault();
     code = cleanCode(app.querySelector('#code').value);
-    name = app.querySelector('#name').value.trim().slice(0, 20);
+    name = cleanName(app.querySelector('#name').value);
     if (code.length !== 4) return joinForm('Room codes are 4 letters.');
-    if (!name) return joinForm('Add your name so everyone knows who you are.');
+    if (!name) return joinForm('Add a name with at least one letter or number.');
+    if (isRude(name)) { name = ''; return joinForm('Let\'s keep it family-friendly. Try another name, or tap 🎲.'); }
     store.set('pg-code', code);
     store.set('pg-name', name);
     join();
@@ -65,9 +69,10 @@ function render(v) {
   document.body.classList.toggle('night', v.phase === 'night');
   document.body.classList.toggle('day', ['day', 'vote', 'verdict'].includes(v.phase));
   if (key !== lastPhaseSeen) { lastPhaseSeen = key; if (v.alive && ['roles', 'night', 'vote'].includes(v.phase)) buzz([80, 60, 80]); }
+  if (v.phase === 'kicked') { clearInterval(hello); room?.close(); room = null; app.innerHTML = `<div class="panel"><h2>You were removed</h2><p class="say">The host removed you from this room.</p></div>`; return; }
   if (v.phase === 'full') { app.innerHTML = `<div class="panel"><h2>That room is full</h2><button class="btn" id="back">Try another code</button></div>`; app.querySelector('#back').onclick = leave; return; }
   if (v.phase === 'lobby') {
-    app.innerHTML = `<div class="panel"><h2>You're in, ${esc(v.me || name)}</h2><p class="say">Watch the TV. The game starts when the host is ready.</p>
+    app.innerHTML = `<div class="panel"><h2>You're in, ${esc(v.me || name)}</h2>${v.byHost ? '<p class="note">The host set your name.</p>' : v.fixed ? `<p class="note">${v.me && name && v.me.toLowerCase().startsWith(name.toLowerCase()) ? 'Someone already had that name, so you got a number.' : 'We tidied up your name.'}</p>` : ''}<p class="say">Watch the TV. The game starts when the host is ready.</p>
       <p class="muted">Game: ${esc(v.game)} · ${v.players.length} playing</p>
       <div class="roster">${v.players.map(n => `<div class="chip">${esc(n)}</div>`).join('')}</div>
       <button class="btn ghost" id="leave">Leave room</button></div>`;

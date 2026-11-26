@@ -3,6 +3,7 @@ import { GAMES, COMING_SOON } from './games/index.js';
 import { openRoom } from './net.js';
 import { esc, store, newCode, say, voice, voices, enableDpad, autofocus, drawScene, titleCard, confetti, clawMarks } from './ui.js';
 import { play, sfx, startAmbient, stopAmbient } from './sfx.js';
+import { settleName, cleanName, isRude, uniqueName, funName, MAX_NAME } from './names.js';
 
 const app = document.getElementById('app');
 const statusEl = document.getElementById('status');
@@ -26,7 +27,10 @@ const joinUrl = () => {
 };
 
 function viewFor(pid) {
-  if (!host.state) return { phase: 'lobby', players: host.players.map(p => p.name), game: game().meta.name, me: (host.players.find(p => p.pid === pid) || {}).name };
+  if (!host.state) {
+    const me = host.players.find(p => p.pid === pid) || {};
+    return { phase: 'lobby', players: host.players.map(p => p.name), game: game().meta.name, me: me.name, fixed: !!me.fixed, byHost: !!me.locked };
+  }
   return game().phoneView(host.state, pid);
 }
 
@@ -75,11 +79,19 @@ function announce() {
 
 function onMessage(m) {
   if (!m || typeof m !== 'object' || typeof m.pid !== 'string') return;
-  const name = String(m.name || '').trim().slice(0, 20);
+  const raw = String(m.name || '').slice(0, 60);
   if (m.t === 'hello') {
+    if (kicked.has(m.pid)) return room.send({ t: 'view', to: m.pid, view: { phase: 'kicked' } });
     let p = host.players.find(x => x.pid === m.pid);
-    if (!p && !host.state && name && host.players.length < game().meta.max) { host.players.push((p = { pid: m.pid, name })); play('join'); }
-    else if (p && name && !host.state) p.name = name;
+    const others = host.players.filter(x => x !== p).map(x => x.name);
+    if (!p && !host.state && host.players.length < game().meta.max) {
+      const { name, changed } = settleName(raw, others);
+      host.players.push((p = { pid: m.pid, name, asked: raw, fixed: changed }));
+      play('join');
+    } else if (p && !host.state && !p.locked && raw !== p.asked) {
+      const { name, changed } = settleName(raw, others);
+      Object.assign(p, { name, asked: raw, fixed: changed });
+    }
     if (p) { lastSent[p.pid] = null; changed(); }
     else room.send({ t: 'view', to: m.pid, view: { phase: host.state ? 'spectate' : 'full' } });
   } else if (m.t === 'bye' && !host.state) {
@@ -109,6 +121,27 @@ function hostAction(a) {
     const used = new Set(host.players.map(p => p.name));
     const name = BOT_NAMES.find(n => !used.has(n)) || 'Bot ' + (host.players.length + 1);
     host.players.push({ pid: 'bot-' + Math.random().toString(36).slice(2, 8), name, bot: true });
+    return changed();
+  }
+  if (a.startsWith('edit:')) { editing = a.slice(5); return render(); }
+  if (a === 'canceledit') { editing = null; return render(); }
+  if (a === 'kick' && editing) {
+    const p = host.players.find(x => x.pid === editing);
+    if (p && !p.bot) { kicked.add(p.pid); room?.send({ t: 'view', to: p.pid, view: { phase: 'kicked' } }); }
+    host.players = host.players.filter(x => x.pid !== editing);
+    editing = null;
+    return changed();
+  }
+  if ((a === 'rename' || a === 'randomname') && editing) {
+    const p = host.players.find(x => x.pid === editing);
+    if (!p) { editing = null; return render(); }
+    const others = host.players.filter(x => x !== p).map(x => x.name);
+    let n = a === 'randomname' ? funName(others) : cleanName(app.querySelector('#rename')?.value);
+    if (!n) return;
+    n = uniqueName(n, others);
+    Object.assign(p, { name: n, locked: true, fixed: false });
+    editing = null;
+    lastSent[p.pid] = null;
     return changed();
   }
   if (a === 'clearbots' && !host.state) { host.players = host.players.filter(p => !p.bot); return changed(); }
@@ -147,6 +180,8 @@ function qr(text) {
 }
 
 const seen = new Set();
+const kicked = new Set();
+let editing = null;
 function renderLobby() {
   const g = game();
   const n = host.players.length;
@@ -161,7 +196,9 @@ function renderLobby() {
     </section>
     <section class="panel">
       <h2>${n ? `${n} player${n === 1 ? '' : 's'} in` : 'Waiting for players'}</h2>
-      <div class="roster">${host.players.map(p => `<div class="chip ${p.bot ? 'bot' : ''} ${seen.has(p.pid) ? '' : 'pop'}">${esc(p.name)}</div>`).join('') || '<p class="muted">Names appear here as phones join.</p>'}</div>
+      <div class="roster">${host.players.map(p => `<button class="chip ${p.bot ? 'bot' : ''} ${seen.has(p.pid) ? '' : 'pop'} ${editing === p.pid ? 'on' : ''}" data-host="edit:${esc(p.pid)}" title="Rename or remove">${esc(p.name)}</button>`).join('') || '<p class="muted">Names appear here as phones join.</p>'}</div>
+      ${host.players.length ? '<p class="muted small">Select a name to rename or remove that player.</p>' : ''}
+      ${(() => { const p = host.players.find(x => x.pid === editing); return p ? `<div class="editbox"><label for="rename">Rename ${esc(p.name)}</label><div class="row"><input id="rename" maxlength="${MAX_NAME}" value="${esc(p.name)}" autocomplete="off"><button class="btn" data-host="rename">Save</button><button class="btn ghost" data-host="randomname">Random name</button><button class="btn ghost" data-host="kick">Remove player</button><button class="btn ghost" data-host="canceledit">Cancel</button></div></div>` : ''; })()}
       <h3>Game</h3>
       <div class="games">
         ${Object.values(GAMES).map(m => `<button class="game ${m.meta.id === host.gameId ? 'on' : ''}" data-game="${m.meta.id}"><b>${esc(m.meta.name)}</b><span>${esc(m.meta.blurb)}</span><small>${m.meta.min}–${m.meta.max} players</small></button>`).join('')}

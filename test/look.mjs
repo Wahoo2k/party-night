@@ -8,7 +8,7 @@ await tv.goto(base + 'tv.html?local=1'); await tv.waitForSelector('.code');
 const code = (await tv.textContent('.code')).trim();
 const me = await ctx.newPage(); me.on('pageerror', e => errors.push('me ' + e.message));
 await me.setViewportSize({ width: 390, height: 780 });
-await me.goto(base + 'play.html?local=1'); await me.fill('#code', code); await me.fill('#name', 'Tom'); await me.click('form .btn');
+await me.goto(base + 'play.html?local=1'); await me.fill('#code', code); await me.fill('#name', 'Tom'); await me.click('#join');
 await me.waitForSelector("text=You're in");
 for (let i = 0; i < 5; i++) await tv.click('[data-host=addbot]');
 await tv.screenshot({ path: 'test/l-lobby.png' });

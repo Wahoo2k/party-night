@@ -16,7 +16,7 @@ for (const n of names) {
   const p = await ctx.newPage(); watch(p, n);
   await p.setViewportSize({ width: 390, height: 800 });
   await p.goto(base + 'play.html?local=1');
-  await p.fill('#code', code); await p.fill('#name', n); await p.click('form .btn');
+  await p.fill('#code', code); await p.fill('#name', n); await p.click('#join');
   await p.waitForSelector('text=You\'re in');
   phones.push(p);
 }

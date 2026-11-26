@@ -1,0 +1,21 @@
+import { cleanName, isRude, uniqueName, settleName, funName, MAX_NAME } from '../js/names.js';
+import assert from 'node:assert';
+const ok = ['Tom', 'Cassie', 'Dickens', 'Scunthorpe', 'Sam 🐺', 'Zoë', 'José', 'Mr. T', 'Ashley', 'Sussex', 'Titus', 'Hancock', 'Butters!', 'Grandma', 'Liam'];
+const rude = ['fuck', 'FuCk', 'f u c k', 'fuuuuck', 'phuck'.replace('ph','f'), 'sh1t', '$hit', 'b!tch', 'ass', 'big ass', 'dick', 'my dick', 'a$$hole', 'Nazi', 'p0rn', 'boobs'];
+for (const n of ok) assert.equal(isRude(n), false, 'false positive: ' + n);
+for (const n of rude) assert.equal(isRude(n), true, 'missed: ' + n);
+assert.equal(cleanName('  Tom   Smith  '), 'Tom Smith');
+assert.equal(cleanName('a​b‮c'), 'abc');
+assert.equal(cleanName('<script>'), 'script');
+assert.equal(cleanName('!!!'), '');
+assert.equal(cleanName('   '), '');
+assert.equal(cleanName('🐺'), '🐺');
+assert.ok(cleanName('Bartholomew Jones').length <= MAX_NAME);
+assert.equal(uniqueName('Tom', ['tom']), 'Tom 2');
+assert.equal(uniqueName('Tom', ['Tom', 'Tom 2']), 'Tom 3');
+assert.equal(uniqueName('Bartholomew', ['Bartholomew']).length <= MAX_NAME, true);
+for (let i = 0; i < 500; i++) { const f = funName(); assert.ok(f.length <= MAX_NAME && !isRude(f), f); }
+let r = settleName('fuck', []); assert.ok(r.changed && !isRude(r.name)); console.log('rude ->', r.name);
+r = settleName('Tom', ['Tom']); assert.deepEqual(r, { name: 'Tom 2', changed: true });
+r = settleName('Tom', []); assert.deepEqual(r, { name: 'Tom', changed: false });
+console.log('names ok');
