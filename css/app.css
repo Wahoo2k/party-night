@@ -227,3 +227,18 @@ button.chip.on{outline:3px solid var(--moon)}
 .pod.p2{order:1;min-height:140px;animation-delay:.2s}
 .pod.p3{order:3;min-height:110px;animation-delay:.4s}
 #lf .btn{width:100%;margin-top:12px}
+
+/* who said that */
+.qlist{margin:10px 0 16px;padding-left:1.3em;display:grid;gap:6px;font-size:clamp(18px,1.6vw,26px)}
+.qline{font-size:clamp(18px,1.6vw,24px);margin:0}
+.quote{font:400 clamp(40px,5vw,84px)/1.1 'Pirata One',serif;margin:10px 0 18px;color:var(--moon);animation:pop .6s cubic-bezier(.3,1.6,.5,1) both}
+.quote.small{font-size:34px;margin:8px 0}
+.author{font-size:clamp(26px,3vw,46px);margin:6px 0 12px;animation:rise .6s both}
+.author b{color:var(--moss)}
+.awards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:12px 0}
+.awards div{display:grid;gap:2px;padding:14px 16px;border-radius:14px;background:#1f2553}
+.awards small{color:var(--dim);text-transform:none}
+.awards b{font-size:24px;color:var(--moon)}
+.awards span{color:var(--dim);font-size:14px}
+#af label{font-weight:600;line-height:1.35}
+#af .btn{width:100%;margin-top:14px}
