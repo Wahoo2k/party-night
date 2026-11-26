@@ -13,6 +13,9 @@ The TV saves its state in localStorage, so a refresh keeps the game, and phones 
 
 Games live in `js/games/` and share one interface (see `js/games/index.js`), so new games plug into the same lobby.
 
+## Live
+https://wahoo2k.github.io/party-night/ (GitHub Pages from `main`, root)
+
 ## Config
 `js/config.js` holds the Supabase URL and publishable key. It currently shares the mixwise project.
 
