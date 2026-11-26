@@ -17,9 +17,12 @@ import * as quick from './quick.js';
 import * as ladder from './ladder.js';
 import * as cases from './cases.js';
 import * as funny from './funny.js';
+import * as letters from './letters.js';
 
-export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny };
+export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters };
 
 export const COMING_SOON = [
-  { name: 'Scattergories', blurb: 'One letter, five categories. Duplicates don\'t count!' },
+  { name: 'Taboo Talk', blurb: 'Describe the word without saying the forbidden ones.' },
+  { name: 'Secret Agents', blurb: 'Spymasters give one-word clues to find their team\'s words.' },
+  { name: 'Sketch Telephone', blurb: 'Draw, guess, redraw. Watch the message fall apart.' },
 ];

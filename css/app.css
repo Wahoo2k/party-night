@@ -492,3 +492,19 @@ button.case:disabled{opacity:.5}
 .vs{align-self:center;font:400 clamp(30px,3vw,48px)/1 'Pirata One',serif;color:var(--moon)}
 #ff .btn{width:100%;margin-top:12px}
 @media(max-width:700px){.faceoff{grid-template-columns:1fr}}
+
+/* letter lists */
+.bigletter{display:grid;place-items:center;width:clamp(110px,12vw,160px);aspect-ratio:1;margin:6px 0 12px;border-radius:24px;background:radial-gradient(circle at 35% 30%,#fff,#f4e9c1);color:#e2483d;font:900 clamp(70px,8vw,110px)/1 Outfit,sans-serif;box-shadow:0 10px 30px #0006;animation:ballin .7s cubic-bezier(.3,1.5,.5,1) both}
+.catlist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px;margin:0 0 10px;padding-left:1.4em;font-size:clamp(18px,1.7vw,26px)}
+.lrows{display:grid;gap:8px;margin:12px 0}
+.lrow{display:grid;grid-template-columns:minmax(0,10em) minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 16px;border-radius:12px;background:#1f2553;animation:rise .4s both}
+.lrow b{font-size:clamp(18px,1.7vw,26px)}
+.lrow small{color:var(--dim)}
+.lrow.ok{border-left:5px solid var(--moss)}
+.lrow.dupe,.lrow.letter,.lrow.veto{border-left:5px solid var(--red);opacity:.7}
+.lrow.dupe b,.lrow.letter b,.lrow.veto b{text-decoration:line-through}
+.lrow.blank{opacity:.4}
+.phoneletter{float:right;display:grid;place-items:center;width:64px;height:64px;border-radius:14px;background:#f4e9c1;color:#e2483d;font:900 44px/1 Outfit,sans-serif;margin:0 0 8px 12px}
+#lf2 label{margin-top:10px}
+#lf2 .btn{width:100%;margin-top:14px}
+@media(max-width:700px){.catlist{grid-template-columns:1fr}}
