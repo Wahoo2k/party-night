@@ -744,3 +744,13 @@ p.center .clock{display:inline-block;font-size:1em;margin:0 0 0 8px;padding:2px 
 .ttrow{display:grid;grid-template-columns:1fr auto;gap:6px;margin-bottom:8px}.ttrow input{margin:0}
 .ttlie{width:52px;border-radius:12px;border:3px solid transparent;background:#232a5c;font-size:24px;cursor:pointer;opacity:.5}
 .ttlie.on{opacity:1;border-color:#e2473b;background:#f4e9c1}
+/* secret word hunt */
+.whtokens{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+.wht{display:grid;justify-items:center;gap:2px;padding:10px 16px;border-radius:14px;font-weight:800;color:#0e1230;border:0}
+.wht b{font:900 clamp(26px,2.6vw,40px)/1 Outfit,sans-serif}
+.wht.yes{background:#7fc8a9}.wht.no{background:#e2473b;color:#fff}.wht.maybe{background:#f4e9c1}.wht.close{background:#ffcf6b}.wht.off{background:#8a8fb8;color:#fff}
+.whlog{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}.whlog .wht{padding:4px 10px;font-size:13px}
+.whlog .wht:last-child{outline:3px solid #fff}
+.whbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.whbtns .wht{padding:20px 6px;font-size:20px;cursor:pointer}.whbtns .wht.yes{grid-column:1}.whbtns .wht.off{grid-column:1/-1}
+.role.insider{padding:16px;border-radius:16px;background:#3a2050;border:2px solid #c48fff}
