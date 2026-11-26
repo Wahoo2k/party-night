@@ -28,10 +28,10 @@ import * as charades from './charades.js';
 import * as clash from './clash.js';
 import * as blackjack from './blackjack.js';
 import * as gofish from './gofish.js';
+import * as bluffcards from './bluffcards.js';
 
-export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish };
+export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards };
 
 export const COMING_SOON = [
-  { name: 'Call My Bluff', blurb: 'Play cards face down, claim anything. Call out the liars.' },
   { name: 'Hearts', blurb: 'Four-player trick-taking. Dodge the hearts and the Queen of Spades.' },
 ];
