@@ -9,11 +9,11 @@ import * as imposter from './imposter.js';
 import * as bluff from './bluff.js';
 import * as whosaid from './whosaid.js';
 import * as ducks from './ducks.js';
+import * as trivia from './trivia.js';
 
-export const GAMES = { werewolf, imposter, bluff, whosaid, ducks };
+export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia };
 
 export const COMING_SOON = [
-  { name: 'Trivia Board', blurb: 'Pick a category and point value, then race to buzz in on your phone.' },
   { name: 'Spin & Solve', blurb: 'Spin the wheel on your phone, call letters and solve the puzzle.' },
   { name: 'Crowd Says', blurb: 'Guess the most popular answers. Three strikes and you\'re out.' },
 ];
