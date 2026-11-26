@@ -3,6 +3,7 @@ import { GAMES, COMING_SOON } from './games/index.js';
 import { openRoom } from './net.js';
 import { esc, store, newCode, say, voice, voices, enableDpad, autofocus, drawScene, titleCard, confetti, clawMarks } from './ui.js';
 import { play, sfx, startAmbient, stopAmbient } from './sfx.js';
+import { cleanAct, textsIn, maskView, maskLine } from './content.js';
 import { settleName, cleanName, isRude, uniqueName, funName, MAX_NAME } from './names.js';
 
 const app = document.getElementById('app');
@@ -13,7 +14,11 @@ enableDpad();
 // Saved so a TV refresh doesn't lose the game.
 let host = store.get('pg-host') || { code: newCode(), players: [], gameId: 'werewolf', state: null };
 host.audience = host.audience || [];
-host.settings = { relaxed: false, howto: true, ...(host.settings || {}) };
+host.settings = { relaxed: false, howto: true, kids: false, ...(host.settings || {}) };
+host.hidden = host.hidden || [];
+let recentTexts = [];
+let vetoOpen = false;
+const tvView = () => maskView(game().tvView(host.state, Date.now()), host.hidden);
 let room = null;
 let lastSent = {};
 let lastPhase = '';
@@ -39,7 +44,7 @@ function viewFor(pid) {
     const me = host.players.find(p => p.pid === pid) || {};
     return { phase: 'lobby', players: host.players.map(p => p.name), game: game().meta.name, me: me.name, fixed: !!me.fixed, byHost: !!me.locked };
   }
-  return { ...game().phoneView(host.state, pid), game: host.gameId };
+  return { ...maskView(game().phoneView(host.state, pid), host.hidden), game: host.gameId };
 }
 
 function sendViews(force) {
@@ -77,7 +82,7 @@ function changed() {
     const ce = game().cueEvent?.(host.state);
     if (ce && ce.id !== lastEventId) {
       lastEventId = ce.id;
-      setTimeout(() => { if (sfx.on) play(ce.sound); if (ce.say) say(ce.say); }, ce.delay || 0);
+      setTimeout(() => { if (sfx.on) play(ce.sound); if (ce.say) say(maskLine(ce.say, host.hidden)); }, ce.delay || 0);
     }
   }
   render();
@@ -101,7 +106,7 @@ function announce() {
   if (c?.fx === 'confetti') setTimeout(confetti, 900);
   if (c?.fx === 'claws') setTimeout(clawMarks, 600);
   const line = g.narration(s);
-  sayTimer = setTimeout(() => say(line), c && sfx.on ? c.wait : 0);
+  sayTimer = setTimeout(() => say(maskLine(line, host.hidden)), c && sfx.on ? c.wait : 0);
 }
 
 function onMessage(m) {
@@ -146,7 +151,10 @@ function onMessage(m) {
     lastReact[m.pid] = now;
     floatReaction(m.e, who.name);
   } else if (m.t === 'act' && host.state) {
-    game().act(host.state, m.pid, m.a, Date.now());
+    const a = cleanAct(m.a, host.settings.kids);
+    const who = host.players.find(p => p.pid === m.pid);
+    if (a?.type !== 'draft') for (const t of textsIn(a)) { recentTexts = [{ t, name: who?.name || '' }, ...recentTexts.filter(x => x.t.toLowerCase() !== t.toLowerCase())].slice(0, 30); }
+    game().act(host.state, m.pid, a, Date.now());
     changed();
   }
 }
@@ -180,6 +188,13 @@ function hostAction(a) {
   if (a === 'testvoice') return say('Night falls on the village. Somewhere in the dark, the wolves are hungry.', true);
   if (a === 'relaxed') { host.settings.relaxed = !host.settings.relaxed; save(); return render(); }
   if (a === 'howto') { host.settings.howto = !host.settings.howto; save(); return render(); }
+  if (a === 'kids') { host.settings.kids = !host.settings.kids; save(); return render(); }
+  if (a === 'veto') { vetoOpen = !vetoOpen; return render(); }
+  if (a.startsWith('hide:')) {
+    const t = recentTexts[Number(a.slice(5))]?.t;
+    if (t) host.hidden = host.hidden.some(h => h.toLowerCase() === t.toLowerCase()) ? host.hidden.filter(h => h.toLowerCase() !== t.toLowerCase()) : [...host.hidden, t];
+    lastViewKey = ''; return changed();
+  }
   if (a === 'sfx') { sfx.on = !sfx.on; if (sfx.on) play('join'); return render(); }
   if (a === 'addbot' && !host.state && host.players.length < game().meta.max) {
     const used = new Set(host.players.map(p => p.name));
@@ -278,6 +293,7 @@ function renderLobby() {
       <div class="row">
         <button class="btn ghost" data-host="relaxed">Relaxed timers: ${host.settings.relaxed ? 'on' : 'off'}</button>
         <button class="btn ghost" data-host="howto">How-to screens: ${host.settings.howto ? 'on' : 'off'}</button>
+        <button class="btn ghost" data-host="kids">Kids mode: ${host.settings.kids ? 'on' : 'off'}</button>
         <span class="muted">Relaxed gives everyone 50% more time.</span>
       </div>
       <div class="row">
@@ -297,13 +313,20 @@ function renderLobby() {
 
 function render() {
   if (!host.state) renderLobby();
-  else { const v = game().tvView(host.state, Date.now()); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); }
+  else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); }
   document.body.classList.toggle('night', host.state?.phase === 'night');
   document.body.classList.toggle('nohow', !host.settings.howto);
   const badge = document.getElementById('aud') || Object.assign(document.createElement('div'), { id: 'aud' });
   if (!badge.isConnected) document.body.append(badge);
   badge.hidden = !host.audience.length;
   badge.textContent = `👥 ${host.audience.length} watching`;
+  let vb = document.getElementById('vetobar');
+  if (!vb) { vb = Object.assign(document.createElement('div'), { id: 'vetobar' }); document.body.append(vb); }
+  vb.hidden = !host.state;
+  host.hidden = host.hidden || [];
+  const isHidden = t => host.hidden.some(h => h.toLowerCase() === t.toLowerCase());
+  vb.innerHTML = vetoOpen && host.state ? `<div class="vetopanel"><h3>Hide an answer</h3><p class="muted small">Tap anything players typed to hide it from the TV, phones and narrator. Tap again to show it.</p><div class="vetolist">${recentTexts.map((x, i) => `<button class="btn ghost ${isHidden(x.t) ? 'on' : ''}" data-host="hide:${i}">${isHidden(x.t) ? '🙈 ' : ''}${esc(x.t)} <small class="muted">${esc(x.name)}</small></button>`).join('') || '<p class="muted">Nothing typed yet.</p>'}</div><button class="btn" data-host="veto">Done</button></div>` : '<button class="btn ghost vetobtn" data-host="veto">🙈 Hide an answer</button>';
+  vb.querySelectorAll('[data-host]').forEach(b => (b.onclick = () => hostAction(b.dataset.host)));
   app.querySelectorAll('[data-host]').forEach(b => (b.onclick = () => hostAction(b.dataset.host)));
   const vsel = app.querySelector('#vsel');
   if (vsel) vsel.onchange = () => { voice.name = vsel.value; say('Good evening, villagers.', true); };
@@ -330,7 +353,7 @@ setInterval(() => {
   if (JSON.stringify(host.state) !== before) return changed();
   stretch();
   // Some views change with time alone (e.g. an animation finishing): redraw only when the view itself changes.
-  if (viewKey(game().tvView(host.state, Date.now())) !== lastViewKey) render();
+  if (viewKey(tvView()) !== lastViewKey) render();
   sendViews();
   if (host.state.deadline) {
     const clock = app.querySelector('.clock');

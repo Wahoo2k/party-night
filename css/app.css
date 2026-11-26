@@ -608,3 +608,11 @@ svg.sk.phone{max-width:340px;margin:8px auto}
 .chcard{display:grid;justify-items:center;gap:4px;width:clamp(110px,10vw,150px);padding:12px;border-radius:14px;background:#f4e9c1;color:#0e1230;animation:rise .45s cubic-bezier(.2,.8,.2,1) both}
 .chcard span{font-size:clamp(44px,4vw,64px);line-height:1}.chcard small{font-size:12px;opacity:.7}
 .chcard.skipped{opacity:.45}
+/* host: hide an answer */
+#vetobar{position:fixed;left:16px;bottom:16px;z-index:40}
+.vetobtn{opacity:.55;font-size:14px;padding:8px 14px;min-height:0}
+.vetobtn:hover,.vetobtn:focus{opacity:1}
+.vetopanel{width:min(560px,90vw);max-height:70vh;overflow:auto;padding:20px;border-radius:18px;background:var(--panel);border:1px solid var(--line);box-shadow:0 20px 60px #000a}
+.vetolist{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.vetolist .btn{min-height:0;padding:8px 12px;font-size:16px}
+.vetolist .btn.on{text-decoration:line-through;opacity:.7}

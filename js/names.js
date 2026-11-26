@@ -38,7 +38,7 @@ export function cleanName(raw) {
 // Words caught anywhere in a name, even with spacing or l33t tricks.
 const ALWAYS = ['fuck', 'fuk', 'shit', 'bitch', 'nigg', 'niga', 'fagg', 'whore', 'slut', 'penis', 'vagina', 'porn', 'rapist', 'nazi', 'hitler', 'retard', 'pussy', 'dildo', 'wank', 'boob', 'bastard', 'asshole', 'jizz', 'kkk'];
 // Words only caught as a whole word, so names like Cassie, Dickens or Scunthorpe are fine.
-const WORD = ['cunt', 'cunts', 'twat', 'ass', 'arse', 'dick', 'cock', 'tit', 'tits', 'fag', 'hoe', 'cum', 'sex', 'piss', 'crap', 'damn', 'butt', 'poop', 'rape', 'nude', 'gay'];
+const WORD = ['cunt', 'cunts', 'twat', 'ass', 'arse', 'dick', 'cock', 'tit', 'tits', 'fag', 'hoe', 'cum', 'sex', 'piss', 'crap', 'damn', 'butt', 'poop', 'rape', 'nude'];
 // "gay" is blocked only because it gets used as an insult in kids' games; it isn't a rude word itself.
 
 const LEET = { 0: 'o', 1: 'i', 3: 'e', 4: 'a', 5: 's', 7: 't', 8: 'b', '@': 'a', $: 's', '!': 'i', '|': 'l' };
