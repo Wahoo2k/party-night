@@ -1,0 +1,91 @@
+{
+  "_about": "Narrator lines for Werewolf. Each key is a moment; each entry is one variant, saved as audio/<id>.mp3. Names are never spoken.",
+  "welcome": [
+    ["welcome-1", "Welcome, travellers, to a quiet little village. Quiet... for now. Gather close, and keep your phones near."],
+    ["welcome-2", "Ah, you've arrived. Pull up a chair by the fire. Tonight, something in this village is not what it seems."]
+  ],
+  "roles": [
+    ["roles-1", "Look at your phone, and hold your card to learn who you are. Tell no one. Not your friends. Not your family. Especially not your family."],
+    ["roles-2", "Your secret role waits on your phone. Read it, remember it, and keep a straight face. The wolves are already among you."]
+  ],
+  "night-first": [
+    ["night-first-1", "Night falls on the village. Eyes on your own phone, and not a sound. Werewolves, choose your victim. Seer, choose someone to look into. Doctor, choose someone to protect. Everyone else, choose who you suspect."],
+    ["night-first-2", "The sun sinks behind the hills, and the village goes to sleep. Look only at your own phone. Wolves, pick your prey. Seer, seek the truth. Doctor, guard a life. Villagers, name your suspect."]
+  ],
+  "night": [
+    ["night-1", "Night falls once more. Make your choice in silence."],
+    ["night-2", "The moon rises over the rooftops. Eyes on your phone, and not a whisper."],
+    ["night-3", "Darkness again. Somewhere in the trees, something is hungry. Choose quietly."],
+    ["night-4", "The lanterns go out, one by one. The village sleeps. Most of it, anyway."]
+  ],
+  "dawn-death": [
+    ["dawn-death-1", "The rooster crows, and the village wakes... but not everyone. Claw marks lead into the forest."],
+    ["dawn-death-2", "A scream at midnight. By morning, one chair at the table sits empty."],
+    ["dawn-death-3", "Muddy paw prints stop at a front door that's still hanging open. The wolves have fed."],
+    ["dawn-death-4", "Good morning, village. Well. Good morning for most of you."],
+    ["dawn-death-5", "The sun rises on a terrible sight. The wolves have taken one of your own."]
+  ],
+  "dawn-saved": [
+    ["dawn-saved-1", "Howls echoed through the night, but the Doctor got there first. Everyone survived!"],
+    ["dawn-saved-2", "The wolves came knocking, but a healer was waiting. Not a single soul was lost."],
+    ["dawn-saved-3", "A close call in the dark, but the Doctor's hands were steady. Everyone wakes up safe."]
+  ],
+  "dawn-quiet": [
+    ["dawn-quiet-1", "A strangely quiet night. Everyone wakes up safe... which is somehow more unsettling."]
+  ],
+  "was-villager": [
+    ["was-villager-1", "They were an innocent villager."],
+    ["was-villager-2", "Just a simple villager. Gone too soon."]
+  ],
+  "was-seer": [
+    ["was-seer-1", "They were the Seer. Whatever they knew, they took it with them."],
+    ["was-seer-2", "The Seer has fallen. The village has lost its sight."]
+  ],
+  "was-doctor": [
+    ["was-doctor-1", "They were the Doctor. Who will protect you now?"],
+    ["was-doctor-2", "The Doctor is gone. From here on, no one is safe at night."]
+  ],
+  "was-wolf": [
+    ["was-wolf-1", "They were... a werewolf! The village breathes a little easier."],
+    ["was-wolf-2", "Fur, fangs and a guilty grin. They were a werewolf!"]
+  ],
+  "discuss": [
+    ["discuss-1", "Now talk it over. Who was too quiet last night? Who is pointing fingers a little too fast?"],
+    ["discuss-2", "The floor is open. Accuse, defend, and bluff. The wolves are listening."],
+    ["discuss-3", "Someone in this room is lying to you. Find them."]
+  ],
+  "thirty-seconds": [
+    ["thirty-seconds-1", "Thirty seconds left. Make up your minds."],
+    ["thirty-seconds-2", "Time is running short. Thirty seconds."]
+  ],
+  "vote": [
+    ["vote-1", "Time to vote. Choose on your phone who leaves the village."],
+    ["vote-2", "The talking is done. Cast your vote."],
+    ["vote-3", "Point your finger, on your phone. Who goes?"]
+  ],
+  "verdict-out": [
+    ["verdict-out-1", "The village has spoken. One of you must leave... forever."],
+    ["verdict-out-2", "The votes are counted. The village has made its choice."],
+    ["verdict-out-3", "The crowd turns, and the decision is made. They are cast out of the village."]
+  ],
+  "verdict-tie": [
+    ["verdict-tie-1", "The village is divided. A tie. No one leaves today."],
+    ["verdict-tie-2", "Half say one thing, half say another. Nobody is cast out... this time."]
+  ],
+  "verdict-none": [
+    ["verdict-none-1", "No votes at all? The village shrugs, and night draws closer."]
+  ],
+  "win-village": [
+    ["win-village-1", "The last wolf is gone! The village wins, and tonight, everyone sleeps soundly."],
+    ["win-village-2", "Every werewolf has been found. Ring the bells! The village is saved!"],
+    ["win-village-3", "The howling stops for good. Villagers, you did it."]
+  ],
+  "win-wolves": [
+    ["win-wolves-1", "The wolves now outnumber the village. The werewolves win."],
+    ["win-wolves-2", "One by one, the lights went out. The village belongs to the wolves now."],
+    ["win-wolves-3", "Too late, the villagers realize the truth. The werewolves win!"]
+  ],
+  "voice-test": [
+    ["voice-test-1", "Night falls on the village. Somewhere in the dark, the wolves are hungry."]
+  ]
+}
