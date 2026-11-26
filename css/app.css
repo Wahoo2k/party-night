@@ -417,3 +417,14 @@ button.chip.on{outline:3px solid var(--moon)}
 .barrow.top .bl{color:var(--moon)}
 .barrow.top .bt{box-shadow:0 0 0 2px var(--moon)}
 @media(max-width:700px){.barrow{grid-template-columns:minmax(0,8em) minmax(0,1fr) 3ch}}
+
+/* audience & settings */
+.nohow .how{display:none}
+#aud{position:fixed;right:max(4vw,16px);bottom:16px;z-index:12;padding:8px 14px;border-radius:99px;background:#000a;font-weight:600}
+.react{position:fixed;bottom:-10px;z-index:25;display:grid;justify-items:center;pointer-events:none;animation:floatup 3.2s ease-out forwards}
+.react span{font-size:clamp(40px,5vw,72px)}
+.react small{padding:2px 8px;border-radius:99px;background:#000a;font-size:14px}
+@keyframes floatup{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:1;transform:translateY(-10vh) scale(1)}100%{transform:translateY(-75vh) scale(1.1);opacity:0}}
+.reacts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
+.reactbtn{font-size:40px;padding:14px 0;border-radius:16px;border:1px solid var(--line);background:#1f2553}
+.reactbtn.hit{animation:pop .3s cubic-bezier(.3,1.6,.5,1)}

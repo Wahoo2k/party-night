@@ -12,6 +12,8 @@ enableDpad();
 
 // Saved so a TV refresh doesn't lose the game.
 let host = store.get('pg-host') || { code: newCode(), players: [], gameId: 'werewolf', state: null };
+host.audience = host.audience || [];
+host.settings = { relaxed: false, howto: true, ...(host.settings || {}) };
 let room = null;
 let lastSent = {};
 let lastPhase = '';
@@ -26,7 +28,13 @@ const joinUrl = () => {
   return u.toString();
 };
 
+const REACTIONS = ['👏', '😂', '😱', '🔥', '❤️', '👎'];
+const isAudience = pid => host.audience.some(a => a.pid === pid);
 function viewFor(pid) {
+  if (isAudience(pid)) {
+    const me = host.audience.find(a => a.pid === pid);
+    return { phase: 'audience', me: me.name, game: game().meta.name, playing: !!host.state, players: host.players.map(p => p.name), reactions: REACTIONS };
+  }
   if (!host.state) {
     const me = host.players.find(p => p.pid === pid) || {};
     return { phase: 'lobby', players: host.players.map(p => p.name), game: game().meta.name, me: me.name, fixed: !!me.fixed, byHost: !!me.locked };
@@ -36,7 +44,7 @@ function viewFor(pid) {
 
 function sendViews(force) {
   if (!room) return;
-  for (const p of host.players) {
+  for (const p of [...host.players, ...host.audience]) {
     if (p.bot) continue;
     const v = JSON.stringify(viewFor(p.pid));
     if (force || lastSent[p.pid] !== v) {
@@ -46,11 +54,22 @@ function sendViews(force) {
   }
 }
 
+// Relaxed timers: every new countdown gets 50% longer.
+let stretchedFor = 0;
+function stretch() {
+  const s = host.state;
+  if (!host.settings.relaxed || !s?.deadline || s.deadline === stretchedFor) return;
+  const now = Date.now();
+  if (s.deadline > now) s.deadline = Math.round(now + (s.deadline - now) * 1.5);
+  stretchedFor = s.deadline;
+}
+
 let fresh = false;
 let lastEventId = 0;
 let lastViewKey = '';
 const viewKey = v => JSON.stringify({ ...v, left: 0 });
 function changed() {
+  stretch();
   save();
   if (host.state) {
     const key = host.state.phase + host.state.round;
@@ -91,7 +110,21 @@ function onMessage(m) {
   if (m.t === 'hello') {
     if (kicked.has(m.pid)) return room.send({ t: 'view', to: m.pid, view: { phase: 'kicked' } });
     let p = host.players.find(x => x.pid === m.pid);
-    const others = host.players.filter(x => x !== p).map(x => x.name);
+    const aud = host.audience.find(x => x.pid === m.pid);
+    const others = [...host.players, ...host.audience].filter(x => x !== p && x !== aud).map(x => x.name);
+    // Someone in the audience gets a seat as soon as there's room in the lobby.
+    if (aud && !host.state && host.players.length < game().meta.max) {
+      host.audience = host.audience.filter(x => x !== aud);
+      host.players.push((p = aud));
+      play('join');
+    } else if (aud) { lastSent[aud.pid] = null; return changed(); }
+    if (!p && (host.state || host.players.length >= game().meta.max)) {
+      const { name, changed: fixedName } = settleName(raw, others);
+      host.audience.push({ pid: m.pid, name, asked: raw, fixed: fixedName });
+      play('join');
+      lastSent[m.pid] = null;
+      return changed();
+    }
     if (!p && !host.state && host.players.length < game().meta.max) {
       const { name, changed } = settleName(raw, others);
       host.players.push((p = { pid: m.pid, name, asked: raw, fixed: changed }));
@@ -102,16 +135,35 @@ function onMessage(m) {
     }
     if (p) { lastSent[p.pid] = null; changed(); }
     else room.send({ t: 'view', to: m.pid, view: { phase: host.state ? 'spectate' : 'full' } });
-  } else if (m.t === 'bye' && !host.state) {
-    host.players = host.players.filter(x => x.pid !== m.pid);
+  } else if (m.t === 'bye') {
+    host.audience = host.audience.filter(x => x.pid !== m.pid);
+    if (!host.state) host.players = host.players.filter(x => x.pid !== m.pid);
     changed();
+  } else if (m.t === 'react' && REACTIONS.includes(m.e)) {
+    const who = [...host.players, ...host.audience].find(x => x.pid === m.pid);
+    const now = Date.now();
+    if (!who || now - (lastReact[m.pid] || 0) < 700) return;
+    lastReact[m.pid] = now;
+    floatReaction(m.e, who.name);
   } else if (m.t === 'act' && host.state) {
     game().act(host.state, m.pid, m.a, Date.now());
     changed();
   }
 }
 
+const lastReact = {};
+function floatReaction(e, name) {
+  const el = document.createElement('div');
+  el.className = 'react';
+  el.style.left = 8 + Math.random() * 84 + 'vw';
+  el.innerHTML = `<span>${e}</span><small>${esc(name)}</small>`;
+  document.body.append(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
 function startGame() {
+  // The audience gets promoted into open seats for the next game.
+  while (host.audience.length && host.players.length < game().meta.max) host.players.push(host.audience.shift());
   const prev = host.state && host.state.game === host.gameId ? host.state : host.lastByGame?.[host.gameId];
   host.state = game().setup(host.players, Math.random, prev);
   lastEventId = 0;
@@ -126,6 +178,8 @@ function hostAction(a) {
   if (a === 'newcode') { host = { code: newCode(), players: [], gameId: host.gameId, state: null }; save(); return connect(); }
   if (a === 'voice') { voice.on = !voice.on; return render(); }
   if (a === 'testvoice') return say('Night falls on the village. Somewhere in the dark, the wolves are hungry.', true);
+  if (a === 'relaxed') { host.settings.relaxed = !host.settings.relaxed; save(); return render(); }
+  if (a === 'howto') { host.settings.howto = !host.settings.howto; save(); return render(); }
   if (a === 'sfx') { sfx.on = !sfx.on; if (sfx.on) play('join'); return render(); }
   if (a === 'addbot' && !host.state && host.players.length < game().meta.max) {
     const used = new Set(host.players.map(p => p.name));
@@ -208,6 +262,7 @@ function renderLobby() {
       <h2>${n ? `${n} player${n === 1 ? '' : 's'} in` : 'Waiting for players'}</h2>
       <div class="roster">${host.players.map(p => `<button class="chip ${p.bot ? 'bot' : ''} ${seen.has(p.pid) ? '' : 'pop'} ${editing === p.pid ? 'on' : ''}" data-host="edit:${esc(p.pid)}" title="Rename or remove">${esc(p.name)}</button>`).join('') || '<p class="muted">Names appear here as phones join.</p>'}</div>
       ${host.players.length ? '<p class="muted small">Select a name to rename or remove that player.</p>' : ''}
+      ${host.audience.length ? `<p class="muted">Audience (${host.audience.length}): ${host.audience.map(a => esc(a.name)).join(', ')}. They join automatically when a seat opens.</p>` : ''}
       ${(() => { const p = host.players.find(x => x.pid === editing); return p ? `<div class="editbox"><label for="rename">Rename ${esc(p.name)}</label><div class="row"><input id="rename" maxlength="${MAX_NAME}" value="${esc(p.name)}" autocomplete="off"><button class="btn" data-host="rename">Save</button><button class="btn ghost" data-host="randomname">Random name</button><button class="btn ghost" data-host="kick">Remove player</button><button class="btn ghost" data-host="canceledit">Cancel</button></div></div>` : ''; })()}
       <h3>Game</h3>
       <div class="games">
@@ -219,6 +274,11 @@ function renderLobby() {
         <button class="btn ghost" data-host="voice">Narrator: ${voice.on ? 'on' : 'off'}</button>
         <button class="btn ghost" data-host="sfx">Sound effects: ${sfx.on ? 'on' : 'off'}</button>
         <button class="btn ghost" data-host="newcode">New room</button>
+      </div>
+      <div class="row">
+        <button class="btn ghost" data-host="relaxed">Relaxed timers: ${host.settings.relaxed ? 'on' : 'off'}</button>
+        <button class="btn ghost" data-host="howto">How-to screens: ${host.settings.howto ? 'on' : 'off'}</button>
+        <span class="muted">Relaxed gives everyone 50% more time.</span>
       </div>
       <div class="row">
         <label class="inline" for="vsel">Narrator voice</label>
@@ -239,6 +299,11 @@ function render() {
   if (!host.state) renderLobby();
   else { const v = game().tvView(host.state, Date.now()); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); }
   document.body.classList.toggle('night', host.state?.phase === 'night');
+  document.body.classList.toggle('nohow', !host.settings.howto);
+  const badge = document.getElementById('aud') || Object.assign(document.createElement('div'), { id: 'aud' });
+  if (!badge.isConnected) document.body.append(badge);
+  badge.hidden = !host.audience.length;
+  badge.textContent = `👥 ${host.audience.length} watching`;
   app.querySelectorAll('[data-host]').forEach(b => (b.onclick = () => hostAction(b.dataset.host)));
   const vsel = app.querySelector('#vsel');
   if (vsel) vsel.onchange = () => { voice.name = vsel.value; say('Good evening, villagers.', true); };
@@ -263,6 +328,7 @@ setInterval(() => {
   const before = JSON.stringify(host.state);
   game().tick(host.state, Date.now());
   if (JSON.stringify(host.state) !== before) return changed();
+  stretch();
   // Some views change with time alone (e.g. an animation finishing): redraw only when the view itself changes.
   if (viewKey(game().tvView(host.state, Date.now())) !== lastViewKey) render();
   sendViews();

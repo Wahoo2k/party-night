@@ -69,6 +69,15 @@ function render(v) {
   document.body.classList.toggle('night', v.phase === 'night');
   document.body.classList.toggle('day', ['day', 'vote', 'verdict'].includes(v.phase));
   if (key !== lastPhaseSeen) { lastPhaseSeen = key; if (v.alive && ['roles', 'night', 'vote'].includes(v.phase)) buzz([80, 60, 80]); }
+  if (v.phase === 'audience') {
+    app.innerHTML = `<div class="panel"><h2>You're in the audience</h2><p class="say">${v.playing ? `A game of ${esc(v.game)} is in progress.` : 'The room is full.'} You'll get a seat in the next game.</p>
+      <p class="muted">Cheer them on! Your reactions float across the TV.</p>
+      <div class="reacts">${v.reactions.map(e => `<button class="reactbtn" data-e="${e}">${e}</button>`).join('')}</div>
+      <p class="muted small">Playing: ${v.players.map(esc).join(', ')}</p><button class="btn ghost" id="leave">Leave room</button></div>`;
+    app.querySelectorAll('[data-e]').forEach(b => (b.onclick = () => { b.classList.remove('hit'); void b.offsetWidth; b.classList.add('hit'); room?.send({ t: 'react', pid, e: b.dataset.e }); }));
+    app.querySelector('#leave').onclick = leave;
+    return;
+  }
   if (v.phase === 'kicked') { clearInterval(hello); room?.close(); room = null; app.innerHTML = `<div class="panel"><h2>You were removed</h2><p class="say">The host removed you from this room.</p></div>`; return; }
   if (v.phase === 'full') { app.innerHTML = `<div class="panel"><h2>That room is full</h2><button class="btn" id="back">Try another code</button></div>`; app.querySelector('#back').onclick = leave; return; }
   if (v.phase === 'lobby') {
