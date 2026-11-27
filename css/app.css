@@ -1360,3 +1360,22 @@ body:is([data-game=midnight],[data-game=haunted]):not(.phone) .scene .title{font
 body:is([data-game=midnight],[data-game=haunted]):not(.phone) .panel,body:is([data-game=midnight],[data-game=haunted]):not(.phone) .scores{background:#12174acc;backdrop-filter:blur(6px);border-color:#5a6fd866}
 .mwcard.big:has(.rolepic){padding:10px 10px 14px;max-width:260px}.mwcard.big .rolepic+span{display:none}
 .mwcard.big:has(.rolepic){justify-items:stretch;text-align:center}.mwcard.big:has(.rolepic) b{font-size:18px;letter-spacing:0;min-width:0;overflow-wrap:anywhere}
+
+/* Painted picture cards, mystery photos and winners' scenes */
+.picimg{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.mmcard.up span:has(.picimg){width:100%;height:100%;border-radius:14px;overflow:hidden}
+.mmcard.up:has(.picimg){padding:0;overflow:hidden}
+.gfcard span:has(.picimg){width:64px;height:64px;border-radius:10px;overflow:hidden}
+.gfa:has(.picimg){display:inline-block;width:1.5em;height:1.5em;border-radius:.3em;overflow:hidden;vertical-align:middle}
+.rb-pic:has(img){width:4.6em;height:4.6em;border-radius:.25em;box-shadow:0 .08em 0 #0005}
+.rb-pic span:has(img){font-size:1em;width:100%;height:100%}
+.rb-pic img{display:block;width:100%;height:100%;object-fit:cover}
+.ceremony[data-theme=comic]{background:linear-gradient(#0b0f2acc,#0b0f2a99 40%,#0b0f2add),url(../art/win-comic.jpg) center/cover}
+.ceremony[data-theme=paper]{background:linear-gradient(#0b0f2acc,#0b0f2a99 40%,#0b0f2add),url(../art/win-paper.jpg) center/cover}
+.ceremony[data-theme=sketch]{background:linear-gradient(#0b0f2acc,#0b0f2a99 40%,#0b0f2add),url(../art/win-sketch.jpg) center/cover}
+.ceremony[data-theme=kids]{background:linear-gradient(#0b0f2acc,#0b0f2a99 40%,#0b0f2add),url(../art/win-kids.jpg) center/cover}
+.ceremony[data-theme=show]{background:linear-gradient(#0b0f2acc,#0b0f2a99 40%,#0b0f2add),url(../art/win-show.jpg) center/cover}
+.ceremony[data-theme=noir]{background:linear-gradient(#0b0f2acc,#0b0f2a99 40%,#0b0f2add),url(../art/win-noir.jpg) center/cover}
+.ceremony[data-theme=teams]{background:linear-gradient(#0b0f2acc,#0b0f2a99 40%,#0b0f2add),url(../art/win-teams.jpg) center/cover}
+.ceremony[data-theme=felt]{background:linear-gradient(#0b0f2acc,#0b0f2a99 40%,#0b0f2add),url(../art/win-felt.jpg) center/cover}
+body:not(.phone) .mmgrid{width:min(100%,calc((100vh - 250px) * var(--cols) / var(--rows,4)));margin-inline:auto}

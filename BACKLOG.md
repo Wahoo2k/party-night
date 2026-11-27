@@ -48,6 +48,7 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - **In-game art still to make:** a backdrop for each game world, role cards for Midnight Wolves, picture cards for Charades / Memory Match / Go Fish / Bingo, photo-style images for the Brain Teasers mystery pictures, and ending scenes.
 - **How it's done:** generate in Canva through the connector, then move the full-size files into `art/` through Chrome. Prompts and file names are in `art/PROMPTS.md`.
 
-## Art still to do (after in-game backdrops, Nov 27)
-- 23 remaining covers; picture cards for Charades, Memory Match, Go Fish, Bingo; photo-style mystery pictures for Brain Teasers; ending scenes for games other than Werewolf; redo the Act Natural cover.
-- Check backdrops and role portraits on a real TV and phones (only seen in desktop screenshots so far).
+## Art still to do (Nov 27, after the full art pass)
+- Done: covers for all 47 games, theme backdrops, Midnight Wolves role cards, animal picture cards (Memory Match, Go Fish), 26 mystery photos (Brain Teasers), winner scenes per theme.
+- Not done: picture cards for Charades and Bingo (they are word and number games; would need a new picture mode), and a matched-style redo of the Midnight Wolves portraits.
+- Check all art on a real TV and phones (only seen in desktop screenshots so far). art/ is about 23 MB; consider WebP if loading is slow on the onn box.

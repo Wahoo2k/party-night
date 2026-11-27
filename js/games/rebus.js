@@ -16,7 +16,7 @@ const AN = (w, cat) => ({ k: 'anagram', ask: `Unscramble: ${cat}`, h: `<div clas
 // Sound-alike: read the nonsense out loud and listen to what you're saying.
 const SA = (t, a, ...alt) => ({ k: 'sound', ask: 'Say it out loud', h: `<span class="rb-say">${t}</span>`, a, alt });
 // Mystery picture: starts blurred or zoomed right in, and clears as the clock runs.
-const MP = (e, how, a, ...alt) => ({ k: how, ask: how === 'zoom' ? 'Zoomed in. What is it?' : 'What is it?', h: `<div class="rb-pic rb-${how}"><span>${e}</span></div>`, a, alt, pic: true });
+const MP = (e, how, a, ...alt) => ({ k: how, ask: how === 'zoom' ? 'Zoomed in. What is it?' : 'What is it?', h: `<div class="rb-pic rb-${how}"><span><img src="art/mp-${a.toLowerCase()}.jpg" alt="" onerror="this.replaceWith('${e}')"></span></div>`, a, alt, pic: true });
 const over = (x, y) => `<div class="rb-stack"><span>${x}</span><span>${y}</span></div>`;
 export const PUZZLES = [
   L(over('STAND', 'I'), 'I understand'), L(over('MIND', 'MATTER'), 'Mind over matter'), L(over('HEAD', 'HEELS'), 'Head over heels'), L(over('MAN', 'BOARD'), 'Man overboard'),

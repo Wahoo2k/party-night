@@ -1,6 +1,7 @@
 // Go Fish, with animal picture cards so little kids can play. Ask someone for an animal you hold;
 // if they have any, you take them all and go again. Four of a kind makes a set. Most sets wins.
 import { esc } from '../ui.js';
+import { pic } from '../art.js';
 import { shuffle } from './cards.js';
 
 export const meta = {
@@ -130,7 +131,7 @@ export function phoneView(s, pid) {
   };
 }
 
-const animal = r => `<span class="gfa" title="${ANIMALS[r][1]}">${ANIMALS[r][0]}</span>`;
+const animal = r => `<span class="gfa" title="${ANIMALS[r][1]}">${pic(ANIMALS[r][0])}</span>`;
 export function renderTV(v, el) {
   document.body.classList.toggle('day', true);
   const seats = `<div class="gfseats">${v.seats.map(p => `<div class="gfseat ${p.turn ? 'on' : ''}"><b>${esc(p.name)}</b><div class="ccfan">${Array.from({ length: Math.min(p.count, 14) }, () => '<i></i>').join('')}</div><small>${p.count} card${p.count === 1 ? '' : 's'}</small><div class="gfbooks">${p.books.map(animal).join('') || '<small class="muted">no sets yet</small>'}</div></div>`).join('')}</div>`;
@@ -145,7 +146,7 @@ export function renderPhone(v, el, send) {
   if (v.phase === 'spectate') { el.innerHTML = '<h2>Game in progress</h2>'; return; }
   if (v.phase === 'over') { el.innerHTML = `<h2 class="${v.place === 1 ? 'win' : ''}">${v.place === 1 ? 'You won!' : `You came #${v.place}`}</h2><div class="gfbooks">${v.books.map(animal).join('')}</div>`; return; }
   if (!v.myTurn || !v.groups.some(g => g.r === picked)) picked = null;
-  const hand = `<div class="gfhand">${v.groups.map(g => `<button class="gfcard ${picked === g.r ? 'on' : ''}" ${v.myTurn ? `data-r="${g.r}"` : 'disabled'}><span>${ANIMALS[g.r][0]}</span><b>${esc(ANIMALS[g.r][1])}</b>${g.n > 1 ? `<i>×${g.n}</i>` : ''}</button>`).join('') || '<p class="muted">No cards</p>'}</div>`;
+  const hand = `<div class="gfhand">${v.groups.map(g => `<button class="gfcard ${picked === g.r ? 'on' : ''}" ${v.myTurn ? `data-r="${g.r}"` : 'disabled'}><span>${pic(ANIMALS[g.r][0])}</span><b>${esc(ANIMALS[g.r][1])}</b>${g.n > 1 ? `<i>×${g.n}</i>` : ''}</button>`).join('') || '<p class="muted">No cards</p>'}</div>`;
   let h = v.last ? `<p class="muted small">${esc(v.last.text)}</p>` : '';
   if (v.myTurn) h += picked === null ? '<h2>Your turn! Tap an animal</h2>' : `<h2>Who has a ${esc(ANIMALS[picked][1])}?</h2><div class="opts">${v.others.filter(o => o.count).map(o => `<button class="opt" data-t="${esc(o.pid)}">${esc(o.name)} <small class="muted">${o.count} cards</small></button>`).join('')}</div>`;
   else h += `<h2>${esc(v.current)}'s turn</h2>`;

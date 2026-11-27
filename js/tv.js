@@ -376,6 +376,7 @@ function ceremony() {
   ceremonyOff?.();
   const el = document.createElement('div');
   el.className = 'ceremony';
+  el.dataset.theme = THEME_OF[host.gameId] || '';
   const face = n => host.players.find(p => p.name === n)?.face;
   const val = p => { const k = ['score', 'chips', 'hearts', 'books'].find(x => typeof p[x] === 'number'); return k ? p[k].toLocaleString() : typeof p.burns === 'number' ? p.burns + ' 🔥' : ''; };
   const tie = list.length > 1 && val(list[0]) !== '' && val(list[0]) === val(list[1]);

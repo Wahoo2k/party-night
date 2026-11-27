@@ -1,6 +1,7 @@
 // Memory Match: animal cards face down on the TV. On your turn, flip two on your phone. A pair? Keep it and go again.
 // All pictures, and the narrator says whose turn it is, so kids who can't read yet can play.
 import { esc } from '../ui.js';
+import { pic } from '../art.js';
 
 export const meta = {
   id: 'memory',
@@ -107,7 +108,7 @@ export function phoneView(s, pid) {
   return v;
 }
 
-const grid = (v, tap) => `<div class="mmgrid" style="--cols:${v.cols}">${v.cards.map(c => `<button class="mmcard ${c.up ? 'up' : ''} ${c.owner ? 'got' : ''}" ${tap && !c.up ? `data-i="${c.i}"` : 'disabled'}><span>${c.up ? c.pic : '⭐'}</span></button>`).join('')}</div>`;
+const grid = (v, tap) => `<div class="mmgrid" style="--cols:${v.cols};--rows:${Math.ceil(v.cards.length / v.cols)}">${v.cards.map(c => `<button class="mmcard ${c.up ? 'up' : ''} ${c.owner ? 'got' : ''}" ${tap && !c.up ? `data-i="${c.i}"` : 'disabled'}><span>${c.up ? pic(c.pic) : '⭐'}</span></button>`).join('')}</div>`;
 export function renderTV(v, el) {
   document.body.classList.toggle('day', true);
   const scores = `<div class="scores"><h3>Pairs</h3>${v.scores.map(p => `<div class="srow"><span>${esc(p.name)}</span><b>${p.score}</b></div>`).join('')}</div>`;

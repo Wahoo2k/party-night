@@ -58,5 +58,9 @@ export const ART = {
 };
 // Painted covers (generated in Canva) replace the drawn scene where one exists. Full-size files live in art/;
 // add a game id here once its art/<id>.jpg exists.
-export const PAINTED = ['bingo', 'bowl', 'bracket', 'charades', 'clash', 'copycat', 'crew', 'doodle', 'ducks', 'faker', 'freeze', 'funny', 'hunt', 'imposter', 'meld', 'meter', 'midnight', 'potato', 'quick', 'rebus', 'sketch', 'taboo', 'werewolf', 'whosaid'];
+export const PAINTED = ['agents', 'bingo', 'blackjack', 'bluff', 'bluffcards', 'bomb', 'bowl', 'bracket', 'cases', 'charades', 'clash', 'copycat', 'crew', 'crowd', 'dares', 'doodle', 'ducks', 'estimate', 'faker', 'freeze', 'funny', 'gofish', 'haunted', 'hearts', 'hunt', 'imposter', 'ladder', 'letters', 'meld', 'memory', 'meter', 'midnight', 'missions', 'mystery', 'potato', 'quick', 'rebus', 'shade', 'sketch', 'spin', 'split', 'taboo', 'trivia', 'truths', 'werewolf', 'whosaid', 'wordhunt'];
 export const art = (id, emoji = '🎲') => (PAINTED.includes(id) ? `<img class="art painted" src="art/${id}.jpg" alt="">` : ART[id] ? ART[id]() : S(`<text x="100" y="108" font-size="84" text-anchor="middle" class="a-bob">${emoji}</text>`));
+
+// Painted picture cards for the little-kid games. A missing file falls back to the emoji.
+const PIC = { '🐶': 'dog', '🐱': 'cat', '🐸': 'frog', '🐷': 'pig', '🐮': 'cow', '🐵': 'monkey', '🦁': 'lion', '🐧': 'penguin', '🐢': 'turtle', '🐙': 'octopus', '🦄': 'unicorn', '🐝': 'bee', '🦖': 'dino', '🐰': 'rabbit', '🦊': 'fox' };
+export const pic = e => (PIC[e] ? `<img class="picimg" src="art/pic-${PIC[e]}.jpg" alt="${e}" onerror="this.replaceWith('${e}')">` : e);
