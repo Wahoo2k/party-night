@@ -52,6 +52,7 @@ export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, 
 
 // Lobby shelves. A game can sit on more than one.
 export const SHELVES = [
+  { id: 'featured', name: '⭐ Featured', games: ['imposter', 'ducks', 'potato', 'bingo', 'quick', 'sketch', 'bowl', 'funny', 'meld', 'doodle', 'whosaid', 'crew', 'charades', 'clash', 'hunt', 'freeze', 'copycat', 'werewolf', 'midnight', 'taboo'] },
   { id: 'all', name: 'All games' },
   { id: 'kids', name: '👶 Little kids', games: ['charades', 'gofish', 'bingo', 'ducks', 'memory', 'copycat', 'hunt', 'freeze'] },
   { id: 'party', name: '🎉 Party', games: ['funny', 'quick', 'split', 'whosaid', 'truths', 'bluff', 'dares', 'meld', 'bowl', 'taboo', 'charades', 'shade', 'potato'] },
@@ -63,4 +64,11 @@ export const SHELVES = [
 ];
 
 export const COMING_SOON = [
+];
+
+// One-tap game nights: a short list of games played in order.
+export const NIGHTS = [
+  { id: 'family', name: 'Family night', icon: '👨‍👩‍👧‍👦', blurb: 'All ages, about 40 minutes', games: ['ducks', 'charades', 'sketch', 'crew'] },
+  { id: 'party', name: 'Party', icon: '🎉', blurb: 'Teens and adults, about an hour', games: ['quick', 'funny', 'bowl', 'werewolf'] },
+  { id: 'kids', name: 'Just the kids', icon: '👶', blurb: 'No reading needed, about 20 minutes', games: ['hunt', 'freeze', 'copycat', 'memory'] },
 ];

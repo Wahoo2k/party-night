@@ -1,5 +1,5 @@
 // TV / host page: owns the room, the player list and the game state.
-import { GAMES, COMING_SOON, SHELVES } from './games/index.js';
+import { GAMES, COMING_SOON, SHELVES, NIGHTS } from './games/index.js';
 import { openRoom } from './net.js';
 import { esc, store, newCode, say, voice, voices, enableDpad, autofocus, drawScene, titleCard, confetti, clawMarks } from './ui.js';
 import { play, sfx, startAmbient, stopAmbient } from './sfx.js';
@@ -182,7 +182,9 @@ function startGame() {
 function hostAction(a) {
   if (a === 'start') return startGame();
   if (a === 'again') return startGame();
-  if (a === 'lobby') { host.lastByGame = { ...(host.lastByGame || {}), [host.gameId]: host.state }; host.state = null; stopAmbient(); document.body.classList.remove('day'); return changed(); }
+  if (a.startsWith('night:')) { const nt = NIGHTS.find(x => x.id === a.slice(6)); if (nt) { host.queue = nt.games.slice(1); host.night = nt.id; host.gameId = nt.games[0]; host.shelf = 'all'; save(); } return changed(); }
+  if (a === 'endnight') { host.queue = []; host.night = null; save(); return render(); }
+  if (a === 'lobby') { host.lastByGame = { ...(host.lastByGame || {}), [host.gameId]: host.state }; host.state = null; if (host.queue?.length) host.gameId = host.queue.shift(); else host.night = null; stopAmbient(); document.body.classList.remove('day'); return changed(); }
   if (a === 'newcode') { host = { code: newCode(), players: [], gameId: host.gameId, state: null }; save(); return connect(); }
   if (a === 'voice') { voice.on = !voice.on; return render(); }
   if (a === 'testvoice') return say('Night falls on the village. Somewhere in the dark, the wolves are hungry.', true);
@@ -279,10 +281,11 @@ function renderLobby() {
       ${host.players.length ? '<p class="muted small">Select a name to rename or remove that player.</p>' : ''}
       ${host.audience.length ? `<p class="muted">Audience (${host.audience.length}): ${host.audience.map(a => esc(a.name)).join(', ')}. They join automatically when a seat opens.</p>` : ''}
       ${(() => { const p = host.players.find(x => x.pid === editing); return p ? `<div class="editbox"><label for="rename">Rename ${esc(p.name)}</label><div class="row"><input id="rename" maxlength="${MAX_NAME}" value="${esc(p.name)}" autocomplete="off"><button class="btn" data-host="rename">Save</button><button class="btn ghost" data-host="randomname">Random name</button><button class="btn ghost" data-host="kick">Remove player</button><button class="btn ghost" data-host="canceledit">Cancel</button></div></div>` : ''; })()}
-      <h3>Game</h3>
+      ${(() => { const nt = NIGHTS.find(x => x.id === host.night); return nt ? `<div class="nightbar"><b>${nt.icon} ${esc(nt.name)}</b><span>Now: <b>${esc(g.meta.name)}</b>${host.queue?.length ? ` · Then: ${host.queue.map(id => esc(GAMES[id].meta.name)).join(' → ')}` : ' · last game'}</span><button class="btn ghost small" data-host="endnight">Pick games myself</button></div>` : `<h3>Start a game night</h3><div class="nights">${NIGHTS.map(x => `<button class="night" data-host="night:${x.id}"><span>${x.icon}</span><b>${esc(x.name)}</b><small>${esc(x.blurb)}</small><small>${x.games.map(id => esc(GAMES[id].meta.name)).join(' → ')}</small></button>`).join('')}</div>`; })()}
+      <h3>${host.night ? 'Game' : 'Or pick a game'}</h3>
       <div class="games">
-        <div class="shelves">${SHELVES.map(f => `<button class="shelf ${(host.shelf || 'all') === f.id ? 'on' : ''}" data-shelf="${f.id}">${esc(f.name)}</button>`).join('')}</div>
-        ${Object.values(GAMES).filter(m => { const f = SHELVES.find(x => x.id === (host.shelf || 'all')); return !f?.games || f.games.includes(m.meta.id); }).map(m => `<button class="game ${m.meta.id === host.gameId ? 'on' : ''}" data-game="${m.meta.id}">${m.meta.kids ? '<span class="kidbadge">👶 Little kids</span>' : ''}<b>${esc(m.meta.name)}</b><span>${esc(m.meta.blurb)}</span><small>${m.meta.min}–${m.meta.max} players</small></button>`).join('')}
+        <div class="shelves">${SHELVES.map(f => `<button class="shelf ${(host.shelf || 'featured') === f.id ? 'on' : ''}" data-shelf="${f.id}">${esc(f.name)}</button>`).join('')}</div>
+        ${Object.values(GAMES).filter(m => { const f = SHELVES.find(x => x.id === (host.shelf || 'featured')); return !f?.games || f.games.includes(m.meta.id); }).map(m => `<button class="game ${m.meta.id === host.gameId ? 'on' : ''}" data-game="${m.meta.id}">${m.meta.kids ? '<span class="kidbadge">👶 Little kids</span>' : ''}<b>${esc(m.meta.name)}</b><span>${esc(m.meta.blurb)}</span><small>${m.meta.min}–${m.meta.max} players</small></button>`).join('')}
         ${COMING_SOON.map(c => `<div class="game soon"><b>${esc(c.name)}</b><span>${esc(c.blurb)}</span><small>Coming soon</small></div>`).join('')}
       </div>
       <div class="row">

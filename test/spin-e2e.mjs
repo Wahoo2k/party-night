@@ -12,7 +12,7 @@ await me.setViewportSize({ width: 390, height: 800 });
 await me.goto(base + 'play.html?local=1'); await me.fill('#code', code); await me.fill('#name', 'Tom'); await me.click('#join');
 await me.waitForSelector("text=You're in");
 await tv.click('[data-host=addbot]');
-await tv.click('[data-game=spin]'); await tv.click('[data-host=start]');
+await tv.click('[data-shelf=all]'); await tv.click('[data-game=spin]'); await tv.click('[data-host=start]');
 await tv.waitForTimeout(3500);
 const st = () => tv.evaluate(() => JSON.parse(localStorage.getItem('pg-host')).state);
 const shots = {};

@@ -899,3 +899,20 @@ button.bwire{cursor:pointer;padding:8px 0}button.bwire span{height:22px}
 .mmpick button{padding:8px 12px;border-radius:10px;border:2px solid #fff3;background:#2a1d3a;color:var(--ink);font:700 15px/1.2 system-ui;cursor:pointer}
 .mmpick button small{display:block;font-weight:500;opacity:.7;font-size:12px}
 .mmpick button.on{background:var(--moon);color:#1a1030;border-color:var(--moon)}.mmpick button.dim{opacity:.45}
+/* TV legibility: bigger base and small text, safe margins (phones are unaffected) */
+body:not(.phone){font-size:clamp(17px,1.25vw,26px)}
+body:not(.phone) small,body:not(.phone) .small,body:not(.phone) .cat{font-size:clamp(15px,1.15vw,24px)}
+body:not(.phone) h3{font-size:clamp(18px,1.4vw,28px)}
+body:not(.phone) .wrap{padding-left:max(5vw,16px);padding-right:max(5vw,16px);padding-bottom:max(6vh,56px)}
+body:not(.phone) #vetobar{left:5vw;bottom:5vh}
+body:not(.phone) #status{font-size:clamp(14px,1vw,20px);right:5vw}
+body:not(.phone) .title{left:5vw}
+/* game nights */
+.nights{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:8px}
+.night{display:grid;gap:4px;justify-items:start;text-align:left;padding:16px 18px;border-radius:16px;border:2px solid var(--line);background:linear-gradient(135deg,#232a5c,#2f2a6b);color:var(--ink);cursor:pointer}
+.night span{font-size:clamp(30px,2.6vw,48px);line-height:1}.night b{font:400 clamp(24px,2.2vw,38px)/1.1 'Pirata One',serif}
+.night small{color:var(--dim)}
+.night:focus-visible,.night:hover{border-color:var(--moon)}
+.nightbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:12px 16px;border-radius:14px;background:#2f2a6b;margin:14px 0}
+.nightbar span{flex:1}
+body:not(.phone) .shelf{font-size:clamp(15px,1.1vw,22px)}

@@ -13,7 +13,7 @@ for (const game of ['memory', 'copycat', 'hunt', 'freeze']) {
   await me.goto(base + 'play.html?local=1'); await me.fill('#code', code); await me.fill('#name', 'Mia'); await me.click('#join');
   await me.waitForSelector("text=You're in");
   await tv.click('[data-host=addbot]');
-  await tv.click(`[data-game=${game}]`); await tv.click('[data-host=start]');
+  await tv.click('[data-shelf=all]'); await tv.click(`[data-game=${game}]`); await tv.click('[data-host=start]');
   const st = () => tv.evaluate(() => JSON.parse(localStorage.getItem('pg-host')).state);
   let shot = false;
   for (let i = 0; i < 70; i++) {

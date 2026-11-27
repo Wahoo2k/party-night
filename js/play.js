@@ -104,7 +104,13 @@ function leave() {
   joinForm();
 }
 
+// Keep the phone awake during a game, where the browser allows it.
+let wake = null;
+async function stayAwake() { try { if (!wake && 'wakeLock' in navigator && document.visibilityState === 'visible') { wake = await navigator.wakeLock.request('screen'); wake.addEventListener('release', () => (wake = null)); } } catch { wake = null; } }
+document.addEventListener('visibilitychange', () => { if (room) stayAwake(); });
+
 async function join() {
+  stayAwake();
   const key = 'pg-pid-' + code;
   pid = store.get(key) || uid();
   store.set(key, pid);

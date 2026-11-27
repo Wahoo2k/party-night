@@ -11,7 +11,7 @@ const join = async n => { const p = await ctx.newPage(); p.on('pageerror', e => 
 const me = await join('Tom'); await me.waitForSelector("text=You're in");
 for (let i = 0; i < 3; i++) await tv.click('[data-host=addbot]');
 await tv.click('[data-host=relaxed]');
-await tv.click('[data-game=quick]'); await tv.click('[data-host=start]');
+await tv.click('[data-shelf=all]'); await tv.click('[data-game=quick]'); await tv.click('[data-host=start]');
 await tv.waitForTimeout(1500);
 const s1 = await tv.evaluate(() => JSON.parse(localStorage.getItem('pg-host')));
 console.log('vote deadline secs', Math.round((s1.state.deadline - Date.now()) / 1000), '(25 normal, ~37 relaxed)');

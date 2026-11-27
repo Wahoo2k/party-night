@@ -12,7 +12,7 @@ await me.setViewportSize({ width: 390, height: 760 });
 await me.goto(base + 'play.html?local=1'); await me.fill('#code', code); await me.fill('#name', 'Tom'); await me.click('#join');
 await me.waitForSelector("text=You're in");
 for (let i = 0; i < 3; i++) await tv.click('[data-host=addbot]');
-await tv.click('[data-game=whosaid]'); await tv.click('[data-host=start]');
+await tv.click('[data-shelf=all]'); await tv.click('[data-game=whosaid]'); await tv.click('[data-host=start]');
 await me.waitForSelector('#af'); await tv.waitForTimeout(3500);
 await me.screenshot({ path: 'test/w-answer.png' }); await tv.screenshot({ path: 'test/w-tv-answer.png' });
 await me.fill('#a0', 'Grilled cheese'); await me.fill('#a1', 'Fly fishing'); await me.click('#af .btn');
