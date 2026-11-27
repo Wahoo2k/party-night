@@ -12,26 +12,60 @@
    "fixed": [
     "Welcome to the village. Something is hunting among you. Check your phone for your secret role, and keep it hidden.",
     "Night falls on the village. Look only at your own phone, and stay silent. Werewolves, choose your victim. Seer, choose someone to investigate. Doctor, choose someone to protect. Everyone else, pick who you suspect.",
-    "Good morning, village. Howls echoed through the night, but the Doctor got there first. Everyone survived! Now talk it over. Who do you suspect?",
     "Time to vote. Choose who leaves the village on your phone.",
+    "The village wins! Every werewolf has been found.",
     "The vote was split, so nobody was voted out.",
-    "The werewolves win! They now outnumber the village.",
-    "The village wins! Every werewolf has been found."
+    "Good morning, village. Howls echoed through the night, but the Doctor got there first. Everyone survived! Now talk it over. Who do you suspect?",
+    "The werewolves win! They now outnumber the village."
    ],
    "withNames": [
-    "Night {n} The village sleeps. Make your choice on your phone, and not a sound.",
-    "Good morning, village. A scream at midnight. By morning, {name} is no more. They were a Villager. Now talk it over. Who do you suspect?",
-    "The village voted out {name}. They were a Villager.",
     "Good morning, village. The village wakes to find {name} gone. Claw marks lead into the forest. They were a Villager. Now talk it over. Who do you suspect?",
+    "The village voted out {name}. They were a Villager.",
+    "Night {n} The village sleeps. Make your choice on your phone, and not a sound.",
     "The village voted out {name}. They were a Werewolf.",
-    "The village voted out {name}. They were a Doctor."
+    "Good morning, village. A scream at midnight. By morning, {name} is no more. They were a Villager. Now talk it over. Who do you suspect?",
+    "The village voted out {name}. They were a Seer."
    ],
    "content": 8,
-   "contentChars": 982,
+   "contentChars": 996,
    "sample": [
-    "Good morning, village. The rooster crows, but {name} does not answer. They were a Villager. Now talk it over. Who do you suspect?",
-    "Good morning, village. Muddy paw prints stop at {name}'s door. They were a Seer. Now talk it over. Who do you suspect?",
-    "Good morning, village. The village wakes to find {name} gone. Claw marks lead into the forest. They were a Doctor. Now talk it over. Who do you suspect?"
+    "Good morning, village. A scream at midnight. By morning, {name} is no more. They were a Seer. Now talk it over. Who do you suspect?",
+    "Good morning, village. The rooster crows, but {name} does not answer. They were a Seer. Now talk it over. Who do you suspect?",
+    "The village voted out {name}. They were a Doctor."
+   ],
+   "reworded": [
+    {
+     "from": "Good morning, village. The village wakes to find {name} gone. Claw marks lead into the forest. They were a Villager. Now talk it over. Who do you suspect?",
+     "record": "Good morning, village. Claw marks lead into the forest. They were a Villager. Now talk it over. Who do you suspect?"
+    },
+    {
+     "from": "The village voted out {name}. They were a Villager.",
+     "record": "They were a Villager."
+    },
+    {
+     "from": "Night {n} The village sleeps. Make your choice on your phone, and not a sound.",
+     "record": "Make your choice on your phone, and not a sound."
+    },
+    {
+     "from": "The village voted out {name}. They were a Werewolf.",
+     "record": "They were a Werewolf."
+    },
+    {
+     "from": "Good morning, village. A scream at midnight. By morning, {name} is no more. They were a Villager. Now talk it over. Who do you suspect?",
+     "record": "Good morning, village. A scream at midnight. They were a Villager. Now talk it over. Who do you suspect?"
+    },
+    {
+     "from": "The village voted out {name}. They were a Seer.",
+     "record": "They were a Seer."
+    }
+   ],
+   "extra": [
+    "Good morning, village. Claw marks lead into the forest. They were a Villager. Now talk it over. Who do you suspect?",
+    "They were a Villager.",
+    "Make your choice on your phone, and not a sound.",
+    "They were a Werewolf.",
+    "Good morning, village. A scream at midnight. They were a Villager. Now talk it over. Who do you suspect?",
+    "They were a Seer."
    ]
   },
   "imposter": {
@@ -42,13 +76,15 @@
     "Time to vote. Who is the imposter?"
    ],
    "withNames": [],
-   "content": 33,
-   "contentChars": 2108,
+   "content": 35,
+   "contentChars": 2249,
    "sample": [
-    "The category is Things. Take turns giving one word clues. Not too obvious, or the imposter will catch on.",
-    "The imposter got away! The word was Candle.",
-    "The category is Sports. Take turns giving one word clues. Not too obvious, or the imposter will catch on."
-   ]
+    "The category is Movies. Take turns giving one word clues. Not too obvious, or the imposter will catch on.",
+    "The imposter got away! The word was Spies.",
+    "The category is Jobs. Take turns giving one word clues. Not too obvious, or the imposter will catch on."
+   ],
+   "reworded": [],
+   "extra": []
   },
   "bluff": {
    "name": "Bluff",
@@ -57,107 +93,217 @@
     "That's the game! The master of lies is on the board."
    ],
    "withNames": [],
-   "content": 78,
-   "contentChars": 7099,
+   "content": 71,
+   "contentChars": 6263,
    "sample": [
-    "Here's a strange but true fact. Mr. Potato Head was the first toy ever advertised on blank. Write a fake answer so convincing that everyone else picks it.",
-    "Next fact. Scotland has over {n} words for blank.",
-    "Next fact. Botanically, a banana is classified as a blank."
-   ]
+    "Here's a strange but true fact. The original name of Google was blank. Write a fake answer so convincing that everyone else picks it.",
+    "Next fact. A group of rhinos is called a blank.",
+    "Next fact. Abraham Lincoln is in the national hall of fame for blank."
+   ],
+   "reworded": [],
+   "extra": []
   },
   "whosaid": {
    "name": "Who Said That?",
    "fixed": [
     "Answer the questions on your phone. Be honest, or be sneaky. Nobody will know it's you... yet.",
     "That's the game! Turns out you don't know each other as well as you thought.",
-    "Someone said: Loading the dishwasher. Who was it?"
+    "Someone said: I don't sing. Who was it?"
    ],
    "withNames": [
     "It was {name}!"
    ],
-   "content": 150,
-   "contentChars": 6930,
+   "content": 134,
+   "contentChars": 6421,
    "sample": [
-    "What's the longest you've gone without sleep, and why? Someone answered: A long flight. Who said that?",
-    "Someone said: Pepperoni and mushroom. Who was it?",
-    "Someone said: Everything on it. Who was it?"
-   ]
+    "What chore do you hate the most? Someone answered: Dishes. Who said that?",
+    "Someone said: A whole night for a test. Who was it?",
+    "Someone said: Cleaning the bathroom. Who was it?"
+   ],
+   "reworded": [
+    {
+     "from": "It was {name}!",
+     "record": null
+    }
+   ],
+   "extra": []
   },
   "ducks": {
    "name": "Ducky Toss",
    "fixed": [
-    "Splash! Turn over."
+    "Splash! Turn over.",
+    "Duck pile! There goes your whole score!"
    ],
    "withNames": [
     "Welcome to Ducky Toss! First to {n} points wins. {name}, you're up first. Swipe up on your phone to toss.",
-    "Sitting pretty + Headstand! {n}!",
-    "{name} banks {n}",
-    "Double sitting pretty! {n} points!",
-    "Beak lean! {n}!",
     "Double belly up! {n} points!",
-    "Belly up + Headstand! {n}!",
+    "{name} banks {n}",
     "Headstand! {n}!",
-    "Splash! But the last duck keeps {n}",
     "Belly up + Sitting pretty! {n}!",
     "Sitting pretty + Belly up! {n}!",
+    "Belly up + Headstand! {n}!",
     "{name} wins Ducky Toss!",
     "Headstand + Belly up! {n}!",
-    "Headstand + Sitting pretty! {n}!"
+    "Splash! But the last duck keeps {n}",
+    "Beak lean! {n}!",
+    "Double sitting pretty! {n} points!"
    ],
-   "content": 6,
-   "contentChars": 184,
+   "content": 8,
+   "contentChars": 236,
    "sample": [
+    "Headstand + Sitting pretty! {n}!",
     "Belly up + Beak lean! {n}!",
-    "Duck pile! There goes your whole score!",
     "Sitting pretty + Beak lean! {n}!"
+   ],
+   "reworded": [
+    {
+     "from": "Welcome to Ducky Toss! First to {n} points wins. {name}, you're up first. Swipe up on your phone to toss.",
+     "record": "Welcome to Ducky Toss! You're up first. Swipe up on your phone to toss."
+    },
+    {
+     "from": "Double belly up! {n} points!",
+     "record": "Double belly up!"
+    },
+    {
+     "from": "{name} banks {n}",
+     "record": null
+    },
+    {
+     "from": "Headstand! {n}!",
+     "record": "Headstand!"
+    },
+    {
+     "from": "Belly up + Sitting pretty! {n}!",
+     "record": "Belly up + Sitting pretty!"
+    },
+    {
+     "from": "Sitting pretty + Belly up! {n}!",
+     "record": "Sitting pretty + Belly up!"
+    },
+    {
+     "from": "Belly up + Headstand! {n}!",
+     "record": "Belly up + Headstand!"
+    },
+    {
+     "from": "{name} wins Ducky Toss!",
+     "record": null
+    },
+    {
+     "from": "Headstand + Belly up! {n}!",
+     "record": "Headstand + Belly up!"
+    },
+    {
+     "from": "Splash! But the last duck keeps {n}",
+     "record": "Splash!"
+    },
+    {
+     "from": "Beak lean! {n}!",
+     "record": "Beak lean!"
+    },
+    {
+     "from": "Double sitting pretty! {n} points!",
+     "record": "Double sitting pretty!"
+    }
+   ],
+   "extra": [
+    "Welcome to Ducky Toss! You're up first. Swipe up on your phone to toss.",
+    "Double belly up!",
+    "Headstand!",
+    "Belly up + Sitting pretty!",
+    "Sitting pretty + Belly up!",
+    "Belly up + Headstand!",
+    "Headstand + Belly up!",
+    "Splash!",
+    "Beak lean!",
+    "Double sitting pretty!"
    ]
   },
   "trivia": {
    "name": "Trivia Board",
    "fixed": [
     "Correct!",
-    "Guacamole is made mostly from this fruit.",
-    "The only one of the Seven Wonders of the Ancient World still standing.",
-    "The main ingredient in hummus.",
     "This pricey spice comes from the dried threads of a crocus flower.",
-    "Water freezes at this many degrees Fahrenheit.",
+    "The colored part of your eye.",
     "The first President of the United States.",
-    "Plants take in this gas from the air to make food.",
+    "The longest bone in the human body.",
+    "The largest organ of the human body.",
     "The year Columbus first reached the Americas.",
-    "The center of an atom.",
+    "Guacamole is made mostly from this fruit.",
+    "The number of bones in an adult human body.",
+    "In bowling, three strikes in a row is called this bird.",
+    "Plants take in this gas from the air to make food.",
+    "The number of players each team has on the field in soccer.",
+    "The only one of the Seven Wonders of the Ancient World still standing.",
+    "The country that has won the most men's soccer World Cups.",
+    "The sport played at Wimbledon.",
+    "Nemo's worried clownfish dad in \"Finding Nemo.\"",
     "The cowboy doll in \"Toy Story.\"",
-    "French fries are traditionally made from this vegetable.",
     "The snowman who loves warm hugs in \"Frozen.\"",
+    "A baby goat is called this.",
+    "This big cat is called the \"King of the Jungle.\"",
     "The capital of Japan.",
     "The capital of France.",
-    "The rat who becomes a chef in \"Ratatouille.\"",
     "The capital of Canada.",
-    "Nemo's worried clownfish dad in \"Finding Nemo.\"",
-    "A word that means the opposite of another word.",
-    "A word that reads the same backward and forward, like \"racecar.\"",
-    "The singer known as the \"King of Pop.\"",
+    "The capital of Australia.",
+    "The only mammal that can truly fly.",
     "He composed the \"Moonlight Sonata.\"",
-    "A word made by rearranging another word's letters, like \"listen\" and \"silent.\"",
-    "The number of bones in an adult human body.",
-    "The largest organ of the human body.",
-    "The capital of Australia."
+    "The number of strings on a standard guitar."
    ],
    "withNames": [
     "Welcome to Trivia Board! {name}, pick a category on your phone.",
-    "H{n}O is the chemical formula for this.",
     "{name}",
     "{name}, pick the next one.",
     "This famous ship sank in {n} after hitting an iceberg.",
     "You found the Wager Tile! {name}, how much will you bet?",
     "{name} wins Trivia Board!",
+    "H{n}O is the chemical formula for this.",
     "This instrument usually has {n} keys."
    ],
-   "content": 40,
-   "contentChars": 1728,
+   "content": 41,
+   "contentChars": 1771,
    "sample": [
-    "The sport played at Wimbledon.",
-    "In bowling, three strikes in a row is called this bird.",
-    "The country that has won the most men's soccer World Cups."
+    "The main ingredient in hummus.",
+    "Words that sound alike but mean different things, like \"pair\" and \"pear.\"",
+    "A word that means the opposite of another word."
+   ],
+   "reworded": [
+    {
+     "from": "Welcome to Trivia Board! {name}, pick a category on your phone.",
+     "record": "Welcome to Trivia Board! Pick a category on your phone."
+    },
+    {
+     "from": "{name}",
+     "record": null
+    },
+    {
+     "from": "{name}, pick the next one.",
+     "record": "Pick the next one."
+    },
+    {
+     "from": "This famous ship sank in {n} after hitting an iceberg.",
+     "record": null
+    },
+    {
+     "from": "You found the Wager Tile! {name}, how much will you bet?",
+     "record": "You found the Wager Tile! How much will you bet?"
+    },
+    {
+     "from": "{name} wins Trivia Board!",
+     "record": null
+    },
+    {
+     "from": "H{n}O is the chemical formula for this.",
+     "record": null
+    },
+    {
+     "from": "This instrument usually has {n} keys.",
+     "record": null
+    }
+   ],
+   "extra": [
+    "Welcome to Trivia Board! Pick a category on your phone.",
+    "Pick the next one.",
+    "You found the Wager Tile! How much will you bet?"
    ]
   },
   "spin": {
@@ -165,78 +311,157 @@
    "fixed": [
     "One T",
     "One N",
-    "No S",
-    "No H",
-    "One L",
-    "One D",
-    "No C",
-    "No M",
-    "One G",
-    "Skip!",
-    "No P",
-    "No B",
-    "No F",
-    "No Y",
-    "One E",
-    "No N",
     "One S",
-    "One H",
-    "No D",
-    "No A",
-    "No G",
-    "One Y",
+    "Skip!",
     "Wipeout!",
     "No R",
-    "One B",
+    "One H",
+    "No D",
     "No E",
-    "No L",
-    "One M",
-    "One R",
+    "No C",
+    "No M",
     "One A",
+    "One G",
+    "No P",
+    "One B",
+    "One O",
+    "No S",
+    "One R",
+    "No G",
+    "No N",
+    "One E",
+    "No L",
+    "One D",
+    "One C",
+    "No T",
+    "No H",
+    "One L",
     "Sorry, no.",
-    "No T"
+    "No O",
+    "No B",
+    "One M"
    ],
    "withNames": [
-    "{n} R's",
-    "{name} solved it!",
-    "Round {n} The category is Event.",
-    "{n} O's",
     "{n} L's",
-    "{name} wins Spin and Solve!",
-    "{n} T's",
-    "{n} C's",
-    "{n} E's",
-    "{n} S's",
-    "Round {n} The category is Phrase.",
+    "{name} solved it!",
+    "Round {n} The category is Thing.",
     "{n} A's",
-    "{n} N's"
+    "{n} E's",
+    "{n} R's",
+    "{name} wins Spin and Solve!",
+    "Round {n} The category is Phrase.",
+    "Round {n} The category is Place.",
+    "{n} N's",
+    "Round {n} The category is Event.",
+    "{n} T's",
+    "{n} S's",
+    "{n} C's",
+    "{n} H's"
    ],
-   "content": 37,
-   "contentChars": 937,
+   "content": 29,
+   "contentChars": 757,
    "sample": [
-    "Welcome to Spin and Solve! The category is Animal. {name}, spin the wheel on your phone.",
-    "No W",
-    "No K"
-   ]
+    "Welcome to Spin and Solve! The category is Event. {name}, spin the wheel on your phone.",
+    "{n} O's",
+    "Welcome to Spin and Solve! The category is Thing. {name}, spin the wheel on your phone."
+   ],
+   "reworded": [
+    {
+     "from": "{n} L's",
+     "record": null
+    },
+    {
+     "from": "{name} solved it!",
+     "record": null
+    },
+    {
+     "from": "Round {n} The category is Thing.",
+     "record": null
+    },
+    {
+     "from": "{n} A's",
+     "record": null
+    },
+    {
+     "from": "{n} E's",
+     "record": null
+    },
+    {
+     "from": "{n} R's",
+     "record": null
+    },
+    {
+     "from": "{name} wins Spin and Solve!",
+     "record": null
+    },
+    {
+     "from": "Round {n} The category is Phrase.",
+     "record": null
+    },
+    {
+     "from": "Round {n} The category is Place.",
+     "record": null
+    },
+    {
+     "from": "{n} N's",
+     "record": null
+    },
+    {
+     "from": "Round {n} The category is Event.",
+     "record": null
+    },
+    {
+     "from": "{n} T's",
+     "record": null
+    },
+    {
+     "from": "{n} S's",
+     "record": null
+    },
+    {
+     "from": "{n} C's",
+     "record": null
+    },
+    {
+     "from": "{n} H's",
+     "record": null
+    }
+   ],
+   "extra": []
   },
   "crowd": {
    "name": "Crowd Says",
    "fixed": [
-    "Team Sun wins Crowd Says!",
-    "Team Moon wins Crowd Says!"
+    "Team Moon wins Crowd Says!",
+    "Team Sun wins Crowd Says!"
    ],
    "withNames": [
-    "Team Sun takes {n} points!",
     "Strike {n}!",
-    "Team Moon takes {n} points!"
+    "Team Moon takes {n} points!",
+    "Team Sun takes {n} points!"
    ],
-   "content": 42,
-   "contentChars": 3609,
+   "content": 43,
+   "contentChars": 3555,
    "sample": [
-    "Welcome to Crowd Says! Name something people are afraid of. Face-off: {name} versus {name}.",
-    "Name a sport played with a ball. Face-off: {name} versus {name}.",
+    "Welcome to Crowd Says! Name a sport played with a ball. Face-off: {name} versus {name}.",
+    "Name an animal you might see on a farm. Face-off: {name} versus {name}.",
     "Name something that has wheels. Face-off: {name} versus {name}."
-   ]
+   ],
+   "reworded": [
+    {
+     "from": "Strike {n}!",
+     "record": null
+    },
+    {
+     "from": "Team Moon takes {n} points!",
+     "record": null
+    },
+    {
+     "from": "Team Sun takes {n} points!",
+     "record": null
+    }
+   ],
+   "extra": []
   },
   "bingo": {
    "name": "Bingo",
@@ -246,39 +471,93 @@
    ],
    "withNames": [
     "Round {n}: Any line. A full row, column or diagonal. Good luck!",
-    "G. {n}",
     "I. {n}",
     "B. {n}",
-    "N. {n}",
     "O. {n}",
-    "Bingo for {name} and {name}!",
-    "Round {n}: Four corners. All four corner squares. Good luck!",
+    "N. {n}",
+    "G. {n}",
     "Bingo for {name}!",
+    "Round {n}: Four corners. All four corner squares. Good luck!",
     "Round {n}: Full card. Every square on the card. Good luck!"
    ],
-   "content": 1,
-   "contentChars": 39,
+   "content": 2,
+   "contentChars": 67,
    "sample": [
+    "Bingo for {name} and {name}!",
     "Bingo for {name} and {name} and {name}!"
+   ],
+   "reworded": [
+    {
+     "from": "Round {n}: Any line. A full row, column or diagonal. Good luck!",
+     "record": "A full row, column or diagonal. Good luck!"
+    },
+    {
+     "from": "I. {n}",
+     "record": null
+    },
+    {
+     "from": "B. {n}",
+     "record": null
+    },
+    {
+     "from": "O. {n}",
+     "record": null
+    },
+    {
+     "from": "N. {n}",
+     "record": null
+    },
+    {
+     "from": "G. {n}",
+     "record": null
+    },
+    {
+     "from": "Bingo for {name}!",
+     "record": null
+    },
+    {
+     "from": "Round {n}: Four corners. All four corner squares. Good luck!",
+     "record": "All four corner squares. Good luck!"
+    },
+    {
+     "from": "Round {n}: Full card. Every square on the card. Good luck!",
+     "record": "Every square on the card. Good luck!"
+    }
+   ],
+   "extra": [
+    "A full row, column or diagonal. Good luck!",
+    "All four corner squares. Good luck!",
+    "Every square on the card. Good luck!"
    ]
   },
   "quick": {
    "name": "Quick Games",
    "fixed": [
-    "That's the pack! Here's who read the room best.",
-    "Most of you picked Dishes!"
+    "Most of you picked Live in a treehouse!",
+    "That's the pack! Here's who read the room best."
    ],
    "withNames": [
     "The room says: {name}!",
     "The room says: {name} and {name}!"
    ],
-   "content": 136,
-   "contentChars": 5572,
+   "content": 139,
+   "contentChars": 5714,
    "sample": [
-    "Best way to spend a rainy day?",
-    "Most of you picked Movie marathon!",
-    "Would you rather have a personal chef, or have a personal driver?"
-   ]
+    "Best season?",
+    "Most of you picked Spring!",
+    "Would you rather always be {n} minutes late, or always be {n} minutes early?"
+   ],
+   "reworded": [
+    {
+     "from": "The room says: {name}!",
+     "record": null
+    },
+    {
+     "from": "The room says: {name} and {name}!",
+     "record": null
+    }
+   ],
+   "extra": []
   },
   "ladder": {
    "name": "Million Ladder",
@@ -288,58 +567,273 @@
    ],
    "withNames": [
     "Welcome to Million Ladder! {name}, take the hot seat. Everyone else, play along on your phones.",
-    "For {n} points. What do caterpillars turn into?",
-    "Correct! {n} points.",
-    "For {n} points. What do bees make?",
-    "For {n} points. Which animal is known as man's best friend?",
-    "{name}, take the hot seat. Everyone else, play along on your phones.",
-    "For {n} points. Which planet is closest to the Sun?",
-    "For {n} points. What do you call frozen water?",
     "For {n} points. Which fruit is dried to make raisins?",
-    "For {n} points. What is the tallest mountain in the world above sea level?",
-    "For {n} points. How many teeth does an adult human usually have?",
-    "For {n} points. Which country gifted the Statue of Liberty to the U.S.?",
-    "For {n} points. Which season comes right after summer?",
-    "For {n} points. Which bird is the national symbol of the United States?",
-    "For {n} points. Which instrument has black and white keys?",
-    "For {n} points. What is the square root of {n}?",
-    "For {n} points. The Grand Canyon is in which U.S. state?",
-    "For {n} points. Who painted the Mona Lisa?",
+    "Correct! {n} points.",
     "For {n} points. How many days are in a leap year?",
-    "For {n} points. What shape is a stop sign?",
+    "For {n} points. What is the largest ocean on Earth?",
+    "For {n} points. What is the chemical symbol for gold?",
+    "For {n} points. What is the hardest natural substance?",
+    "For {n} points. What is the square root of {n}?",
+    "Oh no! The answer was {n}",
+    "{name}, take the hot seat. Everyone else, play along on your phones.",
     "For {n} points. What is the capital of the United States?",
-    "For {n} points. How many strings does a standard violin have?",
-    "For {n} points. What is the smallest planet in our solar system?",
-    "For {n} points. Who wrote \"Romeo and Juliet\"?",
     "For {n} points. What color are emeralds?",
     "For {n} points. Which animal can change color to blend in?",
-    "For {n} points. How many sides does a hexagon have?",
-    "For {n} points. What gas do we need to breathe to stay alive?",
-    "For {n} points. In what year did the U.S. declare independence?",
-    "Oh no! The answer was {n}",
-    "For {n} points. How many legs does a spider have?",
-    "For {n} points. What is the largest ocean on Earth?",
+    "For {n} points. What is the longest river in South America?",
+    "For {n} points. How many strings does a standard violin have?",
+    "For {n} points. Who wrote \"Romeo and Juliet\"?",
+    "For {n} points. What do caterpillars turn into?",
+    "For {n} points. Which instrument has black and white keys?",
+    "For {n} points. What do bees make?",
+    "For {n} points. What do you call frozen water?",
     "For {n} points. How many minutes are in an hour?",
-    "For {n} points. Which language has the most native speakers?",
-    "For {n} points. How many continents are there?",
+    "For {n} points. In what year did the U.S. declare independence?",
     "For {n} points. Which planet is known for its Great Red Spot?",
-    "For {n} points. What is the chemical symbol for gold?",
-    "For {n} points. What is the longest river in South America?"
-   ],
-   "content": 63,
-   "contentChars": 2716,
-   "sample": [
+    "For {n} points. How many teeth does an adult human usually have?",
+    "For {n} points. What gas do we need to breathe to stay alive?",
     "For {n} points. Which ship carried the Pilgrims to America in {n}?",
-    "Oh no! The answer was Mayflower.",
-    "Oh no! The answer was France."
+    "For {n} points. Which planet is closest to the Sun?",
+    "For {n} points. Which animal is known as man's best friend?",
+    "For {n} points. At what temperature does water freeze in Celsius?",
+    "For {n} points. Which blood type is known as the universal donor?",
+    "For {n} points. What is the largest desert in the world?",
+    "For {n} points. What is the tallest mountain in the world above sea level?",
+    "For {n} points. How many legs does a spider have?",
+    "For {n} points. Which bird is the national symbol of the United States?",
+    "For {n} points. Which season comes right after summer?",
+    "For {n} points. Who painted the Mona Lisa?",
+    "For {n} points. What shape is a stop sign?",
+    "For {n} points. How many continents are there?",
+    "For {n} points. How many sides does a hexagon have?",
+    "For {n} points. What is the smallest planet in our solar system?",
+    "For {n} points. The Grand Canyon is in which U.S. state?",
+    "For {n} points. Which country gifted the Statue of Liberty to the U.S.?"
+   ],
+   "content": 59,
+   "contentChars": 2531,
+   "sample": [
+    "For {n} points. What is the largest moon of Saturn?",
+    "For {n} points. How many players does a baseball team have on the field?",
+    "Oh no! The answer was William Shakespeare."
+   ],
+   "reworded": [
+    {
+     "from": "Welcome to Million Ladder! {name}, take the hot seat. Everyone else, play along on your phones.",
+     "record": "Welcome to Million Ladder! Take the hot seat. Everyone else, play along on your phones."
+    },
+    {
+     "from": "For {n} points. Which fruit is dried to make raisins?",
+     "record": "Which fruit is dried to make raisins?"
+    },
+    {
+     "from": "Correct! {n} points.",
+     "record": "Correct!"
+    },
+    {
+     "from": "For {n} points. How many days are in a leap year?",
+     "record": "How many days are in a leap year?"
+    },
+    {
+     "from": "For {n} points. What is the largest ocean on Earth?",
+     "record": "What is the largest ocean on Earth?"
+    },
+    {
+     "from": "For {n} points. What is the chemical symbol for gold?",
+     "record": "What is the chemical symbol for gold?"
+    },
+    {
+     "from": "For {n} points. What is the hardest natural substance?",
+     "record": "What is the hardest natural substance?"
+    },
+    {
+     "from": "For {n} points. What is the square root of {n}?",
+     "record": null
+    },
+    {
+     "from": "Oh no! The answer was {n}",
+     "record": "Oh no!"
+    },
+    {
+     "from": "{name}, take the hot seat. Everyone else, play along on your phones.",
+     "record": "Take the hot seat. Everyone else, play along on your phones."
+    },
+    {
+     "from": "For {n} points. What is the capital of the United States?",
+     "record": "What is the capital of the United States?"
+    },
+    {
+     "from": "For {n} points. What color are emeralds?",
+     "record": "What color are emeralds?"
+    },
+    {
+     "from": "For {n} points. Which animal can change color to blend in?",
+     "record": "Which animal can change color to blend in?"
+    },
+    {
+     "from": "For {n} points. What is the longest river in South America?",
+     "record": "What is the longest river in South America?"
+    },
+    {
+     "from": "For {n} points. How many strings does a standard violin have?",
+     "record": "How many strings does a standard violin have?"
+    },
+    {
+     "from": "For {n} points. Who wrote \"Romeo and Juliet\"?",
+     "record": "Who wrote \"Romeo and Juliet\"?"
+    },
+    {
+     "from": "For {n} points. What do caterpillars turn into?",
+     "record": "What do caterpillars turn into?"
+    },
+    {
+     "from": "For {n} points. Which instrument has black and white keys?",
+     "record": "Which instrument has black and white keys?"
+    },
+    {
+     "from": "For {n} points. What do bees make?",
+     "record": "What do bees make?"
+    },
+    {
+     "from": "For {n} points. What do you call frozen water?",
+     "record": "What do you call frozen water?"
+    },
+    {
+     "from": "For {n} points. How many minutes are in an hour?",
+     "record": "How many minutes are in an hour?"
+    },
+    {
+     "from": "For {n} points. In what year did the U.S. declare independence?",
+     "record": "S. declare independence?"
+    },
+    {
+     "from": "For {n} points. Which planet is known for its Great Red Spot?",
+     "record": "Which planet is known for its Great Red Spot?"
+    },
+    {
+     "from": "For {n} points. How many teeth does an adult human usually have?",
+     "record": "How many teeth does an adult human usually have?"
+    },
+    {
+     "from": "For {n} points. What gas do we need to breathe to stay alive?",
+     "record": "What gas do we need to breathe to stay alive?"
+    },
+    {
+     "from": "For {n} points. Which ship carried the Pilgrims to America in {n}?",
+     "record": null
+    },
+    {
+     "from": "For {n} points. Which planet is closest to the Sun?",
+     "record": "Which planet is closest to the Sun?"
+    },
+    {
+     "from": "For {n} points. Which animal is known as man's best friend?",
+     "record": "Which animal is known as man's best friend?"
+    },
+    {
+     "from": "For {n} points. At what temperature does water freeze in Celsius?",
+     "record": "At what temperature does water freeze in Celsius?"
+    },
+    {
+     "from": "For {n} points. Which blood type is known as the universal donor?",
+     "record": "Which blood type is known as the universal donor?"
+    },
+    {
+     "from": "For {n} points. What is the largest desert in the world?",
+     "record": "What is the largest desert in the world?"
+    },
+    {
+     "from": "For {n} points. What is the tallest mountain in the world above sea level?",
+     "record": "What is the tallest mountain in the world above sea level?"
+    },
+    {
+     "from": "For {n} points. How many legs does a spider have?",
+     "record": "How many legs does a spider have?"
+    },
+    {
+     "from": "For {n} points. Which bird is the national symbol of the United States?",
+     "record": "Which bird is the national symbol of the United States?"
+    },
+    {
+     "from": "For {n} points. Which season comes right after summer?",
+     "record": "Which season comes right after summer?"
+    },
+    {
+     "from": "For {n} points. Who painted the Mona Lisa?",
+     "record": "Who painted the Mona Lisa?"
+    },
+    {
+     "from": "For {n} points. What shape is a stop sign?",
+     "record": "What shape is a stop sign?"
+    },
+    {
+     "from": "For {n} points. How many continents are there?",
+     "record": "How many continents are there?"
+    },
+    {
+     "from": "For {n} points. How many sides does a hexagon have?",
+     "record": "How many sides does a hexagon have?"
+    },
+    {
+     "from": "For {n} points. What is the smallest planet in our solar system?",
+     "record": "What is the smallest planet in our solar system?"
+    },
+    {
+     "from": "For {n} points. The Grand Canyon is in which U.S. state?",
+     "record": "S. state?"
+    },
+    {
+     "from": "For {n} points. Which country gifted the Statue of Liberty to the U.S.?",
+     "record": null
+    }
+   ],
+   "extra": [
+    "Welcome to Million Ladder! Take the hot seat. Everyone else, play along on your phones.",
+    "Which fruit is dried to make raisins?",
+    "Correct!",
+    "How many days are in a leap year?",
+    "What is the largest ocean on Earth?",
+    "What is the chemical symbol for gold?",
+    "What is the hardest natural substance?",
+    "Oh no!",
+    "Take the hot seat. Everyone else, play along on your phones.",
+    "What is the capital of the United States?",
+    "What color are emeralds?",
+    "Which animal can change color to blend in?",
+    "What is the longest river in South America?",
+    "How many strings does a standard violin have?",
+    "Who wrote \"Romeo and Juliet\"?",
+    "What do caterpillars turn into?",
+    "Which instrument has black and white keys?",
+    "What do bees make?",
+    "What do you call frozen water?",
+    "How many minutes are in an hour?",
+    "S. declare independence?",
+    "Which planet is known for its Great Red Spot?",
+    "How many teeth does an adult human usually have?",
+    "What gas do we need to breathe to stay alive?",
+    "Which planet is closest to the Sun?",
+    "Which animal is known as man's best friend?",
+    "At what temperature does water freeze in Celsius?",
+    "Which blood type is known as the universal donor?",
+    "What is the largest desert in the world?",
+    "What is the tallest mountain in the world above sea level?",
+    "How many legs does a spider have?",
+    "Which bird is the national symbol of the United States?",
+    "Which season comes right after summer?",
+    "Who painted the Mona Lisa?",
+    "What shape is a stop sign?",
+    "How many continents are there?",
+    "How many sides does a hexagon have?",
+    "What is the smallest planet in our solar system?",
+    "S. state?"
    ]
   },
   "cases": {
    "name": "Pick a Case",
    "fixed": [
     "No deal!",
-    "Two cases left. Keep yours, or swap?",
-    "That's the end of Pick a Case!"
+    "That's the end of Pick a Case!",
+    "Two cases left. Keep yours, or swap?"
    ],
    "withNames": [
     "Welcome to Pick a Case! {name}, sixteen cases, one hundred thousand points in one of them. Pick the case you'll keep. Everyone else, pick your lucky case.",
@@ -351,25 +845,60 @@
    ],
    "content": 0,
    "contentChars": 0,
-   "sample": []
+   "sample": [],
+   "reworded": [
+    {
+     "from": "Welcome to Pick a Case! {name}, sixteen cases, one hundred thousand points in one of them. Pick the case you'll keep. Everyone else, pick your lucky case.",
+     "record": "Welcome to Pick a Case! Sixteen cases, one hundred thousand points in one of them. Pick the case you'll keep. Everyone else, pick your lucky case."
+    },
+    {
+     "from": "{n}",
+     "record": null
+    },
+    {
+     "from": "The phone is ringing. The buyer offers {n} points. Deal, or keep going?",
+     "record": "The phone is ringing. Deal, or keep going?"
+    },
+    {
+     "from": "Deal! {name} takes {n} Their case had {n}",
+     "record": "Deal!"
+    },
+    {
+     "from": "{name}, sixteen cases, one hundred thousand points in one of them. Pick the case you'll keep. Everyone else, pick your lucky case.",
+     "record": "Sixteen cases, one hundred thousand points in one of them. Pick the case you'll keep. Everyone else, pick your lucky case."
+    },
+    {
+     "from": "{name} wins {n} points!",
+     "record": null
+    }
+   ],
+   "extra": [
+    "Welcome to Pick a Case! Sixteen cases, one hundred thousand points in one of them. Pick the case you'll keep. Everyone else, pick your lucky case.",
+    "The phone is ringing. Deal, or keep going?",
+    "Deal!",
+    "Sixteen cases, one hundred thousand points in one of them. Pick the case you'll keep. Everyone else, pick your lucky case."
+   ]
   },
   "funny": {
    "name": "Funny Answers",
    "fixed": [
     "Welcome to Funny Answers! Check your phone and answer your two prompts. Funny beats true!",
+    "The worst theme for a birthday party.",
     "Round two, and points are doubled. Get writing!",
-    "Final round! Everyone answers the same prompt. The title of a movie about tonight.",
     "Vote for your favorite!",
-    "That's the game!"
+    "That's the game!",
+    "The worst flavor of toothpaste."
    ],
    "withNames": [],
-   "content": 113,
-   "contentChars": 4330,
+   "content": 111,
+   "contentChars": 4325,
    "sample": [
-    "What aliens think of Earth after one day.",
-    "The worst way to wake someone up.",
-    "The real reason the WiFi is slow."
-   ]
+    "A bad name for your car.",
+    "What your shoes would say about you.",
+    "A bad name for a perfume."
+   ],
+   "reworded": [],
+   "extra": []
   },
   "letters": {
    "name": "Letter Lists",
@@ -377,20 +906,22 @@
     "That's the game!"
    ],
    "withNames": [],
-   "content": 66,
-   "contentChars": 2533,
+   "content": 63,
+   "contentChars": 2388,
    "sample": [
-    "Welcome to Letter Lists! Your letter is N. Six categories, ninety seconds. Go!",
-    "A board game.",
-    "Your letter is E. Six categories, ninety seconds. Go!"
-   ]
+    "Welcome to Letter Lists! Your letter is R. Six categories, ninety seconds. Go!",
+    "A fruit.",
+    "Your letter is G. Six categories, ninety seconds. Go!"
+   ],
+   "reworded": [],
+   "extra": []
   },
   "taboo": {
    "name": "Taboo Talk",
    "fixed": [
     "Taboo!",
-    "Team Sun wins Taboo Talk!",
-    "Team Moon wins Taboo Talk!"
+    "Team Moon wins Taboo Talk!",
+    "Team Sun wins Taboo Talk!"
    ],
    "withNames": [
     "Welcome to Taboo Talk! Team Sun, you're up. {name}, you're giving clues. Press start on your phone when your team is ready.",
@@ -399,29 +930,60 @@
     "Time! Team Moon got {n}",
     "Team Sun, you're up. {name}, you're giving clues. Press start on your phone when your team is ready."
    ],
-   "content": 0,
-   "contentChars": 0,
-   "sample": []
+   "content": 1,
+   "contentChars": 11,
+   "sample": [
+    "It's a tie!"
+   ],
+   "reworded": [
+    {
+     "from": "Welcome to Taboo Talk! Team Sun, you're up. {name}, you're giving clues. Press start on your phone when your team is ready.",
+     "record": "Welcome to Taboo Talk! Team Sun, you're up. You're giving clues. Press start on your phone when your team is ready."
+    },
+    {
+     "from": "Time! Team Sun got {n}",
+     "record": "Time!"
+    },
+    {
+     "from": "Team Moon, you're up. {name}, you're giving clues. Press start on your phone when your team is ready.",
+     "record": "Team Moon, you're up. You're giving clues. Press start on your phone when your team is ready."
+    },
+    {
+     "from": "Time! Team Moon got {n}",
+     "record": "Time!"
+    },
+    {
+     "from": "Team Sun, you're up. {name}, you're giving clues. Press start on your phone when your team is ready.",
+     "record": "Team Sun, you're up. You're giving clues. Press start on your phone when your team is ready."
+    }
+   ],
+   "extra": [
+    "Welcome to Taboo Talk! Team Sun, you're up. You're giving clues. Press start on your phone when your team is ready.",
+    "Time!",
+    "Team Moon, you're up. You're giving clues. Press start on your phone when your team is ready.",
+    "Team Sun, you're up. You're giving clues. Press start on your phone when your team is ready."
+   ]
   },
   "agents": {
    "name": "Secret Agents",
    "fixed": [
-    "Welcome to Secret Agents! Team Sun goes first. Spymasters, check your phones for the secret key.",
-    "A bystander.",
-    "Team Sun, your spymaster is thinking.",
+    "Welcome to Secret Agents! Team Moon goes first. Spymasters, check your phones for the secret key.",
     "That one belongs to the other team!",
     "Team Moon, your spymaster is thinking.",
+    "Team Moon found all their agents and wins!",
+    "A bystander.",
     "Team Sun found all their agents and wins!",
-    "Welcome to Secret Agents! Team Moon goes first. Spymasters, check your phones for the secret key.",
-    "Team Moon found all their agents and wins!"
+    "Team Sun, your spymaster is thinking.",
+    "Welcome to Secret Agents! Team Sun goes first. Spymasters, check your phones for the secret key."
    ],
    "withNames": [],
-   "content": 2,
-   "contentChars": 63,
+   "content": 1,
+   "contentChars": 31,
    "sample": [
-    "Oh no, the trap! Team Sun wins!",
-    "Oh no, the trap! Team Moon wins!"
-   ]
+    "Oh no, the trap! Team Sun wins!"
+   ],
+   "reworded": [],
+   "extra": []
   },
   "sketch": {
    "name": "Sketch Telephone",
@@ -435,25 +997,31 @@
    "withNames": [
     "{name} got the most hearts!"
    ],
-   "content": 312,
-   "contentChars": 12781,
+   "content": 315,
+   "contentChars": 13109,
    "sample": [
-    "Time for the big reveal! {name} started with: A sandwich running a marathon",
-    "{name} guessed: A sandwich running a bicycle",
-    "{name} guessed: A sandwich running a spaghetti"
-   ]
+    "Time for the big reveal! {name} started with: A dragon eating spaghetti",
+    "{name} guessed: A dragon eating coaster",
+    "{name} guessed: A dragon eating water"
+   ],
+   "reworded": [
+    {
+     "from": "{name} got the most hearts!",
+     "record": null
+    }
+   ],
+   "extra": []
   },
   "meld": {
    "name": "Mind Meld",
    "fixed": [
-    "The clue is: Pretty far left. Set your dials!",
-    "The clue is: A bit right. Set your dials!",
-    "The clue is: Pretty far right. Set your dials!",
-    "Mind meld! Everyone was close!",
-    "The clue is: Right in the middle. Set your dials!",
     "The clue is: Way over left. Set your dials!",
+    "The clue is: Right in the middle. Set your dials!",
+    "The clue is: Pretty far right. Set your dials!",
     "The clue is: Way over right. Set your dials!",
-    "The clue is: A bit left. Set your dials!"
+    "The clue is: A bit left. Set your dials!",
+    "The clue is: A bit right. Set your dials!",
+    "The clue is: Pretty far left. Set your dials!"
    ],
    "withNames": [
     "Bullseye for {name}!",
@@ -461,13 +1029,32 @@
     "{name} reads minds best!",
     "Bullseye for {name} and {name} and {name}!"
    ],
-   "content": 66,
-   "contentChars": 4311,
+   "content": 71,
+   "contentChars": 4764,
    "sample": [
-    "Welcome to Mind Meld! {name} is the mind reader. They see a secret spot between Bad movie and Great movie.",
-    "{name}, you're the mind reader. Overpriced to Bargain.",
-    "{name}, you're the mind reader. Soft to Hard."
-   ]
+    "Welcome to Mind Meld! {name} is the mind reader. They see a secret spot between Feels short and Feels long.",
+    "{name}, you're the mind reader. Day to Night.",
+    "{name}, you're the mind reader. Bad job to Dream job."
+   ],
+   "reworded": [
+    {
+     "from": "Bullseye for {name}!",
+     "record": null
+    },
+    {
+     "from": "Bullseye for {name} and {name}!",
+     "record": null
+    },
+    {
+     "from": "{name} reads minds best!",
+     "record": null
+    },
+    {
+     "from": "Bullseye for {name} and {name} and {name}!",
+     "record": null
+    }
+   ],
+   "extra": []
   },
   "bowl": {
    "name": "Salad Bowl",
@@ -476,22 +1063,54 @@
     "The bowl is empty! Same names again, but now: One word.",
     "The bowl is empty! Same names again, but now: Act it out.",
     "The bowl is empty!",
-    "Team Moon wins!",
-    "Team Sun wins!"
+    "Team Sun wins!",
+    "Team Moon wins!"
    ],
    "withNames": [
-    "Round {n}: Describe it. Say anything except the name itself. Team Moon, {name} is up.",
-    "Round {n}: One word. Just ONE word per name. Choose wisely! Team Sun, {name} is up.",
-    "Round {n}: Act it out. No talking! Charades only. Team Moon, {name} is up.",
     "Round {n}: Describe it. Say anything except the name itself. Team Sun, {name} is up.",
     "Round {n}: One word. Just ONE word per name. Choose wisely! Team Moon, {name} is up.",
-    "Round {n}: Act it out. No talking! Charades only. Team Sun, {name} is up."
+    "Round {n}: Act it out. No talking! Charades only. Team Sun, {name} is up.",
+    "Round {n}: Act it out. No talking! Charades only. Team Moon, {name} is up.",
+    "Round {n}: Describe it. Say anything except the name itself. Team Moon, {name} is up.",
+    "Round {n}: One word. Just ONE word per name. Choose wisely! Team Sun, {name} is up."
    ],
-   "content": 2,
-   "contentChars": 47,
+   "content": 4,
+   "contentChars": 94,
    "sample": [
-    "Time! {n} for Team Sun.",
-    "Team Moon, {name} is up."
+    "Time! {n} for Team Moon.",
+    "Team Sun, {name} is up.",
+    "Time! {n} for Team Sun."
+   ],
+   "reworded": [
+    {
+     "from": "Round {n}: Describe it. Say anything except the name itself. Team Sun, {name} is up.",
+     "record": "Say anything except the name itself."
+    },
+    {
+     "from": "Round {n}: One word. Just ONE word per name. Choose wisely! Team Moon, {name} is up.",
+     "record": "Just ONE word per name. Choose wisely!"
+    },
+    {
+     "from": "Round {n}: Act it out. No talking! Charades only. Team Sun, {name} is up.",
+     "record": "No talking! Charades only."
+    },
+    {
+     "from": "Round {n}: Act it out. No talking! Charades only. Team Moon, {name} is up.",
+     "record": "No talking! Charades only."
+    },
+    {
+     "from": "Round {n}: Describe it. Say anything except the name itself. Team Moon, {name} is up.",
+     "record": "Say anything except the name itself."
+    },
+    {
+     "from": "Round {n}: One word. Just ONE word per name. Choose wisely! Team Sun, {name} is up.",
+     "record": "Just ONE word per name. Choose wisely!"
+    }
+   ],
+   "extra": [
+    "Say anything except the name itself.",
+    "Just ONE word per name. Choose wisely!",
+    "No talking! Charades only."
    ]
   },
   "crew": {
@@ -499,19 +1118,50 @@
    "fixed": [],
    "withNames": [
     "Welcome to Clue Crew! We're all on the same team. {name}, don't look at the TV or anyone's phone! Everyone else, write a one-word clue. Matching clues cancel out.",
-    "{n} clue made it. {name}, what's the word?",
-    "{name} is guessing. Write your clues!",
     "{n} clues made it. {name}, what's the word?",
+    "{name} is guessing. Write your clues!",
+    "{n} clue made it. {name}, what's the word?",
     "Oh no, every clue cancelled out! {name}, take a wild guess.",
-    "You got {n} out of {n} Solid crew!",
-    "You got {n} out of {n} Not bad. Try again?"
+    "You got {n} out of {n} Solid crew!"
    ],
-   "content": 168,
-   "contentChars": 4468,
+   "content": 152,
+   "contentChars": 4431,
    "sample": [
-    "Nope, it was Hanukkah. That costs us an extra card.",
-    "Passed. It was Easter.",
-    "Passed. It was Plumber."
+    "Yes! It was Skateboarding!",
+    "Yes! It was Waffles!",
+    "Yes! It was Nachos!"
+   ],
+   "reworded": [
+    {
+     "from": "Welcome to Clue Crew! We're all on the same team. {name}, don't look at the TV or anyone's phone! Everyone else, write a one-word clue. Matching clues cancel out.",
+     "record": "Welcome to Clue Crew! We're all on the same team. Don't look at the TV or anyone's phone! Everyone else, write a one-word clue. Matching clues cancel out."
+    },
+    {
+     "from": "{n} clues made it. {name}, what's the word?",
+     "record": "What's the word?"
+    },
+    {
+     "from": "{name} is guessing. Write your clues!",
+     "record": "Write your clues!"
+    },
+    {
+     "from": "{n} clue made it. {name}, what's the word?",
+     "record": "What's the word?"
+    },
+    {
+     "from": "Oh no, every clue cancelled out! {name}, take a wild guess.",
+     "record": "Oh no, every clue cancelled out! Take a wild guess."
+    },
+    {
+     "from": "You got {n} out of {n} Solid crew!",
+     "record": null
+    }
+   ],
+   "extra": [
+    "Welcome to Clue Crew! We're all on the same team. Don't look at the TV or anyone's phone! Everyone else, write a one-word clue. Matching clues cancel out.",
+    "What's the word?",
+    "Write your clues!",
+    "Oh no, every clue cancelled out! Take a wild guess."
    ]
   },
   "charades": {
@@ -525,7 +1175,30 @@
    ],
    "content": 0,
    "contentChars": 0,
-   "sample": []
+   "sample": [],
+   "reworded": [
+    {
+     "from": "Welcome to Picture Charades! No talking, just acting. {name}, you're up! Press start when you're ready.",
+     "record": "Welcome to Picture Charades! No talking, just acting. You're up! Press start when you're ready."
+    },
+    {
+     "from": "Time! {n} guessed.",
+     "record": "Time!"
+    },
+    {
+     "from": "{name}, you're up! Press start when you're ready.",
+     "record": "You're up! Press start when you're ready."
+    },
+    {
+     "from": "{name} wins Picture Charades!",
+     "record": null
+    }
+   ],
+   "extra": [
+    "Welcome to Picture Charades! No talking, just acting. You're up! Press start when you're ready.",
+    "Time!",
+    "You're up! Press start when you're ready."
+   ]
   },
   "clash": {
    "name": "Color Clash",
@@ -533,12 +1206,33 @@
    "withNames": [
     "Welcome to Color Clash! Match the color or the symbol. {name} goes first.",
     "{name} wins Color Clash!",
-    "{name} swapped hands with {name}!",
-    "{name} has one card left!"
+    "{name} has one card left!",
+    "{name} swapped hands with {name}!"
    ],
    "content": 0,
    "contentChars": 0,
-   "sample": []
+   "sample": [],
+   "reworded": [
+    {
+     "from": "Welcome to Color Clash! Match the color or the symbol. {name} goes first.",
+     "record": "Welcome to Color Clash! Match the color or the symbol."
+    },
+    {
+     "from": "{name} wins Color Clash!",
+     "record": null
+    },
+    {
+     "from": "{name} has one card left!",
+     "record": null
+    },
+    {
+     "from": "{name} swapped hands with {name}!",
+     "record": null
+    }
+   ],
+   "extra": [
+    "Welcome to Color Clash! Match the color or the symbol."
+   ]
   },
   "blackjack": {
    "name": "Blackjack",
@@ -547,28 +1241,61 @@
    ],
    "withNames": [
     "Welcome to the Party Night blackjack table! Everyone starts with {n} chips. These are points, not real money. Place your bets.",
-    "Hand {n} Place your bets.",
     "Dealer has {n}",
+    "Hand {n} Place your bets.",
     "{name} leaves the table with the most chips!"
    ],
    "content": 0,
    "contentChars": 0,
-   "sample": []
+   "sample": [],
+   "reworded": [
+    {
+     "from": "Welcome to the Party Night blackjack table! Everyone starts with {n} chips. These are points, not real money. Place your bets.",
+     "record": "Welcome to the Party Night blackjack table! These are points, not real money. Place your bets."
+    },
+    {
+     "from": "Dealer has {n}",
+     "record": null
+    },
+    {
+     "from": "Hand {n} Place your bets.",
+     "record": null
+    },
+    {
+     "from": "{name} leaves the table with the most chips!",
+     "record": null
+    }
+   ],
+   "extra": [
+    "Welcome to the Party Night blackjack table! These are points, not real money. Place your bets."
+   ]
   },
   "gofish": {
    "name": "Go Fish",
    "fixed": [
     "Go fish!",
-    "A set!"
+    "A set!",
+    "It's a tie!"
    ],
    "withNames": [
     "Let's play Go Fish! Ask someone for an animal you have. Get all four to make a set. {name} goes first.",
     "{name} wins with {n} sets!"
    ],
-   "content": 1,
-   "contentChars": 11,
-   "sample": [
-    "It's a tie!"
+   "content": 0,
+   "contentChars": 0,
+   "sample": [],
+   "reworded": [
+    {
+     "from": "Let's play Go Fish! Ask someone for an animal you have. Get all four to make a set. {name} goes first.",
+     "record": "Let's play Go Fish! Ask someone for an animal you have. Get all four to make a set."
+    },
+    {
+     "from": "{name} wins with {n} sets!",
+     "record": null
+    }
+   ],
+   "extra": [
+    "Let's play Go Fish! Ask someone for an animal you have. Get all four to make a set."
    ]
   },
   "bluffcards": {
@@ -577,39 +1304,160 @@
     "Welcome to Liar's Deck! Play cards face down and say they're Aces. Lie if you have to. Anyone can call bluff!"
    ],
    "withNames": [
-    "Bluff! {name} was lying and takes the pile.",
-    "{name} played {n} Two.",
-    "{name} played {n} Thre.",
-    "{name} played {n} Four.",
-    "{name} played {n} Fiv.",
-    "{name} played {n} Eights.",
-    "{name} played {n} Tens.",
     "Nope, {name} told the truth! {name} takes the pile.",
+    "{name} played {n} Threes.",
+    "{name} played {n} Four.",
+    "Bluff! {name} was lying and takes the pile.",
+    "{name} played {n} Fives.",
+    "{name} played {n} Six.",
+    "{name} played {n} Seven.",
+    "{name} played {n} Nines.",
+    "{name} played {n} Ten.",
     "{name} played {n} Jack.",
     "{name} played {n} Queen.",
-    "{name} played {n} Fives.",
-    "{name} played {n} Seven.",
+    "{name} played {n} Two.",
+    "{name} played {n} Thre.",
+    "{name} played {n} Fiv.",
     "{name} played {n} Eight.",
     "{name} played {n} Nin.",
-    "{name} played {n} Ten.",
-    "{name} played {n} Kings.",
-    "{name} played {n} Sevens.",
-    "{name} played {n} Queens.",
-    "{name} played {n} King.",
-    "{name} played {n} Ac.",
-    "{name} played {n} Threes.",
+    "{name} played {n} Jacks.",
     "{name} played {n} Aces.",
     "{name} played {n} Twos.",
+    "{name} played {n} Kings.",
+    "{name} played {n} Ac.",
     "{name} played {n} Fours.",
-    "{name} played {n} Six.",
-    "{name} is out of cards and wins!",
+    "{name} played {n} Tens.",
+    "{name} played {n} Queens.",
+    "{name} played {n} Eights.",
+    "{name} played {n} Sevens.",
     "{name} played {n} Sixes.",
-    "{name} played {n} Nines.",
-    "{name} played {n} Jacks."
+    "{name} played {n} King.",
+    "{name} is out of cards and wins!"
    ],
    "content": 0,
    "contentChars": 0,
-   "sample": []
+   "sample": [],
+   "reworded": [
+    {
+     "from": "Nope, {name} told the truth! {name} takes the pile.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} Threes.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} Four.",
+     "record": null
+    },
+    {
+     "from": "Bluff! {name} was lying and takes the pile.",
+     "record": "Bluff!"
+    },
+    {
+     "from": "{name} played {n} Fives.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} Six.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} Seven.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} Nines.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} Ten.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} Jack.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} Queen.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} Two.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} Thre.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} Fiv.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} Eight.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} Nin.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} Jacks.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} Aces.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} Twos.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} Kings.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} Ac.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} Fours.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} Tens.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} Queens.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} Eights.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} Sevens.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} Sixes.",
+     "record": null
+    },
+    {
+     "from": "{name} played {n} King.",
+     "record": null
+    },
+    {
+     "from": "{name} is out of cards and wins!",
+     "record": null
+    }
+   ],
+   "extra": [
+    "Bluff!"
+   ]
   },
   "hearts": {
    "name": "Hearts",
@@ -624,57 +1472,103 @@
     "Ouch! {name} takes the Queen of Spades!",
     "{name} wins with the lowest score!"
    ],
-   "content": 2,
-   "contentChars": 94,
-   "sample": [
-    "{name} shot the moon! {name} wins with the lowest score!",
-    "{name} shot the moon! End of the hand."
+   "content": 0,
+   "contentChars": 0,
+   "sample": [],
+   "reworded": [
+    {
+     "from": "{name} has the two of clubs and leads.",
+     "record": null
+    },
+    {
+     "from": "Ouch! {name} takes the Queen of Spades!",
+     "record": "Ouch!"
+    },
+    {
+     "from": "{name} wins with the lowest score!",
+     "record": null
+    }
+   ],
+   "extra": [
+    "Ouch!"
    ]
   },
   "shade": {
    "name": "Spot the Shade",
    "fixed": [
-    "The clue is: Plum. Find that shade!",
-    "So close!",
     "The clue is: Lemon. Find that shade!",
+    "So close!",
+    "The clue is: Ketchup. Find that shade!",
     "The clue is: Cherry. Find that shade!",
+    "The clue is: Plum. Find that shade!",
+    "The clue is: Rose. Find that shade!",
     "The clue is: Pool. Find that shade!",
-    "The clue is: Pumpkin. Find that shade!",
-    "The clue is: Mint. Find that shade!",
-    "The clue is: Denim. Find that shade!"
+    "The clue is: Bubblegum. Find that shade!"
    ],
    "withNames": [
     "Welcome to Spot the Shade! {name} sees a secret color and will give a clue. No color names allowed!",
     "{name} is picking a color.",
-    "Bullseye for {name}!",
-    "{name} has the best eye for color!"
+    "{name} has the best eye for color!",
+    "Bullseye for {name}!"
    ],
    "content": 14,
-   "contentChars": 513,
+   "contentChars": 509,
    "sample": [
-    "The clue is: Bubblegum. Find that shade!",
-    "The clue is: Tangerine. Find that shade!",
-    "The clue is: Rose. Find that shade!"
+    "Bullseye for {name} and {name}!",
+    "The clue is: Pumpkin. Find that shade!",
+    "The clue is: Grape. Find that shade!"
+   ],
+   "reworded": [
+    {
+     "from": "Welcome to Spot the Shade! {name} sees a secret color and will give a clue. No color names allowed!",
+     "record": "Welcome to Spot the Shade! No color names allowed!"
+    },
+    {
+     "from": "{name} is picking a color.",
+     "record": null
+    },
+    {
+     "from": "{name} has the best eye for color!",
+     "record": null
+    },
+    {
+     "from": "Bullseye for {name}!",
+     "record": null
+    }
+   ],
+   "extra": [
+    "Welcome to Spot the Shade! No color names allowed!"
    ]
   },
   "estimate": {
    "name": "Estimate & Bet",
    "fixed": [
     "Now bet on the guess you think is closest without going over.",
-    "How many pounds are in a U.S. ton?",
-    "How many time zones does Russia have?"
+    "How many bones are in an adult human body?",
+    "How many Great Lakes are there?"
    ],
    "withNames": [
     "The answer is {n}!",
     "{name} wins Estimate and Bet!"
    ],
-   "content": 60,
-   "contentChars": 4360,
+   "content": 57,
+   "contentChars": 3861,
    "sample": [
-    "Welcome to Estimate and Bet! Nobody knows these exactly, so just make your best guess. How many letters are in the Greek alphabet?",
-    "How many inches are in a yard?",
-    "How many countries are in Africa?"
-   ]
+    "Welcome to Estimate and Bet! Nobody knows these exactly, so just make your best guess. How many weeks long is a typical human pregnancy?",
+    "In what year was the Eiffel Tower finished?",
+    "How many strings does a standard violin have?"
+   ],
+   "reworded": [
+    {
+     "from": "The answer is {n}!",
+     "record": null
+    },
+    {
+     "from": "{name} wins Estimate and Bet!",
+     "record": null
+    }
+   ],
+   "extra": []
   },
   "truths": {
    "name": "Two Truths & a Lie",
@@ -683,43 +1577,182 @@
    ],
    "withNames": [
     "{name}'s turn. Which one is the lie?",
-    "The lie was: I have visited the Moon. {name}, tell us the stories!",
-    "The lie was: I can beep in three languages. {name}, tell us the stories!",
     "The lie was: I once beat a toaster at chess. {name}, tell us the stories!",
     "The lie was: I am afraid of magnets. {name}, tell us the stories!",
+    "The lie was: I can beep in three languages. {name}, tell us the stories!",
     "The lie was: I love oil changes. {name}, tell us the stories!",
     "{name} wins!",
     "The lie was: I collect paper clips. {name}, tell us the stories!",
     "The lie was: I dream in binary. {name}, tell us the stories!",
-    "The lie was: I have never been unplugged. {name}, tell us the stories!",
-    "The lie was: I was built in a lab. {name}, tell us the stories!"
+    "The lie was: I have visited the Moon. {name}, tell us the stories!",
+    "The lie was: I was built in a lab. {name}, tell us the stories!",
+    "The lie was: I have never been unplugged. {name}, tell us the stories!"
    ],
    "content": 0,
    "contentChars": 0,
-   "sample": []
+   "sample": [],
+   "reworded": [
+    {
+     "from": "{name}'s turn. Which one is the lie?",
+     "record": "Which one is the lie?"
+    },
+    {
+     "from": "The lie was: I once beat a toaster at chess. {name}, tell us the stories!",
+     "record": "The lie was: I once beat a toaster at chess. Tell us the stories!"
+    },
+    {
+     "from": "The lie was: I am afraid of magnets. {name}, tell us the stories!",
+     "record": "The lie was: I am afraid of magnets. Tell us the stories!"
+    },
+    {
+     "from": "The lie was: I can beep in three languages. {name}, tell us the stories!",
+     "record": "The lie was: I can beep in three languages. Tell us the stories!"
+    },
+    {
+     "from": "The lie was: I love oil changes. {name}, tell us the stories!",
+     "record": "The lie was: I love oil changes. Tell us the stories!"
+    },
+    {
+     "from": "{name} wins!",
+     "record": null
+    },
+    {
+     "from": "The lie was: I collect paper clips. {name}, tell us the stories!",
+     "record": "The lie was: I collect paper clips. Tell us the stories!"
+    },
+    {
+     "from": "The lie was: I dream in binary. {name}, tell us the stories!",
+     "record": "The lie was: I dream in binary. Tell us the stories!"
+    },
+    {
+     "from": "The lie was: I have visited the Moon. {name}, tell us the stories!",
+     "record": "The lie was: I have visited the Moon. Tell us the stories!"
+    },
+    {
+     "from": "The lie was: I was built in a lab. {name}, tell us the stories!",
+     "record": "The lie was: I was built in a lab. Tell us the stories!"
+    },
+    {
+     "from": "The lie was: I have never been unplugged. {name}, tell us the stories!",
+     "record": "The lie was: I have never been unplugged. Tell us the stories!"
+    }
+   ],
+   "extra": [
+    "Which one is the lie?",
+    "The lie was: I once beat a toaster at chess. Tell us the stories!",
+    "The lie was: I am afraid of magnets. Tell us the stories!",
+    "The lie was: I can beep in three languages. Tell us the stories!",
+    "The lie was: I love oil changes. Tell us the stories!",
+    "The lie was: I collect paper clips. Tell us the stories!",
+    "The lie was: I dream in binary. Tell us the stories!",
+    "The lie was: I have visited the Moon. Tell us the stories!",
+    "The lie was: I was built in a lab. Tell us the stories!",
+    "The lie was: I have never been unplugged. Tell us the stories!"
+   ]
   },
   "wordhunt": {
    "name": "Secret Word Hunt",
    "fixed": [],
    "withNames": [
     "Welcome to Secret Word Hunt! {name} is the Host and picks a secret word. Careful: one of you is the Insider and already knows it. Check your phones!",
-    "The category is Jobs. Ask {name} yes or no questions. You have four minutes!",
+    "The category is Things. Ask {name} yes or no questions. You have four minutes!",
     "The Insider was {name}, and they got away with it!",
     "{name} is the Host this round. Check your phones.",
-    "The category is Holidays. Ask {name} yes or no questions. You have four minutes!",
-    "The category is Sports. Ask {name} yes or no questions. You have four minutes!",
-    "{name} wins!",
-    "The category is Movies. Ask {name} yes or no questions. You have four minutes!",
-    "The category is Things. Ask {name} yes or no questions. You have four minutes!",
+    "The category is Places. Ask {name} yes or no questions. You have four minutes!",
     "The category is Animals. Ask {name} yes or no questions. You have four minutes!",
-    "The category is Around the house. Ask {name} yes or no questions. You have four minutes!"
+    "The category is Jobs. Ask {name} yes or no questions. You have four minutes!",
+    "{name} wins!",
+    "The category is Food. Ask {name} yes or no questions. You have four minutes!",
+    "The category is Around the house. Ask {name} yes or no questions. You have four minutes!",
+    "The category is Holidays. Ask {name} yes or no questions. You have four minutes!",
+    "You caught the Insider, {name}!",
+    "The category is Weather. Ask {name} yes or no questions. You have four minutes!",
+    "The category is Movies. Ask {name} yes or no questions. You have four minutes!",
+    "The category is Sports. Ask {name} yes or no questions. You have four minutes!"
    ],
-   "content": 76,
-   "contentChars": 6692,
+   "content": 75,
+   "contentChars": 6720,
    "sample": [
-    "{name} found it! The word was Chef. Now, who was the Insider? It was too easy... Vote!",
-    "{name} found it! The word was Mother's Day. Now, who was the Insider? It was too easy... Vote!",
-    "{name} found it! The word was Barber. Now, who was the Insider? It was too easy... Vote!"
+    "{name} found it! The word was Camera. Now, who was the Insider? It was too easy... Vote!",
+    "{name} found it! The word was Volcano. Now, who was the Insider? It was too easy... Vote!",
+    "{name} found it! The word was Camel. Now, who was the Insider? It was too easy... Vote!"
+   ],
+   "reworded": [
+    {
+     "from": "Welcome to Secret Word Hunt! {name} is the Host and picks a secret word. Careful: one of you is the Insider and already knows it. Check your phones!",
+     "record": "Welcome to Secret Word Hunt! Careful: one of you is the Insider and already knows it. Check your phones!"
+    },
+    {
+     "from": "The category is Things. Ask {name} yes or no questions. You have four minutes!",
+     "record": "The category is Things. You have four minutes!"
+    },
+    {
+     "from": "The Insider was {name}, and they got away with it!",
+     "record": null
+    },
+    {
+     "from": "{name} is the Host this round. Check your phones.",
+     "record": "Check your phones."
+    },
+    {
+     "from": "The category is Places. Ask {name} yes or no questions. You have four minutes!",
+     "record": "The category is Places. You have four minutes!"
+    },
+    {
+     "from": "The category is Animals. Ask {name} yes or no questions. You have four minutes!",
+     "record": "The category is Animals. You have four minutes!"
+    },
+    {
+     "from": "The category is Jobs. Ask {name} yes or no questions. You have four minutes!",
+     "record": "The category is Jobs. You have four minutes!"
+    },
+    {
+     "from": "{name} wins!",
+     "record": null
+    },
+    {
+     "from": "The category is Food. Ask {name} yes or no questions. You have four minutes!",
+     "record": "The category is Food. You have four minutes!"
+    },
+    {
+     "from": "The category is Around the house. Ask {name} yes or no questions. You have four minutes!",
+     "record": "The category is Around the house. You have four minutes!"
+    },
+    {
+     "from": "The category is Holidays. Ask {name} yes or no questions. You have four minutes!",
+     "record": "The category is Holidays. You have four minutes!"
+    },
+    {
+     "from": "You caught the Insider, {name}!",
+     "record": "You caught the Insider!"
+    },
+    {
+     "from": "The category is Weather. Ask {name} yes or no questions. You have four minutes!",
+     "record": "The category is Weather. You have four minutes!"
+    },
+    {
+     "from": "The category is Movies. Ask {name} yes or no questions. You have four minutes!",
+     "record": "The category is Movies. You have four minutes!"
+    },
+    {
+     "from": "The category is Sports. Ask {name} yes or no questions. You have four minutes!",
+     "record": "The category is Sports. You have four minutes!"
+    }
+   ],
+   "extra": [
+    "Welcome to Secret Word Hunt! Careful: one of you is the Insider and already knows it. Check your phones!",
+    "The category is Things. You have four minutes!",
+    "Check your phones.",
+    "The category is Places. You have four minutes!",
+    "The category is Animals. You have four minutes!",
+    "The category is Jobs. You have four minutes!",
+    "The category is Food. You have four minutes!",
+    "The category is Around the house. You have four minutes!",
+    "The category is Holidays. You have four minutes!",
+    "You caught the Insider!",
+    "The category is Weather. You have four minutes!",
+    "The category is Movies. You have four minutes!",
+    "The category is Sports. You have four minutes!"
    ]
   },
   "midnight": {
@@ -730,13 +1763,15 @@
     "The sun rises. Check what you learned in the night.",
     "Now talk! Who is a wolf? Remember, your card may have changed in the night. You have three minutes.",
     "Time to vote! Point at the wolf on your phone.",
-    "The village wins!",
-    "The werewolves win!"
+    "The werewolves win!",
+    "The village wins!"
    ],
    "withNames": [],
    "content": 0,
    "contentChars": 0,
-   "sample": []
+   "sample": [],
+   "reworded": [],
+   "extra": []
   },
   "missions": {
    "name": "Missions",
@@ -744,21 +1779,47 @@
     "Everyone, vote on this team.",
     "The team is approved. Off you go!",
     "The team is on the mission. Play your cards in secret.",
-    "Mission success!",
-    "The team is turned down."
+    "The team is turned down.",
+    "Mission success!"
    ],
    "withNames": [
     "Welcome to Missions. {n} of you are secret traitors. Check your phone to see which side you're on.",
     "Mission {n} {name} is the leader. Pick a team of {n}",
     "Mission failed! {n} fail card.",
-    "The traitors win! The traitors were {name} and {name}.",
     "Mission failed! {n} fail cards.",
-    "The crew wins! The traitors were {name} and {name}."
+    "The traitors win! The traitors were {name} and {name}."
    ],
    "content": 1,
-   "contentChars": 81,
+   "contentChars": 51,
    "sample": [
-    "The team is turned down. That's {n} in a row. Careful, five and the traitors win!"
+    "The crew wins! The traitors were {name} and {name}."
+   ],
+   "reworded": [
+    {
+     "from": "Welcome to Missions. {n} of you are secret traitors. Check your phone to see which side you're on.",
+     "record": "Welcome to Missions. Check your phone to see which side you're on."
+    },
+    {
+     "from": "Mission {n} {name} is the leader. Pick a team of {n}",
+     "record": null
+    },
+    {
+     "from": "Mission failed! {n} fail card.",
+     "record": "Mission failed!"
+    },
+    {
+     "from": "Mission failed! {n} fail cards.",
+     "record": "Mission failed!"
+    },
+    {
+     "from": "The traitors win! The traitors were {name} and {name}.",
+     "record": "The traitors win!"
+    }
+   ],
+   "extra": [
+    "Welcome to Missions. Check your phone to see which side you're on.",
+    "Mission failed!",
+    "The traitors win!"
    ]
   },
   "dares": {
@@ -774,25 +1835,45 @@
    ],
    "content": 0,
    "contentChars": 0,
-   "sample": []
+   "sample": [],
+   "reworded": [
+    {
+     "from": "{name} says they completed a mission!",
+     "record": null
+    },
+    {
+     "from": "Time's up! {name} completed the most missions!",
+     "record": "Time's up!"
+    }
+   ],
+   "extra": [
+    "Time's up!"
+   ]
   },
   "split": {
    "name": "Split the Room",
    "fixed": [
     "Welcome to Split the Room! Finish your what-if question so the room splits right down the middle. A perfect fifty-fifty scores the most!",
-    "Round two! Points count double. Just kidding. Same rules.",
-    "Everyone agreed. No points!"
+    "Everyone agreed. No points!",
+    "Round two! Points count double. Just kidding. Same rules."
    ],
    "withNames": [
     "{name} splits the room best!"
    ],
-   "content": 190,
-   "contentChars": 15435,
+   "content": 191,
+   "contentChars": 15573,
    "sample": [
-    "You get a robot that does all your chores, but you lose your sense of taste. Do you buy it?",
-    "You become famous overnight, but you have to wear socks on your hands. Do you want it?",
-    "You get a lifetime supply of your favorite candy, but your phone only plays polka music. Deal?"
-   ]
+    "You get a lifetime supply of your favorite candy, but you have to wear a clown nose every day. Deal?",
+    "You can eat any food without gaining weight, but your phone only plays polka music. Deal?",
+    "You win a free vacation, but every Tuesday you turn into a frog. Do you go?"
+   ],
+   "reworded": [
+    {
+     "from": "{name} splits the room best!",
+     "record": null
+    }
+   ],
+   "extra": []
   },
   "doodle": {
    "name": "Doodle Bluff",
@@ -801,51 +1882,147 @@
     "Here is the first masterpiece. What's this drawing called? Write a fake title to fool everyone.",
     "Which one is the real title?",
     "What's this drawing called? Write a fake title to fool everyone.",
-    "The real title was: A dog's dream job!",
-    "The real title was: The laziest dragon!",
-    "The real title was: A sad hot dog!",
-    "The real title was: A volcano taking a bath!",
-    "The real title was: A sock's great escape!"
+    "The real title was: A worm with big plans!",
+    "The real title was: The laziest dragon!"
    ],
    "withNames": [
     "{name} wins Doodle Bluff!"
    ],
-   "content": 25,
-   "contentChars": 1072,
+   "content": 27,
+   "contentChars": 1150,
    "sample": [
-    "The real title was: Dinner with a dinosaur!",
-    "The real title was: A worm with big plans!",
-    "The real title was: A very nervous cloud!"
-   ]
+    "The real title was: Penguins at the beach!",
+    "The real title was: A volcano taking a bath!",
+    "The real title was: A banana in disguise!"
+   ],
+   "reworded": [
+    {
+     "from": "{name} wins Doodle Bluff!",
+     "record": null
+    }
+   ],
+   "extra": []
   },
   "memory": {
    "name": "Memory Match",
-   "fixed": [
-    "It's a tie! Great memory, everyone!"
-   ],
+   "fixed": [],
    "withNames": [
     "Let's play Memory Match! Find two animals that are the same. {name}, you go first. Tap two cards on your phone.",
     "Not a match. {name}'s turn next!",
-    "A match! Two dinosaurs! Go again, {name}!",
+    "A match! Two cats! Go again, {name}!",
+    "A match! Two foxes! Go again, {name}!",
     "A match! Two pigs! Go again, {name}!",
-    "A match! Two foxs! Go again, {name}!",
-    "A match! Two octopuss! Go again, {name}!",
+    "A match! Two octopuses! Go again, {name}!",
     "A match! Two dogs! Go again, {name}!",
-    "A match! Two frogs! Go again, {name}!",
+    "A match! Two turtles! Go again, {name}!",
+    "A match! Two penguins! Go again, {name}!",
+    "A match! Two bunnies! Go again, {name}!",
+    "A match! Two bees! Go again, {name}!",
+    "A match! Two unicorns! Go again, {name}!",
     "A match! Two lions! Go again, {name}!",
     "A match! Two monkeys! Go again, {name}!",
-    "A match! Two penguins! Go again, {name}!",
+    "{name} found the most pairs!",
     "A match! Two cows! Go again, {name}!",
-    "A match! Two turtles! Go again, {name}!",
-    "A match! Two unicorns! Go again, {name}!",
-    "A match! Two cats! Go again, {name}!",
-    "A match! Two bunnys! Go again, {name}!",
-    "{name} found the most pairs!"
+    "A match! Two frogs! Go again, {name}!",
+    "A match! Two dinosaurs! Go again, {name}!"
    ],
    "content": 1,
-   "contentChars": 36,
+   "contentChars": 35,
    "sample": [
-    "A match! Two bees! Go again, {name}!"
+    "It's a tie! Great memory, everyone!"
+   ],
+   "reworded": [
+    {
+     "from": "Let's play Memory Match! Find two animals that are the same. {name}, you go first. Tap two cards on your phone.",
+     "record": "Let's play Memory Match! Find two animals that are the same. You go first. Tap two cards on your phone."
+    },
+    {
+     "from": "Not a match. {name}'s turn next!",
+     "record": "Not a match."
+    },
+    {
+     "from": "A match! Two cats! Go again, {name}!",
+     "record": "A match! Two cats! Go again!"
+    },
+    {
+     "from": "A match! Two foxes! Go again, {name}!",
+     "record": "A match! Two foxes! Go again!"
+    },
+    {
+     "from": "A match! Two pigs! Go again, {name}!",
+     "record": "A match! Two pigs! Go again!"
+    },
+    {
+     "from": "A match! Two octopuses! Go again, {name}!",
+     "record": "A match! Two octopuses! Go again!"
+    },
+    {
+     "from": "A match! Two dogs! Go again, {name}!",
+     "record": "A match! Two dogs! Go again!"
+    },
+    {
+     "from": "A match! Two turtles! Go again, {name}!",
+     "record": "A match! Two turtles! Go again!"
+    },
+    {
+     "from": "A match! Two penguins! Go again, {name}!",
+     "record": "A match! Two penguins! Go again!"
+    },
+    {
+     "from": "A match! Two bunnies! Go again, {name}!",
+     "record": "A match! Two bunnies! Go again!"
+    },
+    {
+     "from": "A match! Two bees! Go again, {name}!",
+     "record": "A match! Two bees! Go again!"
+    },
+    {
+     "from": "A match! Two unicorns! Go again, {name}!",
+     "record": "A match! Two unicorns! Go again!"
+    },
+    {
+     "from": "A match! Two lions! Go again, {name}!",
+     "record": "A match! Two lions! Go again!"
+    },
+    {
+     "from": "A match! Two monkeys! Go again, {name}!",
+     "record": "A match! Two monkeys! Go again!"
+    },
+    {
+     "from": "{name} found the most pairs!",
+     "record": null
+    },
+    {
+     "from": "A match! Two cows! Go again, {name}!",
+     "record": "A match! Two cows! Go again!"
+    },
+    {
+     "from": "A match! Two frogs! Go again, {name}!",
+     "record": "A match! Two frogs! Go again!"
+    },
+    {
+     "from": "A match! Two dinosaurs! Go again, {name}!",
+     "record": "A match! Two dinosaurs! Go again!"
+    }
+   ],
+   "extra": [
+    "Let's play Memory Match! Find two animals that are the same. You go first. Tap two cards on your phone.",
+    "Not a match.",
+    "A match! Two cats! Go again!",
+    "A match! Two foxes! Go again!",
+    "A match! Two pigs! Go again!",
+    "A match! Two octopuses! Go again!",
+    "A match! Two dogs! Go again!",
+    "A match! Two turtles! Go again!",
+    "A match! Two penguins! Go again!",
+    "A match! Two bunnies! Go again!",
+    "A match! Two bees! Go again!",
+    "A match! Two unicorns! Go again!",
+    "A match! Two lions! Go again!",
+    "A match! Two monkeys! Go again!",
+    "A match! Two cows! Go again!",
+    "A match! Two frogs! Go again!",
+    "A match! Two dinosaurs! Go again!"
    ]
   },
   "copycat": {
@@ -860,31 +2037,42 @@
    ],
    "content": 0,
    "contentChars": 0,
-   "sample": []
+   "sample": [],
+   "reworded": [
+    {
+     "from": "Round {n} Watch carefully!",
+     "record": null
+    },
+    {
+     "from": "{name} has the best memory! {n} in a row!",
+     "record": null
+    }
+   ],
+   "extra": []
   },
   "hunt": {
    "name": "Color Hunt",
    "fixed": [
     "Color Hunt! When I say go, run and touch it, then tap your phone. Ready?",
-    "Find something ORANGE! Go go go!",
-    "Get ready!",
-    "Find something WHITE! Go go go!",
-    "Someone",
-    "Find a SPOON! Go go go!",
-    "Find something PURPLE! Go go go!",
     "Find something YELLOW! Go go go!",
-    "Find a BOOK! Go go go!",
-    "Find something SOFT, like a pillow! Go go go!",
-    "Find something PINK! Go go go!",
-    "Touch your NOSE, then find a CHAIR! Go go go!",
-    "Find a SHOE! Go go go!",
-    "Find something with a STAR on it! Go go go!",
+    "Get ready!",
+    "Find something ORANGE! Go go go!",
+    "Someone",
     "Find something RED! Go go go!",
-    "Find something BLACK! Go go go!",
-    "Find something SQUARE, like a box! Go go go!",
-    "Find something ROUND, like a ball! Go go go!",
+    "Find something PURPLE! Go go go!",
     "Find something BLUE! Go go go!",
-    "Find something GREEN! Go go go!"
+    "Find a SHOE! Go go go!",
+    "Find something ROUND, like a ball! Go go go!",
+    "Find something SQUARE, like a box! Go go go!",
+    "Find something BROWN! Go go go!",
+    "Find something BLACK! Go go go!",
+    "Find something SOFT, like a pillow! Go go go!",
+    "Find something GREEN! Go go go!",
+    "Find something PINK! Go go go!",
+    "Find something with a STAR on it! Go go go!",
+    "Touch your NOSE, then find a CHAIR! Go go go!",
+    "Find something WHITE! Go go go!",
+    "Find a SPOON! Go go go!"
    ],
    "withNames": [
     "{name}",
@@ -892,9 +2080,26 @@
     "{name} is the hunt champion!"
    ],
    "content": 1,
-   "contentChars": 31,
+   "contentChars": 22,
    "sample": [
-    "Find something BROWN! Go go go!"
+    "Find a BOOK! Go go go!"
+   ],
+   "reworded": [
+    {
+     "from": "{name}",
+     "record": null
+    },
+    {
+     "from": "{name} was first! Great hunting!",
+     "record": "Great hunting!"
+    },
+    {
+     "from": "{name} is the hunt champion!",
+     "record": null
+    }
+   ],
+   "extra": [
+    "Great hunting!"
    ]
   },
   "freeze": {
@@ -911,41 +2116,84 @@
    ],
    "content": 0,
    "contentChars": 0,
-   "sample": []
+   "sample": [],
+   "reworded": [
+    {
+     "from": "Oops, {name} tapped too early!",
+     "record": null
+    },
+    {
+     "from": "{name} is the freeze champion!",
+     "record": null
+    }
+   ],
+   "extra": []
   },
   "haunted": {
    "name": "Haunted Quiz",
    "fixed": [
     "Pick a door. One of them has a ghost behind it…",
+    "Which planet is known as the Red Planet?",
     "Quick! Solve the sum to escape!",
     "Everyone escaped the basement!",
-    "What is the hardest natural substance?",
-    "How many players are on a basketball court for one team?",
-    "What color do you get by mixing blue and yellow?",
-    "What gas do plants take in from the air?"
+    "Which is the smallest planet in our solar system?"
    ],
    "withNames": [
     "{name} is now a ghost. Wooo.",
-    "The answer is {n} Everyone survives!",
-    "The answer is {n} {name} and {name}, to the basement!",
-    "{name} wins the Haunted Quiz!",
+    "Which instrument has {n} keys?",
     "{name} and {name} are now a ghost. Wooo.",
-    "The answer is {n} {name}, to the basement!"
+    "{name} wins the Haunted Quiz!",
+    "The answer is {n} {name}, to the basement!",
+    "The answer is {n} Everyone survives!",
+    "The answer is {n} {name} and {name}, to the basement!"
    ],
-   "content": 140,
-   "contentChars": 8822,
+   "content": 139,
+   "contentChars": 8544,
    "sample": [
-    "Welcome to the haunted house. Answer correctly to stay alive. Get one wrong, and you go to the basement. Which animal is the tallest in the world?",
-    "The answer is Giraffe. {name} and {name}, to the basement!",
-    "Which ocean is between the U.S. and Europe?"
+    "Welcome to the haunted house. Answer correctly to stay alive. Get one wrong, and you go to the basement. What is the hardest natural substance?",
+    "The answer is Diamond. {name} and {name}, to the basement!",
+    "The answer is Mars. {name} and {name}, to the basement!"
+   ],
+   "reworded": [
+    {
+     "from": "{name} is now a ghost. Wooo.",
+     "record": "Wooo."
+    },
+    {
+     "from": "Which instrument has {n} keys?",
+     "record": null
+    },
+    {
+     "from": "{name} and {name} are now a ghost. Wooo.",
+     "record": "Wooo."
+    },
+    {
+     "from": "{name} wins the Haunted Quiz!",
+     "record": null
+    },
+    {
+     "from": "The answer is {n} {name}, to the basement!",
+     "record": null
+    },
+    {
+     "from": "The answer is {n} Everyone survives!",
+     "record": null
+    },
+    {
+     "from": "The answer is {n} {name} and {name}, to the basement!",
+     "record": null
+    }
+   ],
+   "extra": [
+    "Wooo."
    ]
   },
   "bomb": {
    "name": "Bomb Squad",
    "fixed": [
     "The timer is running. Talk it out!",
-    "Wrong wire! Boom!",
-    "Defused! Nice work, team."
+    "Defused! Nice work, team.",
+    "Wrong wire! Boom!"
    ],
    "withNames": [
     "Bomb Squad! You are all one team. The bomb is on the TV. Each of your phones has some of the rules. Read them out loud. The first rule that applies is the one to follow. {name} is the only one who can cut.",
@@ -956,6 +2204,24 @@
    "contentChars": 43,
    "sample": [
     "Three strikes. The squad defused {n} bombs."
+   ],
+   "reworded": [
+    {
+     "from": "Bomb Squad! You are all one team. The bomb is on the TV. Each of your phones has some of the rules. Read them out loud. The first rule that applies is the one to follow. {name} is the only one who can cut.",
+     "record": "Bomb Squad! You are all one team. The bomb is on the TV. Each of your phones has some of the rules. Read them out loud. The first rule that applies is the one to follow."
+    },
+    {
+     "from": "Bomb {n} {name} has the cutters.",
+     "record": null
+    },
+    {
+     "from": "All done! The squad defused {n} of {n} bombs!",
+     "record": "All done!"
+    }
+   ],
+   "extra": [
+    "Bomb Squad! You are all one team. The bomb is on the TV. Each of your phones has some of the rules. Read them out loud. The first rule that applies is the one to follow.",
+    "All done!"
    ]
   },
   "potato": {
@@ -963,20 +2229,69 @@
    "fixed": [],
    "withNames": [
     "Boom! {name} got burned!",
-    "Name a dessert! {name} starts.",
-    "Name something cold! {name} starts.",
-    "Name a candy! {name} starts.",
+    "Name a body part! {name} starts.",
+    "Name a city! {name} starts.",
     "{name} kept the coolest hands!",
-    "Name an animal! {name} starts.",
-    "Name a breakfast food! {name} starts.",
-    "Name a movie! {name} starts."
+    "Name a fruit! {name} starts.",
+    "Name a song! {name} starts.",
+    "Name something you wear! {name} starts.",
+    "Name a candy! {name} starts.",
+    "Name a bird! {name} starts."
    ],
    "content": 41,
-   "contentChars": 2703,
+   "contentChars": 2827,
    "sample": [
-    "Hot Potato! Say an answer out loud, then toss the potato on your phone. Name a body part! {name} starts.",
-    "Name a sport! {name} starts.",
-    "Name a job! {name} starts."
+    "Hot Potato! Say an answer out loud, then toss the potato on your phone. Name a dessert! {name} starts.",
+    "Name a cartoon character! {name} starts.",
+    "Name a musical instrument! {name} starts."
+   ],
+   "reworded": [
+    {
+     "from": "Boom! {name} got burned!",
+     "record": "Boom!"
+    },
+    {
+     "from": "Name a body part! {name} starts.",
+     "record": "Name a body part!"
+    },
+    {
+     "from": "Name a city! {name} starts.",
+     "record": "Name a city!"
+    },
+    {
+     "from": "{name} kept the coolest hands!",
+     "record": null
+    },
+    {
+     "from": "Name a fruit! {name} starts.",
+     "record": "Name a fruit!"
+    },
+    {
+     "from": "Name a song! {name} starts.",
+     "record": "Name a song!"
+    },
+    {
+     "from": "Name something you wear! {name} starts.",
+     "record": "Name something you wear!"
+    },
+    {
+     "from": "Name a candy! {name} starts.",
+     "record": "Name a candy!"
+    },
+    {
+     "from": "Name a bird! {name} starts.",
+     "record": "Name a bird!"
+    }
+   ],
+   "extra": [
+    "Boom!",
+    "Name a body part!",
+    "Name a city!",
+    "Name a fruit!",
+    "Name a song!",
+    "Name something you wear!",
+    "Name a candy!",
+    "Name a bird!"
    ]
   },
   "mystery": {
@@ -989,148 +2304,258 @@
     "Time to accuse! On your phone, choose who did it, where, and how."
    ],
    "withNames": [],
-   "content": 24,
-   "contentChars": 2333,
+   "content": 25,
+   "contentChars": 2505,
    "sample": [
-    "The thief was {name} (The Pilot), in the Library, with the Fishing rod! And they got away with it!",
-    "The thief was {name} (The Detective's Cousin), in the Kitchen, with the Rope! And they got away with it!",
-    "The thief was {name} (The Mechanic), in the Ballroom, with the Roller skates! And they got away with it!"
-   ]
+    "The thief was {name} (The Gardener), in the Wine Cellar, with the Umbrella! And they got away with it!",
+    "The thief was {name} (The Butler), in the Observatory, with the Rope! And they got away with it!",
+    "The thief was {name} (The Magician), in the Ballroom, with the Fishing rod! And they got away with it!"
+   ],
+   "reworded": [],
+   "extra": []
   },
   "bracket": {
    "name": "Bracket Battle",
    "fixed": [
     "The bracket is set. Which answer will win it all? Pick one that is not yours.",
-    "Soup moves on.",
-    "Soup moves on, on a coin flip.",
-    "Seventeen bees moves on.",
-    "Seventeen bees moves on, on a coin flip.",
-    "Regret moves on.",
-    "The moon moves on.",
-    "The moon moves on, on a coin flip.",
-    "A tiny hat moves on.",
-    "My uncle moves on, on a coin flip.",
-    "My uncle moves on.",
-    "Glitter moves on, on a coin flip.",
     "A very confused goose moves on.",
-    "Round one. Glitter, or Soup?",
-    "A very confused goose moves on, on a coin flip.",
+    "Glitter moves on, on a coin flip.",
+    "Seventeen bees moves on.",
+    "Soup moves on.",
+    "The moon moves on.",
+    "Regret moves on.",
+    "Regret moves on, on a coin flip.",
     "Glitter moves on.",
-    "Regret moves on, on a coin flip."
+    "A tiny hat moves on.",
+    "My uncle moves on.",
+    "The moon moves on, on a coin flip.",
+    "A tiny hat moves on, on a coin flip.",
+    "Soup moves on, on a coin flip.",
+    "Seventeen bees moves on, on a coin flip.",
+    "My uncle moves on, on a coin flip."
    ],
    "withNames": [
     "{name} wins Bracket Battle!"
    ],
-   "content": 179,
-   "contentChars": 7952,
+   "content": 184,
+   "contentChars": 8147,
    "sample": [
-    "Bracket Battle! The best rule for a treehouse. Type your answer.",
-    "Round one. The moon, or Soup?",
-    "Round one. A very confused goose, or Soup?"
-   ]
+    "Bracket Battle! The best thing to yell when you win. Type your answer.",
+    "Round one. Glitter, or A very confused goose?",
+    "Round one. Glitter, or The moon?"
+   ],
+   "reworded": [
+    {
+     "from": "{name} wins Bracket Battle!",
+     "record": null
+    }
+   ],
+   "extra": []
   },
   "faker": {
    "name": "Act Natural",
    "fixed": [
-    "Act Natural! One of you is faking. Fingers. Read your phone, and keep it secret.",
+    "Act Natural! One of you is faking. Hands Up. Read your phone, and keep it secret.",
     "Three. Two. One. Go!",
+    "Hold it! The instruction was: Raise your hand if you have re-gifted a present. Who looked unsure?",
     "Vote for the faker.",
     "The faker is still hiding. One more try.",
-    "Same faker. Try again. Point. Read your phone, and keep it secret.",
-    "Hold it! The instruction was: Point at the person who would last longest without their phone. Who looked unsure?",
-    "New round, new faker. Point. Read your phone, and keep it secret.",
-    "Hold it! The instruction was: Point at the person with the best laugh. Who looked unsure?",
-    "Hold it! The instruction was: Point at the best cook in the room. Who looked unsure?",
-    "Same faker. Try again. Hands Up. Read your phone, and keep it secret.",
-    "Hold it! The instruction was: Raise your hand if you have eaten dessert before dinner this week. Who looked unsure?",
-    "Hold it! The instruction was: Point at the person most likely to adopt ten cats. Who looked unsure?",
     "Same faker. Try again. Fingers. Read your phone, and keep it secret.",
-    "Hold it! The instruction was: Point at the best dancer in the room. Who looked unsure?",
-    "Hold it! The instruction was: Point at the person most likely to survive in the wild. Who looked unsure?",
-    "Hold it! The instruction was: Raise your hand if you have cried at a cartoon. Who looked unsure?",
-    "New round, new faker. Hands Up. Read your phone, and keep it secret.",
-    "Hold it! The instruction was: Raise your hand if you can touch your toes. Who looked unsure?",
-    "Hold it! The instruction was: Raise your hand if you have ever broken a bone. Who looked unsure?",
-    "New round, new faker. Fingers. Read your phone, and keep it secret.",
-    "Hold it! The instruction was: Raise your hand if you have ever locked yourself out. Who looked unsure?",
-    "Hold it! The instruction was: Raise your hand if you have ever forgotten your own phone number. Who looked unsure?",
-    "Act Natural! One of you is faking. Point. Read your phone, and keep it secret.",
-    "Hold it! The instruction was: Raise your hand if you are a morning person. Who looked unsure?",
-    "Hold it! The instruction was: Raise your hand if you talk to your pets. Who looked unsure?",
-    "Hold it! The instruction was: Point at the person most likely to become famous. Who looked unsure?",
-    "Hold it! The instruction was: Point at the person most likely to talk their way out of a ticket. Who looked unsure?",
+    "Same faker. Try again. Hands Up. Read your phone, and keep it secret.",
     "Hold it! The instruction was: Raise your hand if you have been on TV. Who looked unsure?",
-    "Hold it! The instruction was: Point at the person who takes the longest to get ready. Who looked unsure?",
-    "Hold it! The instruction was: Raise your hand if you like pineapple on pizza. Who looked unsure?"
+    "New round, new faker. Point. Read your phone, and keep it secret.",
+    "Hold it! The instruction was: Point at the best dancer in the room. Who looked unsure?",
+    "New round, new faker. Hands Up. Read your phone, and keep it secret.",
+    "Hold it! The instruction was: Raise your hand if you have cried at a cartoon. Who looked unsure?",
+    "Hold it! The instruction was: Raise your hand if you have ever forgotten your own phone number. Who looked unsure?",
+    "Hold it! The instruction was: Raise your hand if you have ever locked yourself out. Who looked unsure?",
+    "Same faker. Try again. Point. Read your phone, and keep it secret.",
+    "Hold it! The instruction was: Point at the person most likely to adopt ten cats. Who looked unsure?",
+    "Act Natural! One of you is faking. Fingers. Read your phone, and keep it secret.",
+    "New round, new faker. Fingers. Read your phone, and keep it secret.",
+    "Hold it! The instruction was: Point at the person most likely to talk their way out of a ticket. Who looked unsure?",
+    "Hold it! The instruction was: Point at the person most likely to get lost. Who looked unsure?",
+    "Hold it! The instruction was: Raise your hand if you have ever broken a bone. Who looked unsure?",
+    "Hold it! The instruction was: Point at the person most likely to win a game show. Who looked unsure?",
+    "Hold it! The instruction was: Raise your hand if you have eaten dessert before dinner this week. Who looked unsure?",
+    "Hold it! The instruction was: Point at the loudest person in the room. Who looked unsure?",
+    "Hold it! The instruction was: Raise your hand if you talk to your pets. Who looked unsure?",
+    "Hold it! The instruction was: Raise your hand if you are a morning person. Who looked unsure?",
+    "Hold it! The instruction was: Raise your hand if you can touch your toes. Who looked unsure?",
+    "Hold it! The instruction was: Point at the person who would be the worst spy. Who looked unsure?"
    ],
    "withNames": [
-    "Hold it! The instruction was: Hold up {n} to {n} fingers: how much you like karaoke. Who looked unsure?",
-    "The faker got away with it all round. It was {name}!",
-    "Hold it! The instruction was: Hold up {n} to {n} fingers: how many countries you have visited ({n} means {n} or more). Who looked unsure?",
-    "Caught! {name} was faking it.",
-    "Hold it! The instruction was: Hold up {n} to {n} fingers: how good a driver you are. Who looked unsure?",
     "Hold it! The instruction was: Hold up {n} to {n} fingers: how many cups of coffee or tea you have a day. Who looked unsure?",
-    "Hold it! The instruction was: Hold up {n} to {n} fingers: how many siblings you have. Who looked unsure?",
-    "{name} wins!",
-    "Hold it! The instruction was: Hold up {n} to {n} fingers: how many hours of sleep you got last night ({n} means {n} or more). Who looked unsure?",
-    "Hold it! The instruction was: Hold up {n} to {n} fingers: how messy your room is right now. Who looked unsure?",
+    "The faker got away with it all round. It was {name}!",
     "Hold it! The instruction was: Hold up {n} to {n} fingers: how spicy you like your food. Who looked unsure?",
-    "Hold it! The instruction was: Hold up {n} to {n} fingers: how much you like camping. Who looked unsure?",
+    "Hold it! The instruction was: Hold up {n} to {n} fingers: how messy your room is right now. Who looked unsure?",
+    "Hold it! The instruction was: Hold up {n} to {n} fingers: how good you are at keeping secrets. Who looked unsure?",
+    "Caught! {name} was faking it.",
+    "{name} wins!",
     "Hold it! The instruction was: Hold up {n} to {n} fingers: how many times you hit snooze. Who looked unsure?",
-    "Hold it! The instruction was: Hold up {n} to {n} fingers: how much you like scary movies. Who looked unsure?"
+    "Hold it! The instruction was: Hold up {n} to {n} fingers: how much you like scary movies. Who looked unsure?",
+    "Hold it! The instruction was: Hold up {n} to {n} fingers: how much you like camping. Who looked unsure?",
+    "Hold it! The instruction was: Hold up {n} to {n} fingers: how good a driver you are. Who looked unsure?"
    ],
-   "content": 11,
-   "contentChars": 1054,
+   "content": 16,
+   "contentChars": 1638,
    "sample": [
-    "Hold it! The instruction was: Point at the person most likely to win a game show. Who looked unsure?",
-    "Hold it! The instruction was: Point at the person who would be the worst spy. Who looked unsure?",
-    "Hold it! The instruction was: Point at the person most likely to get lost. Who looked unsure?"
+    "Hold it! The instruction was: Hold up {n} to {n} fingers: how many countries you have visited ({n} means {n} or more). Who looked unsure?",
+    "Hold it! The instruction was: Point at the person who would last longest without their phone. Who looked unsure?",
+    "Hold it! The instruction was: Hold up {n} to {n} fingers: how much you like karaoke. Who looked unsure?"
+   ],
+   "reworded": [
+    {
+     "from": "Hold it! The instruction was: Hold up {n} to {n} fingers: how many cups of coffee or tea you have a day. Who looked unsure?",
+     "record": "Hold it! Who looked unsure?"
+    },
+    {
+     "from": "The faker got away with it all round. It was {name}!",
+     "record": "The faker got away with it all round."
+    },
+    {
+     "from": "Hold it! The instruction was: Hold up {n} to {n} fingers: how spicy you like your food. Who looked unsure?",
+     "record": "Hold it! Who looked unsure?"
+    },
+    {
+     "from": "Hold it! The instruction was: Hold up {n} to {n} fingers: how messy your room is right now. Who looked unsure?",
+     "record": "Hold it! Who looked unsure?"
+    },
+    {
+     "from": "Hold it! The instruction was: Hold up {n} to {n} fingers: how good you are at keeping secrets. Who looked unsure?",
+     "record": "Hold it! Who looked unsure?"
+    },
+    {
+     "from": "Caught! {name} was faking it.",
+     "record": "Caught!"
+    },
+    {
+     "from": "{name} wins!",
+     "record": null
+    },
+    {
+     "from": "Hold it! The instruction was: Hold up {n} to {n} fingers: how many times you hit snooze. Who looked unsure?",
+     "record": "Hold it! Who looked unsure?"
+    },
+    {
+     "from": "Hold it! The instruction was: Hold up {n} to {n} fingers: how much you like scary movies. Who looked unsure?",
+     "record": "Hold it! Who looked unsure?"
+    },
+    {
+     "from": "Hold it! The instruction was: Hold up {n} to {n} fingers: how much you like camping. Who looked unsure?",
+     "record": "Hold it! Who looked unsure?"
+    },
+    {
+     "from": "Hold it! The instruction was: Hold up {n} to {n} fingers: how good a driver you are. Who looked unsure?",
+     "record": "Hold it! Who looked unsure?"
+    }
+   ],
+   "extra": [
+    "Hold it! Who looked unsure?",
+    "The faker got away with it all round.",
+    "Caught!"
    ]
   },
   "meter": {
    "name": "Room Meter",
    "fixed": [
-    "Is this you? People who have laughed so hard they snorted. Yes or no."
+    "Is this you? People who can ride a bike with no hands. Yes or no.",
+    "Is this you? People who have gotten lost using GPS. Yes or no.",
+    "Is this you? People who have sent a text to the wrong person. Yes or no.",
+    "Is this you? People who have pretended to be on the phone to avoid someone. Yes or no."
    ],
    "withNames": [
     "{name} says {n} percent. Higher or lower?",
-    "The real answer: {n} percent.",
-    "{name}, what percent of this room have pretended to be on the phone to avoid someone?",
     "The real answer: {n} percent. So close!",
-    "{name}, what percent of this room have laughed so hard they snorted?",
+    "The real answer: {n} percent.",
+    "{name}, what percent of this room can ride a bike with no hands?",
+    "{name}, what percent of this room have gotten lost using GPS?",
     "{name} knows this room best!",
     "The real answer: {n} percent. Way off!",
-    "Is this you? People who have stayed up past {n} a.m. this week. Yes or no."
+    "{name}, what percent of this room have sent a text to the wrong person?"
    ],
-   "content": 75,
-   "contentChars": 6121,
+   "content": 69,
+   "contentChars": 5708,
    "sample": [
-    "Room Meter! Answer honestly. Nobody sees your answer. Is this you? People who have gone a whole day without their phone this year. Yes or no.",
-    "{name}, what percent of this room have gone a whole day without their phone this year?",
-    "Is this you? People who have pretended to be on the phone to avoid someone. Yes or no."
+    "Room Meter! Answer honestly. Nobody sees your answer. Is this you? People who have binge-watched a whole season in one day. Yes or no.",
+    "Is this you? People who have gone a whole day without their phone this year. Yes or no.",
+    "{name}, what percent of this room have gone a whole day without their phone this year?"
+   ],
+   "reworded": [
+    {
+     "from": "{name} says {n} percent. Higher or lower?",
+     "record": "Higher or lower?"
+    },
+    {
+     "from": "The real answer: {n} percent. So close!",
+     "record": "So close!"
+    },
+    {
+     "from": "The real answer: {n} percent.",
+     "record": null
+    },
+    {
+     "from": "{name}, what percent of this room can ride a bike with no hands?",
+     "record": "What percent of this room can ride a bike with no hands?"
+    },
+    {
+     "from": "{name}, what percent of this room have gotten lost using GPS?",
+     "record": "What percent of this room have gotten lost using GPS?"
+    },
+    {
+     "from": "{name} knows this room best!",
+     "record": null
+    },
+    {
+     "from": "The real answer: {n} percent. Way off!",
+     "record": "Way off!"
+    },
+    {
+     "from": "{name}, what percent of this room have sent a text to the wrong person?",
+     "record": "What percent of this room have sent a text to the wrong person?"
+    }
+   ],
+   "extra": [
+    "Higher or lower?",
+    "So close!",
+    "What percent of this room can ride a bike with no hands?",
+    "What percent of this room have gotten lost using GPS?",
+    "Way off!",
+    "What percent of this room have sent a text to the wrong person?"
    ]
   },
   "rebus": {
    "name": "Brain Teasers",
    "fixed": [
     "Brain Teasers! A different kind of puzzle every round. Type your answer. Faster is better.",
-    "Say it out loud.",
+    "Put them together.",
     "What does it say?.",
-    "What is it?.",
+    "Say it out loud.",
     "Zoomed in. What is it?.",
-    "Put them together."
+    "What is it?."
    ],
    "withNames": [
     "{name} has it!",
     "{name} wins Brain Teasers!"
    ],
-   "content": 124,
-   "contentChars": 3750,
+   "content": 118,
+   "contentChars": 3590,
    "sample": [
-    "Tuesday! {name} got it first.",
-    "Unscramble: on a hot dog.",
-    "Mustard! {name} got it first."
-   ]
+    "Ice cream! {name} got it first.",
+    "Long underwear! {name} got it first.",
+    "Peanut butter and jelly! {name} got it first."
+   ],
+   "reworded": [
+    {
+     "from": "{name} has it!",
+     "record": null
+    },
+    {
+     "from": "{name} wins Brain Teasers!",
+     "record": null
+    }
+   ],
+   "extra": []
   }
  }
 }

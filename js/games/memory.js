@@ -80,7 +80,7 @@ export function cue(s) {
 }
 export function cueEvent(s) {
   if (!s.eventId) return null;
-  if (s.last?.match) return { id: s.eventId, sound: 'win', say: `A match! Two ${NAMES[s.last.pic]}s! Go again, ${s.last.name}!` };
+  if (s.last?.match) return { id: s.eventId, sound: 'win', say: `A match! Two ${({ octopus: 'octopuses', fox: 'foxes', bunny: 'bunnies' })[NAMES[s.last.pic]] || NAMES[s.last.pic] + 's'}! Go again, ${s.last.name}!` };
   if (s.last && !s.last.match) return { id: s.eventId, sound: 'lose', say: `Not a match. ${nameOf(s, s.players[(s.turn + 1) % s.players.length].pid)}'s turn next!` };
   return { id: s.eventId, sound: 'tick', say: '' };
 }

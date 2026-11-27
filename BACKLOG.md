@@ -62,3 +62,4 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Decision: one host voice for all games, a second "night narrator" for Werewolf, Midnight Wolves and Haunted Quiz. Generate once (ElevenLabs), ship files with the app, no live generation.
 - Script: audio/SCRIPT.md (readable) and audio/lines.json (data), rebuilt by `node test/narration-script.mjs`.
 - To do: re-word lines that need a player name; decide whether question banks get recorded; list of sound effects to replace; wire recorded files in with the browser voice as fallback.
+- Nov 27: host lines written (js/quips.js, audio/QUIPS.md); name lines given a first automatic re-wording (audio/SCRIPT.md, needs a read-through: some leftovers are thin, e.g. "They were a Seer."); sound and music list with prompts in audio/SFX.md. Fifteen quip moments still need wiring, together with a recorded-audio player that queues lines and falls back to the browser voice.
