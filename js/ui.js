@@ -212,3 +212,35 @@ export function clawMarks() {
 
 // The TV tells the narrator who is playing and which game is on, so recorded lines can be matched in the right voice.
 export function voiceContext(names, game) { rec.names = names || []; rec.voice = voiceFor(game); }
+
+// One screen, no scrolling: when what's drawn is taller than the window, the whole game area is scaled down just
+// enough to fit (text re-wraps into the extra width that gives). Used by the TV page and the remote screen.
+export function fitScreen(app) {
+  if (!app) return 1;
+  const fits = () => { const r = app.getBoundingClientRect(); return r.bottom <= innerHeight - 4 && r.right <= innerWidth + 1; };
+  const b = document.body;
+  app.style.zoom = ''; app.style.maxWidth = ''; app.style.width = ''; app.style.boxSizing = ''; b.classList.remove('compact');
+  if (fits()) return 1;
+  // First tighten the layout (smaller header, less padding, name lists side by side); only then scale down.
+  b.classList.add('compact');
+  if (fits()) return 1;
+  // Shrinking frees width at the sides: let the game use it, so less shrinking is needed.
+  // Then scale. Shrinking frees width at the sides, so try both letting the game spread into it (text and lists
+  // re-flow wider and need less shrinking) and keeping its shape (better for boards that grow taller when wider).
+  const search = spread => {
+    const set = z => { app.style.zoom = z; app.style.maxWidth = spread ? 'none' : ''; app.style.width = spread ? 100 / z + '%' : ''; app.style.boxSizing = spread ? 'border-box' : ''; };
+    let lo = 0.4, hi = 1;
+    for (let i = 0; i < 7; i++) { const mid = (lo + hi) / 2; set(mid); if (fits()) lo = mid; else hi = mid; }
+    return { z: lo, set };
+  };
+  const a = search(true), k = search(false), best = a.z >= k.z ? a : k;
+  best.set(best.z);
+  return best.z;
+}
+export function keepFitted(app) {
+  let t = 0;
+  const go = () => { clearTimeout(t); t = setTimeout(() => fitScreen(app), 30); };
+  addEventListener('resize', go);
+  app.addEventListener('load', go, true);   // pictures arriving late change the height
+  return go;
+}

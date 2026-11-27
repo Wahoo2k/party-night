@@ -1,7 +1,7 @@
 // TV / host page: owns the room, the player list and the game state.
 import { GAMES, COMING_SOON, SHELVES, NIGHTS } from './games/index.js';
 import { openRoom } from './net.js';
-import { esc, store, newCode, say, sayLow, voiceContext, voice, voices, enableDpad, autofocus, drawScene, titleCard, confetti, clawMarks } from './ui.js';
+import { esc, store, newCode, say, sayLow, voiceContext, fitScreen, keepFitted, voice, voices, enableDpad, autofocus, drawScene, titleCard, confetti, clawMarks } from './ui.js';
 import { art } from './art.js';
 import { play, sfx, startAmbient, stopAmbient, startBed, stopBed, startLoop, stopLoop, quiet } from './sfx.js';
 import { newKeys, cleanPub, samePub, sharedKey, seal, unseal } from './secure.js';
@@ -12,6 +12,7 @@ import { quip } from './quips.js';
 
 const app = document.getElementById('app');
 const statusEl = document.getElementById('status');
+keepFitted(app);
 drawScene(document.getElementById('sky'));
 enableDpad();
 
@@ -813,6 +814,7 @@ function render() {
   app.querySelectorAll('[data-game]').forEach(b => (b.onclick = () => { host.gameId = b.dataset.game; host.screen = 'gather'; host.queue = []; host.night = null; if (sfx.on) play('lockin'); flash('wipe'); changed(); }));
   app.querySelectorAll('[data-shelf]').forEach(b => (b.onclick = () => { host.shelf = b.dataset.shelf; save(); render(); }));
   autofocus(app);
+  fitScreen(app);
   shareScreen();
 }
 

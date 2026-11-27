@@ -1,11 +1,12 @@
 // Remote screen: shows a room's TV picture, sounds and effects on a far-away laptop or phone. It only watches;
 // players still use play.html to play. The TV sends its drawn page on the room's "-tv" channel.
 import { openRoom } from './net.js';
-import { esc, store, uid, cleanCode, drawScene, say, titleCard, confetti, clawMarks } from './ui.js';
+import { esc, store, uid, cleanCode, drawScene, say, titleCard, confetti, clawMarks, fitScreen, keepFitted } from './ui.js';
 import { play, sfx, startBed, stopBed } from './sfx.js';
 
 const app = document.getElementById('app');
 const statusEl = document.getElementById('status');
+keepFitted(app);
 drawScene(document.getElementById('sky'));
 const params = new URLSearchParams(location.search);
 const embed = params.has('embed');
@@ -71,6 +72,7 @@ function onMessage(m) {
   deadline = +m.deadline || 0; paused = !!m.paused; barOn = !!m.bar;
   statusEl.textContent = `${m.status || ''} · remote screen`;
   if (!gameId) ceremonyOff();
+  fitScreen(app);
   tick();
 }
 
