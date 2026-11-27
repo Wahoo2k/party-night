@@ -1126,3 +1126,5 @@ body.finalround:not(.phone)::after{content:'FINAL ROUND';position:fixed;right:-7
 .join .qr{width:min(100%,200px);margin:6px auto 0}
 .join .code{margin:2px 0 10px;padding:6px 10px;border-radius:14px;background:#0e1230;box-shadow:0 0 0 3px var(--moon) inset;animation:breathe 3s ease-in-out infinite}
 .join h2{font-size:clamp(26px,2.6vw,44px);margin-bottom:6px}
+/* Hearts: each card played lands on the table */
+.hseat.won{animation:pulse .6s 2}

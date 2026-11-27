@@ -137,6 +137,8 @@ function reveal(s, now) {
     const pr = prompt(s);
     winners.forEach(i => { const pid = pr.pids[i]; s.titles[pid] = [...(s.titles[pid] || []), pr.q.replace(/^Who is /, '').replace(/\?$/, '')]; });
   }
+  // The last round is worth double.
+  if (s.n === s.rounds.length - 1) Object.keys(g).forEach(pid => (g[pid] *= 2));
   Object.entries(g).forEach(([pid, n]) => (s.scores[pid] = (s.scores[pid] || 0) + n));
   s.gained = g;
   s.winners = winners;
@@ -191,7 +193,7 @@ export function narration(s) {
 
 export function cue(s) {
   const pr = prompt(s);
-  if (s.phase === 'vote') return { sound: s.n === 0 ? 'join' : 'vote', wait: 900, title: pr.label, sub: `Round ${s.n + 1} of ${s.rounds.length}` };
+  if (s.phase === 'vote') return { sound: s.n === 0 ? 'join' : 'vote', wait: 900, title: pr.label, sub: s.n === s.rounds.length - 1 ? 'Final round · double points!' : `Round ${s.n + 1} of ${s.rounds.length}` };
   if (s.phase === 'reveal') return { sound: 'drumroll', after: 'safe', wait: 2000 };
   if (s.phase === 'over') return { sound: 'win', wait: 1600, title: 'Game Over', sub: 'Who read the room best?', tone: 'dawn', fx: 'confetti' };
   return null;

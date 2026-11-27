@@ -480,9 +480,10 @@ export function renderTV(v, el) {
     const head = v.result === 'caught' ? `<h2 class="win">Imposter caught!</h2><p class="say">${esc(v.imposterName)} was the imposter${v.guess ? ` and guessed "${esc(v.guess)}"` : ''}.</p>`
       : v.result === 'stole' ? `<h2 class="lose">Stolen!</h2><p class="say">${esc(v.imposterName)} was caught but guessed the word!</p>`
       : `<h2 class="lose">The imposter got away!</h2><p class="say">It was ${esc(v.imposterName)}. ${v.accusedName ? `You voted out ${esc(v.accusedName)} instead.` : 'The vote was tied.'}</p>`;
-    h = `${head}<div class="secret">The word was <b>${esc(v.word)}</b></div>${v.ballots?.length ? `<div class="tally ballots">${v.ballots.map(b => `<div class="${b.right ? 'win' : ''}">${esc(b.name)} → ${esc(b.vote)} ${b.right ? '✓' : ''}</div>`).join('')}</div>` : ''}${board}<div class="row"><button class="btn" data-host="again">Next round</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
+    h = `${head}<div class="secret">The word was <b>${esc(v.word)}</b></div>${board}<div class="row"><button class="btn" data-host="again">Next round</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
   }
-  el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel">${h}</div>${scores}</div>`;
+  const votes = v.phase === 'over' && v.ballots?.length ? `<div class="scores"><h3>Who voted for whom</h3>${v.ballots.map(b => `<div class="srow ${b.right ? 'win' : ''}"><span>${esc(b.name)}</span><b>→ ${esc(b.vote)} ${b.right ? '✓' : ''}</b></div>`).join('')}</div>` : '';
+  el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel">${h}</div><div class="side">${scores}${votes}</div></div>`;
 }
 
 export function renderPhone(v, el, send) {
