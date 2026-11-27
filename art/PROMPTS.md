@@ -19,3 +19,9 @@ Save each file into `art/` with the name shown. The app picks them up by name; a
 
 ## Art already made (full size, in art/)
 `werewolf.jpg`, `imposter.jpg`, `funny.jpg`, `quick.jpg`, `sketch.jpg`, `werewolf-bg.jpg`
+
+## In-game art (not covers)
+- `bg-<theme>.jpg` (16:9): painted backdrop behind every game in that theme (comic, paper, sketch, kids, show, noir, teams, felt). Empty middle, detail at the edges, no text, no people.
+- `midnight-<role>.jpg` (3:4): Midnight Wolves role portraits shown on the phone's "look at your card" screen. wolf/seer/villager are copies of the Werewolf portraits; robber, trouble, drunk (Sleepwalker), insomniac (Night Owl) are new.
+- Werewolf's `werewolf-bg.jpg` is also the backdrop for Midnight Wolves and Haunted House.
+- These files are not covers: keep them out of `PAINTED` in js/art.js.

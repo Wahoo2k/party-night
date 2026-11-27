@@ -167,7 +167,7 @@ export function phoneView(s, pid) {
   return v;
 }
 
-const card = (r, big) => `<div class="mwcard ${ROLES[r].team} ${big ? 'big' : ''}"><span>${ROLES[r].icon}</span><b>${esc(ROLES[r].name)}</b></div>`;
+const card = (r, big) => `<div class="mwcard ${ROLES[r].team} ${big ? 'big' : ''}">${big ? `<img class="rolepic" src="art/midnight-${r}.jpg" alt="" onerror="this.remove()">` : ''}<span>${ROLES[r].icon}</span><b>${esc(ROLES[r].name)}</b></div>`;
 export function renderTV(v, el) {
   document.body.classList.toggle('night', ['look', 'night'].includes(v.phase));
   document.body.classList.toggle('day', ['day', 'vote'].includes(v.phase) || (v.phase === 'over' && v.result.village));
