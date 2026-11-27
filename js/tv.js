@@ -1,5 +1,5 @@
 // TV / host page: owns the room, the player list and the game state.
-import { GAMES, COMING_SOON } from './games/index.js';
+import { GAMES, COMING_SOON, SHELVES } from './games/index.js';
 import { openRoom } from './net.js';
 import { esc, store, newCode, say, voice, voices, enableDpad, autofocus, drawScene, titleCard, confetti, clawMarks } from './ui.js';
 import { play, sfx, startAmbient, stopAmbient } from './sfx.js';
@@ -281,7 +281,8 @@ function renderLobby() {
       ${(() => { const p = host.players.find(x => x.pid === editing); return p ? `<div class="editbox"><label for="rename">Rename ${esc(p.name)}</label><div class="row"><input id="rename" maxlength="${MAX_NAME}" value="${esc(p.name)}" autocomplete="off"><button class="btn" data-host="rename">Save</button><button class="btn ghost" data-host="randomname">Random name</button><button class="btn ghost" data-host="kick">Remove player</button><button class="btn ghost" data-host="canceledit">Cancel</button></div></div>` : ''; })()}
       <h3>Game</h3>
       <div class="games">
-        ${Object.values(GAMES).map(m => `<button class="game ${m.meta.id === host.gameId ? 'on' : ''}" data-game="${m.meta.id}">${m.meta.kids ? '<span class="kidbadge">👶 Little kids</span>' : ''}<b>${esc(m.meta.name)}</b><span>${esc(m.meta.blurb)}</span><small>${m.meta.min}–${m.meta.max} players</small></button>`).join('')}
+        <div class="shelves">${SHELVES.map(f => `<button class="shelf ${(host.shelf || 'all') === f.id ? 'on' : ''}" data-shelf="${f.id}">${esc(f.name)}</button>`).join('')}</div>
+        ${Object.values(GAMES).filter(m => { const f = SHELVES.find(x => x.id === (host.shelf || 'all')); return !f?.games || f.games.includes(m.meta.id); }).map(m => `<button class="game ${m.meta.id === host.gameId ? 'on' : ''}" data-game="${m.meta.id}">${m.meta.kids ? '<span class="kidbadge">👶 Little kids</span>' : ''}<b>${esc(m.meta.name)}</b><span>${esc(m.meta.blurb)}</span><small>${m.meta.min}–${m.meta.max} players</small></button>`).join('')}
         ${COMING_SOON.map(c => `<div class="game soon"><b>${esc(c.name)}</b><span>${esc(c.blurb)}</span><small>Coming soon</small></div>`).join('')}
       </div>
       <div class="row">
@@ -331,6 +332,7 @@ function render() {
   const vsel = app.querySelector('#vsel');
   if (vsel) vsel.onchange = () => { voice.name = vsel.value; say('Good evening, villagers.', true); };
   app.querySelectorAll('[data-game]').forEach(b => (b.onclick = () => { host.gameId = b.dataset.game; changed(); }));
+  app.querySelectorAll('[data-shelf]').forEach(b => (b.onclick = () => { host.shelf = b.dataset.shelf; save(); render(); }));
   autofocus(app);
 }
 

@@ -868,3 +868,8 @@ button.bwire{cursor:pointer;padding:8px 0}button.bwire span{height:22px}
 .brules{display:grid;gap:8px;margin:10px 0}
 .brules div{padding:12px 14px;border-radius:12px;background:#f4e9c1;color:#0e1230;font:700 17px/1.3 Outfit,sans-serif}
 .brules b{display:block;font-size:13px;color:#a8261c;margin-bottom:2px}
+/* lobby shelves */
+.shelves{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px;grid-column:1/-1}
+.shelf{padding:8px 14px;border-radius:99px;border:2px solid var(--line);background:transparent;color:var(--ink);font:700 15px/1 system-ui,sans-serif;cursor:pointer}
+.shelf.on{background:var(--moon);color:#0e1230;border-color:var(--moon)}
+.game .kidbadge{position:static;display:inline-block;justify-self:start;margin-bottom:4px}
