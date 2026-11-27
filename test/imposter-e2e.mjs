@@ -36,7 +36,7 @@ await tv.waitForTimeout(3500);
 const s = await st();
 console.log(s.phase, s.result, s.word, 'imposter', s.imposter.startsWith('bot') ? 'bot' : 'Tom', s.clues.map(c => c.text).join(','));
 await tv.screenshot({ path: 'test/i-tv-over.png' }); await me.screenshot({ path: 'test/i-over.png' });
-await tv.click('[data-host=again]'); await tv.waitForTimeout(500);
+await tv.click('.endcard[data-host=again]'); await tv.waitForTimeout(500);
 const s2 = await st(); console.log('round2', s2.round, s2.phase, 'scores kept', JSON.stringify(s2.scores));
 console.log('errors', errors);
 await b.close();

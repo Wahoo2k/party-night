@@ -29,7 +29,7 @@ console.log('phase', (await st())?.phase, JSON.stringify(saw)); await tv.waitFor
 saw.place = await me.evaluate(() => document.querySelector('.myplace')?.textContent);
 await me.screenshot({ path: (process.env.SHOTS || 'test') + '/phone-over.png' });
 await tv.evaluate(() => document.querySelector('.ceremony')?.click()); await tv.waitForTimeout(800);
-await tv.click('[data-host=lobby]'); await tv.waitForSelector('[data-host=awards]'); await tv.click('[data-host=awards]'); await tv.waitForTimeout(3500);
+await tv.click('.endcard[data-host=lobby]'); await tv.waitForSelector('[data-host=awards]'); await tv.click('[data-host=awards]'); await tv.waitForTimeout(3500);
 saw.awards = await tv.evaluate(() => document.querySelectorAll('.naward').length);
 await tv.screenshot({ path: (process.env.SHOTS || 'test') + '/night-awards.png' });
 console.log(JSON.stringify(saw), 'errors', errors);

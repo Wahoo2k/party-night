@@ -532,10 +532,11 @@ let rowAt = {};
 function slideScores() {
   const next = {};
   app.querySelectorAll('.scores .srow').forEach(el => {
-    const k = el.firstElementChild?.textContent || '', y = el.getBoundingClientRect().top;
-    next[k] = y;
-    const dy = rowAt[k] === undefined ? 0 : rowAt[k] - y;
-    if (Math.abs(dy) > 4 && el.animate) { el.animate([{ transform: `translateY(${dy}px)`, background: dy > 0 ? '#3a8f6a66' : '#0000' }, { transform: 'none', background: '#0000' }], { duration: 700, easing: 'cubic-bezier(.2,.9,.3,1)' }); }
+    // Position inside the score list itself, so moving or rescaling the whole stage doesn't count as a rank change.
+    const k = el.firstElementChild?.textContent || '', x = el.offsetLeft, y = el.offsetTop;
+    next[k] = [x, y];
+    const was = rowAt[k], dx = was ? was[0] - x : 0, dy = was ? was[1] - y : 0;
+    if ((Math.abs(dy) > 4 || Math.abs(dx) > 4) && el.animate) { el.animate([{ transform: `translate(${dx}px,${dy}px)`, boxShadow: '0 0 0 3px #8fe0c4' }, { transform: 'none', boxShadow: '0 0 0 0 #8fe0c400' }], { duration: 800, easing: 'cubic-bezier(.2,.9,.3,1)' }); }
   });
   rowAt = next;
 }

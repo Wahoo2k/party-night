@@ -1871,3 +1871,105 @@ body.onstage[data-game=spin] .used span{font-size:18px;padding:5px 9px}
 #joinqr{font:600 clamp(11px,.9vw,15px)/1.2 Outfit,system-ui,sans-serif!important;letter-spacing:0!important;opacity:1!important}
 #joinqr span,#joinqr b{font-family:Outfit,system-ui,sans-serif!important}
 body.onstage[data-game=werewolf] .stage>.roster .chip,body.onstage[data-game=werewolf] .stage>.roster .chip .nm{font:700 16px/1.2 Outfit,sans-serif!important;letter-spacing:0}
+
+/* ===== Stage type for the couch: applies to every game on the stage unless it has its own screen ===== */
+body.onstage .stage .panel>.cat,body.onstage .stage .panel .cat:first-child{font-size:17px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.9}
+body.onstage .stage .panel>h2{font-size:44px;line-height:1.1}
+body.onstage .stage .panel .cq{font-size:44px;line-height:1.15}
+body.onstage .stage .panel .say{font-size:26px}
+body.onstage .stage .panel .muted{font-size:19px}
+body.onstage .stage .panel .clock{font-size:76px}
+body.onstage .stage .panel .say .clock,body.onstage .stage .panel p .clock{font-size:1.25em}
+body.onstage .stage .panel .meter{height:18px}
+body.onstage .stage .panel .roster .chip{font-size:19px;padding:8px 14px}
+body.onstage .stage .side .tscore{font-size:76px}
+body.onstage .stage .side .scores h3{font-size:24px}
+
+/* ===== Hot Potato ===== */
+body.onstage[data-game=potato] .stage .panel{background:none!important;border:0!important;box-shadow:none!important;padding:0!important;text-align:center}
+body.onstage[data-game=potato] .cq,body.onstage[data-game=potato] .stage .panel>h2{display:inline-block;margin:6px 0 0;padding:12px 30px;border-radius:18px;background:#fff7e6;color:#3a2412;font:900 56px/1.1 Outfit,sans-serif;text-shadow:none;box-shadow:0 12px 30px #0007}
+body.onstage[data-game=potato] .potato{font-size:250px;line-height:1;margin:6px 0;filter:drop-shadow(0 18px 14px #0008)}
+body.onstage[data-game=potato] .potato+*,body.onstage[data-game=potato] .stage .panel .say{font-size:34px}
+body.onstage[data-game=potato] .stage .panel b{font-size:1.1em}
+body.onstage[data-game=potato] .stage .panel .lose{display:inline-block;padding:10px 26px;border-radius:16px;background:#c0392b;color:#fff;font:900 50px/1.1 Outfit,sans-serif}
+
+/* ===== Quick Games ===== */
+body.onstage[data-game=quick] .stage .panel{background:#1a0f3de6!important}
+body.onstage[data-game=quick] .cq{font:900 54px/1.1 Outfit,sans-serif;color:#ffd166;margin:4px 0 18px}
+body.onstage[data-game=quick] .bars{gap:14px}
+body.onstage[data-game=quick] .barrow{grid-template-columns:minmax(0,13em) minmax(0,1fr) 3ch}
+body.onstage[data-game=quick] .barrow .bl{font-size:30px}
+body.onstage[data-game=quick] .barrow .bt{height:44px;border-radius:12px}
+body.onstage[data-game=quick] .barrow b{font-size:36px}
+body.onstage[data-game=quick] .barrow small{font-size:18px}
+body.onstage[data-game=quick] .answers .ans{font-size:28px;padding:16px 20px}
+body.onstage[data-game=quick] .splitroom{font-size:34px}
+
+/* ===== Bracket Battle: same comic face-off as Funny Answers ===== */
+body.onstage[data-game=bracket] .cq{margin:0 0 20px;padding:14px 26px;border-radius:18px;background:#fff;color:#1b1147;font:800 42px/1.1 Outfit,sans-serif;text-shadow:none;border:5px solid #1b1147;box-shadow:8px 8px 0 #1b1147;transform:rotate(-1deg);text-align:center}
+body.onstage[data-game=bracket] .faceoff{gap:0;grid-template-columns:minmax(0,1fr) 100px minmax(0,1fr);margin:0 0 16px}
+body.onstage[data-game=bracket] .fa{min-height:170px;padding:18px 22px;border-radius:24px;border:5px solid #1b1147;background:#7fe3ff;color:#1b1147;box-shadow:8px 8px 0 #1b1147}
+body.onstage[data-game=bracket] .fa:last-child{background:#ffb3d1}
+body.onstage[data-game=bracket] .fa-text{font:800 38px/1.1 Outfit,sans-serif}
+body.onstage[data-game=bracket] .fa-by{font:700 22px Outfit,sans-serif;color:#1b1147}
+body.onstage[data-game=bracket] .fa-by .fa-votes{color:#1b1147}
+body.onstage[data-game=bracket] .vs{align-self:center;justify-self:center;z-index:2;display:grid;place-items:center;width:112px;height:112px;margin:0 -6px;background:#ff3b5c;color:#fff;font:900 44px Outfit,sans-serif;clip-path:polygon(50% 0,61% 16%,79% 6%,80% 26%,98% 28%,88% 45%,100% 60%,82% 66%,84% 86%,65% 80%,54% 100%,42% 82%,22% 92%,22% 71%,2% 66%,14% 50%,0 34%,20% 28%,18% 8%,38% 17%)}
+body.onstage[data-game=bracket] .fa.won{box-shadow:8px 8px 0 #ff3b5c;transform:scale(1.04) rotate(-1.5deg)}
+body.onstage[data-game=bracket] .faceoff.result .fa:not(.won){filter:saturate(.45) brightness(.86);opacity:1}
+body.onstage[data-game=bracket] .bktree{font-size:18px}
+body.onstage[data-game=bracket] .bkchamp{font-size:64px}
+
+/* ===== Two Truths & a Lie ===== */
+body.onstage[data-game=truths] .stage .panel>h2{font-size:52px}
+body.onstage[data-game=truths] .ttlist{gap:14px}
+body.onstage[data-game=truths] .ttline{padding:20px 26px;border-radius:16px;box-shadow:0 8px 18px #0005}
+body.onstage[data-game=truths] .ttline span{width:54px;height:54px;font-size:28px}
+body.onstage[data-game=truths] .ttline b{font-size:36px}
+body.onstage[data-game=truths] .ttline small{font-size:20px}
+body.onstage[data-game=truths] .ttline.true{background:#c9f2d8;opacity:1}
+
+/* ===== Mind Meld and Room Meter: the dial is the screen ===== */
+body.onstage[data-game=meld] .stage .panel,body.onstage[data-game=meter] .stage .panel{text-align:center}
+body.onstage[data-game=meld] .stage .panel [style*="linear-gradient"],body.onstage[data-game=meld] .stage .panel [class*=bar],body.onstage[data-game=meter] .stage .panel [class*=bar],body.onstage[data-game=meter] .stage .panel [class*=track]{min-height:54px}
+body.onstage[data-game=meld] .cq,body.onstage[data-game=meter] .cq{font-size:48px}
+
+/* ===== Crowd Says ===== */
+body.onstage[data-game=crowd] .stage{--stage-w:1260}
+body.onstage[data-game=crowd] .cq{font-size:46px;color:#ffd166}
+body.onstage[data-game=crowd] .cboard{gap:12px;padding:16px}
+body.onstage[data-game=crowd] .cboard>div{gap:12px}
+body.onstage[data-game=crowd] .cslot{min-height:72px;font-size:30px;border-radius:12px}
+body.onstage[data-game=crowd] .cslot.hid .cnum{width:50px;height:50px;font-size:26px}
+body.onstage[data-game=crowd] .strikes{font-size:60px}
+
+/* ===== Brain Teasers ===== */
+body.onstage[data-game=rebus] .rbbox{min-height:330px;font-size:1.25em;box-shadow:0 14px 30px #0007}
+body.onstage[data-game=rebus] .rbask{font-size:24px;letter-spacing:.1em}
+body.onstage[data-game=rebus] .rbanswer{font-size:64px}
+
+/* ===== Color Clash ===== */
+body.onstage[data-game=clash] .stage{--stage-w:1260}
+body.onstage[data-game=clash] .ccpile .cc{width:170px;font-size:64px;border-width:7px}
+body.onstage[data-game=clash] .ccseat{font-size:21px;padding:10px 14px}
+body.onstage[data-game=clash] .ccnow{font-size:30px}
+
+/* ===== Salad Bowl ===== */
+body.onstage[data-game=bowl] .stage .panel{text-align:center}
+body.onstage[data-game=bowl] .tabooclock{width:240px;border-width:12px}
+body.onstage[data-game=bowl] .tabooclock .clock{font-size:104px;line-height:1}
+body.onstage[data-game=bowl] .saladbowl{width:260px}
+body.onstage[data-game=bowl] .saladbowl span{font-size:76px}
+body.onstage[data-game=bowl] .history span{font-size:22px;padding:8px 16px}
+
+/* ===== Imposter ===== */
+body.onstage[data-game=imposter] .stage{--stage-w:1260}
+body.onstage[data-game=imposter] .cluerow{padding:14px 18px;gap:14px}
+body.onstage[data-game=imposter] .cluerow b{font-size:26px}
+body.onstage[data-game=imposter] .clue{font-size:26px;min-height:44px}
+body.onstage[data-game=imposter] .secret{font-size:54px}
+body.onstage[data-game=imposter] .tally div{font-size:24px}
+
+/* ===== Memory Match ===== */
+body.onstage[data-game=memory] .stage .panel>h2{font-size:46px}
+body.onstage[data-game=rebus] .rbbox .rb-pic{width:290px;height:290px}
+body.onstage[data-game=rebus] .rbbox .rb-pic span{width:100%;height:100%}

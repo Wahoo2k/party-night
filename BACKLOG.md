@@ -100,3 +100,9 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Bug fixed: the end-screen cards reused the class name of Secret Agents' word tiles and broke that grid for about an hour on the live site; the end cards are now `.endcard`.
 - Test notes: test/e2e.mjs (full Werewolf game) updated for the hub and end screen and passes. test/audience.mjs, imposter-e2e.mjs and phone-e2e.mjs still click the old in-game Play again / Back buttons and need the same update. The local test server can no longer be left running in the background here; scratch script with-server.sh starts and stops it per command.
 - Not yet given a phase-by-phase look: Act Natural vote and result, Werewolf vote and verdict, Trivia Board wager and final, Spin & Solve round end. Needs a pass with real players or slower bots.
+
+## Second twelve (Nov 27)
+- Couch-size type for every game on the stage (headings, prompts, clocks, chips), plus own touches for Hot Potato, Quick Games, Bracket Battle (comic face-off), Two Truths & a Lie, Mind Meld, Room Meter, Crowd Says, Brain Teasers, Color Clash, Salad Bowl, Imposter, Memory Match. CSS only.
+- Score rows now slide by their place in the list, so rescaling the stage no longer makes them fly.
+- Tests brought up to date for the hub and end screen: e2e (Werewolf), audience (now on Funny Answers, since Quick Games lets late joiners play), imposter-e2e, phone-e2e.
+- Lighter than the headliners: these twelve got size and styling, not new layouts. Bracket Battle's result and Imposter's vote were not seen on screen (bots too fast).

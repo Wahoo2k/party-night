@@ -10,8 +10,8 @@ const code = (await tv.textContent('.code')).trim();
 const join = async n => { const p = await ctx.newPage(); p.on('pageerror', e => errors.push(n + ' ' + e.message)); await p.setViewportSize({ width: 390, height: 760 }); await p.goto(base + 'play.html?local=1'); await p.fill('#code', code); await p.fill('#name', n); await p.click('#join'); return p; };
 const me = await join('Tom'); await me.waitForSelector("text=You're in");
 for (let i = 0; i < 3; i++) await tv.click('[data-host=addbot]');
-await tv.click('[data-host=relaxed]');
-await tv.click('[data-game=quick]'); await tv.click('[data-host=start]');
+await tv.click('[data-host=settings]'); await tv.click('[data-host=relaxed]'); await tv.click('[data-host=menu]');
+await tv.click('[data-game=funny]'); await tv.click('[data-host=start]');
 await tv.waitForTimeout(1500);
 const s1 = await tv.evaluate(() => JSON.parse(localStorage.getItem('pg-host')));
 console.log('vote deadline secs', Math.round((s1.state.deadline - Date.now()) / 1000), '(25 normal, ~37 relaxed)');
@@ -22,7 +22,7 @@ await tv.screenshot({ path: 'test/a-tv.png' });
 await tv.click('[data-host=next]'); await tv.waitForTimeout(300);
 // end game quickly: jump to over and play again
 for (let i = 0; i < 40; i++) { const st = await tv.evaluate(() => JSON.parse(localStorage.getItem('pg-host')).state.phase); if (st === 'over') break; await tv.click('[data-host=next]').catch(() => {}); await tv.waitForTimeout(150); }
-await tv.waitForSelector('[data-host=again]'); await tv.click('[data-host=again]'); await tv.waitForTimeout(800);
+await tv.waitForSelector('.endcard[data-host=again]'); await tv.click('.endcard[data-host=again]'); await tv.waitForTimeout(800);
 const h = await tv.evaluate(() => JSON.parse(localStorage.getItem('pg-host')));
 console.log('players now', h.players.map(p => p.name).join(', '), '| audience', h.audience.length);
 await kid.waitForSelector('[data-pick]', { timeout: 5000 }).then(() => console.log('Grandma got a seat and a voting screen')).catch(() => console.log('no seat?'));
