@@ -143,3 +143,10 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Demo mode: `tv.html?local=1&demo=<game id>` plays that game with bots on a loop, saves and reads nothing in the browser, and is silent (`DEMO` in js/ui.js). The website uses it in a frame: a "See it play" section on the home page and a "Watch it play" window on every game card with the intro steps beside it.
 - Narration script rebuilt after the renames and GOAT Toss: 3,992 clips, about 105,000 characters. No "duck" lines remain. Intro steps are on screen only and are not narrated.
 - Stale test fixed: away-e2e expected role names on the first how-to sheet, but the sheet hides role tips until the player has looked at their card.
+
+## ElevenLabs set-up (Nov 27)
+- `tools/eleven.mjs` makes the narration clips (audio/voice/<id>.mp3), sound effects, stings and music (audio/sfx/<name>.mp3) and rewrites audio/manifest.json. Commands: estimate, voices, audition, voice, sfx, music. It skips files that exist, so a run that stops can be continued. Key comes from ELEVENLABS_API_KEY only.
+- `audio/voices.json`: which voice reads the host and night lines (name or voice id; both are still SET-ME), model, voice settings, audition lines.
+- `.github/workflows/audio.yml`: "Audio" workflow, run by hand from the Actions tab; uses the repository secret ELEVENLABS_API_KEY and commits the files.
+- One clean pass is about 113,000 credits (narration 104,798 characters; 31 effects and stings at about 200 each; 3 music pieces). Credit figures for effects and music are from third-party pages, not ElevenLabs' own.
+- Tested only against a stand-in server here; the sandbox can't reach ElevenLabs. The music endpoint (/v1/music with prompt and music_length_ms) is from memory and unverified.

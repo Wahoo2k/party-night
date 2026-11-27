@@ -1,0 +1,48 @@
+# Makes Party Night's recorded audio with ElevenLabs and commits the files. Started by hand from the Actions tab.
+# The API key lives in the repository secret ELEVENLABS_API_KEY and is never printed.
+name: Audio
+on:
+  workflow_dispatch:
+    inputs:
+      job:
+        description: What to do
+        type: choice
+        default: estimate
+        options: [estimate, voices, audition, voice, sfx, music]
+      voices:
+        description: 'audition only: voice names to try, separated by commas'
+        default: ''
+      options:
+        description: 'Extra options, e.g. --game funny --limit 50, --only join,win --redo, --models eleven_v3'
+        default: ''
+permissions:
+  contents: write
+concurrency: audio
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Generate
+        env:
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          JOB: ${{ inputs.job }}
+          VOICES: ${{ inputs.voices }}
+          OPTIONS: ${{ inputs.options }}
+        run: |
+          set -o pipefail
+          if [ "$JOB" = audition ]; then node tools/eleven.mjs audition "$VOICES" $OPTIONS | tee -a "$GITHUB_STEP_SUMMARY"
+          else node tools/eleven.mjs "$JOB" $OPTIONS | tee -a "$GITHUB_STEP_SUMMARY"; fi
+      - name: Save the files
+        if: always()
+        run: |
+          node tools/eleven.mjs manifest || true
+          git config user.name "party-night-audio"
+          git config user.email "audio@users.noreply.github.com"
+          git add audio
+          git diff --cached --quiet && echo "Nothing new to save." && exit 0
+          git commit -qm "Audio: ${{ inputs.job }} ${{ inputs.options }}"
+          git pull -q --rebase && git push -q
