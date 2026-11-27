@@ -290,8 +290,7 @@ function tossRun(root, v) {
 const CUP_SVG = '<svg viewBox="0 0 120 150" aria-hidden="true"><defs><linearGradient id="gcupg" x1="0" x2="1"><stop offset="0" stop-color="#4a2a14"/><stop offset=".45" stop-color="#8a5226"/><stop offset="1" stop-color="#3a200f"/></linearGradient></defs><path d="M14 14h92l-12 124a8 8 0 0 1-8 7H34a8 8 0 0 1-8-7z" fill="url(#gcupg)"/><ellipse cx="60" cy="15" rx="47" ry="11" fill="#2a1609"/><ellipse cx="60" cy="15" rx="47" ry="11" fill="none" stroke="#e3b26a" stroke-width="4"/><path d="M19 44h82M23 112h74" stroke="#e3b26a" stroke-width="3" stroke-dasharray="7 6" opacity=".75"/></svg>';
 function tossScene(v) {
   const last = v.last, since = last && v.animating ? TIMES.anim - (v.animLeft ?? 0) : 0;
-  return `<div class="gtable g3d ${last ? '' : 'empty'}"><div class="gworld">
-    <div class="gtop"><i class="gsh"></i><i class="gsh"></i><i class="gsh cupsh"></i></div><div class="glip"></div>
+  return `<div class="gtable g3d ${last ? '' : 'empty'}"><div class="gtop"><i class="gsh"></i><i class="gsh"></i><i class="gsh cupsh"></i></div><div class="glip"></div><div class="gworld">
     <div class="gcup ${last && v.animating ? 'pour' : ''}" style="animation-delay:-${Math.round(since)}ms">${CUP_SVG}</div>
     ${last ? [last.a, last.b].map(k => `<div class="g3"><span class="goatpic"><img src="art/goat.png" alt="">${!last.pile && k === 'right' ? '' : '<u></u>'}</span></div>`).join('') : ''}
   </div>${last ? '' : '<p class="say">Swipe up on your phone to toss!</p>'}</div>`;

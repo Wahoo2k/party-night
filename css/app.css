@@ -2229,3 +2229,7 @@ body:is([data-game=werewolf],[data-game=midnight],[data-game=haunted]):not(.phon
 @keyframes firefly{0%{transform:translate(0,0);opacity:0}12%{opacity:.9}35%{opacity:.25}50%{transform:translate(46px,-52vh);opacity:.9}70%{opacity:.2}85%{opacity:.8}100%{transform:translate(-34px,-108vh);opacity:0}}
 body.demo #backdrop{display:none!important}
 @media (prefers-reduced-motion:reduce){#backdrop{display:none!important}}
+/* The tabletop is drawn as its own layer under the pieces, so a piece resting on its side is never cut off by it. */
+.g3d>.gtop{left:50%;top:calc(89% - 900px);bottom:auto;margin-left:-850px;transform:translateZ(-120px) rotateX(90deg)}
+.g3d>.glip{left:50%;top:89%;margin-left:-850px;transform:translateZ(-120px)}
+.g3d .g3 .goatpic{transform-origin:50% 50%}
