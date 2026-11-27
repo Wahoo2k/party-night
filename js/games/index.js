@@ -45,14 +45,15 @@ import * as hunt from './hunt.js';
 import * as freeze from './freeze.js';
 import * as haunted from './haunted.js';
 import * as bomb from './bomb.js';
+import * as potato from './potato.js';
 
-export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards, hearts, shade, estimate, truths, wordhunt, midnight, missions, dares, split, doodle, memory, copycat, hunt, freeze, haunted, bomb };
+export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards, hearts, shade, estimate, truths, wordhunt, midnight, missions, dares, split, doodle, memory, copycat, hunt, freeze, haunted, bomb, potato };
 
 // Lobby shelves. A game can sit on more than one.
 export const SHELVES = [
   { id: 'all', name: 'All games' },
   { id: 'kids', name: '👶 Little kids', games: ['charades', 'gofish', 'bingo', 'ducks', 'memory', 'copycat', 'hunt', 'freeze'] },
-  { id: 'party', name: '🎉 Party', games: ['funny', 'quick', 'split', 'whosaid', 'truths', 'bluff', 'dares', 'meld', 'bowl', 'taboo', 'charades', 'shade'] },
+  { id: 'party', name: '🎉 Party', games: ['funny', 'quick', 'split', 'whosaid', 'truths', 'bluff', 'dares', 'meld', 'bowl', 'taboo', 'charades', 'shade', 'potato'] },
   { id: 'trivia', name: '🧠 Trivia & game shows', games: ['trivia', 'spin', 'crowd', 'ladder', 'cases', 'estimate', 'haunted', 'letters'] },
   { id: 'secret', name: '🕵️ Secret roles', games: ['werewolf', 'midnight', 'imposter', 'missions', 'wordhunt', 'agents'] },
   { id: 'cards', name: '🃏 Cards', games: ['clash', 'blackjack', 'gofish', 'bluffcards', 'hearts'] },

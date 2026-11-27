@@ -873,3 +873,12 @@ button.bwire{cursor:pointer;padding:8px 0}button.bwire span{height:22px}
 .shelf{padding:8px 14px;border-radius:99px;border:2px solid var(--line);background:transparent;color:var(--ink);font:700 15px/1 system-ui,sans-serif;cursor:pointer}
 .shelf.on{background:var(--moon);color:#0e1230;border-color:var(--moon)}
 .game .kidbadge{position:static;display:inline-block;justify-self:start;margin-bottom:4px}
+/* hot potato */
+.potato{font-size:clamp(100px,14vw,200px);text-align:center;line-height:1.1;margin:10px 0}
+.potato.live{animation:wobble .35s ease-in-out infinite alternate}
+.potato.small{font-size:90px}
+.potato.boom{animation:pop .5s both}
+@keyframes wobble{from{transform:rotate(-14deg) scale(1)}to{transform:rotate(14deg) scale(1.08)}}
+@keyframes pop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+.ptoss{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}.ptoss .btn{width:100%;margin:0}
+.ptbtn{min-height:18vh;background:#e2473b;font-size:30px}
