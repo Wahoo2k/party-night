@@ -204,7 +204,8 @@ export function tvView(s, now = Date.now()) {
       };
     });
     v.current = s.phase === 'reveal' ? s.step : -1;
-    v.answer = f.a;
+    v.shown = s.phase !== 'reveal' || s.step >= s.reveal.length - 1;   // the phone never gets ahead of the TV's reveal
+    v.answer = v.shown ? f.a : null; if (!v.shown) v.foundTruth = null;
   }
   return v;
 }
@@ -263,7 +264,7 @@ export function renderPhone(v, el, send) {
   else if (v.phase === 'write' && !v.myLie) h = `${top}<form id="lf"><label for="lie">Your fake answer</label><input id="lie" maxlength="30" autocomplete="off" required><p class="lose" id="err"></p><button class="btn" type="submit">Submit lie</button></form><button class="btn ghost" id="safety">🛟 Stuck? Give me one</button><p class="muted">Tip: match the style. A number for a number, a short word for a word.</p>`;
   else if (v.phase === 'write') h = `${top}<h2>Lie locked in</h2><p class="say">"${esc(v.myLie)}"</p><p class="muted">Waiting for everyone else…</p>`;
   else if (v.phase === 'pick') h = `${top}<h2>Find the truth</h2><div class="opts">${v.options.map(o => `<button class="opt ${v.picked === o.id ? 'on' : ''}" data-pick="${esc(o.id)}">${esc(o.text)}</button>`).join('')}</div>${v.picked ? '<p class="muted">Locked in. You can change it until time\'s up.</p>' : '<p class="muted">Your own lie isn\'t on this list.</p>'}`;
-  else if (v.phase === 'reveal' || v.phase === 'scores') h = `${top}<h2>${v.foundTruth ? '<span class="win">You found the truth!</span>' : 'Watch the TV…'}</h2><p class="say">The answer: <b>${esc(v.answer)}</b></p>${v.myLie ? `<p>Your lie "${esc(v.myLie)}" fooled ${v.fooled.length ? `<b>${v.fooled.map(esc).join(', ')}</b>` : 'nobody'}.</p>` : ''}${v.phase === 'scores' ? `<p class="say">+${pts(v.gained)} · ${pts(v.score)} total</p>` : ''}`;
+  else if (v.phase === 'reveal' || v.phase === 'scores') h = `${top}<h2>${v.foundTruth ? '<span class="win">You found the truth!</span>' : 'Watch the TV…'}</h2>${v.shown ? `<p class="say">The answer: <b>${esc(v.answer)}</b></p>` : '<p class="say">The lies come out first…</p>'}${v.myLie ? `<p>Your lie "${esc(v.myLie)}" fooled ${v.fooled.length ? `<b>${v.fooled.map(esc).join(', ')}</b>` : 'nobody'}.</p>` : ''}${v.phase === 'scores' ? `<p class="say">+${pts(v.gained)} · ${pts(v.score)} total</p>` : ''}`;
   else if (v.phase === 'over') h = `<h2 class="${v.rank === 1 ? 'win' : ''}">${v.rank === 1 ? 'You won!' : `You came ${v.rank} of ${v.of}`}</h2><p class="say">${pts(v.score)} points</p>`;
   el.innerHTML = h;
   el.querySelectorAll('[data-pick]').forEach(b => (b.onclick = () => send({ type: 'pick', id: b.dataset.pick })));

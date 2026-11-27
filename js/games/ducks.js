@@ -269,7 +269,7 @@ export function renderPhone(v, el, send) {
     const locked = v.busy || v.ending;
     const msg = v.ending ? (v.endReason === 'splash' ? '<p class="say lose">Splash! Turn over.</p>' : v.endReason === 'pile' ? '<p class="say lose">Duck pile! Ouch.</p>' : '<p class="say">Turn over.</p>') : v.last ? `<p class="say">${esc(v.last.name)}${v.last.pts ? ` +${v.last.pts}` : ''}</p>` : '<p class="say">Your turn!</p>';
     h = `<h2>Your turn</h2>${msg}
-      <div class="swipe ${locked ? 'locked' : ''}" id="swipe"><div class="ducks-mini">${[0, 1].map(i => `<svg viewBox="-60 -60 120 120" width="64" height="64"${i ? ' style="transform:scaleX(-1)"' : ''}>${DUCK(true)}</svg>`).join('')}</div><b>${locked ? '…' : 'Swipe up to toss'}</b><small>or tap</small></div>
+      <div class="swipe ${locked ? 'locked' : ''}" id="swipe"${locked ? '' : ' data-pad'}><div class="ducks-mini">${[0, 1].map(i => `<svg viewBox="-60 -60 120 120" width="64" height="64"${i ? ' style="transform:scaleX(-1)"' : ''}>${DUCK(true)}</svg>`).join('')}</div><b>${locked ? '…' : 'Swipe up to toss'}</b><small>or tap</small></div>
       <div class="turnbar"><div><small>This turn</small><b>${v.turnPts}</b></div><div><small>Banked</small><b>${v.score}</b></div><div><small>Need</small><b>${Math.max(0, v.target - v.score - v.turnPts)}</b></div></div>
       <button class="btn" data-bank ${v.turnPts > 0 && !locked ? '' : 'disabled'}>Bank ${v.turnPts} points</button>
       <p class="muted">Two plain/star sides that don't match is a Splash: you lose this turn's points.</p>`;

@@ -71,3 +71,11 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Plan doc: https://claude.ai/artifact/EHzsA2u9oRpwcrL8E3GeuR (verdict, findings, bug list, six phases, twelve headliners, audio changes, open decisions).
 - Capture script: `SHOTS=<folder> node test/review-shots.mjs funny,werewolf` plays each game with 4 bots and one phone and saves TV and phone pictures per phase.
 - Recording stays on hold until the reveal sequencer and new intros exist.
+
+## Polish plan, first pass built (Nov 27)
+- Decisions (Tom): plan approved; 24 games at launch, all at headliner polish; self-running rounds by default; TV apps first, browser kept; no balloons anywhere; Ducky Toss becomes a legged animal (goats proposed) with better art.
+- Built: full-screen stage (`stageFit` in js/ui.js: design widths 1040/1260/1500, scaled to fill, vw/vh sizes follow the design size through `--vw`/`--vh`), player rail (`.stage.railed`), TV host buttons fade after 5 s idle, self-running rounds (`autoNext` in js/tv.js; setting "Rounds move on by themselves"; per-game `meta.hold` lists phases that wait for the host), phone remote can send a game's own host choices (`meta.remoteActs`, used by Bingo), Funny Answers comic face-off with staged reveal, all-ages table theme replacing balloons.
+- Fixed: Bluff phone spoiler, Ducky Toss phone bar, Bingo mode choice on the host phone, tie podium and "1st of 5" on a dead heat, join name field width. How-to sheet no longer pops up in automated tests unless `&help=1`.
+- Waiting on Chrome: `art/bg-table.jpg` and `art/win-table.jpg` are generated in Canva (media MAHcIJ_sFnQ and MAHcIN_OemU) but not uploaded; a wood-tone gradient shows until they are.
+- Next: reveal sequencer as a shared part (Funny Answers does it in CSS only), between-round scoreboard, end-of-game flow, then headliners 2 to 12; phone polish; goats rework. Self-running rounds need a real-people playtest (it relies on the bots' idea of "nothing left to do").
+- Not rechecked after the stage change: the per-game browser tests other than funny, bluff, bingo, ducks, kids, intro, away, watch, remote.

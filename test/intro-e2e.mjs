@@ -22,7 +22,7 @@ ok(await tv.locator('.introchip.ok').count() === 1 && !(await st()).state, 'one 
 await c.click('#rdy'); await tv.waitForTimeout(1200);
 ok((await st()).state && !(await st()).intro, 'the game starts when everyone is ready');
 // a second game of the same title skips the intro
-await tv.click('[data-host=endgame]'); await tv.click('[data-host=endgame]'); await tv.waitForTimeout(600);
+await tv.mouse.move(40, 40); await tv.mouse.move(60, 60); await tv.click('[data-host=endgame]'); await tv.click('[data-host=endgame]'); await tv.waitForTimeout(600);
 await tv.click('[data-game=werewolf]').catch(() => {}); await tv.click('[data-host=start]'); await tv.waitForTimeout(800);
 ok((await st()).state, 'no intro the second time');
 console.log(errors.length ? 'FAIL\n' + errors.join('\n') : 'ok intro-e2e'); await b.close(); process.exit(errors.length ? 1 : 0);

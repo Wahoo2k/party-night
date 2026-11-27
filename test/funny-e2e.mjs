@@ -20,9 +20,9 @@ for (let i = 0; i < 300; i++) {
   const s = await st();
   if (s.phase === 'over') break;
   const f = await me.$('#ff'); if (f) { if (!shots.w) { await me.screenshot({ path: 'test/f-write.png' }); shots.w = 1; } await me.fill('#fa', lines[k++ % lines.length]); await me.click('#ff .btn'); }
-  if (s.phase === 'vote') { const p = await me.$('[data-pick]'); if (p && !(await me.$('.opt.on'))) await p.click(); if (!shots.v) { await tv.waitForTimeout(800); await tv.screenshot({ path: 'test/f-tv-vote.png' }); shots.v = 1; } }
+  if (s.phase === 'vote') { const p = await me.$('[data-pick]'); if (p && !(await me.$('.opt.on'))) await p.click().catch(() => {}); if (!shots.v) { await tv.waitForTimeout(800); await tv.screenshot({ path: 'test/f-tv-vote.png' }); shots.v = 1; } }
   if (s.phase === 'result') { if (!shots.r) { await tv.waitForTimeout(800); await tv.screenshot({ path: 'test/f-tv-result.png' }); shots.r = 1; } await tv.click('[data-host=next]').catch(() => {}); }
-  if (s.phase === 'finalVote') { const p = await me.$('[data-pick]'); if (p && !(await me.$('.opt.on'))) await p.click(); }
+  if (s.phase === 'finalVote') { const p = await me.$('[data-pick]'); if (p && !(await me.$('.opt.on'))) await p.click().catch(() => {}); }
   if (s.phase === 'finalResult') { await tv.waitForTimeout(1000); await tv.screenshot({ path: 'test/f-tv-final.png' }); await tv.click('[data-host=next]').catch(() => {}); }
   await tv.waitForTimeout(500);
 }

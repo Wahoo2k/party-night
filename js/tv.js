@@ -1,7 +1,7 @@
 // TV / host page: owns the room, the player list and the game state.
 import { GAMES, COMING_SOON, SHELVES, NIGHTS } from './games/index.js';
 import { openRoom } from './net.js';
-import { esc, store, newCode, say, sayLow, voiceContext, fitScreen, keepFitted, voice, voices, enableDpad, autofocus, drawScene, titleCard, confetti, clawMarks } from './ui.js';
+import { esc, store, newCode, say, sayLow, voiceContext, fitScreen, stageFit, keepFitted, voice, voices, enableDpad, autofocus, drawScene, titleCard, confetti, clawMarks } from './ui.js';
 import { art } from './art.js';
 import { play, sfx, startAmbient, stopAmbient, startBed, stopBed, startLoop, stopLoop, quiet } from './sfx.js';
 import { newKeys, cleanPub, samePub, sharedKey, seal, unseal } from './secure.js';
@@ -13,6 +13,8 @@ import { quip } from './quips.js';
 const app = document.getElementById('app');
 const statusEl = document.getElementById('status');
 keepFitted(app);
+// Host buttons on the TV fade away after a few seconds without a key press or mouse move, so the screen shows only the game.
+{ let qt = 0; const wake = () => { document.body.classList.remove('quiet'); clearTimeout(qt); qt = setTimeout(() => document.body.classList.add('quiet'), 5000); }; ['keydown', 'pointermove', 'pointerdown'].forEach(e => addEventListener(e, wake, { passive: true })); wake(); }
 drawScene(document.getElementById('sky'));
 enableDpad();
 
@@ -63,6 +65,25 @@ function ensureFaces() {
   }
 }
 // After a game draws its screen, put each player's character beside their name in the shared score, podium and roster parts.
+// Self-running rounds. When the TV is showing a "Next" button and nobody has anything left to do on their phone,
+// the game moves on by itself after a short read. The host can still press Next sooner, or pause.
+// Phases where a real person has to get ready (a new actor, a new team, a talk) are left to the host.
+const HOLD = /turn|ready|brief|setup|choose|talk|day|discuss|pass|lobby|roles/i;
+let auto = { key: '', at: 0, quiet: 0 }, refitA = 0, refitB = 0;
+function autoNext() {
+  const btn = host.state && !host.intro ? app.querySelector('.stage [data-host=next]') : null, s = host.state, G = btn && game();
+  const hold = !btn || host.settings.auto === false || host.paused || s.phase === 'over' || s.deadline > Date.now() ||
+    (G.meta.hold ? G.meta.hold.includes(s.phase) : HOLD.test(s.phase)) ||
+    host.players.some(p => { try { return G.botAct?.(G.phoneView(s, p.pid, Date.now())); } catch { return false; } });
+  if (hold) { auto.quiet = 0; if (btn) delete btn.dataset.count; return; }
+  const key = [host.gameId, s.phase, s.round, s.n, s.step, s.turn, s.idx, s.q].join('|');
+  if (key !== auto.key) { const words = app.querySelector('.stage .panel')?.textContent.length || 0; auto = { key, quiet: 0, at: Date.now() + Math.min(14000, 6500 + Math.max(0, words - 120) * 30) * (host.settings.relaxed ? 1.5 : 1) }; }
+  const left = Math.ceil((auto.at - Date.now()) / 1000);
+  btn.dataset.count = Math.max(0, left);
+  if (left <= 0 && ++auto.quiet >= 2) { auto.key = ''; hostAction('next'); }   // two checks in a row, so one slow phone isn't cut off
+}
+setInterval(() => { if (host.state && !host.paused) autoNext(); }, 500);
+
 function decorate() {
   const list = [...host.players].sort((a, b) => b.name.length - a.name.length);
   app.querySelectorAll('.srow > span:first-child, .pod > b, .roster .chip, .ccseat > b, .gfseat > b, .hseat > b, .bjseat > b, .mmcast b, .ccplayers b').forEach(el => {
@@ -163,7 +184,7 @@ function trackScores() {
     if (!p) return;
     if (lastScore[p.pid] !== undefined && row.score > lastScore[p.pid]) gains[p.pid] = { n: row.score - lastScore[p.pid], id: ++gainId };
     lastScore[p.pid] = row.score;
-    if (over && host.gameId !== 'imposter') places[p.pid] = { n: list.filter(x => x.score > row.score).length + 1, of: list.length };
+    if (over && host.gameId !== 'imposter' && list.some(x => x.score !== list[0].score)) places[p.pid] = { n: list.filter(x => x.score > row.score).length + 1, of: list.length };
   });
 }
 // Which round is the last one, for the games that count rounds on screen.
@@ -368,7 +389,7 @@ function onMessage(m) {
 function handleAct(pidFrom, rawAct) {
   const m = { pid: pidFrom, a: rawAct };
   if (rawAct?.type === '_ready') { if (host.intro && host.players.some(p => p.pid === pidFrom)) { host.intro.ready[pidFrom] = 1; if (introReady()) startGame(); else changed(); } return; }
-  if (rawAct?.type === '_host') { if (pidFrom === remotePid() && ['next', 'pause', 'start', 'again', 'lobby'].includes(rawAct.a)) hostAction(rawAct.a); return; }
+  if (rawAct?.type === '_host') { if (pidFrom === remotePid() && (['next', 'pause', 'start', 'again', 'lobby'].includes(rawAct.a) || (host.state && (game().meta.remoteActs || []).includes(rawAct.a)))) hostAction(rawAct.a); return; }
   if (!host.state || host.paused) return;
   if (isAudience(pidFrom)) { if (game().audienceAct) { game().audienceAct(host.state, pidFrom, rawAct); changed(); } return; }
   {
@@ -469,8 +490,10 @@ function ceremony() {
   const face = n => host.players.find(p => p.name === n)?.face;
   const val = p => { const k = ['score', 'chips', 'hearts', 'books'].find(x => typeof p[x] === 'number'); return k ? p[k].toLocaleString() : typeof p.burns === 'number' ? p.burns + ' 🔥' : ''; };
   const tie = list.length > 1 && val(list[0]) !== '' && val(list[0]) === val(list[1]);
+  const flat = tie && list.every(p => val(p) === val(list[0]));   // nobody pulled ahead at all
+  const rankOf = i => list.findIndex(p => val(p) === val(list[i])) + 1;   // tied players share a step
   const top = list.slice(0, 3);
-  el.innerHTML = `<h2>${tie ? "It's a tie!" : 'And the winner is…'}</h2><div class="cpods">${[1, 0, 2].filter(i => top[i]).map(i => { const f = face(top[i].name); return `<div class="cpod c${i + 1}"><i style="--pc:${f?.[1] || '#232a5c'}">${f?.[0] || '🏅'}</i><b>${esc(top[i].name)}</b><span>${val(top[i])}</span><em>${i + 1}</em></div>`; }).join('')}</div><p>Press any button to continue</p>`;
+  el.innerHTML = `<h2>${flat ? 'A dead heat!' : tie ? "It's a tie!" : 'And the winner is…'}</h2><div class="cpods">${[1, 0, 2].filter(i => top[i]).map(i => { const f = face(top[i].name); return `<div class="cpod c${i + 1} r${rankOf(i)}"><i style="--pc:${f?.[1] || '#232a5c'}">${f?.[0] || '🏅'}</i><b>${esc(top[i].name)}</b><span>${val(top[i])}</span><em>${rankOf(i)}</em></div>`; }).join('')}</div><p>Press any button to continue</p>`;
   document.body.append(el);
   tap.fn?.('ceremony', [el.className, el.dataset.theme, el.innerHTML, 3300, 11000]);
   if (sfx.on && host.settings.music) setTimeout(() => play('music-win'), 3600);
@@ -587,6 +610,7 @@ function hostAction(a) {
   if (a === 'menu' || a === 'settings') { host.screen = a; save(); return render(); }
   if (a === 'awards') return nightAwards();
   if (a === 'cleartally') { host.tally = null; save(); return render(); }
+  if (a === 'autonext') { host.settings.auto = host.settings.auto === false; save(); return render(); }
   if (a === 'banter') { host.settings.banter = host.settings.banter === false; save(); return render(); }
   if (a === 'music') { host.settings.music = !host.settings.music; if (!host.settings.music) stopBed(); save(); return render(); }
   if (a === 'short') { host.settings.short = !host.settings.short; save(); return render(); }
@@ -782,6 +806,7 @@ function renderLobby() {
         <button class="btn ghost" data-host="relaxed">Relaxed timers: ${host.settings.relaxed ? 'on' : 'off'}</button>
         <button class="btn ghost" data-host="howto">How-to screens: ${host.settings.howto ? 'first time' : 'off'}</button>
         <button class="btn ghost" data-host="music">Music: ${host.settings.music ? 'on' : 'off'}</button>
+        <button class="btn ghost" data-host="autonext">Rounds move on by themselves: ${host.settings.auto === false ? 'off' : 'on'}</button>
         <button class="btn ghost" data-host="banter">Host banter: ${host.settings.banter === false ? 'off' : 'on'}</button>
         <button class="btn ghost" data-host="short">Game length: ${host.settings.short ? 'short' : 'full'}</button>
         <button class="btn ghost" data-host="remote">Phone remote: ${remotePid() ? esc(host.players.find(p => p.pid === remotePid()).name) : host.settings.remote === false ? 'off' : 'first to join'}</button>
@@ -880,6 +905,7 @@ function render() {
   document.body.dataset.theme = onStage ? THEME_OF[host.gameId] || '' : '';
   document.body.dataset.game = onStage ? host.gameId : '';
   document.body.classList.toggle('inlobby', !onStage);
+  document.body.classList.toggle('onstage', !!onStage);
   document.body.classList.toggle('hubmode', !onStage && (host.screen || 'menu') === 'menu');
   // Lobby music plays on the menu and the join screen, and stops when a game starts.
   if (!onStage && host.settings.music && sfx.on) startLoop('music-lobby'); else stopLoop('music-lobby');
@@ -904,10 +930,17 @@ function render() {
   vetoExtras();
   vb.querySelectorAll('[data-host]').forEach(b => (b.onclick = () => hostAction(b.dataset.host)));
   app.querySelectorAll('[data-host]').forEach(b => (b.onclick = () => hostAction(b.dataset.host)));
+  autoNext();
   app.querySelectorAll('[data-game]').forEach(b => (b.onclick = () => { host.gameId = b.dataset.game; host.screen = 'gather'; host.queue = []; host.night = null; if (sfx.on) play('lockin'); flash('wipe'); changed(); }));
   app.querySelectorAll('[data-shelf]').forEach(b => (b.onclick = () => { host.shelf = b.dataset.shelf; save(); render(); }));
   autofocus(app);
-  fitScreen(app);
+  // Scores sit along the bottom as a row of players when the game has a plain score list beside its panel.
+  const stg = app.querySelector('.stage'), sc = stg && stg.children.length === 2 && stg.lastElementChild.matches('.scores') && !stg.lastElementChild.querySelector('.tscore') ? stg.lastElementChild : null;
+  if (sc && onStage) { stg.classList.add('railed'); sc.classList.toggle('many', sc.querySelectorAll('.srow').length > 8); }
+  stageFit(app, !!onStage);
+  // Entrance animations and late-loading fonts change the height a moment after drawing: fit again once they settle.
+  clearTimeout(refitA); clearTimeout(refitB);
+  if (onStage) { refitA = setTimeout(() => stageFit(app, true), 700); refitB = setTimeout(() => stageFit(app, true), 3600); }
   shareScreen();
 }
 

@@ -3,6 +3,7 @@
 import { esc } from '../ui.js';
 
 export const meta = {
+  remoteActs: ['numbers', 'pictures'],
   id: 'bingo',
   name: 'Bingo',
   min: 2,
@@ -251,7 +252,12 @@ let auto = (() => { try { return localStorage.getItem('pg-bingo-auto') === '1'; 
 
 export function renderPhone(v, el, send) {
   if (v.phase === 'spectate') { el.innerHTML = '<h2>Game in progress</h2><p>You\'ll get a card next round.</p>'; return; }
-  if (v.phase === 'choose' || !v.card) { el.innerHTML = '<h2>Bingo</h2><p class="say">The host is choosing numbers or pictures…</p>'; return; }
+  if (v.phase === 'choose' || !v.card) {
+    // The player holding the remote picks the mode on their phone, so no TV remote is needed.
+    el.innerHTML = v._remote ? '<h2>Bingo</h2><p class="say">Pick for the room:</p><button class="btn" data-pick="numbers">Number bingo</button><button class="btn ghost" data-pick="pictures">Picture bingo</button>' : '<h2>Bingo</h2><p class="say">The host is choosing numbers or pictures…</p>';
+    el.querySelectorAll('[data-pick]').forEach(b => (b.onclick = () => send({ type: '_host', a: b.dataset.pick })));
+    return;
+  }
   if (marks.id !== v.cardId) marks = { id: v.cardId, set: new Set([12]) };
   const called = new Set(v.called);
   if (auto) v.card.forEach((val, i) => { if (val !== null && called.has(val)) marks.set.add(i); });

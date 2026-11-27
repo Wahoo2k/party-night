@@ -8,7 +8,7 @@ const tv = await ctx.newPage(); tv.on('pageerror', e => errors.push('tv ' + e.me
 await tv.goto('http://localhost:8765/tv.html?local=1&away=12&gone=30'); await tv.waitForSelector('.gcard');
 for (let i = 0; i < 5; i++) await tv.click('[data-host=addbot]');
 const code = await tv.evaluate(() => JSON.parse(localStorage.getItem('pg-host')).code);
-const join = async name => { const p = await ctx.newPage(); await p.setViewportSize({ width: 390, height: 780 }); p.on('pageerror', e => errors.push('phone ' + e.message)); await p.goto('http://localhost:8765/play.html?local=1'); await p.fill('#code', code); await p.fill('#name', name); await p.click('#join'); await p.waitForSelector("text=You're in"); return p; };
+const join = async name => { const p = await ctx.newPage(); await p.setViewportSize({ width: 390, height: 780 }); p.on('pageerror', e => errors.push('phone ' + e.message)); await p.goto('http://localhost:8765/play.html?local=1&help=1'); await p.fill('#code', code); await p.fill('#name', name); await p.click('#join'); await p.waitForSelector("text=You're in"); return p; };
 const gone = await join('Ghosty'), me = await join('Remy');
 const names = () => tv.evaluate(() => JSON.parse(localStorage.getItem('pg-host')).players.map(p => p.name + (p.away ? '*' : '')));
 ok((await names()).includes('Ghosty'), 'joined');

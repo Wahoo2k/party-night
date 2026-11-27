@@ -190,7 +190,7 @@ function helpButton(v, help, isNew) {
   };
   btn.onclick = open;
   const key = 'pg-seen-' + v.game;
-  if (isNew && !localStore.get(key)) { localStore.set(key, 1); open(); }
+  if (isNew && !localStore.get(key) && (!params.has('local') || params.has('help'))) { localStore.set(key, 1); open(); }   // automated tests skip the pop-up unless they ask for it
 }
 function toast(text, cls) {
   const t = Object.assign(document.createElement('div'), { className: 'ptoast ' + cls, textContent: text });

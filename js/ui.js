@@ -237,9 +237,42 @@ export function fitScreen(app) {
   best.set(best.z);
   return best.z;
 }
+// The stage: during a game the play area is laid out at a fixed design width and then scaled to fill the screen,
+// up as well as down, so it looks the same on a TV box, a laptop and a big monitor. A few design widths are tried
+// and the one that ends up largest on screen wins (tall boards prefer a wider layout).
+let stageH = -1, stageRO = null;
+export function stageFit(app, on) {
+  const st = app.style;
+  // Content that grows or shrinks after it is drawn (a tip fading out, a list filling in) triggers a fresh fit.
+  if (!stageRO && typeof ResizeObserver === 'function') { stageRO = new ResizeObserver(() => { if (document.body.classList.contains('onstage') && app.offsetHeight !== stageH) stageFit(app, true); }); stageRO.observe(app); }
+  if (!on) { st.transform = ''; st.width = ''; st.maxWidth = ''; st.position = ''; st.left = ''; st.top = ''; st.transformOrigin = ''; st.removeProperty('--vw'); st.removeProperty('--vh'); return fitScreen(app); }
+  document.body.classList.remove('compact');
+  st.zoom = ''; st.position = 'absolute'; st.left = '50%'; st.maxWidth = 'none'; st.transformOrigin = '50% 0'; st.transform = 'translateX(-50%)';
+  const availW = innerWidth * 0.93, top = innerHeight * 0.05, availH = innerHeight * 0.9;
+  // Sizes written in screen units (vw, vh) are measured against the design size inside the stage, not the real screen.
+  const setUnits = w => { st.setProperty('--vw', w / 93 + 'px'); st.setProperty('--vh', (w / 0.93) * (innerHeight / innerWidth) / 100 + 'px'); };
+  let best = null;
+  for (const w of [1040, 1260, 1500]) {
+    setUnits(w); st.width = w + 'px';
+    const h = Math.max(app.scrollHeight, 1), z = Math.min(availW / w, availH / h, 2.6);
+    if (!best || z > best.z * 1.04) best = { w, h, z };   // biggest on screen wins; ties go to the narrower layout
+  }
+  setUnits(best.w); st.width = best.w + 'px';
+  // Keep clear of the join badge in the bottom-left corner: shrink just enough that the two don't overlap.
+  const jq = document.getElementById('joinqr'), jr = jq && !jq.hidden ? jq.getBoundingClientRect() : null;
+  if (jr && jr.width) {
+    const left = (innerWidth - best.w * best.z) / 2, bottom = top + Math.max(0, availH - best.h * best.z) * 0.42 + best.h * best.z;
+    if (left < jr.right + 8 && bottom > jr.top - 8) best.z = Math.min(best.z, Math.max((innerWidth - 2 * (jr.right + 8)) / best.w, (jr.top - 8 - top) / best.h));
+  }
+  // Short screens sit a little above the middle: the eye reads that as centered on a TV.
+  st.top = Math.round(top + Math.max(0, availH - best.h * best.z) * 0.42) + 'px';
+  st.transform = `translateX(-50%) scale(${best.z.toFixed(3)})`;
+  stageH = app.offsetHeight;
+  return best.z;
+}
 export function keepFitted(app) {
   let t = 0;
-  const go = () => { clearTimeout(t); t = setTimeout(() => fitScreen(app), 30); };
+  const go = () => { clearTimeout(t); t = setTimeout(() => (document.body.classList.contains('onstage') ? stageFit(app, true) : fitScreen(app)), 30); };
   addEventListener('resize', go);
   app.addEventListener('load', go, true);   // pictures arriving late change the height
   return go;
