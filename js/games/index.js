@@ -47,16 +47,20 @@ import * as haunted from './haunted.js';
 import * as bomb from './bomb.js';
 import * as potato from './potato.js';
 import * as mystery from './mystery.js';
+import * as bracket from './bracket.js';
+import * as faker from './faker.js';
+import * as meter from './meter.js';
+import * as rebus from './rebus.js';
 
-export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards, hearts, shade, estimate, truths, wordhunt, midnight, missions, dares, split, doodle, memory, copycat, hunt, freeze, haunted, bomb, potato, mystery };
+export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards, hearts, shade, estimate, truths, wordhunt, midnight, missions, dares, split, doodle, memory, copycat, hunt, freeze, haunted, bomb, potato, mystery , bracket, faker, meter, rebus};
 
 // Lobby shelves. A game can sit on more than one.
 export const SHELVES = [
   { id: 'featured', name: '⭐ Featured', games: ['imposter', 'ducks', 'potato', 'bingo', 'quick', 'sketch', 'bowl', 'funny', 'meld', 'doodle', 'whosaid', 'crew', 'charades', 'clash', 'hunt', 'freeze', 'copycat', 'werewolf', 'midnight', 'taboo'] },
   { id: 'all', name: 'All games' },
   { id: 'kids', name: '👶 Little kids', games: ['charades', 'gofish', 'bingo', 'ducks', 'memory', 'copycat', 'hunt', 'freeze'] },
-  { id: 'party', name: '🎉 Party', games: ['funny', 'quick', 'split', 'whosaid', 'truths', 'bluff', 'dares', 'meld', 'bowl', 'taboo', 'charades', 'shade', 'potato'] },
-  { id: 'trivia', name: '🧠 Trivia & game shows', games: ['trivia', 'spin', 'crowd', 'ladder', 'cases', 'estimate', 'haunted', 'letters'] },
+  { id: 'party', name: '🎉 Party', games: ['funny', 'bracket', 'faker', 'meter', 'rebus', 'quick', 'split', 'whosaid', 'truths', 'bluff', 'dares', 'meld', 'bowl', 'taboo', 'charades', 'shade', 'potato'] },
+  { id: 'trivia', name: '🧠 Trivia & game shows', games: ['rebus', 'trivia', 'spin', 'crowd', 'ladder', 'cases', 'estimate', 'haunted', 'letters'] },
   { id: 'secret', name: '🕵️ Secret roles', games: ['werewolf', 'midnight', 'imposter', 'missions', 'wordhunt', 'agents', 'mystery'] },
   { id: 'cards', name: '🃏 Cards', games: ['clash', 'blackjack', 'gofish', 'bluffcards', 'hearts'] },
   { id: 'draw', name: '🎨 Drawing', games: ['sketch', 'doodle'] },

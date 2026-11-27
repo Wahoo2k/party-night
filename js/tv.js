@@ -98,7 +98,7 @@ function trackScores() {
   });
 }
 // Which round is the last one, for the games that count rounds on screen.
-const ROUNDS_OF = { quick: v => [v.n, v.total], potato: v => [v.r, v.of], hunt: v => [v.r, v.of], freeze: v => [v.r, v.of], meld: v => [v.turn, v.turns], charades: v => [v.turn, v.turns], taboo: v => [v.turn, v.turns], crew: v => [v.card, v.cards], doodle: v => [v.k, v.of], whosaid: v => [v.i + 1, v.total], bingo: v => [v.round, v.rounds], trivia: v => [v.n, v.total], copycat: () => null };
+const ROUNDS_OF = { quick: v => [v.n, v.total], potato: v => [v.r, v.of], hunt: v => [v.r, v.of], freeze: v => [v.r, v.of], meld: v => [v.turn, v.turns], charades: v => [v.turn, v.turns], taboo: v => [v.turn, v.turns], crew: v => [v.card, v.cards], doodle: v => [v.k, v.of], whosaid: v => [v.i + 1, v.total], bingo: v => [v.round, v.rounds], trivia: v => [v.n, v.total], copycat: () => null, meter: v => [v.q, v.of], faker: v => [v.r, v.of], rebus: v => [v.r, v.of] };
 function checkFinal() {
   const f = host.state && ROUNDS_OF[host.gameId], r = f ? f(game().tvView(host.state, Date.now())) : null;
   finalRound = !!(r && r[1] > 2 && r[0] === r[1] && host.state.phase !== 'over');
@@ -562,7 +562,7 @@ const seen = new Set();
 const kicked = new Set();
 let editing = null;
 // A glyph for each game in the menu.
-const ICONS = { werewolf: '🐺', imposter: '🕵️', bluff: '🤥', whosaid: '💬', ducks: '🦆', trivia: '🧠', spin: '🎡', crowd: '📊', bingo: '🎱', quick: '⚡', ladder: '🪜', cases: '💼', funny: '😂', letters: '🔤', taboo: '🚫', agents: '🕶️', sketch: '✏️', meld: '🧿', bowl: '🥗', crew: '🤝', charades: '🎭', clash: '🃏', blackjack: '♠️', gofish: '🐟', bluffcards: '🎴', hearts: '♥️', shade: '🎨', estimate: '🎯', truths: '🤞', wordhunt: '🔎', midnight: '🌙', missions: '🗝️', dares: '😈', split: '✂️', doodle: '🖼️', memory: '🧩', copycat: '🐱', hunt: '🌈', freeze: '🧊', haunted: '👻', bomb: '💣', potato: '🥔', mystery: '💎' };
+const ICONS = { werewolf: '🐺', imposter: '🕵️', bluff: '🤥', whosaid: '💬', ducks: '🦆', trivia: '🧠', spin: '🎡', crowd: '📊', bingo: '🎱', quick: '⚡', ladder: '🪜', cases: '💼', funny: '😂', letters: '🔤', taboo: '🚫', agents: '🕶️', sketch: '✏️', meld: '🧿', bowl: '🥗', crew: '🤝', charades: '🎭', clash: '🃏', blackjack: '♠️', gofish: '🐟', bluffcards: '🎴', hearts: '♥️', shade: '🎨', estimate: '🎯', truths: '🤞', wordhunt: '🔎', midnight: '🌙', missions: '🗝️', dares: '😈', split: '✂️', doodle: '🖼️', memory: '🧩', copycat: '🐱', hunt: '🌈', freeze: '🧊', haunted: '👻', bomb: '💣', potato: '🥔', mystery: '💎', bracket: '🏆', faker: '🤫', meter: '📈', rebus: '🧩' };
 
 // The menu's live preview: bots really play the highlighted game, sped up, on a small stage.
 let pv = null;

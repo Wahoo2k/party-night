@@ -37,3 +37,7 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - **Recap card** for Who Said That (Sketch Telephone can save a drawing and a whole chain).
 - **A short web address.**
 - **The report's nine open questions** (launch size, family or adult lead, hours, budget, testers, cross-store accounts, Mystery Manor theme, Blackjack and Hearts, final name).
+
+## Puzzle ideas parked
+- **Real photos** for the mystery-picture puzzles (blurred, pixelated, zoomed). Today they use emoji; photos need licensed images.
+- **Art auction game** and **live drawing duel** (the last two of the Jackbox-favorites gaps).
