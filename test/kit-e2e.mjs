@@ -10,9 +10,9 @@ async function run(id, steps) {
   for (let i = 0; i < 5; i++) await tv.click('[data-host=addbot]');
   await tv.click('[data-shelf=all]'); await tv.click(`[data-game=${id}]`); await tv.click('[data-host=start]');
   const st = () => tv.evaluate(() => JSON.parse(localStorage.getItem('pg-host')).state);
-  const seen = {}; const res = {}; let lastK = '', stuck = 0;
+  const t0 = Date.now(); const seen = {}; const res = {}; let lastK = '', stuck = 0;
   for (let i = 0; i < 900; i++) {
-    const s = await st(); if (!s) break;
+    const s = await st(); if (!s || Date.now() - t0 > 100000) break;
     for (const [ph, waits] of Object.entries(steps)) if (s.phase === ph && !seen[ph]) {
       seen[ph] = 1; let t = 0;
       for (const w of waits) { await tv.waitForTimeout(w - t); t = w; await tv.screenshot({ path: `${out}/kit-${id}-${ph}-${w}.png` }); }
