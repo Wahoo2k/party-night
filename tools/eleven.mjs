@@ -122,8 +122,9 @@ if (cmd === 'estimate') {
   const preset = flag('style') ? CFG.styles?.[flag('style')] : null, tag = flag('style') ? '-' + flag('style') : '';
   const lines = { host: CFG.audition.host, night: CFG.audition.night }, set = flag('set') === 'night' ? 'night' : flag('set') === 'host' ? 'host' : null;
   const store = 'audio/audition/rows.json', rows = fs.existsSync(store) ? JSON.parse(fs.readFileSync(store, 'utf8')) : [];   // earlier auditions stay on the page
-  for (const name of names) for (const model of models) {
-    const id = await voiceId(name), slug = (name + '-' + model + tag).toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  for (const spec of names) for (const model of models) {
+    const [name, given] = spec.split('=');   // "Label=voiceid" tries a library voice by its id
+    const id = await voiceId(given || name), slug = (name + '-' + model + tag).toLowerCase().replace(/[^a-z0-9]+/g, '-');
     for (const kind of set ? [set] : ['host', 'night']) for (const [i, text] of lines[kind].entries()) {
       const file = `audio/audition/${slug}-${kind}-${i + 1}.mp3`;
       if (!fs.existsSync(file) || flag('redo')) { fs.mkdirSync('audio/audition', { recursive: true }); fs.writeFileSync(file, await speak(id, text, { model, settings: preset || CFG[kind].settings })); }
