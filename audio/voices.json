@@ -2,14 +2,31 @@
   "model": "eleven_multilingual_v2",
   "format": "mp3_44100_96",
   "creditsPerChar": 1,
-  "host": { "voice": "SET-ME", "settings": { "stability": 0.4, "similarity_boost": 0.8, "style": 0.45, "use_speaker_boost": true } },
-  "night": { "voice": "SET-ME", "settings": { "stability": 0.55, "similarity_boost": 0.8, "style": 0.3, "use_speaker_boost": true, "speed": 0.94 } },
+  "host": {
+    "voice": "SET-ME",
+    "settings": {
+      "stability": 0.4,
+      "similarity_boost": 0.8,
+      "style": 0.45,
+      "use_speaker_boost": true
+    }
+  },
+  "night": {
+    "voice": "Brian",
+    "settings": {
+      "stability": 0.55,
+      "similarity_boost": 0.8,
+      "style": 0.3,
+      "use_speaker_boost": true,
+      "speed": 0.94
+    }
+  },
   "audition": {
     "host": [
       "Phones out. Dignity optional.",
       "Two answers enter. One answer leaves. Vote for your favorite on your phone!",
       "Oh no, the trap! Team Moon wins!",
-      "And the winner is…",
+      "And the winner is\u2026",
       "Round two. The points are doubled, and so is the pressure."
     ],
     "night": [
@@ -17,5 +34,14 @@
       "The village wakes to find one of its own gone. Claw marks lead into the forest.",
       "The sun rises. Check what you learned in the night."
     ]
+  },
+  "styles": {
+    "lively": {
+      "stability": 0.28,
+      "similarity_boost": 0.8,
+      "style": 0.75,
+      "use_speaker_boost": true,
+      "speed": 1.06
+    }
   }
 }

@@ -8,7 +8,7 @@ on:
         description: What to do
         type: choice
         default: estimate
-        options: [estimate, voices, audition, voice, sfx, music]
+        options: [estimate, voices, library, audition, voice, sfx, music]
       voices:
         description: 'audition only: voice names to try, separated by commas'
         default: ''
@@ -34,7 +34,7 @@ jobs:
           OPTIONS: ${{ inputs.options }}
         run: |
           set -o pipefail
-          if [ "$JOB" = audition ]; then node tools/eleven.mjs audition "$VOICES" $OPTIONS | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ "$JOB" = audition ] || [ "$JOB" = library ]; then node tools/eleven.mjs "$JOB" "$VOICES" $OPTIONS | tee -a "$GITHUB_STEP_SUMMARY"
           else node tools/eleven.mjs "$JOB" $OPTIONS | tee -a "$GITHUB_STEP_SUMMARY"; fi
       - name: Save the files
         if: always()

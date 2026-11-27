@@ -110,18 +110,24 @@ if (cmd === 'estimate') {
   const list = (await api('/v1/voices', null, { json: true })).voices;
   for (const v of list) console.log(`${v.name}\t${v.voice_id}\t${v.category || ''}\t${Object.values(v.labels || {}).join(', ')}`);
   console.log('Account:', JSON.stringify(await credits()));
+} else if (cmd === 'library') {
+  // Search the public Voice Library. A library voice has to be added to My Voices before it can be used.
+  const q = new URLSearchParams({ page_size: flag('n') || '12', search: args[0] || 'game show host', language: 'en', ...(flag('gender') ? { gender: flag('gender') } : {}) });
+  const r = await api('/v1/shared-voices?' + q, null, { json: true });
+  for (const v of r.voices || []) console.log([v.name, v.voice_id, v.public_owner_id, v.gender, v.age, v.accent, v.use_case, (v.descriptive || ''), 'used ' + (v.usage_character_count_1y || 0), (v.description || '').replace(/\s+/g, ' ').slice(0, 140)].join('\t'));
 } else if (cmd === 'audition') {
   const names = (args[0] || '').split(',').map(s => s.trim()).filter(Boolean);
   if (!names.length) throw new Error('Give the voices to try, separated by commas.');
   const models = String(flag('models') || CFG.model).split(',');
+  const preset = flag('style') ? CFG.styles?.[flag('style')] : null, tag = flag('style') ? '-' + flag('style') : '';
   const lines = { host: CFG.audition.host, night: CFG.audition.night }, set = flag('set') === 'night' ? 'night' : flag('set') === 'host' ? 'host' : null;
   const store = 'audio/audition/rows.json', rows = fs.existsSync(store) ? JSON.parse(fs.readFileSync(store, 'utf8')) : [];   // earlier auditions stay on the page
   for (const name of names) for (const model of models) {
-    const id = await voiceId(name), slug = (name + '-' + model).toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const id = await voiceId(name), slug = (name + '-' + model + tag).toLowerCase().replace(/[^a-z0-9]+/g, '-');
     for (const kind of set ? [set] : ['host', 'night']) for (const [i, text] of lines[kind].entries()) {
       const file = `audio/audition/${slug}-${kind}-${i + 1}.mp3`;
-      if (!fs.existsSync(file) || flag('redo')) { fs.mkdirSync('audio/audition', { recursive: true }); fs.writeFileSync(file, await speak(id, text, { model, settings: CFG[kind].settings })); }
-      if (!rows.some(r => r.file === path.basename(file))) rows.push({ name, model, kind, text, file: path.basename(file) });
+      if (!fs.existsSync(file) || flag('redo')) { fs.mkdirSync('audio/audition', { recursive: true }); fs.writeFileSync(file, await speak(id, text, { model, settings: preset || CFG[kind].settings })); }
+      if (!rows.some(r => r.file === path.basename(file))) rows.push({ name: name + (flag('style') ? ' (' + flag('style') + ')' : ''), model, kind, text, file: path.basename(file) });
       fs.writeFileSync(store, JSON.stringify(rows));
     }
     console.log('auditioned', name, model);

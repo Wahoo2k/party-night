@@ -2207,3 +2207,25 @@ body.onstage[data-game=imposter] .stage .panel>.btn{display:flex;margin:10px aut
 .g3d .gcup.pour{animation:gcup 3s linear both}
 @keyframes gcup{0%{transform:translate3d(-450px,-90px,-250px) rotate(-8deg)}5%{transform:translate3d(-442px,-104px,-250px) rotate(12deg)}10%{transform:translate3d(-458px,-88px,-250px) rotate(-13deg)}15%{transform:translate3d(-442px,-104px,-250px) rotate(12deg)}20%{transform:translate3d(-455px,-92px,-250px) rotate(-9deg)}26%,46%{transform:translate3d(-430px,-120px,-250px) rotate(112deg)}60%,100%{transform:translate3d(-450px,0,-250px) rotate(0)}}
 .gtable.g3d.empty .say{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);margin:0;padding:10px 24px;border-radius:99px;background:#0e1230cc;color:#fff;font-size:28px;white-space:nowrap}
+
+/* The corner join badge is only for game screens. (It has its own display rule, so "hidden" needs saying out loud.) */
+#joinqr[hidden]{display:none!important}
+/* Join screen: everything fits the panel, whatever the window size. The QR code takes the space that is left. */
+.lobby.gather .panel.join{overflow:hidden;justify-content:center;gap:0}
+.lobby.gather .join>*{flex:0 0 auto}
+.lobby.gather .join .qr{flex:0 1 calc(24*var(--vh,1vh));min-height:72px;width:auto;height:auto;max-width:100%;aspect-ratio:1;align-self:center;margin:4px auto 0}
+.lobby.gather .join .url{white-space:nowrap;overflow-wrap:normal;font-size:clamp(11px,calc(1.15*var(--vw,1vw)),20px)}
+.lobby.gather .join .code{font-size:clamp(24px,calc(4.2*var(--vw,1vw)),96px)}
+@media (max-width:900px){.lobby.gather .join .remoteline{display:none}}
+.lobby.gather .join .remoteline{flex:0 1 auto;min-height:0;overflow:hidden}
+@media (max-height:640px){.lobby.gather .join .remoteline{display:none}.lobby.gather .join h2{font-size:clamp(20px,calc(2.1*var(--vw,1vw)),34px)}}
+
+/* The drifting shapes now float over every game's painted background too, as soft light. Night games get fireflies. */
+body[data-theme]:not([data-theme='']):not(.phone) #backdrop{display:block}
+body[data-theme]:not([data-theme='']):not(.phone) #backdrop i{background:#fff;mix-blend-mode:soft-light;animation-name:drift3}
+@keyframes drift3{0%{transform:translateY(0) rotate(0);opacity:0}10%,90%{opacity:.3}100%{transform:translateY(-130vh) rotate(300deg);opacity:0}}
+body:is([data-game=werewolf],[data-game=midnight],[data-game=haunted]):not(.phone) #backdrop{display:block}
+body:is([data-game=werewolf],[data-game=midnight],[data-game=haunted]):not(.phone) #backdrop i{width:7px;height:7px;border-radius:50%;clip-path:none;background:#fff1b8;box-shadow:0 0 14px 5px #ffd16688;mix-blend-mode:normal;animation-name:firefly}
+@keyframes firefly{0%{transform:translate(0,0);opacity:0}12%{opacity:.9}35%{opacity:.25}50%{transform:translate(46px,-52vh);opacity:.9}70%{opacity:.2}85%{opacity:.8}100%{transform:translate(-34px,-108vh);opacity:0}}
+body.demo #backdrop{display:none!important}
+@media (prefers-reduced-motion:reduce){#backdrop{display:none!important}}
