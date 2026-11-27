@@ -88,3 +88,6 @@ export function renderPhone(v, el, send) {
   el.innerHTML = h;
   el.querySelector('[data-tap]')?.addEventListener('pointerdown', e => { e.preventDefault(); try { navigator.vibrate?.(60); } catch {} send({ type: 'tap' }); });
 }
+
+// A latecomer can take a seat mid-game, starting from zero.
+export function addPlayer(s, p) { if (s.players.some(x => x.pid === p.pid)) return; s.players.push({ pid: p.pid, name: p.name }); s.scores[p.pid] = 0; }

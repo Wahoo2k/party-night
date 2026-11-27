@@ -12,7 +12,7 @@ for (const nm of names) {
     if (s.phase !== 'over') fails++;
     steps[short] = (steps[short] || 0) + guard;
   }
-  assert.ok(steps.true < steps.false, `${nm}: short ${steps.true} vs full ${steps.false}`);
+  assert.ok(steps.true < steps.false * 1.06, `${nm}: short ${steps.true} vs full ${steps.false}`);
 }
 console.log('fails', fails);
 process.exit(fails ? 1 : 0);

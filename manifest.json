@@ -1,0 +1,10 @@
+{
+  "name": "Party Night",
+  "short_name": "Party Night",
+  "start_url": "play.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0e1230",
+  "theme_color": "#0e1230",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

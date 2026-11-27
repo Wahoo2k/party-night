@@ -40,7 +40,7 @@ export function makeDeck(rnd = Math.random) {
 export const isWild = card => WILDS.includes(card.v);
 export const canPlay = (card, top, color) => isWild(card) || card.c === color || card.v === top.v;
 
-export function setup(players, rnd = Math.random) {
+export function setup(players, rnd = Math.random, prev = null, opts = {}) {
   const order = shuffle(players.map(p => ({ pid: p.pid, name: p.name })), rnd);
   const deck = makeDeck(rnd);
   const hands = {};
@@ -48,7 +48,7 @@ export function setup(players, rnd = Math.random) {
   let i = deck.findIndex(c => /^\d$/.test(c.v));
   const top = deck.splice(i, 1)[0];
   return {
-    game: 'clash', players: order, hands, deck, discard: [top], color: top.c,
+    game: 'clash', drawMatch: opts.draw === 'match', players: order, hands, deck, discard: [top], color: top.c,
     turn: 0, dir: 1, drew: null, winner: null, phase: 'play', round: 0, moves: 0,
     last: null, eventId: 0, deadline: Date.now() + TIMES.turn,
   };
@@ -114,7 +114,9 @@ export function act(s, pid, a, now = Date.now(), rnd = Math.random) {
     if (s.drew !== null && card.id !== s.drew) return s;   // after drawing, only the drawn card can be played
     play(s, pid, card, a, now, rnd);
   } else if (a.type === 'draw' && s.drew === null) {
-    const [card] = drawCards(s, pid, 1, rnd);
+    let [card] = drawCards(s, pid, 1, rnd);
+    // House rule: keep drawing until you can play (up to eight cards).
+    for (let n = 1; s.drawMatch && card && !canPlay(card, top(s), s.color) && n < 8; n++) [card] = drawCards(s, pid, 1, rnd);
     if (card && canPlay(card, top(s), s.color)) { s.drew = card.id; note(s, `${nameOf(s, pid)} drew a card`, 'draw'); }
     else { note(s, `${nameOf(s, pid)} drew a card`, 'draw'); nextTurn(s, now); }
   } else if (a.type === 'keep' && s.drew !== null) nextTurn(s, now);
@@ -235,3 +237,5 @@ export function renderPhone(v, el, send) {
   el.querySelector('[data-draw]')?.addEventListener('click', e => { e.target.disabled = true; send({ type: 'draw' }); });
   el.querySelector('[data-keep]')?.addEventListener('click', e => { e.target.disabled = true; send({ type: 'keep' }); });
 }
+
+meta.options = [{ id: 'draw', name: 'No card to play', choices: [['one', 'draw one'], ['match', 'draw until you can']] }];

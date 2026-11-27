@@ -36,6 +36,7 @@ export function setup(players, rnd = Math.random, prev = null, opts = {}) {
   const s = {
     game: 'crew', players: order,
     deck: shuffle([...POOL.keys()], rnd).slice(0, opts.short ? 6 : CARDS),
+    easy: opts.level === 'easy',
     card: 0, played: 0, score: 0, lost: 0, round: 0, best: Math.max(prev?.best || 0, prev?.phase === 'over' && prev.deck?.length === (opts.short ? 6 : CARDS) ? prev.score : 0),
     guesser: null, clues: {}, guess: null, result: null, phase: 'clue', deadline: 0, history: [],
   };
@@ -71,7 +72,7 @@ function finish(s, kind, text, now) {
   const c = cur(s);
   s.guess = text || null;
   if (kind === 'guess' && isRight(text, [c.word])) { s.result = 'right'; s.score++; }
-  else if (kind === 'guess') { s.result = 'wrong'; s.lost++; }   // a wrong guess also costs the next card
+  else if (kind === 'guess') { s.result = 'wrong'; if (!s.easy) s.lost++; }   // a wrong guess also costs the next card
   else s.result = 'pass';
   s.history.push({ word: c.word, result: s.result });
   s.phase = 'reveal'; s.round++;
@@ -209,3 +210,5 @@ export function renderPhone(v, el, send) {
   if (v.phase === 'reveal') { el.innerHTML = `${head}<h2 class="${v.result === 'right' ? 'win' : 'lose'}">${v.result === 'right' ? 'Got it!' : v.result === 'wrong' ? 'Nope!' : 'Passed'}</h2><p class="say">It was <b>${esc(v.word)}</b>.</p>`; return; }
   if (v.phase === 'over') el.innerHTML = `<h2 class="win">${v.score} out of ${v.cards}</h2><p class="say">${esc(v.rating)}</p>`;
 }
+
+meta.options = [{ id: 'level', name: 'Wrong guesses', choices: [['normal', 'cost a card'], ['easy', 'are free']] }];

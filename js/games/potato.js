@@ -108,3 +108,6 @@ export function renderPhone(v, el, send) {
     send({ type: 'toss', to: b.dataset.to || null });
   }));
 }
+
+// A latecomer can take a seat mid-game.
+export function addPlayer(s, p) { if (s.players.some(x => x.pid === p.pid)) return; s.players.push({ pid: p.pid, name: p.name }); s.burns[p.pid] = 0; }

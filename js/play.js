@@ -98,10 +98,12 @@ function render(v) {
   if (key !== lastPhaseSeen) { lastPhaseSeen = key; if (v.alive && ['roles', 'night', 'vote'].includes(v.phase)) buzz([80, 60, 80]); }
   if (v.phase === 'audience') {
     app.innerHTML = `<div class="panel"><h2>You're in the audience</h2><p class="say">${v.playing ? `A game of ${esc(v.game)} is in progress.` : 'The room is full.'} You'll get a seat in the next game.</p>
+      ${v.ask ? `<div class="audask"><p class="muted">Audience vote</p><p class="tq small">${esc(v.ask.q)}</p>${v.ask.options.map(o => `<button class="btn ${v.ask.picked === o.v ? '' : 'ghost'}" data-aud="${esc(o.v)}">${esc(o.label)}</button>`).join('')}</div>` : ''}
       <p class="muted">Cheer them on! Your reactions float across the TV.</p>
       <div class="reacts">${v.reactions.map(e => `<button class="reactbtn" data-e="${e}">${e}</button>`).join('')}</div>
       <p class="muted small">Playing: ${v.players.map(esc).join(', ')}</p><button class="btn ghost" id="leave">Leave room</button></div>`;
     app.querySelectorAll('[data-e]').forEach(b => (b.onclick = () => { b.classList.remove('hit'); void b.offsetWidth; b.classList.add('hit'); room?.send({ t: 'react', pid, e: b.dataset.e }); }));
+    app.querySelectorAll('[data-aud]').forEach(b => (b.onclick = () => send({ type: 'aud', pick: b.dataset.aud })));
     app.querySelector('#leave').onclick = leave;
     return;
   }

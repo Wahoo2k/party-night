@@ -1128,3 +1128,18 @@ body.finalround:not(.phone)::after{content:'FINAL ROUND';position:fixed;right:-7
 .join h2{font-size:clamp(26px,2.6vw,44px);margin-bottom:6px}
 /* Hearts: each card played lands on the table */
 .hseat.won{animation:pulse .6s 2}
+
+/* ---------- living backdrop ---------- */
+#backdrop{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+#backdrop i{position:absolute;bottom:-160px;width:var(--s);height:var(--s);opacity:.0;background:hsl(var(--hue,45) 70% 62%);animation:drift2 var(--t) linear infinite}
+#backdrop i.b0{border-radius:50%}#backdrop i.b1{border-radius:22%;}#backdrop i.b2{clip-path:polygon(50% 0,100% 100%,0 100%)}#backdrop i.b3{clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+@keyframes drift2{0%{transform:translateY(0) rotate(0);opacity:0}10%{opacity:.10}90%{opacity:.10}100%{transform:translateY(-130vh) rotate(300deg);opacity:0}}
+#backdrop.busy i{animation-duration:calc(var(--t)*.7)}
+body.phone #backdrop{display:none}
+@media (prefers-reduced-motion:reduce){#backdrop{display:none}}
+/* small additions */
+.gameopts{margin:4px 0 10px}
+.audask{display:grid;gap:8px;margin:12px 0;padding:12px;border-radius:14px;background:#0f1336}
+.onfire{display:inline-block;color:#ffcf6b;font-weight:800}
+.landed{display:inline-block}.landed.popin{animation:ccfly .4s cubic-bezier(.2,.9,.3,1.1) both}
+.mydraw{margin:10px 0;background:#fffdf6;border-radius:12px}.mydraw svg{width:100%;display:block}

@@ -19,7 +19,7 @@ export const MAX_ROUNDS = 12, HEARTS = 3;
 const rand4 = rnd => Math.floor(rnd() * 4);
 
 export function setup(players, rnd = Math.random, prev = null, opts = {}) {
-  const s = { game: 'copycat', players: players.map(p => ({ pid: p.pid, name: p.name })), pattern: [rand4(rnd), rand4(rnd)], hearts: {}, best: {}, progress: {}, failed: {}, phase: 'show', round: 0, r: 1, max: opts.short ? 8 : MAX_ROUNDS };
+  const s = { game: 'copycat', players: players.map(p => ({ pid: p.pid, name: p.name })), pattern: [rand4(rnd), rand4(rnd)], team: opts.mode === 'team', hearts: {}, best: {}, progress: {}, failed: {}, phase: 'show', round: 0, r: 1, max: opts.short ? 8 : MAX_ROUNDS };
   s.players.forEach(p => { s.hearts[p.pid] = HEARTS; s.best[p.pid] = 0; });
   show(s, Date.now());
   return s;
@@ -29,6 +29,13 @@ const alive = s => s.players.filter(p => s.hearts[p.pid] > 0).map(p => p.pid);
 const nameOf = (s, pid) => (s.players.find(p => p.pid === pid) || {}).name || 'Someone';
 
 function result(s, now) {
+  // Team mode: everyone shares the hearts. If at least half the players get it, nobody loses one.
+  if (s.team) {
+    const a = alive(s), ok = a.filter(pid => s.progress[pid] === s.pattern.length);
+    a.forEach(pid => { if (s.progress[pid] !== s.pattern.length) s.failed[pid] = true; });
+    if (ok.length * 2 >= a.length) { a.forEach(pid => (s.best[pid] = s.pattern.length)); s.failed = {}; } else a.forEach(pid => s.hearts[pid]--);
+    s.phase = 'result'; s.round++; s.deadline = now + 3500; return;
+  }
   for (const pid of alive(s)) {
     if (s.progress[pid] === s.pattern.length) s.best[pid] = s.pattern.length;
     else { s.hearts[pid]--; s.failed[pid] = true; }
@@ -123,3 +130,5 @@ export function renderPhone(v, el, send) {
   el.innerHTML = h;
   el.querySelectorAll('[data-k]').forEach(b => (b.onpointerdown = e => { e.preventDefault(); const k = Number(b.dataset.k); b.classList.add('lit'); setTimeout(() => b.classList.remove('lit'), 200); import('../sfx.js').then(m => m.note(PADS[k].f, 0.3)).catch(() => {}); try { navigator.vibrate?.(20); } catch {} send({ type: 'tap', k }); }));
 }
+
+meta.options = [{ id: 'mode', name: 'Mode', choices: [['solo', 'everyone for themselves'], ['team', 'work together']] }];

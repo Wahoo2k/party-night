@@ -115,6 +115,13 @@ export function act(s, pid, a, now = Date.now(), rnd = Math.random) {
 }
 
 export function hostAct(s, a, now = Date.now(), rnd = Math.random) {
+  if (a === 'overturn') {
+    // The room disagrees with a buzz: take it back and return the point.
+    const log = s.phase === 'turn' ? s.log : s.lastTurn?.log, team = s.phase === 'turn' ? playing(s) : s.lastTurn?.team;
+    const e = log && [...log].reverse().find(l => l.result === 'taboo');
+    if (e && team !== undefined) { e.result = 'overturned'; s.teamScore[team] += 1; s.eventId++; s.lastEvent = 'overturn'; }
+    return s;
+  }
   if (a !== 'next') return s;
   if (s.phase === 'ready') act(s, giver(s), { type: 'start' }, now, rnd);
   else if (s.phase === 'turn') endTurn(s, now);
@@ -165,6 +172,7 @@ export function tvView(s, now = Date.now()) {
     got: s.log.filter(l => l.result === 'got').length, eventId: s.eventId, lastEvent: s.lastEvent,
   };
   if (s.phase === 'turnEnd' || s.phase === 'over') v.lastTurn = s.lastTurn ? { ...s.lastTurn, log: s.lastTurn.log.map(l => ({ word: l.word, result: l.result })) } : null;
+  v.canOverturn = !!(s.phase === 'turn' ? s.log : s.lastTurn?.log)?.some(l => l.result === 'taboo') && ['turn', 'turnEnd'].includes(s.phase);
   return v;
 }
 
@@ -187,6 +195,7 @@ export function renderTV(v, el) {
   if (v.phase === 'turn') h += `<h2>${esc(v.giver)} is describing…</h2><div class="tabooclock ${v.left <= 10 ? 'hurry' : ''}"><span class="clock">${v.left}</span></div><p class="say center">Got so far: <b class="win">${v.got}</b></p><p class="muted center">Guess out loud! No pointing, no "sounds like," no forbidden words.</p><button class="btn ghost" data-host="next">End turn</button>`;
   if (v.phase === 'turnEnd') h += `<h2><span class="tc${v.lastTurn.team}">${esc(v.teams[v.lastTurn.team].name)}</span> got ${v.lastTurn.log.filter(l => l.result === 'got').length}</h2><div class="history">${v.lastTurn.log.map(l => `<span class="${l.result === 'got' ? 'win' : l.result === 'taboo' ? 'lose' : 'muted'}">${esc(l.word)}${l.result === 'taboo' ? ' ✕' : l.result === 'skip' ? ' (skip)' : ' ✓'}</span>`).join('') || '<span>No words this turn</span>'}</div><button class="btn" data-host="next">Next team</button>`;
   if (v.phase === 'over') h = `<h2 class="win">${v.teams[0].score === v.teams[1].score ? 'It\'s a tie!' : `${esc(v.teams[v.teams[0].score > v.teams[1].score ? 0 : 1].name)} wins!`}</h2><div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
+  if (v.canOverturn) h += '<button class="btn ghost" data-host="overturn">Overturn the last buzz</button>';
   el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel">${h}</div>${teams}</div>`;
 }
 

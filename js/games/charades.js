@@ -31,6 +31,18 @@ export const CARDS = [
   ["🚜", "Tractor"], ["🚌", "School bus"], ["🏍️", "Motorcycle"], ["🛶", "Canoe"], ["🚤", "Speedboat"], ["🛷", "Sledding"], ["🎈", "Hot air balloon"], ["🚑", "Ambulance"],
   ["🤧", "Having a cold"], ["😂", "Laughing"], ["😱", "Scared"], ["🥱", "Yawning"], ["🤫", "Being quiet"], ["🤒", "Feeling sick"], ["😎", "Being cool"], ["🤔", "Thinking hard"],
 ];
+// The tricky deck: actions and scenes for older kids and grown-ups.
+const EASY_N = CARDS.length;
+CARDS.push(
+  ['🧟', 'Zombie at a buffet'], ['🧗', 'Rock climbing'], ['🎤', 'Karaoke gone wrong'], ['🧘', 'Yoga class'], ['🚿', 'Cold shower'], ['🛗', 'Stuck in an elevator'],
+  ['🪩', 'Disco dancing'], ['🧑‍🚀', 'Walking on the moon'], ['🎢', 'Front seat of a roller coaster'], ['🦷', 'At the dentist'], ['🧵', 'Threading a needle'], ['🪤', 'Walking through spider webs'],
+  ['📦', 'Building flat-pack furniture'], ['🛒', 'Shopping cart with a bad wheel'], ['🧊', 'Brain freeze'], ['🕺', 'Dad at a wedding'], ['🪰', 'Chasing a fly'], ['🧳', 'Late for a flight'],
+  ['🪜', 'Changing a lightbulb'], ['🎣', 'Catching a huge fish'], ['🧽', 'Washing a car'], ['🐕', 'Walking a dog that pulls'], ['📱', 'Phone with no signal'], ['🧹', 'Sweeping up glitter'],
+  ['🥶', 'Stepping on a cold floor'], ['🍝', 'Eating spaghetti'], ['🧗', 'Crossing a rope bridge'], ['🎭', 'Mime in a box'], ['🪂', 'Skydiving'], ['🧑‍🍳', 'Flipping a pancake'],
+  ['🦞', 'Eating a lobster'], ['🚣', 'Canoe going in circles'], ['🤹', 'Juggling flaming torches'], ['🧛', 'Vampire in sunlight'], ['🏋️', 'Lifting something too heavy'], ['🪥', 'Brushing a dog\'s teeth'],
+);
+const deckIdx = kind => CARDS.map((_, i) => i).filter(i => kind === 'hard' ? i >= EASY_N : kind === 'mix' ? true : i < EASY_N);
+
 export const TIMES = { ready: 25000, turn: 50000, turnEnd: 6000 };
 
 const shuffle = (a, rnd) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -39,9 +51,11 @@ const shuffle = (a, rnd) => { for (let i = a.length - 1; i > 0; i--) { const j =
 export const PASSES = 3;
 export function setup(players, rnd = Math.random, prev = null, opts = {}) {
   const order = shuffle(players.map(p => ({ pid: p.pid, name: p.name })), rnd);
+  const kind = ['hard', 'mix'].includes(opts.deck) ? opts.deck : 'pictures';
   const fo = freshOrder(CARDS.length, prev, Math.min(order.length, opts.short ? 5 : 12) * 6, rnd);
+  fo.order = fo.order.filter(i => deckIdx(kind).includes(i));
   return {
-    seenIdx: fo.seenIdx,
+    seenIdx: fo.seenIdx, deckKind: kind,
     game: 'charades', players: order, turns: Math.min(order.length, opts.short ? 5 : 12), turn: 0, round: 0,
     scores: Object.fromEntries(order.map(p => [p.pid, 0])),
     deck: fo.order.slice().reverse(), card: null, log: [], lastTurn: null,
@@ -51,7 +65,7 @@ export function setup(players, rnd = Math.random, prev = null, opts = {}) {
 
 const nameOf = (s, pid) => (s.players.find(p => p.pid === pid) || {}).name || 'Someone';
 const actor = s => s.players[s.turn % s.players.length].pid;
-const draw = (s, rnd) => { if (!s.deck.length) s.deck = shuffle(CARDS.map((_, i) => i), rnd); s.card = s.deck.pop(); };
+const draw = (s, rnd) => { if (!s.deck.length) s.deck = shuffle(deckIdx(s.deckKind), rnd); s.card = s.deck.pop(); };
 const ranking = s => s.players.map(p => ({ pid: p.pid, name: p.name, score: s.scores[p.pid] })).sort((a, b) => b.score - a.score);
 
 function endTurn(s, now) {
@@ -167,3 +181,5 @@ export function renderPhone(v, el, send) {
   el.querySelectorAll('[data-by]').forEach(b => b.addEventListener('click', () => { el.querySelectorAll('[data-by],[data-skip]').forEach(x => (x.disabled = true)); try { navigator.vibrate?.(30); } catch {} send({ type: 'got', card: v.cardId, by: b.dataset.by }); }));
   el.querySelector('[data-skip]')?.addEventListener('click', e => { e.target.disabled = true; send({ type: 'skip', card: v.cardId }); });
 }
+
+meta.options = [{ id: 'deck', name: 'Deck', choices: [['pictures', 'Pictures (all ages)'], ['hard', 'Tricky'], ['mix', 'Everything']] }];

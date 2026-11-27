@@ -29,6 +29,16 @@ export const HOT = [
   { q: 'Best sandwich?', o: ['Grilled cheese', 'PB&J', 'Turkey club', 'BLT'] },
   { q: 'How do you squeeze the toothpaste?', o: ['From the bottom', 'From the middle', 'Whatever works', 'Someone else buys it'] },
   { q: 'Best Thanksgiving side?', o: ['Stuffing', 'Mashed potatoes', 'Mac and cheese', 'Cranberry sauce'] },
+  { q: 'Best road trip snack?', o: ['Chips', 'Candy', 'Beef jerky', 'Fruit'] },
+  { q: 'Best way to eat a potato?', o: ['Fries', 'Mashed', 'Baked', 'Chips'] },
+  { q: 'Best board game night pick?', o: ['Strategy game', 'Party game', 'Card game', 'Puzzle'] },
+  { q: 'Best pet?', o: ['Dog', 'Cat', 'Fish', 'Something weird'] },
+  { q: 'Best breakfast?', o: ['Pancakes', 'Eggs and bacon', 'Cereal', 'Just coffee'] },
+  { q: 'Best seat in the car?', o: ['Driver', 'Front passenger', 'Back window', 'Way back'] },
+  { q: 'Best movie snack?', o: ['Popcorn', 'Candy', 'Nachos', 'Nothing, just watch'] },
+  { q: 'Best chore, if you had to pick?', o: ['Dishes', 'Laundry', 'Vacuuming', 'Yard work'] },
+  { q: 'Best kind of weather?', o: ['Sunny and hot', 'Crisp and cool', 'Thunderstorm', 'Snow day'] },
+  { q: 'Best thing at a cookout?', o: ['Burgers', 'Hot dogs', 'The sides', 'Dessert'] },
 ];
 
 export const WYR = [
@@ -52,6 +62,10 @@ export const WYR = [
   ['Have spaghetti for hair', 'Sweat maple syrup'],
   ['Never be cold again', 'Never be hot again'],
   ['Be invisible', 'Read minds'],
+  ['Have a pet dragon the size of a cat', 'Have a pet cat the size of a dragon'], ['Never wait in a line again', 'Never hit a red light again'],
+  ['Only whisper', 'Only shout'], ['Have a rewind button for your life', 'Have a pause button'], ['Live in a treehouse', 'Live on a houseboat'],
+  ['Eat only breakfast foods', 'Eat only dinner foods'], ['Talk to animals', 'Speak every human language'], ['Always be ten minutes late', 'Always be an hour early'],
+  ['Have a personal chef', 'Have a personal driver'], ['Give up dessert', 'Give up pizza'],
 ];
 
 export const MLT = [
@@ -268,3 +282,6 @@ export function renderPhone(v, el, send) {
   el.querySelectorAll('[data-pick]').forEach(b => (b.onclick = () => send({ type: 'pick', i: Number(b.dataset.pick) })));
   el.querySelectorAll('[data-guess]').forEach(b => (b.onclick = () => send({ type: 'guess', i: Number(b.dataset.guess) })));
 }
+
+// A latecomer can take a seat mid-game, starting from zero.
+export function addPlayer(s, p) { if (s.players.some(x => x.pid === p.pid)) return; s.players.push({ pid: p.pid, name: p.name }); s.scores[p.pid] = 0; }

@@ -46,6 +46,12 @@ export const PROMPTS = [
   "The worst song to play at a wedding", "What's really inside a piñata", "A bad invention for the kitchen",
   "The motto of a very lazy army", "A strange thing to say when you meet a king", "The worst present from a grandparent",
   "What squirrels are really planning", "A bad name for a roller coaster", "The first rule of the secret club in the treehouse",
+  'The worst thing to hear from your GPS', 'A bad name for a roller coaster', 'What the tooth fairy does with all those teeth', 'The least helpful thing to pack for a camping trip',
+  'A sign you should not eat at this restaurant', 'The worst theme for a birthday party', 'What the cat knocked off the table this time', 'A terrible thing to yell at a soccer game',
+  'The real reason the WiFi is slow', 'A bad slogan for a dentist', 'What Bigfoot does on weekends', 'The worst song to play at a wedding', 'A rejected name for a superhero',
+  'Something you should never put in a blender', 'The strangest thing to find under the couch', 'What the snowman said before he melted', 'A bad excuse for being late to dinner',
+  'The worst flavor of toothpaste', 'What the school bus driver is really thinking', 'A terrible new rule for the house', 'The least scary monster ever', 'What a pirate orders at a drive-through',
+  'A bad thing to hear from the pilot', 'The worst thing to bring to show and tell',
 ];
 export const FINALS = [
   'Describe this group in three words', 'The title of a movie about tonight', 'The best excuse for being late to a family dinner',
@@ -126,6 +132,9 @@ function score(s) {
   [m.a, m.b].forEach(pid => { if (total > 0 && count[pid] === total) g[pid] += 100 * mult(s); });
   if (!m.answers[m.a] && m.answers[m.b]) g[m.b] += 100 * mult(s);
   if (!m.answers[m.b] && m.answers[m.a]) g[m.a] += 100 * mult(s);
+  // The audience's favorite earns a small bonus.
+  const aud = Object.values(m.aud || {}), na = aud.filter(x => x === m.a).length, nb = aud.length - na;
+  if (na !== nb) { m.crowd = na > nb ? m.a : m.b; g[m.crowd] += 50 * mult(s); }
   Object.entries(g).forEach(([pid, n]) => (s.scores[pid] += n));
   m.count = count; m.gained = g; m.sweep = total > 0 && (count[m.a] === total || count[m.b] === total) ? (count[m.a] === total ? m.a : m.b) : null;
 }
@@ -233,7 +242,7 @@ export function tvView(s, now = Date.now()) {
     const m = s.matchups[s.m];
     // Answers are shown anonymously until the result.
     v.prompt = PROMPTS[m.prompt]; v.n = s.m + 1; v.of = s.matchups.length;
-    v.answers = [m.a, m.b].map(pid => ({ text: m.answers[pid] || '(no answer)', name: s.phase === 'result' ? nameOf(s, pid) : null, votes: s.phase === 'result' ? m.count[pid] : null, gained: s.phase === 'result' ? m.gained[pid] : null, sweep: s.phase === 'result' && m.sweep === pid, voters: s.phase === 'result' ? Object.entries(m.votes).filter(([, x]) => x === pid).map(([p]) => nameOf(s, p)) : [] }));
+    v.answers = [m.a, m.b].map(pid => ({ text: m.answers[pid] || '(no answer)', name: s.phase === 'result' ? nameOf(s, pid) : null, votes: s.phase === 'result' ? m.count[pid] : null, gained: s.phase === 'result' ? m.gained[pid] : null, sweep: s.phase === 'result' && m.sweep === pid, crowd: s.phase === 'result' && m.crowd === pid, voters: s.phase === 'result' ? Object.entries(m.votes).filter(([, x]) => x === pid).map(([p]) => nameOf(s, p)) : [] }));
     v.votesIn = Object.keys(m.votes).length; v.need = voters(s, m).length;
   }
   if (s.phase.startsWith('final')) {
@@ -279,7 +288,7 @@ export function renderTV(v, el) {
   let h = '';
   if (v.phase === 'write') h = `<p class="cat">Round ${v.round}${v.round > 1 ? ' · double points' : ''}</p><h2>Answer your prompts</h2><p class="say">Check your phone. Each prompt goes head-to-head against one other player.</p><p class="clock ${v.left <= 10 ? 'hurry' : ''}">${Math.floor(v.left / 60)}:${String(v.left % 60).padStart(2, '0')}</p>${v.waiting.length ? `<p class="muted">Still writing: ${v.waiting.map(esc).join(', ')}</p>` : ''}<button class="btn ghost" data-host="next">Stop writing</button>`;
   if (v.phase === 'vote' || v.phase === 'result') {
-    h = `<p class="cat">Matchup ${v.n} of ${v.of} · Round ${v.round}</p><div class="cq">${esc(v.prompt)}</div><div class="faceoff ${v.phase}">${v.answers.map((a, i) => `<div class="fa ${v.phase === 'result' && a.votes > v.answers[1 - i].votes ? 'won' : ''}" style="animation-delay:${i * 0.25}s"><div class="fa-text">${esc(a.text)}</div>${v.phase === 'result' ? `<div class="fa-by">${esc(a.name)}${a.sweep ? ' · <b class="win">SWEEP!</b>' : ''}</div><div class="fa-votes">${a.votes} vote${a.votes === 1 ? '' : 's'} · +${a.gained}</div><small class="muted">${a.voters.map(esc).join(', ')}</small>` : ''}</div>`).join('<b class="vs">vs</b>')}</div>`;
+    h = `<p class="cat">Matchup ${v.n} of ${v.of} · Round ${v.round}</p><div class="cq">${esc(v.prompt)}</div><div class="faceoff ${v.phase}">${v.answers.map((a, i) => `<div class="fa ${v.phase === 'result' && a.votes > v.answers[1 - i].votes ? 'won' : ''}" style="animation-delay:${i * 0.25}s"><div class="fa-text">${esc(a.text)}</div>${v.phase === 'result' ? `<div class="fa-by">${esc(a.name)}${a.crowd ? ' · 👏 crowd favorite' : ''}${a.sweep ? ' · <b class="win">SWEEP!</b>' : ''}</div><div class="fa-votes">${a.votes} vote${a.votes === 1 ? '' : 's'} · +${a.gained}</div><small class="muted">${a.voters.map(esc).join(', ')}</small>` : ''}</div>`).join('<b class="vs">vs</b>')}</div>`;
     h += v.phase === 'vote' ? `<p class="say center">Vote for the funnier answer on your phone!</p><div class="meter"><span style="width:${v.need ? (100 * v.votesIn) / v.need : 0}%"></span></div><button class="btn ghost" data-host="next">Close voting</button>` : '<button class="btn" data-host="next">Next</button>';
   }
   if (v.phase === 'finalWrite') h = `<p class="cat">Final round · triple points</p><div class="cq">${esc(v.prompt)}</div><p class="say">Everyone answers on their phone.</p><div class="meter"><span style="width:${(100 * v.answersIn) / v.total}%"></span></div><button class="btn ghost" data-host="next">Stop writing</button>`;
@@ -304,4 +313,17 @@ export function renderPhone(v, el, send) {
   else if (v.phase === 'finalResult' || v.phase === 'over') h = `<h2 class="${v.rank === 1 ? 'win' : ''}">${v.rank === 1 ? 'You\'re the funniest!' : `You came ${v.rank} of ${v.of}`}</h2><p class="say">${v.score.toLocaleString()} points</p>`;
   el.innerHTML = h;
   el.querySelectorAll('[data-pick]').forEach(b => (b.onclick = () => send({ type: 'vote', pick: b.dataset.pick })));
+}
+
+// The audience votes on each matchup too; their favorite gets a small bonus.
+export function audienceView(s, pid) {
+  if (s.phase !== 'vote') return null;
+  const m = s.matchups[s.m];
+  if (!m.answers[m.a] || !m.answers[m.b]) return null;
+  return { q: PROMPTS[m.prompt], options: [m.a, m.b].map(p => ({ v: p, label: m.answers[p] })), picked: m.aud?.[pid] || null };
+}
+export function audienceAct(s, pid, a) {
+  if (s.phase !== 'vote' || a?.type !== 'aud') return;
+  const m = s.matchups[s.m];
+  if (a.pick === m.a || a.pick === m.b) (m.aud = m.aud || {})[pid] = a.pick;
 }

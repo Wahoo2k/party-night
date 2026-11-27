@@ -195,8 +195,8 @@ const shuffle = (a, rnd) => { for (let i = a.length - 1; i > 0; i--) { const j =
 const norm = w => String(w || '').toLowerCase().normalize('NFKD').replace(/\p{M}/gu, '').replace(/[^a-z0-9]/g, '');
 const sameWord = (a, b) => { const x = norm(a), y = norm(b); return !!x && (x === y || x === y + 's' || x + 's' === y || x === y + 'es' || x + 'es' === y); };
 
-export function setup(players, rnd = Math.random, prev = null) {
-  const cats = Object.keys(WORDS);
+export function setup(players, rnd = Math.random, prev = null, opts = {}) {
+  const cats = opts.category && WORDS[opts.category] ? [opts.category] : Object.keys(WORDS);
   const used = new Set(prev?.usedWords || []);
   let category, word;
   for (let i = 0; i < 50; i++) {
@@ -532,3 +532,5 @@ export function renderPhone(v, el, send) {
     gf.onsubmit = e => { e.preventDefault(); gf.querySelector('button').disabled = true; send({ type: 'guess', text: gf.querySelector('#guess').value.trim() }); };
   }
 }
+
+meta.options = [{ id: 'category', name: 'Category', choices: [['', 'Surprise me'], ...Object.keys(WORDS).map(c => [c, c])] }];

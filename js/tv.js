@@ -69,7 +69,7 @@ const isAudience = pid => host.audience.some(a => a.pid === pid);
 function viewFor(pid) {
   if (isAudience(pid)) {
     const me = host.audience.find(a => a.pid === pid);
-    return { phase: 'audience', me: me.name, game: game().meta.name, playing: !!host.state, players: host.players.map(p => p.name), reactions: REACTIONS };
+    return { phase: 'audience', me: me.name, game: game().meta.name, playing: !!host.state, players: host.players.map(p => p.name), reactions: REACTIONS, ask: host.state && game().audienceView ? maskView(game().audienceView(host.state, pid) || null, host.hidden) : null };
   }
   if (!host.state) {
     const me = host.players.find(p => p.pid === pid) || {};
@@ -210,6 +210,15 @@ function onMessage(m) {
       host.players.push((p = aud));
       play('join');
     } else if (aud) { lastSent[aud.pid] = null; return changed(); }
+    if (!p && host.state && game().addPlayer && host.state.phase !== 'over' && host.players.length < game().meta.max) {
+      const { name, changed: fixedName } = settleName(raw, others);
+      host.players.push((p = { pid: m.pid, name, asked: raw, fixed: fixedName, pub }));
+      ensureFaces();
+      game().addPlayer(host.state, { pid: p.pid, name });
+      play('join'); say(`${name} jumps in!`);
+      lastSent[p.pid] = null;
+      return changed();
+    }
     if (!p && (host.state || host.players.length >= game().meta.max)) {
       const { name, changed: fixedName } = settleName(raw, others);
       host.audience.push({ pid: m.pid, name, asked: raw, fixed: fixedName, pub });
@@ -256,6 +265,7 @@ function onMessage(m) {
 function handleAct(pidFrom, rawAct) {
   const m = { pid: pidFrom, a: rawAct };
   if (!host.state || host.paused) return;
+  if (isAudience(pidFrom)) { if (game().audienceAct) { game().audienceAct(host.state, pidFrom, rawAct); changed(); } return; }
   {
     const a = cleanAct(m.a, host.settings.kids);
     const who = host.players.find(p => p.pid === m.pid);
@@ -410,7 +420,7 @@ function startGame() {
   // The audience gets promoted into open seats for the next game.
   while (host.audience.length && host.players.length < game().meta.max) host.players.push(host.audience.shift());
   const prev = host.state && host.state.game === host.gameId ? host.state : host.lastByGame?.[host.gameId];
-  host.state = game().setup(host.players, Math.random, prev, { short: !!host.settings.short });
+  host.state = game().setup(host.players, Math.random, prev, { short: !!host.settings.short, ...(host.opts?.[host.gameId] || {}) });
   lastEventId = 0; popped.clear(); gains = {}; places = {}; lastScore = {}; finalRound = false; finalSaid = false;
   host.played = { ...(host.played || {}), [host.gameId]: (host.played?.[host.gameId] || 0) + 1 }; host.counted = false;
   lastPhase = '';
@@ -433,6 +443,7 @@ function hostAction(a) {
     else { const ms = Date.now() - host.paused; shiftTimes(host.state, ms); stretchedFor += ms; host.paused = 0; }
     save(); render(); return sendViews();
   }
+  if (a.startsWith('opt:')) { const o = (game().meta.options || []).find(x => x.id === a.slice(4)); if (o) { const mine = (host.opts = host.opts || {})[host.gameId] = host.opts[host.gameId] || {}; const i = o.choices.findIndex(c => c[0] === (mine[o.id] ?? o.choices[0][0])); mine[o.id] = o.choices[(i + 1) % o.choices.length][0]; save(); } return render(); }
   if (a === 'awards') return nightAwards();
   if (a === 'cleartally') { host.tally = null; save(); return render(); }
   if (a === 'music') { host.settings.music = !host.settings.music; if (!host.settings.music) stopBed(); save(); return render(); }
@@ -534,6 +545,7 @@ function renderLobby() {
             ? seat(i, `<i style="--pc:${p.face?.[1] || '#232a5c'}">${p.face?.[0] || '🙂'}</i><b>${esc(p.name)}</b>${i === 0 ? '<em>👑</em>' : ''}`, `taken ${p.bot ? 'bot' : ''} ${seen.has(p.pid) ? '' : 'pop'} ${editing === p.pid ? 'on' : ''}`, `data-host="edit:${esc(p.pid)}" title="Rename or remove"`)
             : seat(i, '<i>Join!</i>', 'open'); }).join('')}</div>`;
       })()}
+      ${g.meta.options?.length ? `<div class="row gameopts"><span class="muted">${esc(g.meta.name)} options</span>${g.meta.options.map(o => { const cur = host.opts?.[host.gameId]?.[o.id] ?? o.choices[0][0]; return `<button class="btn ghost" data-host="opt:${o.id}">${esc(o.name)}: ${esc((o.choices.find(c => c[0] === cur) || o.choices[0])[1])}</button>`; }).join('')}</div>` : ''}
       ${host.players.length ? '<p class="muted small">Select a name to rename or remove that player.</p>' : ''}
       ${host.audience.length ? `<p class="muted">Audience (${host.audience.length}): ${host.audience.map(a => esc(a.name)).join(', ')}. They join automatically when a seat opens.</p>` : ''}
       ${(() => { const p = host.players.find(x => x.pid === editing); return p ? `<div class="editbox"><label for="rename">Rename ${esc(p.name)}</label><div class="row"><input id="rename" maxlength="${MAX_NAME}" value="${esc(p.name)}" autocomplete="off"><button class="btn" data-host="rename">Save</button><button class="btn ghost" data-host="randomname">Random name</button><button class="btn ghost" data-host="kick">Remove player</button><button class="btn ghost" data-host="canceledit">Cancel</button></div></div>` : ''; })()}
@@ -609,6 +621,17 @@ async function connect() {
     if (s === 'live') sendViews(true);
   });
 }
+
+// A living backdrop behind every game: slow drifting shapes, tinted per game, so the screen is never still.
+const backdrop = Object.assign(document.createElement('div'), { id: 'backdrop' });
+backdrop.innerHTML = Array.from({ length: 16 }, (_, i) => `<i class="b${i % 4}" style="left:${(i * 61) % 100}%;--s:${40 + ((i * 37) % 90)}px;--t:${18 + ((i * 7) % 16)}s;animation-delay:${-(i * 2.3)}s"></i>`).join('');
+document.body.prepend(backdrop);
+function tintBackdrop() {
+  let h = 0; for (const ch of host.gameId || '') h = (h * 31 + ch.charCodeAt(0)) % 360;
+  backdrop.style.setProperty('--hue', host.state ? h : 45);
+  backdrop.classList.toggle('busy', !!host.state);
+}
+setInterval(tintBackdrop, 1500);
 
 // One shared countdown bar across the top of the TV for every game, plus thinking music while a timer runs.
 const tbar = Object.assign(document.createElement('div'), { id: 'tbar' });

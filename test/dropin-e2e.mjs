@@ -1,0 +1,22 @@
+// Game options in the lobby, and a latecomer taking a seat mid-game in a drop-in game.
+import { chromium } from '/opt/npm-tools/node_modules/playwright/index.mjs';
+const base = 'http://localhost:8765/';
+const b = await chromium.launch({ executablePath: '/usr/bin/google-chrome' });
+const ctx = await b.newContext({ viewport: { width: 1280, height: 720 } });
+const errors = [];
+const tv = await ctx.newPage(); tv.on('pageerror', e => errors.push('tv ' + e.message));
+await tv.goto(base + 'tv.html?local=1'); await tv.waitForSelector('.code');
+const code = (await tv.textContent('.code')).trim();
+for (let i = 0; i < 4; i++) await tv.click('[data-host=addbot]');
+await tv.click('[data-shelf=all]'); await tv.click('[data-game=charades]');
+const before = await tv.textContent('[data-host="opt:deck"]'); await tv.click('[data-host="opt:deck"]'); const after = await tv.textContent('[data-host="opt:deck"]');
+await tv.click('[data-game=quick]'); await tv.click('[data-host=start]');
+await tv.waitForTimeout(4000);
+const me = await ctx.newPage(); me.on('pageerror', e => errors.push('me ' + e.message));
+await me.setViewportSize({ width: 390, height: 800 });
+await me.goto(base + 'play.html?local=1'); await me.fill('#code', code); await me.fill('#name', 'Late'); await me.click('#join');
+await me.waitForTimeout(3500);
+const phone = await me.evaluate(() => document.querySelector('#app').innerText.slice(0, 80).replace(/\n/g, ' | '));
+const seats = await tv.evaluate(() => JSON.parse(localStorage.getItem('pg-host')).players.map(p => p.name));
+console.log(JSON.stringify({ before, after, phone, seats }), 'errors', errors);
+await b.close(); process.exit(errors.length ? 1 : 0);

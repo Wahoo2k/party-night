@@ -42,6 +42,8 @@ export function act(s, pid, a, now = Date.now()) {
   return s;
 }
 export function hostAct(s, a, now = Date.now()) {
+  // A grown-up can take back the last "found it" if it didn't count.
+  if (a === 'undo' && ['go', 'done'].includes(s.phase) && s.found.length) { const pid = s.found.pop(); s.scores[pid] -= [3, 2, 1][s.found.length] || 1; if (s.phase === 'done') { s.phase = 'go'; s.round++; s.deadline = now + 8000; } return s; }
   if (a !== 'next') return s;
   if (s.phase === 'get') { s.phase = 'go'; s.round++; s.deadline = now + TIMES.go; }
   else if (s.phase === 'go') { s.phase = 'done'; s.round++; s.deadline = now + TIMES.done; }
@@ -85,6 +87,7 @@ export function renderTV(v, el) {
   if (v.phase === 'get') h += '<div class="huntbig ready">👀<b>Ready…</b></div>';
   if (v.phase === 'go' || v.phase === 'done') h += `<div class="huntbig" style="--c:${v.hunt.c}"><span>${v.hunt.e}</span><b>${esc(v.hunt.say)}</b></div>${v.phase === 'go' ? `<p class="center"><span class="clock">${v.left}</span></p>` : ''}<div class="huntfound">${v.found.map((n, i) => `<span data-pop="f${v.r}-${i}" data-snd="none">${['🥇', '🥈', '🥉'][i] || '✅'} ${esc(n)}</span>`).join('')}</div>${v.phase === 'go' ? '<button class="btn ghost" data-host="next">Stop</button>' : '<button class="btn" data-host="next">Next hunt</button>'}`;
   if (v.phase === 'over') h = `<h2 class="win">🏆 ${esc(v.scores[0].name)} wins!</h2><div class="podium">${v.scores.slice(0, 3).map((p, i) => `<div class="pod p${i + 1}"><b>${esc(p.name)}</b><span>${p.score}</span></div>`).join('')}</div><div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
+  if (['go', 'done'].includes(v.phase) && v.found.length) h += `<button class="btn ghost small" data-host="undo">Didn't count: undo ${esc(v.found[v.found.length - 1])}</button>`;
   el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel">${h}</div>${scores}</div>`;
 }
 export function renderPhone(v, el, send) {
@@ -97,3 +100,6 @@ export function renderPhone(v, el, send) {
   el.innerHTML = h;
   el.querySelector('[data-found]')?.addEventListener('pointerdown', e => { e.preventDefault(); try { navigator.vibrate?.(60); } catch {} send({ type: 'found' }); });
 }
+
+// A latecomer can take a seat mid-game, starting from zero.
+export function addPlayer(s, p) { if (s.players.some(x => x.pid === p.pid)) return; s.players.push({ pid: p.pid, name: p.name }); s.scores[p.pid] = 0; }
