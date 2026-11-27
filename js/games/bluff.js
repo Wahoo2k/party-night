@@ -5,6 +5,7 @@ import { isRude } from '../names.js';
 import { FACTS } from './bluff-facts.js';
 
 export const meta = {
+  how: ['The TV shows a strange fact with a word missing.', 'Make up a fake answer on your phone that sounds real.', 'All the fakes are shown with the truth mixed in. Pick the one you think is real.', 'Score for finding the truth, and for every player your lie fools.'],
   id: 'bluff',
   name: 'Bluff',
   min: 3,

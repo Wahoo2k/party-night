@@ -1,43 +1,45 @@
-// Ducky Toss: a press-your-luck tossing game. Toss two rubber ducks, score by how they land,
-// keep tossing to build your turn, or bank before a Splash wipes it out. First to the target wins.
-// Our own critters, landing names and scoring (not affiliated with any commercial dice game).
+// GOAT Toss: a press-your-luck tossing game. Toss two little goats, score by how they land,
+// keep tossing to build your turn, or bank before they butt heads and wipe it out. First to the target is the
+// Greatest Of All Time. Our own pieces, landing names and scoring (not affiliated with any commercial dice game).
+// (The file and game id are still "ducks" from the first version, so saved rooms and links keep working.)
 import { esc } from '../ui.js';
 
 export const meta = {
+  how: ['On your turn, swipe up on your phone to toss two goats onto the table.', 'How they land scores points: hooves up and on all fours are 5, a nose dive is 10, a horn stand is 15. Two the same is worth four times as much.', 'Keep tossing to build your turn, or bank your points to keep them.', "If the goats land on two different sides they butt heads and you lose the turn's points. First to 100 is the G.O.A.T."],
   id: 'ducks',
-  name: 'Ducky Toss',
+  name: 'GOAT Toss',
   min: 2,
   max: 10,
-  blurb: 'Toss two rubber ducks, see how they land, and push your luck.',
+  blurb: 'Toss two goats, see how they land, and push your luck. First to 100 is the G.O.A.T.',
   kids: true,
 };
 
 export const TARGET = 100;
-export const TIMES = { anim: 1500, endTurn: 3200, idle: 30000 };
+export const TIMES = { anim: 2600, endTurn: 3400, idle: 30000 };
 
-// How one duck lands. The duck has a star painted on one wing.
+// How one goat lands. One flank has a painted spot, so the two "lying down" sides can be told apart.
 export const POSES = {
-  star:  { name: 'Star side',  pts: 0,  p: 0.35 },
-  plain: { name: 'Plain side', pts: 0,  p: 0.30 },
-  back:  { name: 'Belly up',   pts: 5,  p: 0.22 },
-  sit:   { name: 'Sitting pretty', pts: 5, p: 0.09 },
-  head:  { name: 'Headstand',  pts: 10, p: 0.03 },
-  lean:  { name: 'Beak lean',  pts: 15, p: 0.01 },
+  left:  { name: 'Spot side',   pts: 0,  p: 0.33 },
+  right: { name: 'Plain side',  pts: 0,  p: 0.29 },
+  back:  { name: 'Hooves up',   pts: 5,  p: 0.20 },
+  stand: { name: 'On all fours', pts: 5, p: 0.10 },
+  nose:  { name: 'Nose dive',   pts: 10, p: 0.05 },
+  horn:  { name: 'Horn stand',  pts: 15, p: 0.03 },
 };
-const PILE_CHANCE = 0.006;   // ducks land stacked: lose your whole score
+const PILE_CHANCE = 0.006;   // goats land touching: lose your whole score
 
-const DOUBLE = { back: 'Double belly up', sit: 'Double sitting pretty', head: 'Double headstand', lean: 'Double beak lean' };
+const DOUBLE = { back: 'Double hooves up', stand: 'Stampede', nose: 'Double nose dive', horn: 'G.O.A.T. landing' };
 
 function pose(rnd) {
   let r = rnd();
   for (const [k, v] of Object.entries(POSES)) { if ((r -= v.p) < 0) return k; }
-  return 'star';
+  return 'left';
 }
 
 // Score a pair of landings.
 export function score(a, b) {
-  const isSide = k => k === 'star' || k === 'plain';
-  if (isSide(a) && isSide(b)) return a === b ? { name: 'Snuggle', pts: 1 } : { name: 'Splash!', pts: 0, splash: true };
+  const isSide = k => k === 'left' || k === 'right';
+  if (isSide(a) && isSide(b)) return a === b ? { name: 'Nap time', pts: 1 } : { name: 'Butt heads!', pts: 0, bust: true };
   if (isSide(a)) return { name: POSES[b].name, pts: POSES[b].pts };
   if (isSide(b)) return { name: POSES[a].name, pts: POSES[a].pts };
   if (a === b) return { name: DOUBLE[a], pts: POSES[a].pts * 4, double: true };
@@ -45,7 +47,7 @@ export function score(a, b) {
 }
 
 export function toss(rnd = Math.random) {
-  if (rnd() < PILE_CHANCE) return { a: 'pile', b: 'pile', name: 'Duck pile!', pts: 0, pile: true };
+  if (rnd() < PILE_CHANCE) return { a: 'pile', b: 'pile', name: 'Goat pile!', pts: 0, pile: true };
   const a = pose(rnd), b = pose(rnd);
   return { a, b, ...score(a, b) };
 }
@@ -69,7 +71,7 @@ export function setup(players, rnd = Math.random, prev = null) {
     last: null,        // last toss result
     eventId: 0,
     busyUntil: 0,
-    ending: 0,         // when the turn hands over after a splash or bank
+    ending: 0,         // when the turn hands over after a bust or bank
     endReason: null,
     deadline: Date.now() + TIMES.idle,
     winner: null,
@@ -116,11 +118,11 @@ export function act(s, pid, a, now = Date.now(), rnd = Math.random) {
     s.busyUntil = now + TIMES.anim;
     s.deadline = now + TIMES.idle;
     if (r.pile) { s.lost = s.scores[pid]; s.scores[pid] = 0; s.turnPts = 0; endTurn(s, now + TIMES.anim, 'pile'); }
-    else if (r.splash) {
-      // Catch-up: whoever is in last place and well behind keeps half of the turn's points on a splash.
+    else if (r.bust) {
+      // Catch-up: whoever is in last place and well behind keeps half of the turn's points on a bust.
       const all = Object.values(s.scores), mine = s.scores[current(s)];
       const keep = mine === Math.min(...all) && Math.max(...all) - mine >= 30 ? Math.floor(s.turnPts / 2) : 0;
-      s.scores[current(s)] += keep; s.kept = keep; s.lost = s.turnPts - keep; s.turnPts = 0; endTurn(s, now + TIMES.anim, 'splash');
+      s.scores[current(s)] += keep; s.kept = keep; s.lost = s.turnPts - keep; s.turnPts = 0; endTurn(s, now + TIMES.anim, 'bust');
     }
     else {
       s.turnPts += r.pts;
@@ -145,14 +147,14 @@ export function tick(s, now = Date.now()) {
 }
 
 export function narration(s) {
-  if (s.phase === 'turn' && s.t === 0 && !s.tosses.length) return `Welcome to Ducky Toss! First to ${TARGET} points wins. ${nameOf(s, current(s))}, you're up first. Swipe up on your phone to toss.`;
-  if (s.phase === 'over') return `${nameOf(s, s.winner)} wins Ducky Toss!`;
+  if (s.phase === 'turn' && s.t === 0 && !s.tosses.length) return `Welcome to GOAT Toss! First to ${TARGET} points is the greatest of all time. ${nameOf(s, current(s))}, you're up first. Swipe up on your phone to toss.`;
+  if (s.phase === 'over') return `${nameOf(s, s.winner)} is the greatest of all time!`;
   return '';
 }
 
 export function cue(s) {
-  if (s.phase === 'turn' && s.t === 0 && !s.tosses.length) return { sound: 'join', wait: 700, title: 'Ducky Toss', sub: `First to ${TARGET} wins` };
-  if (s.phase === 'over') return { sound: 'win', wait: 1600, title: `${nameOf(s, s.winner)} Wins!`, sub: 'Ducky Toss champion', tone: 'dawn', fx: 'confetti' };
+  if (s.phase === 'turn' && s.t === 0 && !s.tosses.length) return { sound: 'join', wait: 700, title: 'GOAT Toss', sub: `First to ${TARGET} is the Greatest Of All Time` };
+  if (s.phase === 'over') return { sound: 'win', wait: 1600, title: `${nameOf(s, s.winner)} is the G.O.A.T.!`, sub: 'Greatest Of All Time', tone: 'dawn', fx: 'confetti' };
   return null;
 }
 
@@ -162,8 +164,8 @@ export function cueEvent(s) {
   if (s.lastEvent === 'bank') return { id: s.eventId, sound: 'safe', say: `${nameOf(s, current(s))} banks ${s.banked}.`, delay: 0 };
   const r = s.last;
   if (!r) return null;
-  if (r.pile) return { id: s.eventId, sound: 'lose', react: 'groan', fx: 'shake', say: 'Duck pile! There goes your whole score!', delay: TIMES.anim };
-  if (r.splash) return { id: s.eventId, sound: 'death', react: 'groan', fx: 'splash', say: s.kept ? `Splash! But the last duck keeps ${s.kept}.` : 'Splash! Turn over.', delay: TIMES.anim };
+  if (r.pile) return { id: s.eventId, sound: 'lose', react: 'groan', fx: 'shake', say: 'Goat pile! There goes your whole score!', delay: TIMES.anim };
+  if (r.bust) return { id: s.eventId, sound: 'death', react: 'groan', fx: 'shake', say: s.kept ? `They butt heads! But the underdog keeps ${s.kept}.` : 'They butt heads! Turn over.', delay: TIMES.anim };
   if (r.double) return { id: s.eventId, sound: 'win', react: 'cheer', fx: 'gold', say: `${r.name}! ${r.pts} points!`, delay: TIMES.anim };
   return { id: s.eventId, sound: r.pts >= 10 ? 'safe' : 'tick', say: r.pts >= 10 ? `${r.name}! ${r.pts}!` : '', delay: TIMES.anim };
 }
@@ -183,7 +185,7 @@ export function tvView(s, now = Date.now()) {
     phase: s.phase, target: TARGET,
     who: nameOf(s, current(s)),
     turnPts: s.turnPts,
-    tosses: s.tosses.map(r => ({ name: r.name, pts: r.pts, splash: !!r.splash, pile: !!r.pile })),
+    tosses: s.tosses.map(r => ({ name: r.name, pts: r.pts, bust: !!r.bust, pile: !!r.pile })),
     last: s.last, eventId: s.eventId, lastEvent: s.lastEvent,
     animating: now < s.busyUntil,
     ending: !!s.ending, endReason: s.endReason, lost: s.lost, banked: s.banked,
@@ -205,74 +207,58 @@ export function phoneView(s, pid, now = Date.now()) {
     busy: now < s.busyUntil,
     ending: !!s.ending,
     endReason: s.endReason,
-    last: s.last ? { name: s.last.name, pts: s.last.pts, splash: !!s.last.splash, pile: !!s.last.pile } : null,
+    last: s.last ? { name: s.last.name, pts: s.last.pts, bust: !!s.last.bust, pile: !!s.last.pile } : null,
     eventId: s.eventId,
     won: s.winner === pid,
     winner: s.winner ? nameOf(s, s.winner) : null,
   };
 }
 
-// ---------- duck drawing ----------
-// One rubber duck, drawn facing right, sitting upright. Poses rotate/flip it.
-const DUCK = (star) => `<g class="duck-body">
-  <ellipse cx="0" cy="14" rx="34" ry="22" fill="#ffd23f"/>
-  <path d="M-34 10 Q-46 -4 -36 -12 Q-30 2 -24 4Z" fill="#ffd23f"/>
-  <circle cx="14" cy="-14" r="18" fill="#ffd23f"/>
-  <path d="M30 -16 Q46 -14 44 -6 Q36 -4 28 -8Z" fill="#ff8a1f"/>
-  <circle cx="18" cy="-18" r="3.4" fill="#1b1b2f"/><circle cx="19.2" cy="-19.2" r="1.1" fill="#fff"/>
-  <ellipse cx="-4" cy="12" rx="16" ry="10" fill="#f6c225"/>
-  ${star ? '<path d="M-4 4 l2.6 5.4 5.8.8-4.2 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8-4.2-4.1 5.8-.8Z" fill="#e2483d"/>' : ''}
-  <ellipse cx="-6" cy="2" rx="10" ry="4" fill="#fff" opacity=".35"/>
-</g>`;
-const POSE_XFORM = { star: 'rotate(90)', plain: 'scale(-1,1) rotate(90)', back: 'rotate(180)', sit: 'rotate(0)', head: 'rotate(-110)', lean: 'rotate(-55)', pile: 'rotate(15)' };
+// ---------- goat drawing ----------
+// One painted goat piece, standing and facing right (art/goat.png). Every landing is the same piece turned a
+// different way, like a real tossed game piece. The spot is drawn on top for the spotted flank.
+const ROT = { left: 90, right: -90, back: 180, stand: 0, nose: 62, horn: 138, pile: 24 };
+const LIFT = { left: 18, right: 18, back: 10, stand: 0, nose: 4, horn: 6, pile: 0 };   // how far the turned piece sinks to rest on the table (% of its size)
+const goatImg = (k) => `<span class="goatpic ${k === 'right' ? 'flip' : ''}" style="--rot:${ROT[k] || 0}deg;--lift:${LIFT[k] || 0}%"><img src="art/goat.png" alt="">${k === 'right' ? '' : '<u></u>'}</span>`;
 
-function duckSvg(poseKey, i, animate, eid) {
-  const star = poseKey !== 'plain';
-  return `<div class="duck ${animate ? 'tumble' : ''} d${i}" style="--dx:${i ? 1 : -1}" data-e="${eid}"><svg viewBox="-60 -60 120 120"><g transform="${POSE_XFORM[poseKey] || ''}">${DUCK(star)}</g></svg></div>`;
+function goat(poseKey, i, animate, eid) {
+  return `<div class="goat ${animate ? 'tumble' : ''} g${i}" style="--dx:${i ? 1 : -1}" data-e="${eid}"><i class="gshadow"></i>${goatImg(poseKey)}</div>`;
 }
 
 // ---------- renderers ----------
 export function renderTV(v, el) {
   document.body.classList.toggle('day', true);
-  const board = `<div class="scores"><h3>First to ${v.target}</h3>${v.board.map(p => `<div class="srow ${p.now ? 'now' : ''}"><span>${esc(p.name)}</span><b>${p.score}</b></div><div class="bar"><span style="width:${Math.min(100, (100 * p.score) / v.target)}%"></span></div>`).join('')}</div>`;
+  const board = `<div class="scores"><h3>First to ${v.target}</h3>${v.board.map(p => `<div class="srow ${p.now ? 'now' : ''}"><span>${esc(p.name)}</span><b>${p.score}</b></div>`).join('')}</div>`;
   let h = '';
   if (v.phase === 'turn') {
     const last = v.last;
-    const pond = last
-      ? `<div class="pond ${last.pile ? 'pile' : ''}">${duckSvg(last.pile ? 'pile' : last.a, 0, v.animating, v.eventId)}${duckSvg(last.pile ? 'pile' : last.b, 1, v.animating, v.eventId)}</div>`
-      : `<div class="pond empty"><p class="say">Swipe up on your phone to toss!</p></div>`;
-    const result = last && !v.animating ? `<div class="toss-name ${last.splash || last.pile ? 'lose' : last.double ? 'win' : ''}">${esc(last.name)} ${last.pts ? `<b>+${last.pts}</b>` : ''}</div>` : '<div class="toss-name"> </div>';
+    const table = last
+      ? `<div class="gtable ${last.pile ? 'pile' : ''}">${goat(last.pile ? 'pile' : last.a, 0, v.animating, v.eventId)}${goat(last.pile ? 'pile' : last.b, 1, v.animating, v.eventId)}</div>`
+      : `<div class="gtable empty"><p class="say">Swipe up on your phone to toss!</p></div>`;
+    const result = last && !v.animating ? `<div class="toss-name ${last.bust || last.pile ? 'lose' : last.double ? 'win' : ''}">${esc(last.name)} ${last.pts ? `<b>+${last.pts}</b>` : ''}</div>` : '<div class="toss-name blank"></div>';
     const status = v.ending && !v.animating
-      ? v.endReason === 'bank' ? `<p class="say win">Banked ${v.banked} points!</p>` : v.endReason === 'splash' ? `<p class="say lose">Splash! Lost ${v.lost} points this turn.</p>` : v.endReason === 'pile' ? `<p class="say lose">Duck pile! Back to zero.</p>` : '<p class="say">Turn skipped.</p>'
-      : `<p class="say">This turn: <b class="turnpts">${v.turnPts}</b></p>${(() => { const c = v.board.find(p => p.now); if (!c) return ''; const need = v.target - c.score - v.turnPts; return need <= 0 ? '<p class="say win" data-pop="bankwin" data-snd="gasp">Bank it to WIN!</p>' : need <= 15 ? `<p class="say" data-pop="near${c.name}" data-snd="gasp">🔥 ${need} away from winning!</p>` : ''; })()}`;
-    h = `<h2>${esc(v.who)}'s turn</h2>${pond}${result}${status}<div class="history">${v.tosses.map(t => `<span class="${t.splash || t.pile ? 'lose' : ''}">${esc(t.name)}${t.pts ? ' +' + t.pts : ''}</span>`).join('')}</div>${v.animating ? '' : `<button class="btn ghost" data-host="next">${v.ending ? 'Next player' : 'Skip / bank for them'}</button>`}`;
+      ? v.endReason === 'bank' ? `<p class="say win">Banked ${v.banked} points!</p>` : v.endReason === 'bust' ? `<p class="say lose">They butt heads! Lost ${v.lost} points this turn.</p>` : v.endReason === 'pile' ? `<p class="say lose">Goat pile! Back to zero.</p>` : '<p class="say">Turn skipped.</p>'
+      : `<p class="say">This turn: <b class="turnpts">${v.turnPts}</b></p>${(() => { const c = v.board.find(p => p.now); if (!c) return ''; const need = v.target - c.score - v.turnPts; return need <= 0 ? '<p class="say win" data-pop="bankwin" data-snd="gasp">Bank it to be the G.O.A.T.!</p>' : need <= 15 ? `<p class="say" data-pop="near${c.name}" data-snd="gasp">🔥 ${need} away from winning!</p>` : ''; })()}`;
+    const legend = `<div class="glegend">${[['left', 'right', 'Different sides', 'lose turn', 'lose'], ['left', 'left', 'Same side', '1'], ['back', '', 'Hooves up', '5'], ['stand', '', 'On all fours', '5'], ['nose', '', 'Nose dive', '10'], ['horn', '', 'Horn stand', '15'], ['back', 'back', 'Two alike', '×4']].map(([a, b, n, p, c]) => `<div class="gl ${c || ''}"><span class="glpic">${goatImg(a)}${b ? goatImg(b) : ''}</span><small>${n}</small><b>${p}</b></div>`).join('')}</div>`;
+    h = `<div class="ghead"><h2>${esc(v.who)}'s turn</h2>${result}</div>${table}<div class="gfoot">${status}<div class="history">${v.tosses.map(t => `<span class="${t.bust || t.pile ? 'lose' : ''}">${esc(t.name)}${t.pts ? ' +' + t.pts : ''}</span>`).join('')}</div></div>${legend}<button class="btn ghost" data-host="next" ${v.animating ? 'style="visibility:hidden"' : ''}>${v.ending ? 'Next player' : 'Skip / bank for them'}</button>`;
   }
-  if (v.phase === 'over') h = `<h2 class="win">${esc(v.winner)} wins!</h2><div class="podium">${[...v.board].sort((a, b) => b.score - a.score).slice(0, 3).map((p, i) => `<div class="pod p${i + 1}"><b>${esc(p.name)}</b><span>${p.score}</span></div>`).join('')}</div><div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
-  const legend = `<div class="scores legend"><h3>How ducks land</h3>
-    <div class="srow"><span>Matching sides</span><b>1</b></div>
-    <div class="srow"><span>Belly up · Sitting pretty</span><b>5</b></div>
-    <div class="srow"><span>Headstand</span><b>10</b></div>
-    <div class="srow"><span>Beak lean</span><b>15</b></div>
-    <div class="srow"><span>Doubles</span><b>×4</b></div>
-    <div class="srow lose"><span>Splash (sides don't match)</span><b>lose turn</b></div>
-    <div class="srow lose"><span>Duck pile</span><b>lose all</b></div>
-    <p class="muted small">Catch-up: in last place and 30+ behind? A splash only costs half your turn.</p></div>`;
-  el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel">${h}</div><div class="side">${board}${legend}</div></div>`;
+  if (v.phase === 'over') h = `<h2 class="win">${esc(v.winner)} is the G.O.A.T.!</h2><p class="say">Greatest Of All Time, at least until the next game.</p><div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
+  el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel">${h}</div>${board}</div>`;
 }
 
 export function renderPhone(v, el, send) {
   let h = '';
   if (v.phase === 'spectate') h = '<h2>Game in progress</h2><p>You\'ll join the next game.</p>';
-  else if (v.phase === 'over') h = `<h2 class="${v.won ? 'win' : ''}">${v.won ? 'You won!' : `${esc(v.winner)} wins!`}</h2><p class="say">You finished with ${v.score}.</p>`;
+  else if (v.phase === 'over') h = `<h2 class="${v.won ? 'win' : ''}">${v.won ? 'You are the G.O.A.T.!' : `${esc(v.winner)} is the G.O.A.T.`}</h2><p class="say">You finished with ${v.score}.</p>`;
   else if (!v.myTurn) h = `<h2>${esc(v.who)} is tossing</h2><p class="say">Their turn so far: <b>${v.theirTurnPts}</b></p><p class="muted">Your score: ${v.score} of ${v.target}</p>`;
   else {
     const locked = v.busy || v.ending;
-    const msg = v.ending ? (v.endReason === 'splash' ? '<p class="say lose">Splash! Turn over.</p>' : v.endReason === 'pile' ? '<p class="say lose">Duck pile! Ouch.</p>' : '<p class="say">Turn over.</p>') : v.last ? `<p class="say">${esc(v.last.name)}${v.last.pts ? ` +${v.last.pts}` : ''}</p>` : '<p class="say">Your turn!</p>';
+    const msg = v.ending ? (v.endReason === 'bust' ? '<p class="say lose">They butt heads! Turn over.</p>' : v.endReason === 'pile' ? '<p class="say lose">Goat pile! Ouch.</p>' : '<p class="say">Turn over.</p>') : v.last ? `<p class="say">${esc(v.last.name)}${v.last.pts ? ` +${v.last.pts}` : ''}</p>` : '<p class="say">Your turn!</p>';
     h = `<h2>Your turn</h2>${msg}
-      <div class="swipe ${locked ? 'locked' : ''}" id="swipe"${locked ? '' : ' data-pad'}><div class="ducks-mini">${[0, 1].map(i => `<svg viewBox="-60 -60 120 120" width="64" height="64"${i ? ' style="transform:scaleX(-1)"' : ''}>${DUCK(true)}</svg>`).join('')}</div><b>${locked ? '…' : 'Swipe up to toss'}</b><small>or tap</small></div>
+      <div class="swipe ${locked ? 'locked' : ''}" id="swipe"${locked ? '' : ' data-pad'}><div class="ducks-mini">${goatImg('stand')}${goatImg('stand')}</div><b>${locked ? '…' : 'Swipe up to toss'}</b><small>or tap</small></div>
       <div class="turnbar"><div><small>This turn</small><b>${v.turnPts}</b></div><div><small>Banked</small><b>${v.score}</b></div><div><small>Need</small><b>${Math.max(0, v.target - v.score - v.turnPts)}</b></div></div>
       <button class="btn" data-bank ${v.turnPts > 0 && !locked ? '' : 'disabled'}>Bank ${v.turnPts} points</button>
-      <p class="muted">Two plain/star sides that don't match is a Splash: you lose this turn's points.</p>`;
+      <p class="muted">Two goats on different sides butt heads: you lose this turn's points. Bank before your luck runs out.</p>`;
   }
   el.innerHTML = h;
   el.querySelector('[data-bank]')?.addEventListener('click', () => send({ type: 'bank' }));

@@ -185,6 +185,7 @@ const isAudience = pid => host.audience.some(a => a.pid === pid);
 const howCache = {};
 function rulesFor(id) {
   if (howCache[id]) return howCache[id];
+  if (GAMES[id].meta.how) return (howCache[id] = GAMES[id].meta.how);   // a game can spell out its own steps
   try {
     const G = GAMES[id], n = Math.max(G.meta.min, Math.min(G.meta.max, host.players.length || G.meta.min));
     const ps = Array.from({ length: n }, (_, i) => ({ pid: 'r' + i, name: host.players[i]?.name || 'Player ' + (i + 1) }));
@@ -753,7 +754,7 @@ const seen = new Set();
 const kicked = new Set();
 let editing = null;
 // A glyph for each game in the menu.
-const ICONS = { werewolf: '🐺', imposter: '🕵️', bluff: '🤥', whosaid: '💬', ducks: '🦆', trivia: '🧠', spin: '🎡', crowd: '📊', bingo: '🎱', quick: '⚡', ladder: '🪜', cases: '💼', funny: '😂', letters: '🔤', taboo: '🚫', agents: '🕶️', sketch: '✏️', meld: '🧿', bowl: '🥗', crew: '🤝', charades: '🎭', clash: '🃏', blackjack: '♠️', gofish: '🐟', bluffcards: '🎴', hearts: '♥️', shade: '🎨', estimate: '🎯', truths: '🤞', wordhunt: '🔎', midnight: '🌙', missions: '🗝️', dares: '😈', split: '✂️', doodle: '🖼️', memory: '🧩', copycat: '🐱', hunt: '🌈', freeze: '🧊', haunted: '👻', bomb: '💣', potato: '🥔', mystery: '💎', bracket: '🏆', faker: '🤫', meter: '📈', rebus: '🧩' };
+const ICONS = { werewolf: '🐺', imposter: '🕵️', bluff: '🤥', whosaid: '💬', ducks: '🐐', trivia: '🧠', spin: '🎡', crowd: '📊', bingo: '🎱', quick: '⚡', ladder: '🪜', cases: '💼', funny: '😂', letters: '🔤', taboo: '🚫', agents: '🕶️', sketch: '✏️', meld: '🧿', bowl: '🥗', crew: '🤝', charades: '🎭', clash: '🃏', blackjack: '♠️', gofish: '🐟', bluffcards: '🎴', hearts: '♥️', shade: '🎨', estimate: '🎯', truths: '🤞', wordhunt: '🔎', midnight: '🌙', missions: '🗝️', dares: '😈', split: '✂️', doodle: '🖼️', memory: '🧩', copycat: '🐱', hunt: '🌈', freeze: '🧊', haunted: '👻', bomb: '💣', potato: '🥔', mystery: '💎', bracket: '🏆', faker: '🤫', meter: '📈', rebus: '🧩' };
 
 // Each game lives in its own visual world: a color scheme, a background and a headline typeface. Games not listed keep the night village.
 const THEME_OF = {};

@@ -4,6 +4,7 @@ import { esc } from '../ui.js';
 import { isRude } from '../names.js';
 
 export const meta = {
+  how: ['Everyone answers a few questions about themselves on their phone.', 'The TV shows one answer at a time, without a name.', 'Guess who said it on your phone.', 'Score for each right guess, and for keeping the room guessing about yours.'],
   id: 'whosaid',
   name: 'Who Said That?',
   min: 3,
@@ -304,7 +305,7 @@ export function renderTV(v, el) {
   let h = '';
   if (v.phase === 'answer') h = `<h2>Answer on your phone</h2><p class="say">Everyone answers the same ${v.questions.length} questions about themselves. Then we guess who said what.</p><ol class="qlist">${v.questions.map(q => `<li>${esc(q)}</li>`).join('')}</ol><p class="clock ${v.left <= 10 ? 'hurry' : ''}">${mmss(v.left)}</p><div class="roster">${v.writers.map(w => `<div class="chip ${w.done ? '' : 'waiting'}">${esc(w.name)}${w.done ? ' ✓' : ''}</div>`).join('')}</div><button class="btn ghost" data-host="next">Stop answering</button>`;
   if (v.phase === 'guess' || v.phase === 'reveal') {
-    h = `<p class="cat">Answer ${v.i + 1} of ${v.total}</p><p class="muted qline">${esc(v.q)}</p><div class="quote">“${esc(v.text)}”</div>`;
+    h = `<p class="cat">Answer ${v.i + 1} of ${v.total}</p><p class="muted qline">${esc(v.q)}</p><div class="quote">“${esc(v.text)}”</div><div class="roster suspects">${v.scores.map(p => `<div class="chip" ${v.phase === 'reveal' && p.name === v.author ? 'data-beat="2" data-beat-class="it"' : ''}>${esc(p.name)}</div>`).join('')}</div>`;
     if (v.phase === 'guess') h += `<p class="say">Who said that? Guess on your phone.</p><p class="clock ${v.left <= 10 ? 'hurry' : ''}">${mmss(v.left)}</p><div class="meter"><span style="width:${v.need ? (100 * v.done) / v.need : 0}%"></span></div><button class="btn ghost" data-host="next">Reveal now</button>`;
     else h += `<div class="author" data-beat="2">It was <b>${esc(v.author)}</b>!</div><div class="tally" data-beat="1">${v.guesses.map(g => `<div class="${g.right ? 'win' : ''}">${esc(g.name)} → ${esc(g.guess)} ${g.right ? '✓' : ''}</div>`).join('') || '<div>No guesses</div>'}</div><button class="btn" data-host="next">Next answer</button>`;
   }

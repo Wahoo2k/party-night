@@ -4,6 +4,7 @@ import { esc } from '../ui.js';
 import { isRude } from '../names.js';
 
 export const meta = {
+  how: ['Your phone gives you two silly prompts. Type the funniest answer you can for each.', 'Two answers to the same prompt go head to head on the TV.', 'Everyone else votes for their favorite on their phone.', 'Votes are points. Later rounds are worth more, and the last round is everyone against everyone.'],
   id: 'funny',
   name: 'Funny Answers',
   min: 3,

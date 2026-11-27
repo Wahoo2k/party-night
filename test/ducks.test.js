@@ -2,16 +2,16 @@ import * as G from '../js/games/ducks.js';
 import assert from 'node:assert';
 // probabilities sum to 1
 assert.ok(Math.abs(Object.values(G.POSES).reduce((a, p) => a + p.p, 0) - 1) < 1e-9);
-assert.deepEqual(G.score('star', 'star'), { name: 'Snuggle', pts: 1 });
-assert.ok(G.score('star', 'plain').splash);
-assert.equal(G.score('star', 'head').pts, 10);
+assert.deepEqual(G.score('left', 'left'), { name: 'Nap time', pts: 1 });
+assert.ok(G.score('left', 'right').bust);
+assert.equal(G.score('left', 'nose').pts, 10);
 assert.equal(G.score('back', 'back').pts, 20);
-assert.equal(G.score('head', 'head').pts, 40);
-assert.equal(G.score('back', 'sit').pts, 10);
+assert.equal(G.score('nose', 'nose').pts, 40);
+assert.equal(G.score('back', 'stand').pts, 10);
 // distribution
-const n = 200000, c = { splash: 0, pile: 0 }; let sum = 0;
-for (let i = 0; i < n; i++) { const r = G.toss(); if (r.splash) c.splash++; if (r.pile) c.pile++; sum += r.pts; }
-console.log('splash', (c.splash / n * 100).toFixed(1) + '%', 'pile', (c.pile / n * 100).toFixed(2) + '%', 'avg pts', (sum / n).toFixed(2));
+const n = 200000, c = { bust: 0, pile: 0 }; let sum = 0;
+for (let i = 0; i < n; i++) { const r = G.toss(); if (r.bust) c.bust++; if (r.pile) c.pile++; sum += r.pts; }
+console.log('bust', (c.bust / n * 100).toFixed(1) + '%', 'pile', (c.pile / n * 100).toFixed(2) + '%', 'avg pts', (sum / n).toFixed(2));
 let fails = 0, turns = 0, prev = null;
 for (let g = 0; g < 2000; g++) {
   const np = 2 + (g % 9);

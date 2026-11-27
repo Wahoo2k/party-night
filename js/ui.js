@@ -252,7 +252,9 @@ export function stageFit(app, on) {
   // Sizes written in screen units (vw, vh) are measured against the design size inside the stage, not the real screen.
   const setUnits = w => { st.setProperty('--vw', w / 93 + 'px'); st.setProperty('--vh', (w / 0.93) * (innerHeight / innerWidth) / 100 + 'px'); };
   let best = null;
-  for (const w of [1040, 1260, 1500]) {
+  // A game can ask for one design width (a wide table, say) with --stage-w on its .stage.
+  const want = +getComputedStyle(app.firstElementChild || app).getPropertyValue('--stage-w') || 0;
+  for (const w of want ? [want] : [1040, 1260, 1500]) {
     setUnits(w); st.width = w + 'px';
     const h = Math.max(app.scrollHeight, 1), z = Math.min(availW / w, availH / h, 2.6);
     if (!best || z > best.z * 1.04) best = { w, h, z };   // biggest on screen wins; ties go to the narrower layout

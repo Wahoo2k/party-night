@@ -86,3 +86,10 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Between-round standings (`standings` in js/tv.js): full-screen rank list for about 5 s when a game's round number goes up and it has a plain score list; rows slide to the new order. Mirrored to the remote screen as a still list.
 - End of game (`afterParty`): Play again / Up next (night playlist first, then an unplayed game from the same shelf that fits the player count) / All games, plus tonight's leaders once two games are done. The games' own Play again and Back buttons are hidden on the stage.
 - To do next: headliners 2 to 12 get their own screens; games' own last-screen podiums are now redundant with the rail and can go; standings only fire for games that expose `round` and `scores`.
+
+## Headliners, first three plus GOAT Toss (Nov 27)
+- Bluff: index-card answers, stamped lies, the truth lit last. Who Said That?: speech bubble over a line-up; the author's face lifts on the second beat. Both are CSS on the shared stage plus small markup.
+- Ducky Toss is now GOAT Toss (id and file stay `ducks`). One painted goat piece (art/goat.png, cut out from a green-screen render) turned to six landings: spot side, plain side, hooves up (5), on all fours (5), nose dive (10), horn stand (15); same side twice 1; two alike x4; different sides "butt heads" and lose the turn; touching "goat pile" loses everything. Slower 2.6 s tumble with bounces across a table. Win line: "<name> is the G.O.A.T.!". New cover (art/ducks.jpg).
+- A game can spell out its intro steps with `meta.how` (done for GOAT Toss, Funny Answers, Bluff, Who Said That?) and ask for one stage width with `--stage-w` on its `.stage`.
+- Still to do from the twelve: Act Natural, Sketch Telephone, Doodle Bluff, Werewolf, Secret Agents, Taboo Talk, Trivia Board, Spin & Solve. Then twelve more for the launch 24, phone polish, and audio.
+- GOAT Toss odds were kept from Ducky Toss (bust about 19%, average 5.7 points a toss, about 30 turns a game with bots); worth a feel-check with real players.
