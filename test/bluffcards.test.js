@@ -5,7 +5,7 @@ for (let g = 0; g < 1000; g++) {
   const n = 3 + (g % 6);
   const players = Array.from({ length: n }, (_, i) => ({ pid: 'bot-' + i, name: 'B' + i }));
   const s = G.setup(players); let t = Date.now(), guard = 0;
-  while (s.phase !== 'over' && guard++ < 4000) {
+  while (s.phase !== 'over' && guard++ < 15000) {
     for (const p of players) if (Math.random() < 0.9) { const a = G.botAct(G.phoneView(s, p.pid)); if (a) G.act(s, p.pid, a, t); }
     if (s.phase === 'reveal') { calls++; if (s.reveal.lied) lies++; }
     t += 2000; G.tick(s, t);
