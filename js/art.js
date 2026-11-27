@@ -58,5 +58,5 @@ export const ART = {
 };
 // Painted covers (generated in Canva) replace the drawn scene where one exists. Full-size files live in art/;
 // add a game id here once its art/<id>.jpg exists.
-export const PAINTED = ['werewolf', 'imposter', 'funny', 'quick', 'sketch'];
+export const PAINTED = ['bingo', 'bowl', 'charades', 'clash', 'crew', 'doodle', 'ducks', 'funny', 'imposter', 'meld', 'potato', 'quick', 'sketch', 'werewolf', 'whosaid'];
 export const art = (id, emoji = '🎲') => (PAINTED.includes(id) ? `<img class="art painted" src="art/${id}.jpg" alt="">` : ART[id] ? ART[id]() : S(`<text x="100" y="108" font-size="84" text-anchor="middle" class="a-bob">${emoji}</text>`));
