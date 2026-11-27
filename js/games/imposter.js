@@ -365,6 +365,7 @@ export function cue(s) {
   return null;
 }
 
+const VAGUE = ['classic', 'popular', 'everyday', 'famous', 'fun', 'loud', 'colorful', 'old-school', 'modern', 'childhood', 'weekend', 'family', 'iconic', 'common', 'big', 'small', 'noisy', 'cozy', 'messy', 'fancy', 'cheap', 'expensive', 'seasonal', 'nostalgic', 'trendy', 'simple', 'tricky', 'relaxing', 'exciting', 'familiar'];
 export function botAct(v, rnd = Math.random) {
   const words = WORDS[v.category] || {};
   const any = a => a[Math.floor(rnd() * a.length)];
@@ -376,7 +377,10 @@ export function botAct(v, rnd = Math.random) {
     const pool = (words[target] || []).filter(h => !used.has(norm(h)) && !sameWord(h, v.word || ''));
     const mine = new Set((v.myClues || []).map(norm));
     const fallback = (words[target] || ['Hmm']).filter(h => !sameWord(h, v.word || '') && !mine.has(norm(h)));
-    return { type: 'clue', text: any(pool.length ? pool : fallback.length ? fallback : ['Hmm']) };
+    // Each word only has a few real hints, so bots also reach for vaguer clues the way people do. That keeps a table of bots from all typing the same thing.
+    const vague = VAGUE.filter(h => !used.has(norm(h)) && !mine.has(norm(h)));
+    const pick = pool.length && rnd() < (pool.length >= 3 ? 0.65 : 0.4) ? pool : vague.length ? vague : fallback.length ? fallback : ['Hmm'];
+    return { type: 'clue', text: any(pick) };
   }
   if (v.phase === 'vote' && !v.voted && v.options?.length) {
     if (v.isImposter || !v.board) return { type: 'vote', target: any(v.options).pid };
