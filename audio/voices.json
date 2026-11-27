@@ -3,12 +3,13 @@
   "format": "mp3_44100_96",
   "creditsPerChar": 1,
   "host": {
-    "voice": "SET-ME",
+    "voice": "Callum",
     "settings": {
-      "stability": 0.4,
+      "stability": 0.28,
       "similarity_boost": 0.8,
-      "style": 0.45,
-      "use_speaker_boost": true
+      "style": 0.75,
+      "use_speaker_boost": true,
+      "speed": 1.06
     }
   },
   "night": {
