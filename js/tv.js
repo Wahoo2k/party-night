@@ -179,6 +179,7 @@ function announce() {
   // Game over with a score table: the shared winners' ceremony replaces the game's own title card.
   if (s.phase === 'over' && host.gameId !== 'imposter' && ceremony()) { sayTimer = setTimeout(() => say(maskLine(line, host.hidden)), 4200); return; }
   if (c?.title) titleCard(c.title, c.sub, c.tone);
+  else if (s.phase !== 'over') flash('wipe');
   // A title card covers the screen for about three seconds, so the phase's clock doesn't start until it clears.
   if (c?.title && s.deadline > Date.now()) { shiftTimes(s, 2600); stretchedFor += 2600; }
   if (c?.fx === 'confetti') setTimeout(confetti, 900);
@@ -315,6 +316,18 @@ function guideTip() {
   if (tip) app.querySelector('.panel')?.insertAdjacentHTML('beforeend', `<div class="guide"><b>💡 First game</b> ${esc(tip)}</div>`);
 }
 
+// Scoreboards re-sort with a slide: rows glide to their new places instead of jumping.
+let rowAt = {};
+function slideScores() {
+  const next = {};
+  app.querySelectorAll('.scores .srow').forEach(el => {
+    const k = el.firstElementChild?.textContent || '', y = el.getBoundingClientRect().top;
+    next[k] = y;
+    const dy = rowAt[k] === undefined ? 0 : rowAt[k] - y;
+    if (Math.abs(dy) > 4 && el.animate) { el.animate([{ transform: `translateY(${dy}px)`, background: dy > 0 ? '#3a8f6a66' : '#0000' }, { transform: 'none', background: '#0000' }], { duration: 700, easing: 'cubic-bezier(.2,.9,.3,1)' }); }
+  });
+  rowAt = next;
+}
 let ceremonyOff = null;
 // The winners' ceremony, shared by every game that ends with a score table: third, second, then a drumroll and first.
 function ceremony() {
@@ -505,13 +518,22 @@ function renderLobby() {
   app.innerHTML = `<div class="lobby">
     <section class="panel join">
       <h2>Join on your phone</h2>
-      <div class="qr">${qr(url)}</div>
-      <p class="muted">Scan the code, or go to<br><b class="url">${esc(url.replace(/\?.*/, ''))}</b><br>and enter</p>
+      <p class="muted">Go to <b class="url">${esc(url.replace(/\?.*/, '').replace(/^https?:\/\//, ''))}</b><br>and enter room code</p>
       <div class="code">${host.code}</div>
+      <p class="muted">or scan</p>
+      <div class="qr">${qr(url)}</div>
     </section>
     <section class="panel">
-      <h2>${n ? `${n} player${n === 1 ? '' : 's'} in` : 'Waiting for players'}</h2>
-      <div class="roster">${host.players.map(p => `<button class="chip ${p.bot ? 'bot' : ''} ${seen.has(p.pid) ? '' : 'pop'} ${editing === p.pid ? 'on' : ''}" data-host="edit:${esc(p.pid)}" title="Rename or remove" style="--rc:${p.face?.[1] || ''}"><i class="pface" style="--pc:${p.face?.[1] || ''}">${p.face?.[0] || ''}</i>${esc(p.name)}</button>`).join('') || '<p class="muted">Names appear here as phones join.</p>'}</div>
+      ${(() => {
+        // Seats around the campfire: everyone who has joined, plus open seats waiting to be filled.
+        const total = Math.max(n, Math.min(g.meta.max, 8));
+        const seat = (i, inner, cls, attrs = '') => { const a = ((i + 0.5) / total) * Math.PI * 2 - Math.PI / 2; return `<${attrs ? 'button' : 'div'} class="seat ${cls}" ${attrs} style="left:${(50 + 42 * Math.cos(a)).toFixed(1)}%;top:${(50 + 37 * Math.sin(a)).toFixed(1)}%;--d:${(i * 0.37) % 2}s">${inner}</${attrs ? 'button' : 'div'}>`; };
+        return `<div class="ring n${Math.min(total, 12)}"><div class="fireflies">${Array.from({ length: 14 }, (_, k) => `<i style="left:${(k * 37) % 100}%;top:${(k * 53) % 100}%;animation-delay:${-(k * 0.9)}s"></i>`).join('')}</div>
+          <div class="ringmid"><div class="fire">🔥</div><h2>${esc(g.meta.name)}</h2><p>${n ? `${n} player${n === 1 ? '' : 's'} in` : 'Grab a seat!'}${need ? ` · need ${need} more` : ''}</p><button class="btn" data-host="start" ${need ? 'disabled' : ''}>${need ? 'Waiting…' : "Everybody's in!"}</button></div>
+          ${Array.from({ length: total }, (_, i) => { const p = host.players[i]; return p
+            ? seat(i, `<i style="--pc:${p.face?.[1] || '#232a5c'}">${p.face?.[0] || '🙂'}</i><b>${esc(p.name)}</b>${i === 0 ? '<em>👑</em>' : ''}`, `taken ${p.bot ? 'bot' : ''} ${seen.has(p.pid) ? '' : 'pop'} ${editing === p.pid ? 'on' : ''}`, `data-host="edit:${esc(p.pid)}" title="Rename or remove"`)
+            : seat(i, '<i>Join!</i>', 'open'); }).join('')}</div>`;
+      })()}
       ${host.players.length ? '<p class="muted small">Select a name to rename or remove that player.</p>' : ''}
       ${host.audience.length ? `<p class="muted">Audience (${host.audience.length}): ${host.audience.map(a => esc(a.name)).join(', ')}. They join automatically when a seat opens.</p>` : ''}
       ${(() => { const p = host.players.find(x => x.pid === editing); return p ? `<div class="editbox"><label for="rename">Rename ${esc(p.name)}</label><div class="row"><input id="rename" maxlength="${MAX_NAME}" value="${esc(p.name)}" autocomplete="off"><button class="btn" data-host="rename">Save</button><button class="btn ghost" data-host="randomname">Random name</button><button class="btn ghost" data-host="kick">Remove player</button><button class="btn ghost" data-host="canceledit">Cancel</button></div></div>` : ''; })()}
@@ -554,7 +576,7 @@ function renderLobby() {
 
 function render() {
   if (!host.state) renderLobby();
-  else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); decorate(); pops(fresh); guideTip(); }
+  else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); decorate(); pops(fresh); guideTip(); slideScores(); }
   document.body.classList.toggle('night', host.state?.phase === 'night');
   // How-to screens show in full the first time a room plays a game, then get out of the way.
   document.body.classList.toggle('nohow', !host.settings.howto || (host.played?.[host.gameId] || 0) > 1);
@@ -596,6 +618,7 @@ let barFor = 0, barTotal = 1;
 const OWN_AUDIO = ['freeze', 'copycat'], SECRET = ['potato', 'freeze'];
 function timerBar() {
   const s = host.state, now = Date.now();
+  const vbar = document.getElementById('vetobar'); if (vbar) vbar.style.display = s ? '' : 'none';
   // Only timers the game itself shows on screen: a hidden fuse (Hot Potato, Freeze Dance) must stay hidden.
   const live = s && !host.paused && s.phase !== 'over' && s.deadline > now && !SECRET.includes(host.gameId) && !!app.querySelector('.clock');
   tbar.hidden = !live;

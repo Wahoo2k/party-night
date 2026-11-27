@@ -135,8 +135,11 @@ export function titleCard(title, sub = '', tone = '') {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   document.querySelector('.tcard')?.remove();
   const el = document.createElement('div');
-  el.className = 'tcard ' + tone;
-  el.innerHTML = `<div><h2>${esc(title)}</h2>${sub ? `<p>${esc(sub)}</p>` : ''}</div>`;
+  // Each card arrives a different way (iris, sweep, curtain, diagonal), picked by its title so a game feels varied but not random.
+  const kinds = ['iris', 'sweep', 'curtain', 'diag'];
+  let h = 0; for (const ch of String(title)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  el.className = `tcard ${tone} tc-${kinds[h % kinds.length]}`;
+  el.innerHTML = `<i class="tc-s s1"></i><i class="tc-s s2"></i><i class="tc-s s3"></i><div><h2>${String(title).split(' ').map((w, i) => `<span style="--i:${i}">${esc(w)}</span>`).join(' ')}</h2>${sub ? `<p>${esc(sub)}</p>` : ''}</div>`;
   document.body.append(el);
   setTimeout(() => el.remove(), 3200);
 }
