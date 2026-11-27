@@ -2006,3 +2006,117 @@ body.phone[data-theme] .panel{transform:none!important}
 #wave.hit{animation:pop .3s cubic-bezier(.3,1.6,.5,1)}
 body.phone.ingame #status{right:104px;max-width:38%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 body.phone.ingame .title{max-width:44%}
+
+/* ===== The remaining 23 games on the stage (Nov 27): bigger boards, cards and type ===== */
+/* Playing cards on the TV: one size up everywhere */
+body.onstage .stage .pc{width:74px;border-radius:10px}
+body.onstage .stage .pc .mid{font-size:36px}
+body.onstage .stage .pc b{font-size:17px}body.onstage .stage .pc b i{font-size:14px}
+body.onstage .stage .pcrow.small .pc{width:58px}body.onstage .stage .pcrow.small .pc .mid{font-size:28px}
+body.onstage .stage .pc.big{width:130px}body.onstage .stage .pc.big .mid{font-size:64px}body.onstage .stage .pc.big b{font-size:24px}
+
+/* Blackjack, Hearts, Liar's cards, Go Fish: wider table */
+body.onstage[data-game=blackjack] .stage,body.onstage[data-game=hearts] .stage,body.onstage[data-game=bluffcards] .stage,body.onstage[data-game=gofish] .stage{--stage-w:1260}
+body.onstage[data-game=blackjack] .bjseat{font-size:21px;padding:12px 14px}
+body.onstage[data-game=blackjack] .bjseat b{font-size:24px}
+body.onstage[data-game=blackjack] .bjdealer{font-size:22px}
+body.onstage[data-game=hearts] .hseat{min-width:160px;padding:12px 18px;font-size:22px}
+body.onstage[data-game=hearts] .hcenter{font-size:26px}
+body.onstage[data-game=bluffcards] .cq{font-size:56px}
+body.onstage[data-game=bluffcards] .ccseat,body.onstage[data-game=gofish] .gfseat{font-size:21px;padding:10px 14px}
+body.onstage[data-game=gofish] .gfpond{width:230px}
+body.onstage[data-game=gofish] .gfpond b{font-size:54px}
+body.onstage[data-game=gofish] .gflast{font-size:26px}
+
+/* Bingo: the called ball is the star */
+body.onstage[data-game=bingo] .ball{width:250px;font-size:110px}
+body.onstage[data-game=bingo] .ball.pictures{font-size:120px}
+body.onstage[data-game=bingo] .recentballs{font-size:26px}
+body.onstage[data-game=bingo] .calledgrid{font-size:20px}
+body.onstage[data-game=bingo] .stage .panel>.btn:not([data-host=next]),body.onstage[data-game=bingo] .stage .panel .row .btn{min-height:64px;font-size:24px;padding:0 28px}
+
+/* Bomb Squad: a bigger bomb */
+body.onstage[data-game=bomb] .bbox{padding:26px;gap:30px;border-width:6px}
+body.onstage[data-game=bomb] .bwires{gap:16px}
+body.onstage[data-game=bomb] .bwire{grid-template-columns:36px 1fr 100px;font-size:20px}
+body.onstage[data-game=bomb] .bwire span{height:26px;border-radius:13px}
+body.onstage[data-game=bomb] .bwire small{font-size:24px}
+body.onstage[data-game=bomb] .btimer{font-size:76px;padding:10px 22px;border-radius:12px}
+body.onstage[data-game=bomb] .bserial{font-size:20px}
+body.onstage[data-game=bomb] .blight{width:54px;height:54px}
+
+/* Pick a Case: big cases */
+body.onstage[data-game=cases] .stage{--stage-w:1260;grid-template-columns:minmax(0,2.6fr) minmax(0,1fr)}
+body.onstage[data-game=cases] .casegrid{gap:12px}
+body.onstage[data-game=cases] .case{font-size:36px;border-radius:12px;box-shadow:0 5px 0 #0006}
+body.onstage[data-game=cases] .offercard{font-size:1.3em}
+body.onstage[data-game=cases] .valboard{font-size:19px}
+
+/* Picture Charades */
+body.onstage[data-game=charades] .stage .panel{text-align:center}
+body.onstage[data-game=charades] .tabooclock{width:260px;border-width:12px;margin:12px auto}
+body.onstage[data-game=charades] .tabooclock .clock{font-size:112px;line-height:1}
+body.onstage[data-game=charades] .chcards{justify-content:center;gap:14px}
+body.onstage[data-game=charades] .chcard{width:158px;padding:14px}
+body.onstage[data-game=charades] .chcard span{font-size:72px}
+body.onstage[data-game=charades] .chcard b{font-size:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+body.onstage[data-game=charades] .chcard small{font-size:15px}
+
+/* Copy Cat */
+body.onstage[data-game=copycat] .ccseq span{width:92px;height:92px;font-size:52px;border-radius:18px}
+body.onstage[data-game=copycat] .ccplayers{font-size:22px}
+
+/* Clue Crew */
+body.onstage[data-game=crew] .cclue{font-size:44px;padding:18px 28px}
+body.onstage[data-game=crew] .cclue small{font-size:17px}
+body.onstage[data-game=crew] .crewclues{gap:16px}
+
+/* Secret Missions */
+body.onstage[data-game=dares] .dfeed div{font-size:26px;padding:14px 20px}
+body.onstage[data-game=dares] .dclaim{font-size:30px}
+
+/* Estimate & Bet */
+body.onstage[data-game=estimate] .ebslot{padding:16px 10px;font-size:22px}
+body.onstage[data-game=estimate] .ebnum{font-size:40px}
+body.onstage[data-game=estimate] .ebodds{font-size:24px}
+
+/* Freeze Dance and Color Hunt: one huge card */
+body.onstage[data-game=freeze] .huntbig,body.onstage[data-game=hunt] .huntbig{padding:54px 30px;font-size:170px;border-radius:30px}
+body.onstage[data-game=freeze] .huntbig b,body.onstage[data-game=hunt] .huntbig b{font-size:76px}
+body.onstage[data-game=freeze] .dancefloor{font-size:92px}
+
+/* Haunted Quiz */
+body.onstage[data-game=haunted] .hqopt{font-size:32px;padding:18px 20px}
+body.onstage[data-game=haunted] .hqopt b{width:50px;height:50px;font-size:24px}
+body.onstage[data-game=haunted] .hqopt small{font-size:17px}
+body.onstage[data-game=haunted] .hqdoor{font-size:92px;padding:22px 34px}
+body.onstage[data-game=haunted] .hqdoor b{font-size:30px}
+
+/* Million Ladder */
+body.onstage[data-game=ladder] .stage{--stage-w:1260;grid-template-columns:minmax(0,2.4fr) minmax(0,1fr)}
+body.onstage[data-game=ladder] .lq{font-size:42px;padding:24px 30px}
+body.onstage[data-game=ladder] .lopt{font-size:30px;min-height:78px}
+body.onstage[data-game=ladder] .rung{font-size:22px;padding:6px 14px}
+body.onstage[data-game=ladder] .life{font-size:22px;padding:8px 16px}
+
+/* Letter Lists */
+body.onstage[data-game=letters] .bigletter{width:170px;font-size:120px}
+body.onstage[data-game=letters] .catlist{font-size:28px;line-height:1.5}
+body.onstage[data-game=letters] .lrow{font-size:24px}
+
+/* Midnight Wolves, Missions, Mystery Manor */
+body.onstage[data-game=midnight] .mwroles{font-size:26px}
+body.onstage[data-game=midnight] .mwrow{font-size:24px;gap:14px}
+body.onstage[data-game=midnight] .mwrow .mwcard span{font-size:30px}
+body.onstage[data-game=missions] .mscard{width:150px;font-size:24px}
+body.onstage[data-game=missions] .msvotes{font-size:24px}
+body.onstage[data-game=missions] .roster .chip{font-size:24px;padding:12px 18px}
+body.onstage[data-game=mystery] .mmcast{font-size:1.15em}
+body.onstage[data-game=mystery] .mmclues{font-size:24px}
+body.onstage[data-game=mystery] .mmtruth{font-size:28px}
+
+/* Split the Room: a clean highlight that wraps properly */
+.spfill{-webkit-box-decoration-break:clone;box-decoration-break:clone;padding:.02em .22em;border-radius:.22em;line-height:1.45}
+body.onstage[data-game=split] .cq{line-height:1.4;text-shadow:none}
+body.onstage[data-game=split] .spbar{font-size:28px;min-height:64px}
+body.onstage[data-game=split] .spbar>div{padding:16px 0}

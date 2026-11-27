@@ -115,3 +115,10 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Lobby: pick your animal (first come, first served; message `face`) and wave at the TV.
 - Not done: per-game art on the phone header (the cover is set as the header background but mostly hidden under the dark overlay), and a buzz on iPhones (the browser doesn't allow it; needs the phone app wrapper).
 - Check on real phones: the bright comic theme background behind the panel, and the header on narrow screens.
+
+## Remaining 23 games (Nov 27)
+- Bigger boards, cards and type on the stage for Bingo, Blackjack, Liar's cards, Bomb Squad, Pick a Case, Picture Charades, Copy Cat, Clue Crew, Secret Missions, Estimate & Bet, Freeze Dance, Go Fish, Haunted Quiz, Hearts, Color Hunt, Million Ladder, Letter Lists, Midnight Wolves, Missions, Mystery Manor, Spot the Shade, Split the Room, Secret Word Hunt. Playing cards are one size up on the TV in every card game. CSS only.
+- Split the Room's yellow highlight now wraps cleanly.
+- Every one of the 47 games has now been through the stage work. Depth differs: 12 headliners with their own layouts, 12 with their own touches, 23 with size and styling.
+- Not seen on screen for these 23: Bingo while calling, and most vote/result phases beyond the one or two captured per game.
+- Still open from the review bug list: Missions name chip showing an id (not reproduced), Midnight Wolves ending without a winners' moment, Copy Cat heading wrap.
