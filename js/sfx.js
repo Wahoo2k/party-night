@@ -86,7 +86,21 @@ function howl(t = 0, scale = 1, vol = 0.35) {
   o.stop(s + 2.6); lfo.stop(s + 2.6);
 }
 
+// A crowd of villagers, made from shaped noise: used for the reaction beat after a reveal.
+function crowd({ t = 0, dur = 1.4, vol = 0.22, lo = 700, hi = 2600, rise = true }) {
+  for (let i = 0; i < 7; i++) noise({ t: t + i * (dur / 9), dur: dur * 0.55, vol: vol * (rise ? 0.5 + i / 12 : 1 - i / 10), freq: lo + ((hi - lo) * (rise ? i : 6 - i)) / 6, q: 0.8 });
+}
 const SOUNDS = {
+  cheer() { crowd({}); [784, 988, 1175, 1568].forEach((f, i) => tone({ type: 'triangle', f0: f, t: 0.15 + i * 0.09, dur: 0.5, vol: 0.12 })); },
+  groan() { crowd({ dur: 1.1, vol: 0.16, lo: 300, hi: 900, rise: false }); tone({ type: 'sawtooth', f0: 220, f1: 130, dur: 0.9, vol: 0.1, curve: 'lin' }); },
+  gasp() { noise({ dur: 0.35, vol: 0.25, freq: 2400, q: 0.6 }); noise({ t: 0.05, dur: 0.5, vol: 0.12, freq: 1200, q: 0.5 }); },
+  laugh() { for (let i = 0; i < 6; i++) { noise({ t: i * 0.13, dur: 0.09, vol: 0.16, freq: 1100 + (i % 2) * 500, q: 1.2 }); tone({ type: 'triangle', f0: 520 - i * 30, t: i * 0.13, dur: 0.08, vol: 0.08 }); } },
+  stamp() { tone({ type: 'sine', f0: 140, f1: 60, dur: 0.22, vol: 0.5 }); noise({ dur: 0.12, vol: 0.3, freq: 300, type: 'lowpass' }); },
+  whoosh() { noise({ dur: 0.35, vol: 0.2, freq: 900, q: 0.4 }); tone({ type: 'sine', f0: 300, f1: 1400, dur: 0.3, vol: 0.05 }); },
+  pop() { tone({ type: 'sine', f0: 500, f1: 1100, dur: 0.09, vol: 0.25 }); },
+  lockin() { tone({ type: 'triangle', f0: 740, dur: 0.07, vol: 0.14 }); tone({ type: 'triangle', f0: 1110, t: 0.06, dur: 0.1, vol: 0.12 }); },
+  points() { [660, 880, 1320].forEach((f, i) => tone({ type: 'triangle', f0: f, t: i * 0.07, dur: 0.25, vol: 0.16 })); },
+  fanfare() { [523, 523, 659, 784, 1047].forEach((f, i) => tone({ type: 'square', f0: f, t: [0, 0.16, 0.32, 0.48, 0.72][i], dur: i === 4 ? 1.1 : 0.15, vol: 0.13 })); [262, 330, 392].forEach(f => tone({ type: 'triangle', f0: f, t: 0.72, dur: 1.1, vol: 0.1 })); },
   night() { howl(0, 1, 0.32); howl(0.5, 0.85, 0.14); tone({ type: 'sine', f0: 110, dur: 3, vol: 0.12, attack: 0.8 }); },
   dawn() { // rooster-ish crow then a bright chime
     tone({ type: 'sawtooth', f0: 500, f1: 900, dur: 0.18, vol: 0.18 });
@@ -143,3 +157,23 @@ export function startMusic(seed = 0) {
   }, 200);
 }
 export function stopMusic() { clearInterval(music); music = null; }
+
+// A quiet thinking-music bed for phases where people are typing, drawing or deciding.
+// 'hurry' is the same tune, faster and brighter, for the last ten seconds.
+let bed = null, bedKind = '';
+const BED = { think: { ms: 420, notes: [392, 0, 494, 587, 0, 494, 392, 0, 440, 0, 523, 659, 0, 523, 440, 0], bass: [98, 98, 110, 110] }, hurry: { ms: 210, notes: [523, 659, 784, 659, 523, 659, 784, 988, 587, 698, 880, 698, 587, 698, 880, 1047], bass: [131, 131, 147, 147] } };
+export function startBed(kind = 'think') {
+  if (bedKind === kind && bed) return;
+  stopBed();
+  const b = BED[kind] || BED.think;
+  let i = 0;
+  bedKind = kind;
+  bed = setInterval(() => {
+    if (!ready()) return;
+    const f = b.notes[i % 16];
+    if (f) tone({ type: 'sine', f0: f, dur: 0.32, vol: 0.07 }), tone({ type: 'triangle', f0: f * 2, dur: 0.12, vol: 0.025 });
+    if (i % 4 === 0) tone({ type: 'sine', f0: b.bass[(i >> 2) % 4], dur: 0.5, vol: 0.09 });
+    i++;
+  }, b.ms);
+}
+export function stopBed() { clearInterval(bed); bed = null; bedKind = ''; }

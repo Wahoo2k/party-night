@@ -109,7 +109,7 @@ export function cue(s) {
 }
 
 export function cueEvent(s) {
-  if (s.lastEvent === 'got') return { id: s.eventId, sound: 'safe', say: '' };
+  if (s.lastEvent === 'got') return { id: s.eventId, sound: 'points', fx: 'gold', say: '' };
   if (s.lastEvent === 'skip') return { id: s.eventId, sound: 'tick', say: '' };
   return null;
 }

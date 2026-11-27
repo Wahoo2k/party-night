@@ -2,7 +2,7 @@
 import { GAMES, COMING_SOON, SHELVES, NIGHTS } from './games/index.js';
 import { openRoom } from './net.js';
 import { esc, store, newCode, say, voice, voices, enableDpad, autofocus, drawScene, titleCard, confetti, clawMarks } from './ui.js';
-import { play, sfx, startAmbient, stopAmbient } from './sfx.js';
+import { play, sfx, startAmbient, stopAmbient, startBed, stopBed } from './sfx.js';
 import { newKeys, cleanPub, samePub, sharedKey, seal, unseal } from './secure.js';
 import { cleanAct, textsIn, maskView, maskLine } from './content.js';
 import { settleName, cleanName, isRude, uniqueName, funName, MAX_NAME } from './names.js';
@@ -15,7 +15,7 @@ enableDpad();
 // Saved so a TV refresh doesn't lose the game.
 let host = store.get('pg-host') || { code: newCode(), players: [], gameId: 'werewolf', state: null };
 host.audience = host.audience || [];
-host.settings = { relaxed: false, howto: true, kids: false, ...(host.settings || {}) };
+host.settings = { relaxed: false, howto: true, kids: false, music: true, ...(host.settings || {}) };
 host.hidden = host.hidden || [];
 let recentTexts = [];
 let vetoOpen = false;
@@ -124,7 +124,7 @@ function changed() {
     const ce = game().cueEvent?.(host.state);
     if (ce && ce.id !== lastEventId) {
       lastEventId = ce.id;
-      setTimeout(() => { if (sfx.on) play(ce.sound); if (ce.say) say(maskLine(ce.say, host.hidden)); }, ce.delay || 0);
+      setTimeout(() => { if (sfx.on) { play(ce.sound); if (ce.react) setTimeout(() => play(ce.react), 350); } if (ce.fx) flash(ce.fx); if (ce.say) say(maskLine(ce.say, host.hidden)); }, ce.delay || 0);
     }
   }
   render();
@@ -144,10 +144,18 @@ function announce() {
     if (c.after) setTimeout(() => play(c.after), c.wait - 500);
     if (c.ambient) setTimeout(startAmbient, c.wait);
   }
-  if (c?.title) titleCard(c.title, c.sub, c.tone);
-  if (c?.fx === 'confetti') setTimeout(confetti, 900);
-  if (c?.fx === 'claws') setTimeout(clawMarks, 600);
   const line = g.narration(s);
+  // Game over with a score table: the shared winners' ceremony replaces the game's own title card.
+  if (s.phase === 'over' && host.gameId !== 'imposter' && ceremony()) { sayTimer = setTimeout(() => say(maskLine(line, host.hidden)), 4200); return; }
+  if (c?.title) titleCard(c.title, c.sub, c.tone);
+  // A title card covers the screen for about three seconds, so the phase's clock doesn't start until it clears.
+  if (c?.title && s.deadline > Date.now()) { shiftTimes(s, 2600); stretchedFor += 2600; }
+  if (c?.fx === 'confetti') setTimeout(confetti, 900);
+  if (c?.flash) setTimeout(() => flash(c.flash), c.flashAt || 0);
+  if (c?.fx === 'claws') setTimeout(clawMarks, 600);
+  // The reaction beat: the villagers cheer, gasp or groan a moment after the reveal.
+  const react = c?.react || (c?.fx === 'confetti' ? 'cheer' : c?.fx === 'claws' ? 'gasp' : c?.sound === 'lose' ? 'groan' : null);
+  if (react && sfx.on) setTimeout(() => play(react), (c.wait || 600) + 250);
   sayTimer = setTimeout(() => say(maskLine(line, host.hidden)), c && sfx.on ? c.wait : 0);
 }
 
@@ -221,9 +229,11 @@ function handleAct(pidFrom, rawAct) {
     const who = host.players.find(p => p.pid === m.pid);
     if (a?.type !== 'draft') for (const t of textsIn(a)) { recentTexts = [{ t, name: who?.name || '' }, ...recentTexts.filter(x => x.t.toLowerCase() !== t.toLowerCase())].slice(0, 30); }
     game().act(host.state, m.pid, a, Date.now());
+    if (sfx.on && !['draft', 'dial', 'tap', 'flip', 'toss'].includes(a?.type) && Date.now() - lastLock > 150) { lastLock = Date.now(); play('lockin'); }
     changed();
   }
 }
+let lastLock = 0;
 
 const lastReact = {};
 function floatReaction(e, name) {
@@ -244,13 +254,58 @@ function shiftTimes(x, ms) {
   }
 }
 
+// Full-screen punctuation for a moment: a red buzzer flash, a frost flash, a gold flash, or a screen shake.
+function flash(kind) {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (kind === 'shake') { app.classList.remove('shake'); void app.offsetWidth; app.classList.add('shake'); return setTimeout(() => app.classList.remove('shake'), 700); }
+  if (kind === 'boom') flash('shake');
+  const el = Object.assign(document.createElement('div'), { className: 'fxflash ' + kind });
+  document.body.append(el); setTimeout(() => el.remove(), 1000);
+}
+// Anything a game marks with data-pop="key" punches in (with a sound) the first time that key shows up mid-phase.
+const popped = new Set();
+let lastPop = 0;
+function pops(isFresh) {
+  app.querySelectorAll('[data-pop]').forEach(el => {
+    const k = host.gameId + ':' + el.dataset.pop;
+    if (popped.has(k)) return;
+    popped.add(k);
+    if (isFresh && !el.dataset.always) return;
+    el.classList.add('popin');
+    if (sfx.on && Date.now() - lastPop > 120) { lastPop = Date.now(); play(el.dataset.snd || 'pop'); }
+  });
+}
+
+// The winners' ceremony, shared by every game that ends with a score table: third, second, then a drumroll and first.
+function ceremony() {
+  const v = tvView();
+  let list = Array.isArray(v.scores) && v.scores.length >= 2 && v.scores[0]?.name ? v.scores : null;
+  if (!list && Array.isArray(v.teams) && typeof v.teams[0]?.score === 'number') list = [...v.teams].sort((a, b) => b.score - a.score);
+  if (!list || matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+  document.querySelector('.ceremony')?.remove();
+  const el = document.createElement('div');
+  el.className = 'ceremony';
+  const face = n => host.players.find(p => p.name === n)?.face;
+  const val = p => { const k = ['score', 'chips', 'hearts', 'books'].find(x => typeof p[x] === 'number'); return k ? p[k].toLocaleString() : typeof p.burns === 'number' ? p.burns + ' 🔥' : ''; };
+  const tie = list.length > 1 && val(list[0]) !== '' && val(list[0]) === val(list[1]);
+  const top = list.slice(0, 3);
+  el.innerHTML = `<h2>${tie ? "It's a tie!" : 'And the winner is…'}</h2><div class="cpods">${[1, 0, 2].filter(i => top[i]).map(i => { const f = face(top[i].name); return `<div class="cpod c${i + 1}"><i style="--pc:${f?.[1] || '#232a5c'}">${f?.[0] || '🏅'}</i><b>${esc(top[i].name)}</b><span>${val(top[i])}</span><em>${i + 1}</em></div>`; }).join('')}</div><p>Press any button to continue</p>`;
+  document.body.append(el);
+  const close = () => { el.classList.add('out'); setTimeout(() => el.remove(), 500); removeEventListener('keydown', close); };
+  el.onclick = close; setTimeout(() => addEventListener('keydown', close), 4500);
+  if (sfx.on) { setTimeout(() => play('pop'), 700); setTimeout(() => play('pop'), 1700); play('drumroll'); setTimeout(() => play('drumroll'), 1500); setTimeout(() => { play('fanfare'); play('cheer'); }, 3300); }
+  setTimeout(() => { el.classList.add('first'); confetti(); }, 3300);
+  setTimeout(close, 11000);
+  return true;
+}
+
 function startGame() {
   host.paused = 0;
   // The audience gets promoted into open seats for the next game.
   while (host.audience.length && host.players.length < game().meta.max) host.players.push(host.audience.shift());
   const prev = host.state && host.state.game === host.gameId ? host.state : host.lastByGame?.[host.gameId];
   host.state = game().setup(host.players, Math.random, prev, { short: !!host.settings.short });
-  lastEventId = 0;
+  lastEventId = 0; popped.clear();
   lastPhase = '';
   changed();
 }
@@ -260,7 +315,7 @@ function hostAction(a) {
   if (a === 'again') return startGame();
   if (a.startsWith('night:')) { const nt = NIGHTS.find(x => x.id === a.slice(6)); if (nt) { host.queue = nt.games.slice(1); host.night = nt.id; host.gameId = nt.games[0]; host.shelf = 'all'; save(); } return changed(); }
   if (a === 'endnight') { host.queue = []; host.night = null; save(); return render(); }
-  if (a === 'lobby') { host.lastByGame = { ...(host.lastByGame || {}), [host.gameId]: host.state }; host.state = null; if (host.queue?.length) host.gameId = host.queue.shift(); else host.night = null; stopAmbient(); document.body.classList.remove('day'); return changed(); }
+  if (a === 'lobby') { host.lastByGame = { ...(host.lastByGame || {}), [host.gameId]: host.state }; host.state = null; document.querySelector('.ceremony')?.remove(); if (host.queue?.length) host.gameId = host.queue.shift(); else host.night = null; stopAmbient(); document.body.classList.remove('day'); return changed(); }
   if (a === 'newcode') { host = { code: newCode(), players: [], gameId: host.gameId, state: null }; save(); return connect(); }
   if (a === 'voice') { voice.on = !voice.on; return render(); }
   if (a === 'testvoice') return say('Night falls on the village. Somewhere in the dark, the wolves are hungry.', true);
@@ -271,6 +326,7 @@ function hostAction(a) {
     else { const ms = Date.now() - host.paused; shiftTimes(host.state, ms); stretchedFor += ms; host.paused = 0; }
     save(); render(); return sendViews();
   }
+  if (a === 'music') { host.settings.music = !host.settings.music; if (!host.settings.music) stopBed(); save(); return render(); }
   if (a === 'short') { host.settings.short = !host.settings.short; save(); return render(); }
   if (a === 'kids') { host.settings.kids = !host.settings.kids; save(); return render(); }
   if (a === 'veto') { vetoOpen = !vetoOpen; return render(); }
@@ -379,6 +435,7 @@ function renderLobby() {
       <div class="row">
         <button class="btn ghost" data-host="relaxed">Relaxed timers: ${host.settings.relaxed ? 'on' : 'off'}</button>
         <button class="btn ghost" data-host="howto">How-to screens: ${host.settings.howto ? 'on' : 'off'}</button>
+        <button class="btn ghost" data-host="music">Music: ${host.settings.music ? 'on' : 'off'}</button>
         <button class="btn ghost" data-host="short">Game length: ${host.settings.short ? 'short' : 'full'}</button>
         <button class="btn ghost" data-host="kids">Kids mode: ${host.settings.kids ? 'on' : 'off'}</button>
         <span class="muted">Relaxed gives everyone 50% more time.</span>
@@ -400,7 +457,7 @@ function renderLobby() {
 
 function render() {
   if (!host.state) renderLobby();
-  else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); decorate(); }
+  else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); decorate(); pops(fresh); }
   document.body.classList.toggle('night', host.state?.phase === 'night');
   document.body.classList.toggle('nohow', !host.settings.howto);
   const badge = document.getElementById('aud') || Object.assign(document.createElement('div'), { id: 'aud' });
@@ -432,6 +489,27 @@ async function connect() {
     if (s === 'live') sendViews(true);
   });
 }
+
+// One shared countdown bar across the top of the TV for every game, plus thinking music while a timer runs.
+const tbar = Object.assign(document.createElement('div'), { id: 'tbar' });
+tbar.innerHTML = '<span></span>';
+document.body.append(tbar);
+let barFor = 0, barTotal = 1;
+const OWN_AUDIO = ['freeze', 'copycat'], SECRET = ['potato', 'freeze'];
+function timerBar() {
+  const s = host.state, now = Date.now();
+  // Only timers the game itself shows on screen: a hidden fuse (Hot Potato, Freeze Dance) must stay hidden.
+  const live = s && !host.paused && s.phase !== 'over' && s.deadline > now && !SECRET.includes(host.gameId) && !!app.querySelector('.clock');
+  tbar.hidden = !live;
+  if (!live) { barFor = 0; stopBed(); return; }
+  if (s.deadline !== barFor) { barFor = s.deadline; barTotal = Math.max(1000, s.deadline - now); tbar.firstChild.style.transition = 'none'; tbar.firstChild.style.width = '100%'; void tbar.offsetWidth; }
+  const left = s.deadline - now;
+  tbar.firstChild.style.transition = 'width 1s linear';
+  tbar.firstChild.style.width = Math.max(0, (100 * (left - 1000)) / barTotal) + '%';
+  tbar.classList.toggle('hurry', left <= 10000);
+  if (host.settings.music && sfx.on && !OWN_AUDIO.includes(host.gameId) && barTotal >= 12000) startBed(left <= 10000 ? 'hurry' : 'think'); else stopBed();
+}
+setInterval(timerBar, 1000);
 
 setInterval(() => {
   if (!host.state || host.paused) return;

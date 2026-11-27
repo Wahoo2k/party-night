@@ -67,7 +67,7 @@ export function narration(s) {
 export function cue(s) {
   if (s.phase === 'show') return { sound: 'join', wait: 500, title: s.r === 1 ? 'Copy Cat' : `Round ${s.r}`, sub: '👀 Watch!' };
   if (s.phase === 'input') return { sound: 'vote', wait: 200 };
-  if (s.phase === 'result') return { sound: Object.keys(s.failed).length ? 'lose' : 'win', wait: 300, fx: Object.keys(s.failed).length ? null : 'confetti' };
+  if (s.phase === 'result') return { sound: Object.keys(s.failed).length ? 'lose' : 'win', wait: 300, fx: Object.keys(s.failed).length ? null : 'confetti', flash: Object.keys(s.failed).length ? 'buzz' : 'gold' };
   if (s.phase === 'over') return { sound: 'win', wait: 1200, title: 'Game Over', sub: `${ranking(s)[0].name} wins`, tone: 'dawn', fx: 'confetti' };
   return null;
 }

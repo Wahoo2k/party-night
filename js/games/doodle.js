@@ -120,7 +120,7 @@ export function cue(s) {
   if (s.phase === 'draw') return { sound: 'join', wait: 700, title: 'Doodle Bluff', sub: 'Draw your secret title' };
   if (s.phase === 'fake') return { sound: 'vote', wait: 400 };
   if (s.phase === 'pick') return { sound: 'vote', wait: 300 };
-  if (s.phase === 'reveal') return { sound: 'drumroll', wait: 1400 };
+  if (s.phase === 'reveal') return { sound: 'drumroll', after: 'safe', wait: 1700 };
   if (s.phase === 'over') return { sound: 'win', wait: 1500, title: 'Game Over', sub: `${ranking(s)[0].name} wins`, tone: 'dawn', fx: 'confetti' };
   return null;
 }

@@ -128,6 +128,7 @@ export function narration(s) {
 export function cue(s) {
   if (s.phase === 'clue') return { sound: 'join', wait: 700, title: s.played === 0 ? 'Clue Crew' : `Card ${s.card + 1}`, sub: `${nameOf(s, s.guesser)}, look away!` };
   if (s.phase === 'guess') return { sound: 'vote', wait: 300 };
+  if (s.phase === 'reveal' && s.result === 'wrong') return { sound: 'lose', wait: 500, flash: 'buzz' };
   if (s.phase === 'reveal') return { sound: s.result === 'right' ? 'win' : s.result === 'wrong' ? 'lose' : 'tick', wait: 500, fx: s.result === 'right' ? 'confetti' : null };
   if (s.phase === 'over') return { sound: 'win', wait: 1500, title: `${s.score} / ${s.deck.length}`, sub: rating(s.score), tone: 'dawn', fx: s.score >= 6 ? 'confetti' : null };
   return null;

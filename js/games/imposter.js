@@ -357,7 +357,7 @@ export function cue(s) {
     case 'clues': return s.turn === 0 ? { sound: 'vote', wait: 600, title: s.category, sub: 'Give a one-word clue' } : null;
     case 'discuss': return { sound: 'dawn', wait: 1800, title: 'Discuss', sub: 'Who doesn\'t know the word?', tone: 'dawn' };
     case 'vote': return { sound: 'vote', wait: 500, title: 'The Vote', sub: 'Choose on your phone' };
-    case 'guess': return { sound: 'drumroll', after: 'death', wait: 2300 };
+    case 'guess': return { sound: 'drumroll', after: 'death', wait: 2300, react: 'gasp', flash: 'buzz', flashAt: 1800 };
     case 'over': return s.result === 'caught'
       ? { sound: 'win', wait: 1600, title: 'Caught!', sub: `The word was ${s.word}`, tone: 'dawn', fx: 'confetti' }
       : { sound: 'lose', wait: 1600, title: s.result === 'stole' ? 'Stolen!' : 'Got Away!', sub: `The word was ${s.word}`, tone: 'blood' };
@@ -460,7 +460,7 @@ const mmss = n => `${Math.floor(n / 60)}:${String(n % 60).padStart(2, '0')}`;
 
 export function renderTV(v, el) {
   document.body.classList.toggle('day', ['discuss', 'vote', 'guess', 'over'].includes(v.phase));
-  const board = `<div class="clueboard">${v.order.map((p, i) => `<div class="cluerow ${i === v.turnIndex ? 'now' : ''}"><b>${esc(p.name)}</b>${[0, 1].map(k => `<span class="clue ${p.clues[k] ? 'in' : ''}">${p.clues[k] ? esc(p.clues[k]) : ''}</span>`).join('')}</div>`).join('')}</div>`;
+  const board = `<div class="clueboard">${v.order.map((p, i) => `<div class="cluerow ${i === v.turnIndex ? 'now' : ''}"><b>${esc(p.name)}</b>${[0, 1].map(k => `<span class="clue ${p.clues[k] ? 'in' : ''}" ${p.clues[k] ? `data-pop="c${k}-${esc(p.name)}-${esc(p.clues[k])}" data-snd="stamp"` : ''}>${p.clues[k] ? esc(p.clues[k]) : ''}</span>`).join('')}</div>`).join('')}</div>`;
   const progress = v.total ? `<div class="meter"><span style="width:${(100 * v.done) / v.total}%"></span></div><p class="muted">${v.done} of ${v.total}</p>` : '';
   const scores = `<div class="scores"><h3>Scores</h3>${v.scores.map(p => `<div class="srow"><span>${esc(p.name)}</span><b>${p.score}${p.gained && v.phase === 'over' ? `<small> +${p.gained}</small>` : ''}</b></div>`).join('')}</div>`;
   let h = '';

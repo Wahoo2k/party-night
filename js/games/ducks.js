@@ -157,9 +157,9 @@ export function cueEvent(s) {
   if (s.lastEvent === 'bank') return { id: s.eventId, sound: 'safe', say: `${nameOf(s, current(s))} banks ${s.banked}.`, delay: 0 };
   const r = s.last;
   if (!r) return null;
-  if (r.pile) return { id: s.eventId, sound: 'lose', say: 'Duck pile! There goes your whole score!', delay: TIMES.anim };
-  if (r.splash) return { id: s.eventId, sound: 'death', say: 'Splash! Turn over.', delay: TIMES.anim };
-  if (r.double) return { id: s.eventId, sound: 'win', say: `${r.name}! ${r.pts} points!`, delay: TIMES.anim };
+  if (r.pile) return { id: s.eventId, sound: 'lose', react: 'groan', fx: 'shake', say: 'Duck pile! There goes your whole score!', delay: TIMES.anim };
+  if (r.splash) return { id: s.eventId, sound: 'death', react: 'groan', fx: 'splash', say: 'Splash! Turn over.', delay: TIMES.anim };
+  if (r.double) return { id: s.eventId, sound: 'win', react: 'cheer', fx: 'gold', say: `${r.name}! ${r.pts} points!`, delay: TIMES.anim };
   return { id: s.eventId, sound: r.pts >= 10 ? 'safe' : 'tick', say: r.pts >= 10 ? `${r.name}! ${r.pts}!` : '', delay: TIMES.anim };
 }
 

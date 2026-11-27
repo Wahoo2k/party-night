@@ -124,7 +124,7 @@ export function narration(s) {
 export function cue(s) {
   if (s.phase === 'clue') return { sound: 'join', wait: 700, title: s.turn === 0 ? 'Mind Meld' : nameOf(s, s.psychic), sub: s.turn === 0 ? 'Read the mind reader' : 'is the mind reader' };
   if (s.phase === 'guess') return { sound: 'vote', wait: 300 };
-  if (s.phase === 'reveal') return { sound: s.result.meld ? 'win' : 'drumroll', wait: s.result.meld ? 900 : 1500, fx: s.result.meld ? 'confetti' : null };
+  if (s.phase === 'reveal') return { sound: 'drumroll', after: s.result.meld ? 'win' : 'safe', wait: 1700, fx: s.result.meld ? 'confetti' : null, react: s.result.meld ? 'cheer' : null, flash: s.result.meld ? 'gold' : null, flashAt: 1700 };
   if (s.phase === 'over') return { sound: 'win', wait: 1500, title: 'Game Over', sub: `${ranking(s)[0].name} wins`, tone: 'dawn', fx: 'confetti' };
   return null;
 }

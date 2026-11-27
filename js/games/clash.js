@@ -151,7 +151,7 @@ export function cueEvent(s) {
   if (!s.last || s.phase === 'over') return null;
   const one = s.players.find(p => s.hands[p.pid].length === 1);
   const say = s.last.kind === 'swap' ? s.last.text : one && s.last.kind !== 'draw' && s.last.text.startsWith(one.name) ? `${one.name} has one card left!` : '';
-  return { id: s.eventId, sound: s.last.kind === 'action' || s.last.kind === 'swap' ? 'death' : s.last.kind === 'draw' ? 'tick' : 'vote', say };
+  return { id: s.eventId, sound: s.last.kind === 'action' || s.last.kind === 'swap' ? 'death' : s.last.kind === 'draw' ? 'tick' : 'whoosh', fx: s.last.kind === 'action' || s.last.kind === 'swap' ? 'shake' : say ? 'gold' : null, react: say && s.last.kind !== 'swap' ? 'gasp' : null, say };
 }
 
 export function botAct(v, rnd = Math.random) {

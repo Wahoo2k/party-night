@@ -757,7 +757,7 @@ p.center .clock{display:inline-block;font-size:1em;margin:0 0 0 8px;padding:2px 
 /* midnight wolves */
 .mwcard{display:inline-grid;justify-items:center;gap:4px;padding:10px 12px;border-radius:12px;background:#f4e9c1;color:#0e1230;min-width:92px}
 .mwcard span{font-size:34px;line-height:1}.mwcard b{font-size:13px}
-.mwcard.wolf{background:#5a1f2a;color:#ffd7d7}
+.mwcard.wolf{background:#5a1f2a;color:#ffd7d7;opacity:1}
 .mwcard.big{padding:24px;margin:10px auto;display:grid;max-width:220px}.mwcard.big span{font-size:90px}.mwcard.big b{font-size:24px}
 .mwroles{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.mwroles p{width:100%;margin:0}
 .mwroles span{padding:6px 12px;border-radius:99px;background:#232a5c;font-weight:700}
@@ -929,3 +929,114 @@ body.phone .panel{border-top:4px solid var(--me,var(--line))}
 /* stroke-by-stroke replay */
 svg.sk.anim path{stroke-dasharray:1;stroke-dashoffset:1;animation:skdraw .4s linear forwards}
 @keyframes skdraw{to{stroke-dashoffset:0}}
+
+/* ---------- shared kit: emoji art, timer bar, winners' ceremony ---------- */
+body{font-family:Outfit,system-ui,'Noto Color Emoji',sans-serif}
+#tbar{position:fixed;left:0;right:0;top:0;height:10px;z-index:15;background:#0b0e2a;pointer-events:none}
+#tbar span{display:block;height:100%;width:100%;background:linear-gradient(90deg,#3ed6a0,#ffd166);border-radius:0 6px 6px 0;box-shadow:0 0 14px #ffd16688}
+#tbar.hurry span{background:linear-gradient(90deg,#ff8a5c,#e2483d);box-shadow:0 0 18px #e2483dcc;animation:pulse .5s infinite}
+body.phone #tbar{display:none}
+.ceremony{position:fixed;inset:0;z-index:45;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3vh;text-align:center;background:radial-gradient(ellipse at 50% 60%,#232a7a 0,#0a0d2c 55%,#05071a 100%);animation:cerin .5s both}
+.ceremony.out{opacity:0;transition:opacity .5s}
+.ceremony h2{font:400 clamp(40px,6vw,96px)/1 'Pirata One',serif;color:#ffd166;margin:0;text-shadow:0 4px 0 #0008}
+.ceremony p{opacity:0;color:#aab;animation:cerin .6s 5s both;margin:0}
+.cpods{display:flex;align-items:flex-end;justify-content:center;gap:3vw}
+.cpod{display:flex;flex-direction:column;align-items:center;gap:8px;width:clamp(120px,20vw,300px);opacity:0;transform:translateY(60px)}
+.cpod i{font-style:normal;display:grid;place-items:center;width:clamp(72px,10vw,150px);aspect-ratio:1;border-radius:50%;background:var(--pc);font-size:clamp(40px,6vw,90px);box-shadow:0 0 0 5px #fff3,0 10px 30px #0008}
+.cpod b{font-size:clamp(20px,2.6vw,44px);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cpod span{font-size:clamp(16px,2vw,32px);color:#ffd166;font-variant-numeric:tabular-nums}
+.cpod em{font:800 clamp(28px,4vw,64px)/1 Outfit,sans-serif;font-style:normal;display:grid;place-items:center;width:100%;border-radius:14px 14px 0 0;background:linear-gradient(#3a43a0,#232a5c);color:#fff8}
+.cpod.c1 em{height:22vh;background:linear-gradient(#ffd166,#c98a1a);color:#3a2500}.cpod.c2 em{height:15vh}.cpod.c3 em{height:10vh}
+.cpod.c3{animation:cerup .6s .6s cubic-bezier(.2,1.4,.4,1) forwards}
+.cpod.c2{animation:cerup .6s 1.6s cubic-bezier(.2,1.4,.4,1) forwards}
+.ceremony.first .cpod.c1{animation:cerup .7s cubic-bezier(.2,1.6,.4,1) forwards}
+.ceremony.first .cpod.c1 i{animation:cerglow 1.2s .5s infinite alternate}
+@keyframes cerin{from{opacity:0}to{opacity:1}}
+@keyframes cerup{to{opacity:1;transform:none}}
+@keyframes cerglow{to{box-shadow:0 0 0 8px #ffd166,0 0 60px #ffd166aa}}
+
+/* ---------- signature moments ---------- */
+@keyframes slam{0%{opacity:0;transform:scale(2.6) rotate(-6deg)}60%{opacity:1;transform:scale(.92) rotate(1deg)}100%{opacity:1;transform:none}}
+@keyframes stampin{0%{opacity:0;transform:scale(2.2) rotate(-8deg)}55%{opacity:1;transform:scale(.9) rotate(2deg)}100%{transform:none}}
+@keyframes fromleft{from{opacity:0;transform:translateX(-60vw) rotate(-8deg)}}
+@keyframes fromright{from{opacity:0;transform:translateX(60vw) rotate(8deg)}}
+@keyframes shakex{10%,50%,90%{transform:translateX(-12px)}30%,70%{transform:translateX(12px)}}
+@keyframes flashout{from{opacity:.75}to{opacity:0}}
+@keyframes fadein{from{opacity:0}}
+.popin{animation:stampin .45s cubic-bezier(.3,1.5,.5,1) both}
+#app.shake{animation:shakex .6s}
+.fxflash{position:fixed;inset:0;z-index:18;pointer-events:none;animation:flashout .9s ease-out forwards}
+.fxflash.buzz{background:radial-gradient(circle,#e2483d 0,#7a0f0f 100%)}
+.fxflash.boom{background:radial-gradient(circle,#fff3c4 0,#ff7a1f 45%,#7a1f00 100%)}
+.fxflash.gold{background:radial-gradient(circle,#ffe9a8 0,#ffcf6b00 70%)}
+.fxflash.frost{background:radial-gradient(circle,#ffffff 0,#8fd3ff 60%,#3f9fe0 100%);animation-duration:1.3s}
+.fxflash.splash{background:linear-gradient(#3f9fe000 30%,#3f9fe0 100%)}
+body.phone .fxflash{display:none}
+/* Imposter: clues stamp onto the board; the secret word slams in once the title card clears */
+.clue.in{animation:none}.clue.popin{animation:stampin .45s cubic-bezier(.3,1.5,.5,1) both;box-shadow:0 0 0 2px var(--moon)}
+.stage.enter .secret b{display:inline-block;animation:slam .6s 3.1s both}
+/* Hot Potato: shakes faster and glows hotter the longer it lives */
+@keyframes heat{from{filter:none}60%{filter:drop-shadow(0 0 30px #ff9a3c) saturate(1.5)}to{filter:drop-shadow(0 0 70px #ff3c1f) saturate(2.2) hue-rotate(-28deg)}}
+.potato.live{animation:wobble var(--w,.35s) ease-in-out infinite alternate,heat 30s linear var(--heat,0s) both}
+/* Ducky Toss: a bad toss rattles the name */
+.toss-name.lose{animation:shakex .6s both}
+/* Bingo: the number just called pulses on the board */
+.calledgrid .last{animation:pulse .8s 3;box-shadow:0 0 0 3px var(--moon)}
+/* Quick Games: the bars race during the drumroll, then the winner lights up */
+.stage.enter .barrow .bt span{animation:grow 1.9s .2s cubic-bezier(.3,.1,.3,1) both}
+.stage.enter .barrow b,.stage.enter .barrow small{animation:fadein .3s 2.1s both}
+.stage.enter .barrow.top .bt{animation:toplit .6s 2.1s both}
+@keyframes toplit{from{box-shadow:none}50%{box-shadow:0 0 0 6px var(--moon),0 0 40px var(--moon)}}
+.stage.enter .barrow.top .bl{animation:toplbl .01s 2.1s both}@keyframes toplbl{from{color:inherit}}
+/* Sketch Telephone: each new link lands with a thump */
+.chainrow .link.newest{animation:stampin .5s cubic-bezier(.3,1.5,.5,1) both}
+/* Salad Bowl: the count thumps as names go in and come out */
+.saladbowl span.popin{display:inline-block;animation:stampin .35s both}
+/* Funny Answers: the two answers crash in from each side; the winner lifts, the loser sinks, SWEEP gets stamped */
+.stage.enter .faceoff.vote .fa:first-child{animation:fromleft .5s cubic-bezier(.2,1.2,.4,1) both}
+.stage.enter .faceoff.vote .fa:last-child{animation:fromright .5s .35s cubic-bezier(.2,1.2,.4,1) both}
+.faceoff.result .fa{animation:none}
+.stage.enter .faceoff.result .fa.won{animation:wonlift .6s .2s both}
+@keyframes wonlift{from{transform:none;border-color:var(--line);box-shadow:none}60%{transform:scale(1.09)}}
+.faceoff.result .fa:not(.won){opacity:.72}
+.stage.enter .faceoff.result .fa-by{animation:fadein .4s .5s both}
+.fa-by b.win{display:inline-block;padding:2px 10px;border:3px solid currentColor;border-radius:8px;transform:rotate(-6deg)}
+.stage.enter .fa-by b.win{animation:slam .5s .9s both}
+/* Mind Meld: dials land first, then the target wipes open on the drumroll */
+.stage.enter .mband{animation:bandopen .7s 1.5s cubic-bezier(.2,.8,.2,1) both}
+@keyframes bandopen{from{clip-path:inset(0 50%);opacity:0}to{clip-path:inset(0 0);opacity:1}}
+.stage.enter .mtarget{animation:fadein .2s 1.5s both}
+.stage.enter .mpin b{animation:pincol .01s 1.6s both}@keyframes pincol{from{background:#f4e9c1;opacity:1}}
+/* Doodle Bluff: the drawing hangs in a frame; fakes are exposed before the real title lights up */
+.dbart{padding:14px;border-radius:6px;background:linear-gradient(135deg,#c9a24a,#8a6420 40%,#e6c877 60%,#8a6420);box-shadow:0 14px 30px #0008,inset 0 0 0 4px #0003}
+.dbart svg{display:block;border-radius:2px;box-shadow:inset 0 0 12px #0004}
+.stage.enter .dbopt small{animation:fadein .3s 1.7s both}
+.stage.enter .dbopt.real{animation:realtitle .6s 1.7s both}
+@keyframes realtitle{from{background:#f4e9c1;box-shadow:none;transform:none}50%{transform:scale(1.07)}}
+/* Who Said That: the name waits for the drumroll, then lands */
+.stage.enter .author{animation:slam .5s 1.8s both}
+.stage.enter .author~.tally div{animation:rise .4s 2.4s both}
+/* Clue Crew: matching clues crack and cancel */
+.stage.enter .cclue.dead{animation:shatter .8s .5s both}
+@keyframes shatter{0%{background:#f4e9c1;color:#0e1230;text-decoration:none;transform:none}20%,60%{background:#f4e9c1;color:#0e1230;transform:translateX(-8px) rotate(-3deg)}40%,80%{background:#f4e9c1;color:#0e1230;transform:translateX(8px) rotate(3deg)}100%{transform:rotate(-2deg) scale(.94)}}
+.cclue.dead{transform:rotate(-2deg) scale(.94)}
+/* Charades: the turn's cards flip over one by one */
+.stage.enter .chcard{animation:aflip .45s both;animation-delay:calc(.3s + var(--i,0)*.15s)}
+.chcard:nth-child(2){--i:1}.chcard:nth-child(3){--i:2}.chcard:nth-child(4){--i:3}.chcard:nth-child(5){--i:4}.chcard:nth-child(6){--i:5}.chcard:nth-child(7){--i:6}.chcard:nth-child(8){--i:7}.chcard:nth-child(n+9){--i:8}
+/* Color Clash: the played card flies in spinning */
+@keyframes ccfly{from{opacity:0;transform:translate(-30vw,-30vh) rotate(-200deg) scale(.5)}}
+.topcard{animation:ccfly .5s cubic-bezier(.2,.9,.3,1.1)}
+/* Freeze Dance: FREEZE slams down */
+.stage.enter .freezebig{animation:slam .45s both}
+/* Copy Cat: the pattern replays pad by pad; anyone who missed gets a rattle */
+.stage.enter .ccseq span{animation:stampin .35s both;animation-delay:calc(var(--i,0)*.14s)}
+.ccseq span:nth-child(2){--i:1}.ccseq span:nth-child(3){--i:2}.ccseq span:nth-child(4){--i:3}.ccseq span:nth-child(5){--i:4}.ccseq span:nth-child(6){--i:5}.ccseq span:nth-child(7){--i:6}.ccseq span:nth-child(8){--i:7}.ccseq span:nth-child(n+9){--i:8}
+.stage.enter .ccplayers .bad{animation:shakex .6s .3s}
+/* Midnight Wolves: after the title card, the table is dealt row by row and swapped cards flip to what they became */
+.stage.enter .mwrow{animation:rise .4s both;animation-delay:calc(3.1s + var(--i,0)*.25s)}
+.mwrow:nth-child(2){--i:1}.mwrow:nth-child(3){--i:2}.mwrow:nth-child(4){--i:3}.mwrow:nth-child(5){--i:4}.mwrow:nth-child(6){--i:5}.mwrow:nth-child(7){--i:6}.mwrow:nth-child(8){--i:7}.mwrow:nth-child(n+9){--i:8}
+.mwrow.swapped .mwcard:last-of-type{box-shadow:0 0 0 3px #ffcf6b,0 0 18px #ffcf6b88}
+.stage.enter .mwrow.swapped .mwcard:last-of-type{animation:aflip .5s both;animation-delay:calc(3.9s + var(--i,0)*.25s)}
+@media (prefers-reduced-motion:reduce){.popin,.fxflash,.stage.enter *{animation:none!important}}
+body:not(.phone) #app{padding-bottom:calc(5vh + 60px)}
+body:not(.phone) #vetobar{left:auto;right:5vw;justify-content:flex-end}

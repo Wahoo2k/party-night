@@ -52,7 +52,7 @@ export function narration(s) {
 }
 export function cue(s) {
   if (s.phase === 'ready') return { sound: 'join', wait: 300, title: s.r === 0 ? 'Freeze Dance' : `Round ${s.r + 1}`, sub: '💃 Get ready!' };
-  if (s.phase === 'freeze') return { sound: 'lose', wait: 100, title: 'FREEZE!', tone: 'night' };
+  if (s.phase === 'freeze') return { sound: 'stamp', wait: 100, flash: 'frost' };
   if (s.phase === 'over') return { sound: 'win', wait: 1200, title: 'Dance over!', sub: `${ranking(s)[0].name} wins`, tone: 'dawn', fx: 'confetti' };
   return null;
 }
@@ -73,7 +73,7 @@ export function renderTV(v, el) {
   let h = `<p class="cat">Round ${Math.min(v.r, v.of)} of ${v.of}</p>`;
   if (v.phase === 'ready') h += '<div class="huntbig ready">🎵<b>Get ready…</b></div>';
   if (v.phase === 'dance') h += `<div class="dancefloor">${DANCES.map((d, i) => `<span style="animation-delay:${i * 0.12}s">${d}</span>`).join('')}</div><h2 class="center">DANCE! 🎶</h2>${v.early.length ? `<p class="lose center">Too early: ${v.early.map(esc).join(', ')}</p>` : ''}`;
-  if (v.phase === 'freeze') h += `<div class="huntbig freezebig">🧊<b>FREEZE!</b></div><div class="huntfound">${v.taps.map((n, i) => `<span>${['🥇', '🥈', '🥉'][i] || '✅'} ${esc(n)}</span>`).join('')}</div>`;
+  if (v.phase === 'freeze') h += `<div class="huntbig freezebig">🧊<b>FREEZE!</b></div><div class="huntfound">${v.taps.map((n, i) => `<span data-pop="t${v.r}-${i}">${['🥇', '🥈', '🥉'][i] || '✅'} ${esc(n)}</span>`).join('')}</div>`;
   if (v.phase === 'over') h = `<h2 class="win">🏆 ${esc(v.scores[0].name)} wins!</h2><div class="podium">${v.scores.slice(0, 3).map((p, i) => `<div class="pod p${i + 1}"><b>${esc(p.name)}</b><span>${p.score}</span></div>`).join('')}</div><div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
   el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel">${h}</div>${scores}</div>`;
   import('../sfx.js').then(m => (v.phase === 'dance' ? m.startMusic(v.seed) : m.stopMusic())).catch(() => {});

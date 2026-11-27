@@ -60,15 +60,15 @@ export function narration(s) {
 export function cue(s) {
   if (s.phase === 'ready') return { sound: 'join', wait: 400, title: CATEGORIES[s.cats[s.r]] + '!', sub: `${nameOf(s, s.holder)} starts` };
   if (s.phase === 'live') return { sound: 'drumroll', wait: 200, ambient: 'buzz' };
-  if (s.phase === 'boom') return { sound: 'death', wait: 200, title: '💥 BOOM!', sub: `${nameOf(s, s.burned)} got burned`, tone: 'blood', fx: 'claws' };
+  if (s.phase === 'boom') return { sound: 'death', wait: 200, title: '💥 BOOM!', sub: `${nameOf(s, s.burned)} got burned`, tone: 'blood', flash: 'boom', react: 'gasp' };
   if (s.phase === 'over') return { sound: 'win', wait: 1200, title: 'Game Over', sub: `${ranking(s)[0].name} wins`, tone: 'dawn', fx: 'confetti' };
   return null;
 }
-export function cueEvent(s) { return s.phase === 'live' && s.eventId ? { id: s.eventId, sound: 'tick', say: '' } : null; }
+export function cueEvent(s) { return s.phase === 'live' && s.eventId ? { id: s.eventId, sound: 'whoosh', say: '' } : null; }
 export function botAct(v, rnd = Math.random) { return v.phase === 'live' && v.holding && v.held > 1.5 && rnd() < 0.5 ? { type: 'toss', to: v.others[Math.floor(rnd() * v.others.length)].pid } : null; }
 
 export function tvView(s, now = Date.now()) {
-  return { phase: s.phase, r: s.r + 1, of: s.cats.length, cat: s.cats[s.r] !== undefined ? CATEGORIES[s.cats[s.r]] : '', holder: nameOf(s, s.holder), passes: s.passes, burned: s.burned ? nameOf(s, s.burned) : null, scores: ranking(s), eventId: s.eventId };
+  return { phase: s.phase, r: s.r + 1, of: s.cats.length, cat: s.cats[s.r] !== undefined ? CATEGORIES[s.cats[s.r]] : '', holder: nameOf(s, s.holder), passes: s.passes, since: s.since, burned: s.burned ? nameOf(s, s.burned) : null, scores: ranking(s), eventId: s.eventId };
 }
 export function phoneView(s, pid, now = Date.now()) {
   if (s.burns[pid] === undefined) return { phase: 'spectate' };
@@ -77,11 +77,13 @@ export function phoneView(s, pid, now = Date.now()) {
   return v;
 }
 
+// The longer the potato has been live, the faster it shakes and the redder it glows. (The fuse length itself stays secret.)
+function heat(since) { const t = Math.max(0, (Date.now() - since) / 1000); return `style="--w:${Math.max(0.12, 0.45 - t * 0.012).toFixed(2)}s;--heat:${-Math.min(29, t).toFixed(1)}s"`; }
 export function renderTV(v, el) {
   document.body.classList.toggle('day', v.phase !== 'boom');
   const scores = `<div class="scores"><h3>Burns</h3>${v.scores.map(p => `<div class="srow"><span>${esc(p.name)}</span><b>${'🔥'.repeat(p.burns) || '—'}</b></div>`).join('')}</div>`;
   let h = `<p class="cat">Round ${Math.min(v.r, v.of)} of ${v.of}</p>`;
-  if (v.phase === 'ready' || v.phase === 'live') h += `<div class="cq">${esc(v.cat)}!</div><div class="potato ${v.phase === 'live' ? 'live' : ''}" key="${v.eventId}">🥔</div><h2 class="center">${esc(v.holder)}</h2><p class="muted center">${v.phase === 'live' ? `Say one out loud, then toss it! · ${v.passes} tosses` : 'Get ready…'}</p>`;
+  if (v.phase === 'ready' || v.phase === 'live') h += `<div class="cq">${esc(v.cat)}!</div><div class="potato ${v.phase === 'live' ? 'live' : ''}" key="${v.eventId}" ${v.phase === 'live' ? heat(v.since) : ''}>🥔</div><h2 class="center">${esc(v.holder)}</h2><p class="muted center">${v.phase === 'live' ? `Say one out loud, then toss it! · ${v.passes} tosses` : 'Get ready…'}</p>`;
   if (v.phase === 'boom') h += `<div class="potato boom">💥</div><h2 class="center lose">${esc(v.burned)} got burned!</h2><button class="btn" data-host="next">Next round</button>`;
   if (v.phase === 'over') h = `<h2 class="win">${esc(v.scores[0].name)} has the coolest hands!</h2><div class="podium">${v.scores.slice(0, 3).map((p, i) => `<div class="pod p${i + 1}"><b>${esc(p.name)}</b><span>${p.burns} 🔥</span></div>`).join('')}</div><div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
   el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel">${h}</div>${scores}</div>`;

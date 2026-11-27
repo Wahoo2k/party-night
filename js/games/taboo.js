@@ -145,7 +145,7 @@ export function cue(s) {
 export function cueEvent(s) {
   if (!s.eventId) return null;
   if (s.lastEvent === 'got') return { id: s.eventId, sound: 'safe', say: '' };
-  if (s.lastEvent === 'taboo') return { id: s.eventId, sound: 'death', say: 'Taboo!' };
+  if (s.lastEvent === 'taboo') return { id: s.eventId, sound: 'death', react: 'groan', fx: 'buzz', say: 'Taboo!' };
   if (s.lastEvent === 'skip') return { id: s.eventId, sound: 'tick', say: '' };
   return null;
 }

@@ -162,7 +162,7 @@ export function narration(s) {
 
 export function cue(s) {
   if (s.phase === 'calling' && !s.called.length) return { sound: 'join', wait: 900, title: `Round ${s.round + 1}`, sub: pattern(s).name };
-  if (s.phase === 'bingo') return { sound: 'win', wait: 300, title: 'BINGO!', sub: nameOf(s, s.winners[0]), tone: 'dawn', fx: 'confetti' };
+  if (s.phase === 'bingo') return { sound: 'win', wait: 300, title: 'BINGO!', sub: nameOf(s, s.winners[0]), tone: 'dawn', fx: 'confetti', flash: 'gold' };
   if (s.phase === 'over') return { sound: 'win', wait: 1600, title: 'Game Over', sub: 'Thanks for playing!', tone: 'dawn' };
   return null;
 }
@@ -171,7 +171,7 @@ const SAY_NUM = v => { const L = LETTERS[Math.floor((v - 1) / 15)]; return `${L}
 export function cueEvent(s) {
   if (!s.eventId) return null;
   if (s.lastEvent === 'call') { const v = s.called[s.called.length - 1]; return { id: s.eventId, sound: 'tick', say: s.mode === 'numbers' ? SAY_NUM(v) : PICTURES[v][1] + '!' }; }
-  if (s.lastEvent === 'false') return { id: s.eventId, sound: 'vote', say: `Not quite, ${nameOf(s, s.lastFalse)}. Keep playing!` };
+  if (s.lastEvent === 'false') return { id: s.eventId, sound: 'vote', react: 'groan', say: `Not quite, ${nameOf(s, s.lastFalse)}. Keep playing!` };
   return null;
 }
 

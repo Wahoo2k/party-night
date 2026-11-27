@@ -215,7 +215,7 @@ export function cue(s) {
   switch (s.phase) {
     case 'answer': return { sound: 'join', wait: 700, title: 'Who Said That?', sub: 'Answer about yourself' };
     case 'guess': return s.i === 0 ? { sound: 'vote', wait: 600, title: 'Who Said That?', sub: 'Guess on your phone' } : { sound: 'vote', wait: 300 };
-    case 'reveal': return { sound: 'drumroll', after: 'safe', wait: 1800 };
+    case 'reveal': return { sound: 'drumroll', after: 'stamp', wait: 1800, react: 'laugh' };
     case 'over': return { sound: 'win', wait: 1600, title: 'Game Over', sub: 'Who knows who best?', tone: 'dawn', fx: 'confetti' };
   }
   return null;
