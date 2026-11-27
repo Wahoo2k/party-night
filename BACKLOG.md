@@ -93,3 +93,10 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - A game can spell out its intro steps with `meta.how` (done for GOAT Toss, Funny Answers, Bluff, Who Said That?) and ask for one stage width with `--stage-w` on its `.stage`.
 - Still to do from the twelve: Act Natural, Sketch Telephone, Doodle Bluff, Werewolf, Secret Agents, Taboo Talk, Trivia Board, Spin & Solve. Then twelve more for the launch 24, phone polish, and audio.
 - GOAT Toss odds were kept from Ducky Toss (bust about 19%, average 5.7 points a toss, about 30 turns a game with bots); worth a feel-check with real players.
+
+## Headliners 5 to 12 (Nov 27)
+- Own screens for Act Natural (cue cards), Sketch Telephone (film strip), Doodle Bluff (gallery wall, brass plaques), Werewolf (a house per player; the window goes dark when they fall), Secret Agents (bigger grid), Taboo Talk (big clock and tally), Trivia Board (category board, full-stage clue), Spin & Solve (full-height wheel). All twelve headliners now have a screen of their own. These eight are CSS only on the shared stage.
+- In-game "How to play" boxes are hidden on the stage (the intro screen covers it). Sketch-theme title card size fixed.
+- Bug fixed: the end-screen cards reused the class name of Secret Agents' word tiles and broke that grid for about an hour on the live site; the end cards are now `.endcard`.
+- Test notes: test/e2e.mjs (full Werewolf game) updated for the hub and end screen and passes. test/audience.mjs, imposter-e2e.mjs and phone-e2e.mjs still click the old in-game Play again / Back buttons and need the same update. The local test server can no longer be left running in the background here; scratch script with-server.sh starts and stops it per command.
+- Not yet given a phase-by-phase look: Act Natural vote and result, Werewolf vote and verdict, Trivia Board wager and final, Spin & Solve round end. Needs a pass with real players or slower bots.

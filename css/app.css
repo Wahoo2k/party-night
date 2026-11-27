@@ -1639,26 +1639,26 @@ body.onstage[data-game=funny] .faceoff.result .fa:not(.won){transition:filter .5
 .strow small{font:700 3.8vh/1 Outfit,sans-serif;color:#8fe0c4}
 .strow[style*="--i:0"] em,.strow[style*="--i: 0"] em{color:#ffd166}
 /* End of game: what next */
-body.onstage .stage [data-host=again]:not(.acard),body.onstage .stage [data-host=lobby]:not(.acard){display:none}
+body.onstage .stage [data-host=again]:not(.endcard),body.onstage .stage [data-host=lobby]:not(.endcard){display:none}
 .after{grid-column:1/-1;display:flex;flex-wrap:wrap;justify-content:center;gap:18px;margin-top:6px}
-.acard{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:14px;align-items:center;text-align:left;min-width:270px;padding:12px 20px 12px 12px;border-radius:18px;border:2px solid #ffffff30;background:#0e1230e6;color:#fff;cursor:pointer;font-family:Outfit,sans-serif}
-.acard .aart{grid-row:1/3;width:104px;aspect-ratio:4/3;border-radius:12px;overflow:hidden;display:grid;place-items:center;background:#232a5c;font-size:44px}
-.acard .aart img,.acard .aart svg{width:100%;height:100%;object-fit:cover;display:block}
-.acard small{align-self:end;font-size:15px;color:#cfd4ff;text-transform:uppercase;letter-spacing:.08em}
-.acard b{align-self:start;font-size:26px;line-height:1.1}
-.acard.next{border-color:#ffd166;box-shadow:0 0 0 3px #ffd16633}
-.acard:focus-visible,.acard:hover{outline:0;border-color:#fff;transform:translateY(-3px)}
+.endcard{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:14px;align-items:center;text-align:left;min-width:270px;padding:12px 20px 12px 12px;border-radius:18px;border:2px solid #ffffff30;background:#0e1230e6;color:#fff;cursor:pointer;font-family:Outfit,sans-serif}
+.endcard .aart{grid-row:1/3;width:104px;aspect-ratio:4/3;border-radius:12px;overflow:hidden;display:grid;place-items:center;background:#232a5c;font-size:44px}
+.endcard .aart img,.endcard .aart svg{width:100%;height:100%;object-fit:cover;display:block}
+.endcard small{align-self:end;font-size:15px;color:#cfd4ff;text-transform:uppercase;letter-spacing:.08em}
+.endcard b{align-self:start;font-size:26px;line-height:1.1}
+.endcard.next{border-color:#ffd166;box-shadow:0 0 0 3px #ffd16633}
+.endcard:focus-visible,.endcard:hover{outline:0;border-color:#fff;transform:translateY(-3px)}
 .anight{flex-basis:100%;margin:2px 0 0;text-align:center;font-size:20px;color:#e9dcc6}
 
 .after{width:100%}
-.acard{display:grid!important;text-transform:none!important;letter-spacing:0!important;min-height:0;box-shadow:none}
-.acard .aart{grid-column:1;grid-row:1/3}.acard small{grid-column:2;grid-row:1}.acard b{grid-column:2;grid-row:2;text-transform:none}
+.endcard{display:grid!important;text-transform:none!important;letter-spacing:0!important;min-height:0;box-shadow:none}
+.endcard .aart{grid-column:1;grid-row:1/3}.endcard small{grid-column:2;grid-row:1}.endcard b{grid-column:2;grid-row:2;text-transform:none}
 
-.acard{display:flex!important;align-items:center;gap:14px}
-.acard .atext{display:flex;flex-direction:column;gap:3px;text-align:left;min-width:0}
-.acard .atext small{position:static;font:600 14px/1 Outfit,sans-serif;color:#cfd4ff;text-transform:uppercase;letter-spacing:.08em}
-.acard .atext b{position:static;font:800 25px/1.1 Outfit,sans-serif;text-transform:none;white-space:nowrap}
-.acard .aart{flex:0 0 104px}
+.endcard{display:flex!important;align-items:center;gap:14px}
+.endcard .atext{display:flex;flex-direction:column;gap:3px;text-align:left;min-width:0}
+.endcard .atext small{position:static;font:600 14px/1 Outfit,sans-serif;color:#cfd4ff;text-transform:uppercase;letter-spacing:.08em}
+.endcard .atext b{position:static;font:800 25px/1.1 Outfit,sans-serif;text-transform:none;white-space:nowrap}
+.endcard .aart{flex:0 0 104px}
 
 /* The rail already shows the ranking: the old in-panel podium is not repeated on the stage */
 body.onstage .stage .podium{display:none}
@@ -1748,3 +1748,126 @@ body.onstage[data-game=ducks] .stage{--stage-w:1260}
 
 .ghead .toss-name.blank{visibility:hidden}
 .ghead .toss-name.blank::before{content:'.'}
+
+.tcard.th-sketch h2{font-size:clamp(56px,11vw,180px)!important;line-height:1.05}
+.tcard.th-sketch>div{justify-self:center;width:100%;text-align:center}
+
+/* The intro screen explains the rules now: the old in-game "How to play" boxes are not repeated on the stage */
+body.onstage .stage .how{display:none}
+
+/* ===== Act Natural: the instruction on a big cue card, suspects at the vote ===== */
+body.onstage[data-game=faker] .stage .panel{background:none!important;border:0!important;box-shadow:none!important;padding:0!important;text-align:center}
+body.onstage[data-game=faker] .cat{display:inline-block;margin:0 0 12px;padding:5px 16px;border-radius:99px;background:#0c2a22;color:#9dffd0;font:700 16px Outfit,sans-serif;letter-spacing:.1em;text-transform:uppercase}
+body.onstage[data-game=faker] .huntbig{max-width:720px;margin:0 auto 16px;padding:34px;border-radius:28px;background:#fffdf5;color:#14241f;text-shadow:none;box-shadow:0 16px 40px #0008;border:6px solid #14241f;font-size:120px;transform:rotate(-1.5deg)}
+body.onstage[data-game=faker] .huntbig b{font:900 64px/1 Outfit,sans-serif}
+body.onstage[data-game=faker] .huntbig.fkgo{background:#ffd166;animation:pulse .6s infinite}
+body.onstage[data-game=faker] .cq{max-width:900px;margin:0 auto 18px;padding:26px 34px;border-radius:22px;background:#fffdf5;color:#14241f;font:800 46px/1.15 Outfit,sans-serif;text-shadow:none;border:6px solid #14241f;box-shadow:0 16px 40px #0008;transform:rotate(-1deg)}
+body.onstage[data-game=faker] .say{display:inline-block;margin:0 0 10px;padding:8px 20px;border-radius:99px;background:#0c2a22;color:#fff;font-size:24px}
+body.onstage[data-game=faker] .clock{display:inline-block;padding:2px 22px;border-radius:14px;background:#14241f;color:#9dffd0;font-size:60px;margin:0}
+body.onstage[data-game=faker] h2{display:inline-block;margin:0 0 16px;padding:14px 30px;border-radius:18px;background:#14241f;color:#fff;font:800 48px/1.1 Outfit,sans-serif}
+body.onstage[data-game=faker] h2.win{background:#1e9e5a}body.onstage[data-game=faker] h2.lose{background:#c0392b}
+body.onstage[data-game=faker] .tally{justify-content:center;gap:14px}
+body.onstage[data-game=faker] .tally div{padding:12px 20px;border-radius:16px;background:#fffdf5;color:#14241f;font-size:26px;font-weight:700}
+body.onstage[data-game=faker] .tally b{font-size:40px;color:#c0392b}
+body.onstage[data-game=faker] .meter{max-width:600px;margin:10px auto}
+
+/* ===== Sketch Telephone: the chain plays back as a film strip ===== */
+body.onstage[data-game=sketch] .stage .panel{background:none!important;border:0!important;box-shadow:none!important;padding:0!important;text-align:center}
+body.onstage[data-game=sketch] .cat{display:inline-block;margin:0 0 12px;padding:5px 16px;border-radius:99px;background:#2d3142;color:#fff;font:700 17px Outfit,sans-serif;letter-spacing:.06em}
+body.onstage[data-game=sketch] h2{display:inline-block;margin:0 0 10px;padding:10px 26px;border-radius:16px;background:#2d3142;color:#fff;font:800 44px/1.1 Outfit,sans-serif}
+body.onstage[data-game=sketch] .say{display:block;margin:0 auto 10px;max-width:860px;padding:8px 20px;border-radius:14px;background:#ffffffd9;color:#2d3142;font-size:24px}
+body.onstage[data-game=sketch] .roster{justify-content:center}
+body.onstage[data-game=sketch] .roster .chip{background:#2d3142;color:#fff}
+body.onstage[data-game=sketch] .roster .chip.skdone{background:#1e9e5a}
+body.onstage[data-game=sketch] .chainrow{flex-wrap:nowrap;align-items:stretch;gap:0;margin:0 0 14px;padding:34px 22px;border-radius:10px;background:#1b1d27;box-shadow:0 16px 40px #0008;background-image:radial-gradient(#f6f8fc 5px,#0000 6px),radial-gradient(#f6f8fc 5px,#0000 6px);background-size:34px 20px,34px 20px;background-position:6px 6px,6px calc(100% - 6px);background-repeat:repeat-x}
+body.onstage[data-game=sketch] .chainrow .link{flex:1 1 0;min-width:0;width:auto;margin:0 7px;padding:10px 10px 8px;border-radius:6px;background:#f6f8fc;color:#2d3142}
+body.onstage[data-game=sketch] .chainrow .link svg{width:100%;height:auto;background:#fff;border-radius:4px}
+body.onstage[data-game=sketch] .chainrow .link.newest{transform:none;box-shadow:0 0 0 5px #f08a4b,0 0 30px #f08a4b99}
+body.onstage[data-game=sketch] .chainrow .link small{color:#4a5066;font-size:15px}
+body.onstage[data-game=sketch] .chainrow .arrow{display:none}
+body.onstage[data-game=sketch] .sktext{min-height:150px;background:#fff3c9;font-size:24px;border-radius:4px}
+body.onstage[data-game=sketch] .muted.center{display:inline-block;padding:6px 18px;border-radius:99px;background:#2d3142;color:#fff;font-size:20px}
+
+/* ===== Doodle Bluff: the drawing hangs on a gallery wall, titles on brass plaques ===== */
+body.onstage[data-game=doodle] .stage .panel{background:linear-gradient(#efe6d6,#e2d6c0)!important;border:0!important;box-shadow:0 16px 40px #0007,inset 0 -30px 0 #6b4a2a!important;padding:26px 30px 48px!important;color:#2d3142}
+body.onstage[data-game=doodle] .cat{color:#6b4a2a;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+body.onstage[data-game=doodle] .dbart{padding:18px;box-shadow:0 18px 30px #0007,inset 0 0 0 4px #0003}
+body.onstage[data-game=doodle] h2{color:#2d3142;font:800 40px/1.1 Outfit,sans-serif}
+body.onstage[data-game=doodle] .say,body.onstage[data-game=doodle] .muted{color:#4a4032}
+body.onstage[data-game=doodle] .dbopt{padding:12px 18px;border-radius:6px;background:linear-gradient(135deg,#e9cf86,#b88f3a 45%,#f3e2a8 60%,#a67c2c);color:#2a1d05;font:800 24px/1.15 Outfit,sans-serif;box-shadow:0 4px 10px #0005,inset 0 0 0 2px #fff5}
+body.onstage[data-game=doodle] .dbopt small{font-size:15px;opacity:.85}
+body.onstage[data-game=doodle] .dbopt.real{background:linear-gradient(135deg,#bff0d2,#58c08a);box-shadow:0 0 0 4px #1e9e5a,0 0 30px #7fe0a8}
+body.onstage[data-game=doodle] .clock{color:#2d3142}
+body.onstage[data-game=doodle] .roster .chip{background:#2d3142;color:#fff}
+
+/* ===== Werewolf: the village. Every player is a house; the light goes out when they fall ===== */
+body.onstage[data-game=werewolf] .stage{grid-template-columns:minmax(0,1fr);gap:18px}
+body.onstage[data-game=werewolf] .stage .panel{max-width:860px;margin:0 auto;width:100%;background:#0b1030d9!important;text-align:center}
+body.onstage[data-game=werewolf] .stage .panel h2{font-size:54px;margin:0 0 6px}
+body.onstage[data-game=werewolf] .stage .panel .say{font-size:27px}
+body.onstage[data-game=werewolf] .stage .panel .clock{font-size:72px;margin:4px 0}
+body.onstage[data-game=werewolf] .stage .panel .meter{max-width:520px;margin:10px auto}
+body.onstage[data-game=werewolf] .tally{justify-content:center}
+body.onstage[data-game=werewolf] .stage>.roster{flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:flex-end;gap:10px}
+body.onstage[data-game=werewolf] .stage>.roster .chip{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;width:124px;min-height:132px;padding:44px 8px 10px;border-radius:0 0 8px 8px;background:#3a2a22;color:#ffe9b8;font-size:17px;clip-path:polygon(50% 0,100% 32%,100% 100%,0 100%,0 32%);box-shadow:none;border:0}
+body.onstage[data-game=werewolf] .stage>.roster .chip::before{content:'';position:absolute;left:0;right:0;top:0;height:34%;background:#6b2f2a;clip-path:polygon(50% 0,100% 100%,0 100%)}
+body.onstage[data-game=werewolf] .stage>.roster .chip .pface{position:relative;width:52px;height:52px;font-size:32px;margin:0;border-radius:8px;background:#ffd166;box-shadow:0 0 22px #ffd166cc,inset 0 0 0 3px #3a2a22}
+body.onstage[data-game=werewolf] .stage>.roster .chip .nm{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+body.onstage[data-game=werewolf] .stage>.roster .chip small{font-size:13px;color:var(--rc,#ffe9b8)}
+body.onstage[data-game=werewolf] .stage>.roster .chip.out{background:#1c1a22;color:#8a8794;text-decoration:none}
+body.onstage[data-game=werewolf] .stage>.roster .chip.out::before{background:#2a2630}
+body.onstage[data-game=werewolf] .stage>.roster .chip.out .pface{background:#0b0d18;box-shadow:inset 0 0 0 3px #2a2630;filter:grayscale(1) brightness(.55)}
+body.onstage[data-game=werewolf] .stage>.roster .chip.out .nm{text-decoration:line-through}
+
+/* ===== Secret Agents: the word grid is the screen ===== */
+body.onstage[data-game=agents] .stage{--stage-w:1260;grid-template-columns:minmax(0,3.2fr) minmax(0,1fr)}
+body.onstage[data-game=agents] .agrid{gap:12px;margin:14px 0}
+body.onstage[data-game=agents] .agrid .acard{min-height:92px;font-size:25px;border-radius:14px;box-shadow:0 5px 0 #0006;letter-spacing:.03em}
+body.onstage[data-game=agents] .agrid .acard small{font-size:13px}
+body.onstage[data-game=agents] .clueline{font-size:34px}
+
+/* ===== Taboo Talk: one big clock, one big tally ===== */
+body.onstage[data-game=taboo] .stage .panel{text-align:center}
+body.onstage[data-game=taboo] .stage .panel h2{font-size:50px;margin:0 0 4px}
+body.onstage[data-game=taboo] .tabooclock{width:300px;border-width:14px;margin:14px auto}
+body.onstage[data-game=taboo] .tabooclock .clock{font-size:130px;line-height:1}
+body.onstage[data-game=taboo] .say.center{font-size:40px}
+body.onstage[data-game=taboo] .say.center b{font-size:1.5em}
+body.onstage[data-game=taboo] .history{justify-content:center}
+body.onstage[data-game=taboo] .history span{font-size:22px;padding:8px 16px}
+body.onstage[data-game=taboo] .tscore{font-size:84px}
+
+/* ===== Trivia Board: a real category board; the clue fills the stage ===== */
+body.onstage[data-game=trivia] .stage .panel{background:none!important;border:0!important;box-shadow:none!important;padding:0!important}
+body.onstage[data-game=trivia] .stage .panel>h2{display:inline-block;margin:0 12px 8px 0;padding:8px 22px;border-radius:14px;background:#1a0f3d;color:#ffd166;font:800 34px/1.1 Outfit,sans-serif}
+body.onstage[data-game=trivia] .stage .panel>.muted{display:inline-block;color:#fff}
+body.onstage[data-game=trivia] .tboard{gap:10px;margin:6px 0 0;padding:14px;border-radius:20px;background:#120a2e;box-shadow:0 16px 40px #0008,inset 0 0 0 3px #ffd16655}
+body.onstage[data-game=trivia] .tcat{min-height:78px;border-radius:10px;background:linear-gradient(#5a2fb8,#3a1c85);color:#fff;font-size:20px;text-transform:uppercase;letter-spacing:.04em;box-shadow:inset 0 -4px 0 #0004}
+body.onstage[data-game=trivia] .tboard .tile{display:grid;place-items:center;min-height:74px;border-radius:10px;background:linear-gradient(#2b3ea8,#1b2670);color:#ffd166;font:900 38px/1 Outfit,sans-serif;text-shadow:0 3px 0 #0006;box-shadow:inset 0 -4px 0 #0005}
+body.onstage[data-game=trivia] .tboard .tile.gone{background:#150d33;box-shadow:none}
+body.onstage[data-game=trivia] .tboard .tile.sel{background:#ffd166;color:#1a0f3d;transform:scale(1.08);box-shadow:0 0 30px #ffd166}
+body.onstage[data-game=trivia] .tclue{padding:44px 50px;border-radius:24px;background:linear-gradient(#2b3ea8,#1b2670);border:5px solid #ffd166;box-shadow:0 16px 40px #0008}
+body.onstage[data-game=trivia] .tcl-cat{font-size:24px;letter-spacing:.08em;text-transform:uppercase;color:#ffd166}
+body.onstage[data-game=trivia] .tq{font-size:56px;line-height:1.15;margin:10px 0 22px}
+body.onstage[data-game=trivia] .tq.small{font-size:32px}
+body.onstage[data-game=trivia] .buzzed{font-size:54px}
+body.onstage[data-game=trivia] .say,body.onstage[data-game=trivia] .tclue .muted{font-size:28px}
+body.onstage[data-game=trivia] .tanswer{font-size:38px}
+body.onstage[data-game=trivia] .judge{font-size:26px}
+
+/* ===== Spin & Solve: a full-height wheel beside the letter board ===== */
+body.onstage[data-game=spin] .stage{--stage-w:1260}
+body.onstage[data-game=spin] .stage .panel{display:grid;grid-template-columns:400px minmax(0,1fr);grid-template-areas:'wheel cat' 'wheel board' 'wheel info';column-gap:26px;align-items:start;background:#1a0f3dd9!important}
+body.onstage[data-game=spin] .stage .panel>.cat{grid-area:cat;margin:0 0 6px;font-size:24px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#ffd166}
+body.onstage[data-game=spin] .pboard{grid-area:board;margin:0 0 12px;padding:18px;gap:8px}
+body.onstage[data-game=spin] .prow{gap:8px}
+body.onstage[data-game=spin] .ptile{width:54px;height:70px;font-size:40px;border-radius:8px}
+body.onstage[data-game=spin] .spinrow{display:contents}
+body.onstage[data-game=spin] .wheelwrap{grid-area:wheel;width:400px;align-self:center}
+body.onstage[data-game=spin] .spinrow>div:last-child{grid-area:info}
+body.onstage[data-game=spin] .stage .panel>h2,body.onstage[data-game=spin] .stage .panel>.btn,body.onstage[data-game=spin] .stage .panel>.row{grid-column:2}
+body.onstage[data-game=spin] .say{font-size:28px}
+body.onstage[data-game=spin] .used span{font-size:18px;padding:5px 9px}
+#joinqr{font:600 clamp(11px,.9vw,15px)/1.2 Outfit,system-ui,sans-serif!important;letter-spacing:0!important;opacity:1!important}
+#joinqr span,#joinqr b{font-family:Outfit,system-ui,sans-serif!important}
+body.onstage[data-game=werewolf] .stage>.roster .chip,body.onstage[data-game=werewolf] .stage>.roster .chip .nm{font:700 16px/1.2 Outfit,sans-serif!important;letter-spacing:0}

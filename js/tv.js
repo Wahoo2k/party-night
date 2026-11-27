@@ -100,9 +100,9 @@ function afterParty() {
   const nx = suggestNext(), G = nx && GAMES[nx];
   const t = host.tally, night = t?.games.length > 1 ? Object.entries(t.by).filter(e => e[1].pts).sort((a, b) => b[1].pts - a[1].pts).slice(0, 5) : [];
   app.insertAdjacentHTML('beforeend', `<div class="after">
-    <button class="acard" data-host="again"><span class="aart">${art(host.gameId, ICONS[host.gameId])}</span><span class="atext"><small>Same game</small><b>Play again</b></span></button>
-    ${G ? `<button class="acard next" data-host="playnext:${nx}"><span class="aart">${art(nx, ICONS[nx])}</span><span class="atext"><small>Up next</small><b>${esc(G.meta.name)}</b></span></button>` : ''}
-    <button class="acard" data-host="lobby"><span class="aart all">🎲</span><span class="atext"><small>Something else</small><b>All games</b></span></button>
+    <button class="endcard" data-host="again"><span class="aart">${art(host.gameId, ICONS[host.gameId])}</span><span class="atext"><small>Same game</small><b>Play again</b></span></button>
+    ${G ? `<button class="endcard next" data-host="playnext:${nx}"><span class="aart">${art(nx, ICONS[nx])}</span><span class="atext"><small>Up next</small><b>${esc(G.meta.name)}</b></span></button>` : ''}
+    <button class="endcard" data-host="lobby"><span class="aart all">🎲</span><span class="atext"><small>Something else</small><b>All games</b></span></button>
     ${night.length ? `<p class="anight"><b>Tonight</b> ${night.map(([n, r], i) => `${i ? '· ' : '👑 '}${esc(n)} <b>${r.pts}</b>`).join(' ')}</p>` : ''}</div>`);
 }
 

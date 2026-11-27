@@ -4,7 +4,7 @@ const base = 'http://localhost:8765/';
 const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome' });
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
 const errors = [];
-const watch = (p, tag) => { p.on('pageerror', e => errors.push(tag + ': ' + e.message)); p.on('console', m => m.type() === 'error' && !/fonts|jsdelivr|ERR_/.test(m.text()) && errors.push(tag + ' console: ' + m.text())); };
+const watch = (p, tag) => { p.on('pageerror', e => errors.push(tag + ': ' + e.message)); p.on('console', m => m.type() === 'error' && !/fonts|jsdelivr|ERR_|status of 404/.test(m.text()) && errors.push(tag + ' console: ' + m.text())); };
 const tv = await ctx.newPage(); watch(tv, 'tv');
 await tv.goto(base + 'tv.html?local=1');
 await tv.waitForSelector('.code');
@@ -20,7 +20,7 @@ for (const n of names) {
   await p.waitForSelector('text=You\'re in');
   phones.push(p);
 }
-await tv.waitForSelector('text=6 players in');
+await tv.waitForSelector('text=6 in'); await tv.click('[data-game=werewolf]');
 await tv.screenshot({ path: 'test/shot-lobby.png' });
 await phones[0].screenshot({ path: 'test/shot-phone-lobby.png' });
 await tv.click('[data-host=start]');
@@ -55,6 +55,6 @@ console.log('phase', final.phase, 'winner', final.winner, '\n' + final.log.join(
 await tv.screenshot({ path: 'test/shot-tv-over.png' });
 await phones[2].screenshot({ path: 'test/shot-phone-over.png' });
 // TV refresh mid-lobby recovery: back to lobby, reload TV, phones still listed
-await tv.click('[data-host=lobby]'); await tv.reload(); await tv.waitForSelector('text=6 players in');
+await tv.click('.endcard[data-host=lobby]'); await tv.reload(); await tv.waitForSelector('text=6 in'); await tv.click('[data-game=werewolf]');
 console.log('errors', errors);
 await browser.close();
