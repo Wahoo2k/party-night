@@ -31,6 +31,23 @@ export const CARDS = [
   ['Kangaroo', 'hop', 'pouch', 'Australia', 'joey'], ['Christmas', 'Santa', 'December', 'tree', 'presents'], ['Pumpkin', 'orange', 'Halloween', 'pie', 'carve'],
   ['Bubble', 'soap', 'blow', 'pop', 'bath'], ['Cowboy', 'horse', 'hat', 'ranch', 'Western'], ['Telephone', 'call', 'ring', 'talk', 'phone'],
   ['Bee', 'honey', 'sting', 'buzz', 'hive'], ['Pajamas', 'sleep', 'bed', 'night', 'wear'], ['Wedding', 'marry', 'bride', 'groom', 'ring'],
+  ["Giraffe", "neck", "tall", "Africa", "spots"], ["Spaghetti", "pasta", "noodles", "sauce", "Italian"], ["Snow", "white", "cold", "winter", "flake"],
+  ["Sandwich", "bread", "lunch", "meat", "peanut butter"], ["Dragon", "fire", "wings", "knight", "breathe"], ["Astronaut", "space", "rocket", "moon", "NASA"],
+  ["Banana", "yellow", "fruit", "monkey", "peel"], ["Firefighter", "fire", "truck", "hose", "rescue"], ["Thunder", "lightning", "storm", "loud", "rain"],
+  ["Butterfly", "wings", "caterpillar", "fly", "insect"], ["Bedtime", "sleep", "night", "pajamas", "story"], ["Skateboard", "wheels", "ride", "tricks", "ramp"],
+  ["Zebra", "stripes", "horse", "black", "white"], ["Jellyfish", "sting", "ocean", "tentacles", "float"], ["Toaster", "bread", "kitchen", "pop", "burn"],
+  ["Mailbox", "letter", "post", "deliver", "stamp"], ["Scarecrow", "crows", "farm", "straw", "field"], ["Treasure", "pirate", "gold", "chest", "map"],
+  ["Waterfall", "river", "cliff", "falls", "Niagara"], ["Marshmallow", "campfire", "white", "s'more", "roast"], ["Dinosaur", "extinct", "T-rex", "fossil", "Jurassic"],
+  ["Lighthouse", "ships", "beam", "coast", "tower"], ["Popsicle", "frozen", "stick", "summer", "lick"], ["Parachute", "jump", "plane", "sky", "fall"],
+  ["Mosquito", "bite", "itch", "bug", "buzz"], ["Trampoline", "jump", "bounce", "backyard", "flip"], ["Piano", "keys", "music", "play", "black"],
+  ["Kite", "fly", "wind", "string", "sky"], ["Recess", "school", "playground", "break", "play"], ["Octopus", "eight", "arms", "ocean", "ink"],
+  ["Vacation", "trip", "travel", "beach", "holiday"], ["Backpack", "school", "carry", "bag", "books"], ["Mountain", "climb", "high", "peak", "hill"],
+  ["Movie theater", "film", "popcorn", "screen", "tickets"], ["Hiccup", "breath", "scare", "sound", "drink"], ["Sunburn", "skin", "red", "sunscreen", "beach"],
+  ["Yawn", "tired", "mouth", "sleepy", "open"], ["Mermaid", "tail", "sea", "Ariel", "fish"], ["Garage", "car", "park", "door", "house"],
+  ["Lemonade", "drink", "sour", "stand", "sugar"], ["Detective", "mystery", "clue", "solve", "Sherlock"], ["Rollercoaster", "ride", "park", "loop", "scream"],
+  ["Sneeze", "nose", "achoo", "tissue", "bless"], ["Karate", "kick", "belt", "martial", "chop"], ["Igloo", "ice", "snow", "house", "Arctic"],
+  ["Tooth Fairy", "pillow", "money", "lose", "night"], ["Popstar", "sing", "famous", "concert", "music"], ["Surfboard", "waves", "ocean", "ride", "beach"],
+  ["Window", "glass", "open", "look", "house"],
 ];
 export const TEAMS = ['Team Sun', 'Team Moon'];
 const TURNS_PER_TEAM = 3;

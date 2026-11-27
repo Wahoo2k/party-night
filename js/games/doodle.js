@@ -155,13 +155,17 @@ export function phoneView(s, pid) {
   return v;
 }
 
+let shownKey = '';
 export function renderTV(v, el) {
+  const key = ['fake', 'pick', 'reveal'].includes(v.phase) ? 'd' + v.k : '';
+  const replay = v.phase === 'fake' && key !== shownKey;
+  if (v.phase === 'fake' || !key) shownKey = key;
   document.body.classList.toggle('day', v.phase === 'reveal' || v.phase === 'over');
   const scores = `<div class="scores"><h3>Scores</h3>${v.scores.map(p => `<div class="srow"><span>${esc(p.name)}</span><b>${p.score.toLocaleString()}</b></div>`).join('')}</div>`;
   let h = '';
   if (v.phase === 'draw') h = `<h2>Draw your secret title</h2><p class="say">Everyone has a different weird title. Draw it as well as you can. No words!</p><p class="clock ${v.left <= 10 ? 'hurry' : ''}">${Math.floor(v.left / 60)}:${String(v.left % 60).padStart(2, '0')}</p><div class="roster">${v.done.map(n => `<div class="chip skdone">✓ ${esc(n)}</div>`).join('')}${v.waiting.map(n => `<div class="chip">✏️ ${esc(n)}</div>`).join('')}</div><button class="btn ghost" data-host="next">Move on</button><div class="how"><h3>How to play</h3><ol><li>Draw your secret title.</li><li>For each drawing, everyone else writes a fake title.</li><li>Then pick which title is real. 1,000 for finding it.</li><li>Every player you fool with your fake earns you 500.</li></ol></div>`;
   if (['fake', 'pick', 'reveal'].includes(v.phase)) {
-    const art = `<div class="dbart">${svgFor(v.strokes)}</div>`;
+    const art = `<div class="dbart">${svgFor(v.strokes, '', replay)}</div>`;
     let side = '';
     if (v.phase === 'fake') side = `<h2>What's this called?</h2><p class="say">Write a fake title on your phone that sounds real.</p><div class="meter"><span style="width:${(100 * v.n) / v.total}%"></span></div><p class="muted">${v.n} of ${v.total} <span class="clock">${v.left}</span></p><button class="btn ghost" data-host="next">Show the titles</button>`;
     if (v.phase === 'pick') side = `<h2>Which is real?</h2><div class="dbopts">${v.options.map((o, i) => `<div class="dbopt" style="animation-delay:${i * 0.08}s">${esc(o)}</div>`).join('')}</div><p class="muted">Pick on your phone <span class="clock">${v.left}</span></p>`;

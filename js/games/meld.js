@@ -178,7 +178,7 @@ let dialTimer = null;
 export function renderPhone(v, el, send) {
   if (v.phase === 'spectate') { el.innerHTML = '<h2>Game in progress</h2>'; return; }
   if (v.phase === 'clue' && v.isPsychic) {
-    el.innerHTML = `<h2>You're the mind reader</h2><p class="muted">Only you can see the spot. Give a clue that belongs right there.</p>${bar(v.scale, { target: v.target })}<form id="mf"><input id="mc" maxlength="40" autocomplete="off" placeholder="A thing, a place, a person…"><p class="lose" id="err"></p><button class="btn" type="submit">Send clue</button></form>`;
+    el.innerHTML = `<h2>You're the mind reader</h2><p class="muted">Only you can see the spot. Give a clue that belongs right there.</p><p class="muted small">Example: on <b>Cold ↔ Hot</b>, a spot far right could be "lava", the middle "a warm bath", far left "the North Pole".</p>${bar(v.scale, { target: v.target })}<form id="mf"><input id="mc" maxlength="40" autocomplete="off" placeholder="A thing, a place, a person…"><p class="lose" id="err"></p><button class="btn" type="submit">Send clue</button></form>`;
     const f = el.querySelector('#mf');
     f.onsubmit = e => { e.preventDefault(); const r = cleanClue(f.querySelector('#mc').value); if (!r.ok) { f.querySelector('#err').textContent = r.why; return; } f.querySelector('button').disabled = true; send({ type: 'clue', text: r.text }); };
     return;

@@ -36,7 +36,8 @@ export function makeBomb(rnd = Math.random, level = 0) {
     () => { const l = pick(LIGHTS, rnd), k = Math.floor(rnd() * n); return { text: `If the light is ${l}, cut the ${ORD[k]} wire.`, test: () => light === l, cut: () => k }; },
     () => { const c = pick(CNAMES, rnd), d = pick(CNAMES.filter(x => x !== c), rnd); return { text: `If there are more ${c} wires than ${d} wires, cut the last wire.`, test: () => count(c) > count(d), cut: () => n - 1 }; },
   ];
-  const rules = Array.from({ length: 4 + Math.min(2, Math.floor(level / 2)) }, () => pick(T, rnd)());
+  // Bomb 1 is a training bomb: fewer rules, and the timer is generous.
+  const rules = Array.from({ length: level === 0 ? 2 : 4 + Math.min(2, Math.floor(level / 2)) }, () => pick(T, rnd)());
   const k = Math.floor(rnd() * n);
   rules.push({ text: `Otherwise, cut the ${ORD[k]} wire.`, test: () => true, cut: () => k });
   const answer = rules.find(r => r.test()).cut();
@@ -75,7 +76,7 @@ export function act(s, pid, a, now = Date.now()) {
 }
 export function hostAct(s, a, now = Date.now(), rnd = Math.random) {
   if (a !== 'next') return s;
-  if (s.phase === 'brief') { s.phase = 'defuse'; s.round++; s.deadline = now + Math.max(45000, TIMES.defuse - s.b * 8000); }
+  if (s.phase === 'brief') { s.phase = 'defuse'; s.round++; s.deadline = now + (s.b === 0 ? 150000 : Math.max(45000, TIMES.defuse - s.b * 8000)); }
   else if (s.phase === 'defuse') result(s, now, false, 'time');
   else if (s.phase === 'result') {
     s.b++;
@@ -125,7 +126,7 @@ export function renderTV(v, el) {
   const head = `<div class="bhead"><span>Bomb ${Math.min(v.b, v.of)} of ${v.of}</span><span>${v.log.join(' ') || '—'}</span><span>Strikes: ${'❌'.repeat(v.strikes)}${'▫️'.repeat(Math.max(0, STRIKES - v.strikes))}</span></div>`;
   const bomb = `<div class="bbox"><div class="bpanel"><div class="blight" style="--c:${COLORS[v.light]}"></div><div class="bserial">SERIAL ${esc(v.serial)}</div>${v.phase === 'defuse' ? `<div class="btimer ${v.left <= 15 ? 'hurry' : ''}"><span class="clock">${v.left}</span></div>` : ''}</div>${wiresHTML(v, false, v.last?.cut, v.phase === 'result' ? v.last.answer : null)}</div>`;
   let h = head;
-  if (v.phase === 'brief') h += `<h2>${esc(v.cutter)} has the cutters</h2>${bomb}<p class="say">Everyone else: your phones have rules numbered 1 to ${v.nRules}. Read them out loud <b>in order</b>. The first rule that's true tells ${esc(v.cutter)} which wire to cut.</p><button class="btn" data-host="next">Start the timer</button>`;
+  if (v.phase === 'brief') h += `${v.b === 1 ? '<p class="cat">Training bomb: take your time and learn how the rules work.</p>' : ''}<h2>${esc(v.cutter)} has the cutters</h2>${bomb}<p class="say">Everyone else: your phones have rules numbered 1 to ${v.nRules}. Read them out loud <b>in order</b>. The first rule that's true tells ${esc(v.cutter)} which wire to cut.</p><button class="btn" data-host="next">Start the timer</button>`;
   if (v.phase === 'defuse') h += `${bomb}<p class="say center">Read your rules out loud. <b>${esc(v.cutter)}</b> cuts!</p>`;
   if (v.phase === 'result') h += `<h2 class="${v.last.ok ? 'win' : 'lose'}">${v.last.ok ? '✅ Defused!' : v.last.why === 'time' ? '💥 Out of time!' : '💥 Wrong wire!'}</h2>${bomb}<p class="muted">The right wire was the ${ORD[v.last.answer]}.</p><button class="btn" data-host="next">Next bomb</button>`;
   if (v.phase === 'over') h = `<h2 class="${v.defused >= 4 ? 'win' : ''}">The squad defused ${v.defused} of ${v.of} bombs</h2><p class="say">${v.log.join(' ')}</p><div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;

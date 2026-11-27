@@ -21,6 +21,14 @@ export const CARDS = [
   ['🚗', 'Driving'], ['✈️', 'Airplane'], ['🚀', 'Rocket'], ['🚂', 'Train'], ['🚁', 'Helicopter'], ['⛵', 'Sailboat'], ['🛹', 'Skateboard'], ['🚲', 'Bicycle'], ['🛸', 'Flying saucer'], ['🚒', 'Fire truck'],
   ['🪥', 'Brushing teeth'], ['😴', 'Sleeping'], ['🧹', 'Sweeping'], ['📸', 'Taking a photo'], ['🎁', 'Opening a present'], ['🛁', 'Taking a bath'], ['📞', 'Phone call'], ['🪁', 'Flying a kite'], ['🧊', 'Freezing cold'], ['🔥', 'Too hot'],
   ['☔', 'Rain'], ['⛄', 'Snowman'], ['🌋', 'Volcano'], ['🌪️', 'Tornado'], ['🌈', 'Rainbow'], ['🎈', 'Balloon'], ['🪄', 'Magic trick'], ['🎢', 'Roller coaster'], ['🤧', 'Sneezing'], ['🥶', 'Shivering'],
+  ["🦒", "Giraffe"], ["🦓", "Zebra"], ["🐊", "Crocodile"], ["🦅", "Eagle"], ["🦉", "Owl"], ["🐌", "Snail"], ["🕷️", "Spider"], ["🐙", "Octopus"], ["🦈", "Shark"], ["🐳", "Whale"], ["🐷", "Pig"], ["🐮", "Cow"], ["🐑", "Sheep"], ["🐓", "Rooster"], ["🦩", "Flamingo"], ["🐿️", "Squirrel"], ["🦇", "Bat"], ["🐛", "Caterpillar"], ["🦍", "Gorilla"], ["🐘", "Baby elephant"],
+  ["🏈", "Football"], ["⚾", "Baseball"], ["🎾", "Tennis"], ["🏐", "Volleyball"], ["⛳", "Golf"], ["🏹", "Archery"], ["🤸", "Cartwheel"], ["🏋️", "Lifting weights"], ["🧘", "Yoga"], ["⛸️", "Ice skating"], ["🚣", "Rowing a boat"], ["🤿", "Snorkeling"], ["🪂", "Parachute"], ["🥋", "Karate"], ["🤹", "Juggling"],
+  ["👨‍⚕️", "Doctor"], ["🧑‍🏫", "Teacher"], ["🧑‍🌾", "Farmer"], ["🕵️", "Detective"], ["👷", "Builder"], ["🧑‍🔧", "Mechanic"], ["🦷", "Dentist"], ["📮", "Mail carrier"], ["💇", "Haircut"], ["🧑‍🎨", "Painter"],
+  ["🧺", "Folding laundry"], ["🧽", "Washing dishes"], ["🍳", "Cooking eggs"], ["🥪", "Making a sandwich"], ["☕", "Drinking hot coffee"], ["🛒", "Grocery shopping"], ["🚿", "Taking a shower"], ["🎮", "Playing video games"], ["📚", "Reading a book"], ["🧶", "Knitting"], ["🪴", "Watering plants"], ["🐕", "Walking the dog"], ["🔨", "Hammering"], ["🧳", "Packing a suitcase"], ["🏕️", "Camping"], ["🎆", "Fireworks"], ["🎃", "Carving a pumpkin"], ["🎄", "Decorating a tree"], ["🏰", "Building a sandcastle"], ["🪥", "Flossing"],
+  ["🐉", "Dragon"], ["🧚", "Fairy"], ["🧛", "Vampire"], ["🧞", "Genie"], ["🦄", "Unicorn"], ["👽", "Alien"], ["🤠", "Cowboy"], ["🥷", "Ninja"], ["👸", "Princess"], ["🎅", "Santa"], ["🤴", "Knight"], ["🧜‍♂️", "Sea monster"],
+  ["🍔", "Eating a burger"], ["🌮", "Taco"], ["🍩", "Donut"], ["🥨", "Pretzel"], ["🌽", "Corn on the cob"], ["🍭", "Lollipop"], ["🥤", "Milkshake"], ["🧀", "Cheese"], ["🥕", "Carrot"], ["🍇", "Grapes"],
+  ["🚜", "Tractor"], ["🚌", "School bus"], ["🏍️", "Motorcycle"], ["🛶", "Canoe"], ["🚤", "Speedboat"], ["🛷", "Sledding"], ["🎈", "Hot air balloon"], ["🚑", "Ambulance"],
+  ["🤧", "Having a cold"], ["😂", "Laughing"], ["😱", "Scared"], ["🥱", "Yawning"], ["🤫", "Being quiet"], ["🤒", "Feeling sick"], ["😎", "Being cool"], ["🤔", "Thinking hard"],
 ];
 export const TIMES = { ready: 25000, turn: 50000, turnEnd: 6000 };
 

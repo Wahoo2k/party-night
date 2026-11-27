@@ -269,22 +269,29 @@ export function phoneView(s, pid) {
 }
 
 // ---------- drawing ----------
-export function svgFor(strokes, cls = '') {
-  const paths = (strokes || []).map(st => {
+// animate = true redraws the picture stroke by stroke, in the order it was drawn (about 4 seconds at most).
+export function svgFor(strokes, cls = '', animate = false) {
+  const list = strokes || [];
+  const per = Math.min(0.4, 4 / Math.max(1, list.length));
+  const paths = list.map((st, i) => {
     const p = st.p;
     let d = `M${p[0]} ${p[1]}`;
     for (let i = 2; i < p.length; i += 2) d += `L${p[i]} ${p[i + 1]}`;
     if (p.length === 2) d += `L${p[0] + 0.1} ${p[1]}`;
-    return `<path d="${d}" stroke="${COLORS[st.c] || COLORS[1]}" stroke-width="${WIDTHS[st.w] || 7}"/>`;
+    return `<path d="${d}" stroke="${COLORS[st.c] || COLORS[1]}" stroke-width="${WIDTHS[st.w] || 7}"${animate ? ` pathLength="1" style="animation-duration:${per.toFixed(2)}s;animation-delay:${(i * per).toFixed(2)}s"` : ''}/>`;
   }).join('');
-  return `<svg class="sk ${cls}" viewBox="0 0 256 256" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect width="256" height="256" fill="${COLORS[0]}"/>${paths}</svg>`;
+  return `<svg class="sk ${cls} ${animate ? 'anim' : ''}" viewBox="0 0 256 256" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect width="256" height="256" fill="${COLORS[0]}"/>${paths}</svg>`;
 }
 
 // ---------- renderers ----------
 const clock = left => `<p class="clock ${left <= 10 ? 'hurry' : ''}">${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}</p>`;
 const TV_TITLES = { write: 'Write something weird', draw: 'Draw what you were given', guess: 'What is that drawing?' };
+let drawnKey = '';   // which drawing has already had its stroke-by-stroke replay
 export function renderTV(v, el) {
   document.body.classList.toggle('day', v.phase === 'over');
+  const nowKey = v.phase === 'reveal' ? `${v.c}.${v.entries.length}` : '';
+  const replay = nowKey !== drawnKey;
+  drawnKey = nowKey;
   let h = '';
   if (['write', 'draw', 'guess'].includes(v.phase)) {
     h = `<p class="cat">Step ${v.step + 1} of ${v.steps}</p><h2>${TV_TITLES[v.phase]}</h2><p class="say">${v.phase === 'write' ? 'A thing, a scene, a silly idea. Stuck? Tap "Help me" for one.' : v.phase === 'draw' ? 'Check your phone. No letters or numbers in the picture!' : 'Describe the drawing on your phone in a few words.'}</p>${clock(v.left)}
@@ -292,7 +299,7 @@ export function renderTV(v, el) {
     h += `<div class="how"><h3>How it works</h3><ol><li>Everyone writes something.</li><li>The next person draws it.</li><li>The next person guesses the drawing.</li><li>Then it's drawn again… and again.</li><li>At the end, the TV replays how each one fell apart. Tap ❤️ for your favorites.</li></ol></div>`;
   }
   if (v.phase === 'reveal') {
-    h = `<p class="cat">Chain ${v.c + 1} of ${v.chains} · started by ${esc(v.owner)}</p><div class="chainrow">${v.entries.map((e, i) => `<div class="link ${i === v.entries.length - 1 ? 'newest' : ''} ${e.kind}">${e.kind === 'draw' ? svgFor(e.strokes) : `<div class="sktext">${esc(e.text)}</div>`}<small>${e.kind === 'draw' ? 'drawn' : i === 0 ? 'written' : 'guessed'} by <b>${esc(e.name)}</b>${e.late ? ' (ran out of time)' : ''}${e.hearts ? ` · ❤️ ${e.hearts}` : ''}</small></div>`).join('<span class="arrow">→</span>')}</div><p class="muted center">Tap ❤️ on your phone for your favorites</p><button class="btn ghost" data-host="next">Next</button>`;
+    h = `<p class="cat">Chain ${v.c + 1} of ${v.chains} · started by ${esc(v.owner)}</p><div class="chainrow">${v.entries.map((e, i) => `<div class="link ${i === v.entries.length - 1 ? 'newest' : ''} ${e.kind}">${e.kind === 'draw' ? svgFor(e.strokes, '', replay && i === v.entries.length - 1) : `<div class="sktext">${esc(e.text)}</div>`}<small>${e.kind === 'draw' ? 'drawn' : i === 0 ? 'written' : 'guessed'} by <b>${esc(e.name)}</b>${e.late ? ' (ran out of time)' : ''}${e.hearts ? ` · ❤️ ${e.hearts}` : ''}</small></div>`).join('<span class="arrow">→</span>')}</div><p class="muted center">Tap ❤️ on your phone for your favorites</p><button class="btn ghost" data-host="next">Next</button>`;
   }
   if (v.phase === 'over') {
     h = `<h2 class="win">${v.scores[0].hearts ? `${esc(v.scores[0].name)} is the most loved artist!` : 'What a masterpiece of chaos!'}</h2>${v.best ? `<div class="skbest">${svgFor(v.best.strokes)}<div><p class="cat">Most loved drawing</p><p class="say">${v.best.from ? `“${esc(v.best.from)}”` : ''}</p><p>by <b>${esc(v.best.name)}</b> · ❤️ ${v.best.hearts}</p></div></div>` : ''}<div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
