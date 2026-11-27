@@ -12,7 +12,7 @@ await me.setViewportSize({ width: 390, height: 844 });
 await me.goto(base + 'play.html?local=1'); await me.fill('#code', code); await me.fill('#name', 'Tom'); await me.click('#join');
 await me.waitForSelector("text=You're in");
 for (let i = 0; i < 2; i++) await tv.click('[data-host=addbot]');
-await tv.click('[data-host=kids]');
+await tv.click('[data-host=settings]'); await tv.click('[data-host=kids]'); await tv.click('[data-host=menu]');   // the kids switch lives under Settings
 await tv.click('[data-game=sketch]'); await tv.click('[data-host=start]');
 await me.waitForSelector('#skt');
 await me.fill('#skt', 'A dumb walrus'); await me.click('#skf [type=submit]');
@@ -20,7 +20,7 @@ const st = () => tv.evaluate(() => JSON.parse(localStorage.getItem('pg-host')).s
 const s1 = await st();
 const mine = s1.chains.flat().find(e => e && e.text && e.text.includes('walrus'));
 console.log('kids mode text:', mine?.text);
-await tv.click('.vetobtn'); await tv.screenshot({ path: 'test/veto-open.png' });
+await tv.mouse.move(300, 300); await tv.click('.vetobtn[data-host=veto]'); await tv.screenshot({ path: 'test/veto-open.png' });
 await tv.click('.vetolist [data-host^=hide]');
 await tv.click('.vetopanel [data-host=veto]');
 // skip ahead to the reveal

@@ -19,13 +19,14 @@ const [d, dn] = await join('  Zoë​  🐺  ');
 console.log(an, '|', bn, '|', cerr, '|', dn);
 await b2.screenshot({ path: 'test/n-phone.png' });
 // host renames Tom 2 then removes Zoë
-await tv.click('button.chip:has-text("tom 2")');
+await tv.click('[data-game=quick]'); await tv.waitForSelector('.lobby.gather');   // names are managed on the join screen's seats
+await tv.click('button.seat:has-text("tom 2")');
 await tv.fill('#rename', 'Grandpa'); await tv.click('[data-host=rename]');
 await b2.waitForSelector('text=Grandpa'); console.log('renamed:', await b2.textContent('#app h2'), await b2.textContent('.note'));
-await tv.click('button.chip:has-text("Zoë")'); await tv.screenshot({ path: 'test/n-tv.png' });
+await tv.click('button.seat:has-text("Zoë")'); await tv.screenshot({ path: 'test/n-tv.png' });
 await tv.click('[data-host=kick]');
 await d.waitForSelector('text=You were removed'); console.log('kicked ok');
-console.log('roster:', await tv.$$eval('.roster .chip', els => els.map(e => e.textContent)));
+console.log('roster:', await tv.$$eval('.seat.taken b', els => els.map(e => e.textContent)));
 // dice
 await c.click('#dice'); console.log('dice:', await c.inputValue('#name'));
 console.log('errors', errors);

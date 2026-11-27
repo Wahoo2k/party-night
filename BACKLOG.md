@@ -160,3 +160,8 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Narration: all 3,992 clips are recorded and in audio/voice/ (103 MB). Host is Callum with the "lively" settings in audio/voices.json; night narrator is Brian. Model eleven_multilingual_v2. Sound effects and music are not made yet.
 - GOAT Toss: art/goats.png is one sheet of six painted landings seen from the table's camera (spot side up, plain side up, hooves up, on all fours, nose dive, horn stand), cut out from a green-screen render. In the air the piece flips through the faces and leans; on the last stretch it shows the face it lands on. The legend and the phone use the same sheet. art/goat.png (the old single cutout) is no longer used.
 - Join screen no longer scrolls; the corner join badge shows only during games; the drifting background shapes show over every game (fireflies in the night games).
+
+## Audio complete; full test pass (Nov 27)
+- All 31 sound effects and stings and 3 music pieces are in audio/sfx/. With the narration, every sound has a recorded file. Nobody has listened to the full set in play yet.
+- Full pass: all unit tests and all 52 browser tests pass. Two were stale and were updated, not the app: namesflow (names are managed on the join screen's seats) and veto-e2e (kids switch is under Settings; the TV now has a Pause button beside Hide an answer).
+- Stripe: Tom's existing Stripe account (shown as "BlockBundlRVA", not yet activated: business details, statement descriptor and representative are incomplete) is to be used, ultimately under Toolshed Apps.
