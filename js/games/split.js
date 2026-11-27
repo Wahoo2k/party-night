@@ -151,7 +151,7 @@ export function renderPhone(v, el, send) {
     if (v.sent) h += '<h2>Sent!</h2><p class="say">Waiting for the others…</p>';
     else {
       if (draft.round !== v.round) draft = { round: v.round, text: '' };
-      h += `<h2>Make it a tough call</h2><p class="tq small">${esc(v.parts[0])}<b>______</b>${esc(v.parts[1] || '')}</p><form id="spf"><input id="spt" maxlength="70" autocomplete="off" placeholder="…the catch" value="${esc(draft.text)}"><p class="lose" id="err"></p><button class="btn" type="submit">Send</button></form><p class="muted small">Aim for half the room saying yes and half saying no.</p>`;
+      h += `<h2>Make it a tough call</h2><p class="tq small">${esc(v.parts[0])}<b>______</b>${esc(v.parts[1] || '')}</p><form id="spf"><input id="spt" maxlength="70" autocomplete="off" placeholder="…the catch" value="${esc(draft.text)}"><p class="lose" id="err"></p><button class="btn" type="submit">Send</button></form><button class="btn ghost" id="safety" type="button">🛟 Stuck? Give me one</button><p class="muted small">Aim for half the room saying yes and half saying no.</p>`;
     }
   }
   if (v.phase === 'vote') h += v.mine ? '<h2>That\'s yours!</h2><p class="say">Fingers crossed for 50/50.</p>' : `<p class="tq small">${esc(v.text)}</p><div class="row"><button class="btn ${v.voted === true ? '' : 'ghost'}" data-y="1">YES</button><button class="btn ${v.voted === false ? '' : 'ghost'}" data-y="0">NO</button></div>`;
@@ -159,6 +159,6 @@ export function renderPhone(v, el, send) {
   if (v.phase === 'over') h += `<h2 class="${v.place === 1 ? 'win' : ''}">${v.place === 1 ? 'You won!' : `You came #${v.place}`}</h2>`;
   el.innerHTML = h;
   const f = el.querySelector('#spf');
-  if (f) { const inp = f.querySelector('#spt'); inp.oninput = () => (draft.text = inp.value); f.onsubmit = e => { e.preventDefault(); const r = cleanFill(inp.value); if (!r.ok) { f.querySelector('#err').textContent = r.why; return; } f.querySelector('button').disabled = true; send({ type: 'fill', text: r.text }); }; }
+  if (f) { const inp = f.querySelector('#spt'); inp.oninput = () => (draft.text = inp.value); el.querySelector('#safety').onclick = () => { inp.value = FILL[Math.floor(Math.random() * FILL.length)]; draft.text = inp.value; }; f.onsubmit = e => { e.preventDefault(); const r = cleanFill(inp.value); if (!r.ok) { f.querySelector('#err').textContent = r.why; return; } f.querySelector('button').disabled = true; send({ type: 'fill', text: r.text }); }; }
   el.querySelectorAll('[data-y]').forEach(b => (b.onclick = () => send({ type: 'vote', yes: b.dataset.y === '1' })));
 }

@@ -29,10 +29,10 @@ export function cleanTitle(t) {
   return { ok: true, text: x };
 }
 
-export function setup(players, rnd = Math.random) {
+export function setup(players, rnd = Math.random, prev = null, opts = {}) {
   const titles = shuffle([...TITLES.keys()], rnd);
   return {
-    game: 'doodle', players: players.map(p => ({ pid: p.pid, name: p.name })), round: 0,
+    game: 'doodle', maxShows: opts.short ? 4 : 10, players: players.map(p => ({ pid: p.pid, name: p.name })), round: 0,
     scores: Object.fromEntries(players.map(p => [p.pid, 0])),
     art: Object.fromEntries(players.map((p, i) => [p.pid, { title: TITLES[titles[i % titles.length]], strokes: null }])), drafts: {},
     order: [], k: 0, fakes: {}, picks: {}, options: [], result: null, phase: 'draw', deadline: Date.now() + TIMES.draw,
@@ -44,7 +44,7 @@ const others = s => s.players.filter(p => p.pid !== artist(s)).map(p => p.pid);
 
 function startShows(s, now, rnd) {
   s.players.forEach(p => { if (!s.art[p.pid].strokes) s.art[p.pid].strokes = s.drafts[p.pid] || []; });
-  s.order = shuffle(s.players.map(p => p.pid).filter(pid => s.art[pid].strokes.length), rnd);
+  s.order = shuffle(s.players.map(p => p.pid).filter(pid => s.art[pid].strokes.length), rnd).slice(0, s.maxShows);
   s.k = 0;
   if (!s.order.length) { s.phase = 'over'; s.round++; s.deadline = 0; return; }
   toFake(s, now);

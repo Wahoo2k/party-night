@@ -249,7 +249,7 @@ function startGame() {
   // The audience gets promoted into open seats for the next game.
   while (host.audience.length && host.players.length < game().meta.max) host.players.push(host.audience.shift());
   const prev = host.state && host.state.game === host.gameId ? host.state : host.lastByGame?.[host.gameId];
-  host.state = game().setup(host.players, Math.random, prev);
+  host.state = game().setup(host.players, Math.random, prev, { short: !!host.settings.short });
   lastEventId = 0;
   lastPhase = '';
   changed();
@@ -271,6 +271,7 @@ function hostAction(a) {
     else { const ms = Date.now() - host.paused; shiftTimes(host.state, ms); stretchedFor += ms; host.paused = 0; }
     save(); render(); return sendViews();
   }
+  if (a === 'short') { host.settings.short = !host.settings.short; save(); return render(); }
   if (a === 'kids') { host.settings.kids = !host.settings.kids; save(); return render(); }
   if (a === 'veto') { vetoOpen = !vetoOpen; return render(); }
   if (a.startsWith('hide:')) {
@@ -378,6 +379,7 @@ function renderLobby() {
       <div class="row">
         <button class="btn ghost" data-host="relaxed">Relaxed timers: ${host.settings.relaxed ? 'on' : 'off'}</button>
         <button class="btn ghost" data-host="howto">How-to screens: ${host.settings.howto ? 'on' : 'off'}</button>
+        <button class="btn ghost" data-host="short">Game length: ${host.settings.short ? 'short' : 'full'}</button>
         <button class="btn ghost" data-host="kids">Kids mode: ${host.settings.kids ? 'on' : 'off'}</button>
         <span class="muted">Relaxed gives everyone 50% more time.</span>
       </div>

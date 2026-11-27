@@ -15,8 +15,8 @@ export const ROUNDS = 8;
 export const TIMES = { ready: 3500, freeze: 6000 };
 const DANCES = ['💃', '🕺', '🐸', '🐙', '🤖', '🦖', '🐧', '🦩'];
 
-export function setup(players, rnd = Math.random) {
-  const s = { game: 'freeze', players: players.map(p => ({ pid: p.pid, name: p.name })), r: 0, round: 0, scores: {}, taps: [], early: [], seed: Math.floor(rnd() * 1000) };
+export function setup(players, rnd = Math.random, prev = null, opts = {}) {
+  const s = { game: 'freeze', players: players.map(p => ({ pid: p.pid, name: p.name })), r: 0, rounds: opts.short ? 5 : ROUNDS, round: 0, scores: {}, taps: [], early: [], seed: Math.floor(rnd() * 1000) };
   s.players.forEach(p => (s.scores[p.pid] = 0));
   ready(s, Date.now());
   return s;
@@ -38,7 +38,7 @@ export function hostAct(s, a, now = Date.now(), rnd = Math.random) {
   if (a !== 'next') return s;
   if (s.phase === 'ready') { s.phase = 'dance'; s.round++; s.deadline = now + 5000 + Math.floor(rnd() * 9000); }
   else if (s.phase === 'dance') { s.phase = 'freeze'; s.round++; s.deadline = now + TIMES.freeze; }
-  else if (s.phase === 'freeze') { s.r++; if (s.r >= ROUNDS) { s.phase = 'over'; s.round++; s.deadline = 0; } else ready(s, now); }
+  else if (s.phase === 'freeze') { s.r++; if (s.r >= s.rounds) { s.phase = 'over'; s.round++; s.deadline = 0; } else ready(s, now); }
   return s;
 }
 export function tick(s, now = Date.now(), rnd = Math.random) { return s.deadline && now >= s.deadline ? hostAct(s, 'next', now, rnd) : s; }
@@ -60,7 +60,7 @@ export function cueEvent(s) { return s.eventId && s.phase === 'dance' ? { id: s.
 export function botAct(v, rnd = Math.random) { if (v.phase === 'freeze' && !v.tapped && !v.early && rnd() < 0.4) return { type: 'tap' }; if (v.phase === 'dance' && !v.early && rnd() < 0.01) return { type: 'tap' }; return null; }
 
 export function tvView(s) {
-  return { phase: s.phase, r: s.r + 1, seed: s.seed + s.r, taps: s.taps.map(p => nameOf(s, p)), early: s.early.map(p => nameOf(s, p)), scores: ranking(s) };
+  return { phase: s.phase, r: s.r + 1, of: s.rounds, seed: s.seed + s.r, taps: s.taps.map(p => nameOf(s, p)), early: s.early.map(p => nameOf(s, p)), scores: ranking(s) };
 }
 export function phoneView(s, pid) {
   if (s.scores[pid] === undefined) return { phase: 'spectate' };
@@ -70,7 +70,7 @@ export function phoneView(s, pid) {
 export function renderTV(v, el) {
   document.body.classList.toggle('day', v.phase === 'dance' || v.phase === 'over');
   const scores = `<div class="scores"><h3>Stars</h3>${v.scores.map(p => `<div class="srow"><span>${esc(p.name)}</span><b>${p.score}</b></div>`).join('')}</div>`;
-  let h = `<p class="cat">Round ${Math.min(v.r, ROUNDS)} of ${ROUNDS}</p>`;
+  let h = `<p class="cat">Round ${Math.min(v.r, v.of)} of ${v.of}</p>`;
   if (v.phase === 'ready') h += '<div class="huntbig ready">🎵<b>Get ready…</b></div>';
   if (v.phase === 'dance') h += `<div class="dancefloor">${DANCES.map((d, i) => `<span style="animation-delay:${i * 0.12}s">${d}</span>`).join('')}</div><h2 class="center">DANCE! 🎶</h2>${v.early.length ? `<p class="lose center">Too early: ${v.early.map(esc).join(', ')}</p>` : ''}`;
   if (v.phase === 'freeze') h += `<div class="huntbig freezebig">🧊<b>FREEZE!</b></div><div class="huntfound">${v.taps.map((n, i) => `<span>${['🥇', '🥈', '🥉'][i] || '✅'} ${esc(n)}</span>`).join('')}</div>`;

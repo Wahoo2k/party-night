@@ -21,8 +21,8 @@ export const MIN_HOLD = 1200;   // you have to hold it long enough to say someth
 export const TIMES = { ready: 4000, boom: 6000 };
 const shuffle = (a, rnd) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
-export function setup(players, rnd = Math.random) {
-  const s = { game: 'potato', players: players.map(p => ({ pid: p.pid, name: p.name })), cats: shuffle([...CATEGORIES.keys()], rnd).slice(0, ROUNDS), r: 0, round: 0, burns: {}, holder: null, passes: 0, eventId: 0 };
+export function setup(players, rnd = Math.random, prev = null, opts = {}) {
+  const s = { game: 'potato', players: players.map(p => ({ pid: p.pid, name: p.name })), cats: shuffle([...CATEGORIES.keys()], rnd).slice(0, opts.short ? 5 : ROUNDS), r: 0, round: 0, burns: {}, holder: null, passes: 0, eventId: 0 };
   s.players.forEach(p => (s.burns[p.pid] = 0));
   ready(s, Date.now(), rnd);
   return s;
@@ -68,7 +68,7 @@ export function cueEvent(s) { return s.phase === 'live' && s.eventId ? { id: s.e
 export function botAct(v, rnd = Math.random) { return v.phase === 'live' && v.holding && v.held > 1.5 && rnd() < 0.5 ? { type: 'toss', to: v.others[Math.floor(rnd() * v.others.length)].pid } : null; }
 
 export function tvView(s, now = Date.now()) {
-  return { phase: s.phase, r: s.r + 1, cat: s.cats[s.r] !== undefined ? CATEGORIES[s.cats[s.r]] : '', holder: nameOf(s, s.holder), passes: s.passes, burned: s.burned ? nameOf(s, s.burned) : null, scores: ranking(s), eventId: s.eventId };
+  return { phase: s.phase, r: s.r + 1, of: s.cats.length, cat: s.cats[s.r] !== undefined ? CATEGORIES[s.cats[s.r]] : '', holder: nameOf(s, s.holder), passes: s.passes, burned: s.burned ? nameOf(s, s.burned) : null, scores: ranking(s), eventId: s.eventId };
 }
 export function phoneView(s, pid, now = Date.now()) {
   if (s.burns[pid] === undefined) return { phase: 'spectate' };
@@ -80,7 +80,7 @@ export function phoneView(s, pid, now = Date.now()) {
 export function renderTV(v, el) {
   document.body.classList.toggle('day', v.phase !== 'boom');
   const scores = `<div class="scores"><h3>Burns</h3>${v.scores.map(p => `<div class="srow"><span>${esc(p.name)}</span><b>${'🔥'.repeat(p.burns) || '—'}</b></div>`).join('')}</div>`;
-  let h = `<p class="cat">Round ${Math.min(v.r, ROUNDS)} of ${ROUNDS}</p>`;
+  let h = `<p class="cat">Round ${Math.min(v.r, v.of)} of ${v.of}</p>`;
   if (v.phase === 'ready' || v.phase === 'live') h += `<div class="cq">${esc(v.cat)}!</div><div class="potato ${v.phase === 'live' ? 'live' : ''}" key="${v.eventId}">🥔</div><h2 class="center">${esc(v.holder)}</h2><p class="muted center">${v.phase === 'live' ? `Say one out loud, then toss it! · ${v.passes} tosses` : 'Get ready…'}</p>`;
   if (v.phase === 'boom') h += `<div class="potato boom">💥</div><h2 class="center lose">${esc(v.burned)} got burned!</h2><button class="btn" data-host="next">Next round</button>`;
   if (v.phase === 'over') h = `<h2 class="win">${esc(v.scores[0].name)} has the coolest hands!</h2><div class="podium">${v.scores.slice(0, 3).map((p, i) => `<div class="pod p${i + 1}"><b>${esc(p.name)}</b><span>${p.burns} 🔥</span></div>`).join('')}</div><div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;

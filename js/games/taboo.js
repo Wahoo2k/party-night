@@ -38,13 +38,13 @@ export const TIMES = { ready: 20000, turn: 60000, turnEnd: 7000 };
 
 const shuffle = (a, rnd) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
-export function setup(players, rnd = Math.random, prev = null) {
+export function setup(players, rnd = Math.random, prev = null, opts = {}) {
   const sameCrowd = prev?.teamOf && players.every(p => prev.teamOf[p.pid] !== undefined) && Math.abs(players.filter(p => prev.teamOf[p.pid] === 0).length * 2 - players.length) <= 1;
   const teamOf = {};
   if (sameCrowd) players.forEach(p => (teamOf[p.pid] = prev.teamOf[p.pid]));
   else shuffle(players.map(p => p.pid), rnd).forEach((pid, i) => (teamOf[pid] = i % 2));
   return {
-    game: 'taboo',
+    game: 'taboo', perTeam: opts.short ? 2 : TURNS_PER_TEAM,
     players: players.map(p => ({ pid: p.pid, name: p.name })),
     teamOf, teamScore: [0, 0],
     deck: shuffle(CARDS.map((_, i) => i), rnd),
@@ -82,7 +82,7 @@ function endTurn(s, now) {
 function nextTurn(s, now) {
   s.giverIdx[playing(s)]++;
   s.turn++;
-  if (s.turn >= TURNS_PER_TEAM * 2) { s.phase = 'over'; return; }
+  if (s.turn >= s.perTeam * 2) { s.phase = 'over'; return; }
   s.log = [];
   s.card = null;
   s.phase = 'ready';
@@ -142,7 +142,7 @@ export function botAct(v, rnd = Math.random) {
 // ---------- views ----------
 export function tvView(s, now = Date.now()) {
   const v = {
-    phase: s.phase, turn: s.turn + 1, turns: TURNS_PER_TEAM * 2, playing: playing(s),
+    phase: s.phase, turn: s.turn + 1, turns: s.perTeam * 2, playing: playing(s),
     teams: TEAMS.map((name, t) => ({ name, score: s.teamScore[t], members: team(s, t).map(p => nameOf(s, p)) })),
     giver: nameOf(s, giver(s)), left: Math.max(0, Math.ceil((s.deadline - now) / 1000)),
     got: s.log.filter(l => l.result === 'got').length, eventId: s.eventId, lastEvent: s.lastEvent,

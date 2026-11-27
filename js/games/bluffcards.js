@@ -1,4 +1,4 @@
-// Call My Bluff: play cards face down and say what they are. The rank to play goes up each turn,
+// Liar's Deck: play cards face down and say what they are. The rank to play goes up each turn,
 // so sometimes you have to lie. Anyone can call "Bluff!": a liar takes the pile, a wrong call takes it too.
 // First to empty their hand wins. (A classic "I Doubt It" / "Cheat" card game.)
 import { esc } from '../ui.js';
@@ -6,7 +6,7 @@ import { makeStd, face, RANKS, shuffle } from './cards.js';
 
 export const meta = {
   id: 'bluffcards',
-  name: 'Call My Bluff',
+  name: 'Liar\'s Deck',
   min: 3,
   max: 8,
   blurb: 'Play cards face down, claim anything. Call out the liars.',
@@ -84,14 +84,14 @@ export function tick(s, now = Date.now(), rnd = Math.random) {
 
 const claimText = (s, c) => `${nameOf(s, c.pid)} played ${c.n} ${c.n === 1 ? WORDS[c.rank].replace(/es$|s$/, '').replace(/Sixe/, 'Six') : WORDS[c.rank]}`;
 export function narration(s) {
-  if (s.phase === 'play' && s.moves === 0) return `Welcome to Call My Bluff! Play cards face down and say they're ${WORDS[s.rank]}. Lie if you have to. Anyone can call bluff!`;
+  if (s.phase === 'play' && s.moves === 0) return `Welcome to Liar's Deck! Play cards face down and say they're ${WORDS[s.rank]}. Lie if you have to. Anyone can call bluff!`;
   if (s.phase === 'window') return claimText(s, s.claim) + '.';
   if (s.phase === 'reveal') return s.reveal.lied ? `Bluff! ${nameOf(s, s.reveal.liar)} was lying and takes the pile.` : `Nope, ${nameOf(s, s.reveal.liar)} told the truth! ${nameOf(s, s.reveal.by)} takes the pile.`;
   if (s.phase === 'over') return `${nameOf(s, s.winner)} is out of cards and wins!`;
   return '';
 }
 export function cue(s) {
-  if (s.phase === 'play' && s.moves === 0) return { sound: 'join', wait: 700, title: 'Call My Bluff', sub: `Start with ${WORDS[s.rank]}` };
+  if (s.phase === 'play' && s.moves === 0) return { sound: 'join', wait: 700, title: 'Liar\'s Deck', sub: `Start with ${WORDS[s.rank]}` };
   if (s.phase === 'window') return { sound: 'vote', wait: 300 };
   if (s.phase === 'reveal') return { sound: s.reveal.lied ? 'death' : 'lose', wait: 600, title: s.reveal.lied ? 'BLUFF!' : 'TRUTH!', sub: `${nameOf(s, s.reveal.loser)} takes ${s.reveal.size} cards`, tone: s.reveal.lied ? 'blood' : 'dawn' };
   if (s.phase === 'over') return { sound: 'win', wait: 1500, title: `${nameOf(s, s.winner)} Wins!`, tone: 'dawn', fx: 'confetti' };

@@ -23,8 +23,8 @@ export const ROUNDS = 8;
 export const TIMES = { get: 3500, go: 30000, done: 5000 };
 const shuffle = (a, rnd) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
-export function setup(players, rnd = Math.random) {
-  const s = { game: 'hunt', players: players.map(p => ({ pid: p.pid, name: p.name })), list: shuffle([...HUNTS.keys()], rnd).slice(0, ROUNDS), r: 0, round: 0, scores: {}, found: [] };
+export function setup(players, rnd = Math.random, prev = null, opts = {}) {
+  const s = { game: 'hunt', players: players.map(p => ({ pid: p.pid, name: p.name })), list: shuffle([...HUNTS.keys()], rnd).slice(0, opts.short ? 5 : ROUNDS), r: 0, round: 0, scores: {}, found: [] };
   s.players.forEach(p => (s.scores[p.pid] = 0));
   get(s, Date.now());
   return s;

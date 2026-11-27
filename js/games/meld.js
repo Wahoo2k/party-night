@@ -36,9 +36,9 @@ export function cleanClue(t) {
   return { ok: true, text: x };
 }
 
-export function setup(players, rnd = Math.random) {
+export function setup(players, rnd = Math.random, prev = null, opts = {}) {
   const order = shuffle(players.map(p => ({ pid: p.pid, name: p.name })), rnd);
-  const turns = Math.min(order.length <= 3 ? order.length * 2 : order.length, 8);
+  const turns = Math.min(order.length <= 3 ? order.length * 2 : order.length, opts.short ? 4 : 8);
   const s = {
     game: 'meld', players: order, turns, turn: 0, round: 0,
     scales: shuffle([...SCALES.keys()], rnd).slice(0, turns),

@@ -26,10 +26,10 @@ export const TIMES = { ready: 25000, turn: 50000, turnEnd: 6000 };
 
 const shuffle = (a, rnd) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
-export function setup(players, rnd = Math.random) {
+export function setup(players, rnd = Math.random, prev = null, opts = {}) {
   const order = shuffle(players.map(p => ({ pid: p.pid, name: p.name })), rnd);
   return {
-    game: 'charades', players: order, turns: Math.min(order.length, 12), turn: 0, round: 0,
+    game: 'charades', players: order, turns: Math.min(order.length, opts.short ? 5 : 12), turn: 0, round: 0,
     scores: Object.fromEntries(order.map(p => [p.pid, 0])),
     deck: shuffle(CARDS.map((_, i) => i), rnd), card: null, log: [], lastTurn: null,
     phase: 'ready', deadline: Date.now() + TIMES.ready, eventId: 0, lastEvent: null,

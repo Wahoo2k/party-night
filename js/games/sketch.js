@@ -56,10 +56,10 @@ export function cleanStrokes(list) {
   return out;
 }
 
-export function setup(players, rnd = Math.random) {
+export function setup(players, rnd = Math.random, prev = null, opts = {}) {
   const order = shuffle(players.map(p => ({ pid: p.pid, name: p.name })), rnd);
   const n = order.length;
-  const steps = Math.max(3, Math.min(n, 8));
+  const steps = Math.max(3, Math.min(n, opts.short ? 4 : 8));
   return {
     game: 'sketch',
     players: order, steps,

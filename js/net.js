@@ -8,8 +8,14 @@ const isLocal = () => new URLSearchParams(location.search).has('local');
 let clientPromise;
 async function client() {
   if (!clientPromise) {
-    clientPromise = import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.2/+esm')
-      .then(m => m.createClient(SUPABASE_URL, SUPABASE_KEY, { realtime: { params: { eventsPerSecond: 40 } } }));
+    // The Supabase library ships with the app (js/vendor), so joining doesn't depend on an outside server.
+    clientPromise = new Promise((resolve, reject) => {
+      const tag = document.createElement('script');
+      tag.src = new URL('./vendor/supabase.js', import.meta.url).href;
+      tag.onload = () => resolve(window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { realtime: { params: { eventsPerSecond: 40 } } }));
+      tag.onerror = () => reject(new Error('Could not load the connection library'));
+      document.head.append(tag);
+    });
   }
   return clientPromise;
 }

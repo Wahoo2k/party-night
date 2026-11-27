@@ -31,11 +31,11 @@ export function cleanClue(text, word) {
   return { ok: true, text: w };
 }
 
-export function setup(players, rnd = Math.random) {
+export function setup(players, rnd = Math.random, prev = null, opts = {}) {
   const order = shuffle(players.map(p => ({ pid: p.pid, name: p.name })), rnd);
   const s = {
     game: 'crew', players: order,
-    deck: shuffle([...POOL.keys()], rnd).slice(0, CARDS),
+    deck: shuffle([...POOL.keys()], rnd).slice(0, opts.short ? 6 : CARDS),
     card: 0, played: 0, score: 0, lost: 0, round: 0,
     guesser: null, clues: {}, guess: null, result: null, phase: 'clue', deadline: 0, history: [],
   };
@@ -121,7 +121,7 @@ export function narration(s) {
   if (s.phase === 'clue') return s.played === 0 ? `Welcome to Clue Crew! We're all on the same team. ${nameOf(s, s.guesser)}, don't look at the TV or anyone's phone! Everyone else, write a one-word clue. Matching clues cancel out.` : `${nameOf(s, s.guesser)} is guessing. Write your clues!`;
   if (s.phase === 'guess') { const n = aliveList(s).length; return n ? `${n} clue${n === 1 ? '' : 's'} made it. ${nameOf(s, s.guesser)}, what's the word?` : `Oh no, every clue cancelled out! ${nameOf(s, s.guesser)}, take a wild guess.`; }
   if (s.phase === 'reveal') return s.result === 'right' ? `Yes! It was ${cur(s).word}!` : s.result === 'wrong' ? `Nope, it was ${cur(s).word}. That costs us an extra card.` : `Passed. It was ${cur(s).word}.`;
-  if (s.phase === 'over') return `You got ${s.score} out of ${CARDS}. ${rating(s.score)}`;
+  if (s.phase === 'over') return `You got ${s.score} out of ${s.deck.length}. ${rating(s.score)}`;
   return '';
 }
 
@@ -129,7 +129,7 @@ export function cue(s) {
   if (s.phase === 'clue') return { sound: 'join', wait: 700, title: s.played === 0 ? 'Clue Crew' : `Card ${s.card + 1}`, sub: `${nameOf(s, s.guesser)}, look away!` };
   if (s.phase === 'guess') return { sound: 'vote', wait: 300 };
   if (s.phase === 'reveal') return { sound: s.result === 'right' ? 'win' : s.result === 'wrong' ? 'lose' : 'tick', wait: 500, fx: s.result === 'right' ? 'confetti' : null };
-  if (s.phase === 'over') return { sound: 'win', wait: 1500, title: `${s.score} / ${CARDS}`, sub: rating(s.score), tone: 'dawn', fx: s.score >= 6 ? 'confetti' : null };
+  if (s.phase === 'over') return { sound: 'win', wait: 1500, title: `${s.score} / ${s.deck.length}`, sub: rating(s.score), tone: 'dawn', fx: s.score >= 6 ? 'confetti' : null };
   return null;
 }
 
@@ -141,7 +141,7 @@ export function botAct(v, rnd = Math.random) {
 }
 
 export function tvView(s, now = Date.now()) {
-  const v = { phase: s.phase, card: Math.min(s.card + 1, CARDS), cards: CARDS, score: s.score, lost: s.lost, played: s.played, guesser: nameOf(s, s.guesser), left: Math.max(0, Math.ceil((s.deadline - now) / 1000)), history: s.history };
+  const v = { phase: s.phase, card: Math.min(s.card + 1, s.deck.length), cards: s.deck.length, score: s.score, lost: s.lost, played: s.played, guesser: nameOf(s, s.guesser), left: Math.max(0, Math.ceil((s.deadline - now) / 1000)), history: s.history };
   if (s.phase === 'clue') { v.cat = cur(s).cat; v.sent = Object.keys(s.clues).length; v.total = givers(s).length; }
   if (s.phase === 'guess') { v.cat = cur(s).cat; v.alive = aliveList(s); v.cancelled = Object.keys(s.clues).length - v.alive.length; }
   if (s.phase === 'reveal') { v.word = cur(s).word; v.guess = s.guess; v.result = s.result; v.clues = Object.entries(s.clues).map(([pid, text]) => ({ text, name: nameOf(s, pid), alive: s.alive[pid] })); }
@@ -152,7 +152,7 @@ export function tvView(s, now = Date.now()) {
 export function phoneView(s, pid) {
   if (!s.players.some(p => p.pid === pid)) return { phase: 'spectate' };
   const bot = String(pid).startsWith('bot-');
-  const v = { phase: s.phase, round: s.round, isGuesser: pid === s.guesser, guesser: nameOf(s, s.guesser), score: s.score, card: s.card + 1, cards: CARDS };
+  const v = { phase: s.phase, round: s.round, isGuesser: pid === s.guesser, guesser: nameOf(s, s.guesser), score: s.score, card: s.card + 1, cards: s.deck.length };
   if (s.phase === 'clue' && !v.isGuesser) { v.word = cur(s).word; v.cat = cur(s).cat; v.sent = !!s.clues[pid]; if (bot) v._hints = cur(s).hints; }
   if (s.phase === 'clue' && v.isGuesser) v.cat = cur(s).cat;
   if (s.phase === 'guess') {

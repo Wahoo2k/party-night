@@ -16,8 +16,8 @@ export const STEP = 750;
 export const MAX_ROUNDS = 12, HEARTS = 3;
 const rand4 = rnd => Math.floor(rnd() * 4);
 
-export function setup(players, rnd = Math.random) {
-  const s = { game: 'copycat', players: players.map(p => ({ pid: p.pid, name: p.name })), pattern: [rand4(rnd), rand4(rnd)], hearts: {}, best: {}, progress: {}, failed: {}, phase: 'show', round: 0, r: 1 };
+export function setup(players, rnd = Math.random, prev = null, opts = {}) {
+  const s = { game: 'copycat', players: players.map(p => ({ pid: p.pid, name: p.name })), pattern: [rand4(rnd), rand4(rnd)], hearts: {}, best: {}, progress: {}, failed: {}, phase: 'show', round: 0, r: 1, max: opts.short ? 8 : MAX_ROUNDS };
   s.players.forEach(p => { s.hearts[p.pid] = HEARTS; s.best[p.pid] = 0; });
   show(s, Date.now());
   return s;
@@ -35,7 +35,7 @@ function result(s, now) {
 }
 function next(s, now, rnd) {
   s.r++;
-  if (s.r > MAX_ROUNDS || !alive(s).length) { s.phase = 'over'; s.round++; s.deadline = 0; return; }
+  if (s.r > s.max || !alive(s).length) { s.phase = 'over'; s.round++; s.deadline = 0; return; }
   s.pattern.push(rand4(rnd));
   show(s, now);
 }

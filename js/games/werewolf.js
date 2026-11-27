@@ -136,6 +136,12 @@ function resolveVote(s, now) {
 export function act(s, pid, a, now = Date.now()) {
   const me = P(s, pid);
   if (!me || !a) return s;
+  // Ghosts (dead villagers) keep playing: they guess who the wolves are. Right guesses are shown at the end.
+  if (!me.alive && me.role !== 'W' && a.type === 'ghost' && s.phase !== 'over') {
+    const t = P(s, a.target);
+    if (t && t.alive) { s.ghost = s.ghost || {}; s.ghost[pid] = a.target; }
+    return s;
+  }
   if (s.phase === 'roles' && a.type === 'ready') s.ready[pid] = true;
   else if (s.phase === 'night' && me.alive && a.type === 'pick') {
     const t = P(s, a.target);
@@ -233,7 +239,11 @@ export function tvView(s, now = Date.now()) {
   base.total = s.phase === 'roles' ? s.players.length : a.length;
   if (s.phase === 'day') { base.morning = s.morning; base.reveal = s.reveal || null; }
   if (s.phase === 'verdict') { base.verdict = s.verdict; base.reveal = s.verdict.name ? { name: s.verdict.name, role: s.verdict.role } : null; }
-  if (s.phase === 'over') { base.winner = s.winner; base.log = s.log; }
+  base.ghosts = s.players.filter(p => !p.alive && p.role !== 'W').length;
+  if (s.phase === 'over') {
+    base.winner = s.winner; base.log = s.log;
+    base.ghostRight = s.players.filter(p => !p.alive && p.role !== 'W' && (P(s, (s.ghost || {})[p.pid]) || {}).role === 'W').map(p => p.name);
+  }
   return base;
 }
 
@@ -243,6 +253,7 @@ export function phoneView(s, pid) {
   const v = { phase: s.phase, round: s.round, role: me.role, alive: me.alive };
   const others = alive(s).filter(p => p.pid !== pid).map(p => ({ pid: p.pid, name: p.name }));
   if (me.role === 'W') v.pack = s.players.filter(p => p.role === 'W' && p.pid !== pid).map(p => p.name);
+  if (!me.alive && me.role !== 'W' && s.phase !== 'over') { v.ghostOptions = others; v.ghostPick = (s.ghost || {})[pid] || null; }
   if (s.phase === 'roles') v.ready = !!s.ready[pid];
   if (s.phase === 'night' && me.alive) {
     v.picked = s.night.picks[pid] || null;
@@ -307,7 +318,7 @@ export function renderTV(v, el) {
   if (v.phase === 'day') h = `<h2>Morning ${v.round}</h2><p class="say">${esc(v.morning)}</p><p class="clock">${mmss(v.left)}</p><p class="muted">Talk it over. Who's been too quiet? Who's pointing fingers? Your phone has tips for your role. Voting starts when the clock runs out.</p><button class="btn" data-host="next">Start the vote now</button>`;
   if (v.phase === 'vote') h = `<h2>Vote</h2><p class="say">Vote on your phone for who leaves the village. Most votes is out. A tie means nobody leaves.</p>${progress}<button class="btn ghost" data-host="next">Close the vote</button>`;
   if (v.phase === 'verdict') h = `<h2>The verdict</h2><p class="say">${esc(v.verdict.text)}</p><div class="tally">${v.verdict.tally.map(t => `<div><b>${t.count}</b> ${esc(t.name)}</div>`).join('') || '<div>No votes</div>'}</div><button class="btn" data-host="next">Continue</button>`;
-  if (v.phase === 'over') h = `<h2 class="${v.winner === 'V' ? 'win' : 'lose'}">${v.winner === 'V' ? 'The village wins' : 'The werewolves win'}</h2><details><summary class="muted">What happened</summary><p>${v.log.map(esc).join('<br>')}</p></details><div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
+  if (v.phase === 'over') h = `<h2 class="${v.winner === 'V' ? 'win' : 'lose'}">${v.winner === 'V' ? 'The village wins' : 'The werewolves win'}</h2>${v.ghostRight?.length ? `<p class="say">👻 Ghosts who guessed a wolf: <b>${v.ghostRight.map(esc).join(', ')}</b></p>` : ''}<details><summary class="muted">What happened</summary><p>${v.log.map(esc).join('<br>')}</p></details><div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
   const reveal = v.reveal ? `<div class="reveal-card ${v.fresh ? 'flip' : 'shown'}" style="--rc:${ROLES[v.reveal.role].color}"><div class="rc-inner"><div class="rc-back"></div><div class="rc-front"><svg viewBox="0 0 100 100">${roleIcon(v.reveal.role)}</svg><b>${esc(v.reveal.name)}</b><span>${ROLES[v.reveal.role].name}</span></div></div></div>` : '';
   el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel ${v.phase === 'night' ? 'dim' : ''}">${reveal}${h}</div>${roster}</div>`;
 }
@@ -317,7 +328,7 @@ export function renderPhone(v, el, send) {
   const opts = (list, picked, type) => `<div class="opts">${list.map(o => `<button class="opt ${picked === o.pid ? 'on' : ''}" data-${type}="${esc(o.pid)}">${esc(o.name)}</button>`).join('')}</div>`;
   let h = '';
   if (v.phase === 'spectate') h = `<h2>Game in progress</h2><p>You'll join the next round.</p>`;
-  else if (!v.alive && v.phase !== 'over') h = `<h2>You're out</h2><p class="say">You can still watch, but no hints, no faces, no gasps. Ghosts stay silent.</p>${card(v.role)}`;
+  else if (!v.alive && v.phase !== 'over') h = `<h2>You're out</h2><p class="say">You can still watch, but no hints, no faces, no gasps. Ghosts stay silent.</p>${v.ghostOptions ? `<h3>👻 Ghost guess: who's a wolf?</h3><p class="muted">Change it any time. Right guesses are shown at the end.</p><div class="opts">${v.ghostOptions.map(o => `<button class="opt ${v.ghostPick === o.pid ? 'on' : ''}" data-ghost="${esc(o.pid)}">${esc(o.name)}</button>`).join('')}</div>` : ''}${card(v.role)}`;
   else if (v.phase === 'roles') h = `<h2>Your secret role</h2><p class="muted">Press and hold the card. Keep your screen hidden from others.</p>${card(v.role)}<button class="btn" data-ready ${v.ready ? 'disabled' : ''}>${v.ready ? 'Waiting for others' : "I've seen it"}</button>`;
   else if (v.phase === 'night') {
     h = `<h2>Night ${v.round}</h2><p>${esc(v.prompt)}</p>`;
@@ -342,6 +353,7 @@ export function renderPhone(v, el, send) {
     c.addEventListener('keyup', hide);
     c.addEventListener('contextmenu', e => e.preventDefault());
   }
+  el.querySelectorAll('[data-ghost]').forEach(b => (b.onclick = () => send({ type: 'ghost', target: b.dataset.ghost })));
   el.querySelectorAll('[data-ready]').forEach(b => (b.onclick = () => send({ type: 'ready' })));
   el.querySelectorAll('[data-pick]').forEach(b => (b.onclick = () => send({ type: 'pick', target: b.dataset.pick })));
   el.querySelectorAll('[data-vote]').forEach(b => (b.onclick = () => send({ type: 'vote', target: b.dataset.vote })));

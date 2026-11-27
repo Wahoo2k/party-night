@@ -220,6 +220,8 @@ export function setup(players, rnd = Math.random, prev = null) {
     order: shuffle(players.map(p => p.pid), rnd),
     turn: 0,
     clues: [],          // {pid, text, lap}
+    fast: players.length >= 7,   // big groups: everyone types their clue at the same time each lap
+    pending: {},
     ready: {},
     votes: {},
     guess: null,
@@ -242,6 +244,16 @@ function startClues(s, now) { s.phase = 'clues'; s.turn = 0; s.deadline = now + 
 function addClue(s, pid, text, now) {
   s.clues.push({ pid, text, lap: lap(s) });
   s.turn++;
+  if (s.turn >= s.order.length * CLUE_ROUNDS) { s.phase = 'discuss'; s.deadline = now + TIMES.discuss; }
+  else s.deadline = now + TIMES.clue;
+}
+
+// Fast mode: when everyone's clue is in (or time is up), reveal the whole lap in seating order.
+function flushLap(s, now) {
+  const l = lap(s);
+  s.order.forEach(pid => s.clues.push({ pid, text: s.pending[pid] || '(no clue)', lap: l }));
+  s.pending = {};
+  s.turn += s.order.length;
   if (s.turn >= s.order.length * CLUE_ROUNDS) { s.phase = 'discuss'; s.deadline = now + TIMES.discuss; }
   else s.deadline = now + TIMES.clue;
 }
@@ -294,6 +306,9 @@ export function act(s, pid, a, now = Date.now()) {
   if (s.phase === 'roles' && a.type === 'ready') {
     s.ready[pid] = true;
     if (s.players.every(p => s.ready[p.pid])) startClues(s, now);
+  } else if (s.phase === 'clues' && a.type === 'clue' && s.fast) {
+    const c = cleanClue(a.text, pid === s.imposter ? null : s.word);
+    if (c.ok && !s.pending[pid]) { s.pending[pid] = c.text; if (s.order.every(p => s.pending[p])) flushLap(s, now); }
   } else if (s.phase === 'clues' && a.type === 'clue' && current(s) === pid) {
     const c = cleanClue(a.text, pid === s.imposter ? null : s.word);
     // The imposter doesn't know the word, so they can't be blocked for "using" it; a lucky hit still counts.
@@ -310,7 +325,7 @@ export function act(s, pid, a, now = Date.now()) {
 export function hostAct(s, a, now = Date.now()) {
   if (a !== 'next') return s;
   if (s.phase === 'roles') startClues(s, now);
-  else if (s.phase === 'clues') addClue(s, current(s), '(skipped)', now);
+  else if (s.phase === 'clues') { if (s.fast) flushLap(s, now); else addClue(s, current(s), '(skipped)', now); }
   else if (s.phase === 'discuss') { s.phase = 'vote'; s.votes = {}; }
   else if (s.phase === 'vote') { if (Object.keys(s.votes).length) resolveVote(s, now); else { s.result = 'escaped'; score(s); s.phase = 'over'; } }
   else if (s.phase === 'guess') resolveGuess(s, '');
@@ -318,7 +333,7 @@ export function hostAct(s, a, now = Date.now()) {
 }
 
 export function tick(s, now = Date.now()) {
-  if (s.phase === 'clues' && now >= s.deadline) addClue(s, current(s), '(no clue)', now);
+  if (s.phase === 'clues' && now >= s.deadline) { if (s.fast) flushLap(s, now); else addClue(s, current(s), '(no clue)', now); }
   else if (s.phase === 'discuss' && now >= s.deadline) { s.phase = 'vote'; s.votes = {}; }
   else if (s.phase === 'guess' && now >= s.deadline) resolveGuess(s, '');
   return s;
@@ -397,8 +412,9 @@ export function tvView(s, now = Date.now()) {
     phase: s.phase, round: s.round, category: s.category,
     left: Math.max(0, Math.ceil(((s.deadline || 0) - now) / 1000)),
     order: s.order.map(pid => ({ name: nameOf(s, pid), clues: s.clues.filter(c => c.pid === pid).map(c => c.text) })),
-    turnName: s.phase === 'clues' ? nameOf(s, current(s)) : null,
-    turnIndex: s.phase === 'clues' ? s.turn % s.order.length : -1,
+    turnName: s.phase === 'clues' ? (s.fast ? 'Everyone' : nameOf(s, current(s))) : null,
+    turnIndex: s.phase === 'clues' && !s.fast ? s.turn % s.order.length : -1,
+    fast: !!s.fast, waiting: s.fast && s.phase === 'clues' ? s.order.filter(p => !s.pending[p]).map(p => nameOf(s, p)) : [],
     lap: lap(s),
     scores: s.players.map(p => ({ name: p.name, score: s.scores[p.pid] || 0, gained: s.gained[p.pid] || 0 })).sort((a, b) => b.score - a.score),
   };
@@ -416,8 +432,9 @@ export function phoneView(s, pid) {
   const v = { phase: s.phase, round: s.round, category: s.category, isImposter, word: isImposter ? null : s.word };
   if (s.phase === 'roles') v.ready = !!s.ready[pid];
   if (s.phase === 'clues') {
-    v.myTurn = current(s) === pid;
+    v.myTurn = s.fast ? !s.pending[pid] : current(s) === pid;
     v.turnName = nameOf(s, current(s));
+    v.fast = !!s.fast;
     v.myClues = s.clues.filter(c => c.pid === pid).map(c => c.text);
     v.lap = lap(s);
     v.recent = s.clues.slice(-4).map(c => ({ name: nameOf(s, c.pid), text: c.text }));
@@ -454,7 +471,7 @@ export function renderTV(v, el) {
       <li><b>Vote:</b> after two rounds of clues, discuss and vote for the imposter.</li>
       <li><b>Last chance:</b> if the imposter is caught, they can still win by guessing the word.</li>
     </ol></div><button class="btn" data-host="next">Everyone's ready, start clues</button>`;
-  if (v.phase === 'clues') h = `<p class="cat">Category: <b>${esc(v.category)}</b></p><h2>${esc(v.turnName)}'s turn</h2><p class="say">Type one clue on your phone. Round ${v.lap} of 2.</p><p class="clock ${v.left <= 10 ? 'hurry' : ''}">${mmss(v.left)}</p>${board}<button class="btn ghost" data-host="next">Skip this player</button>`;
+  if (v.phase === 'clues') h = `<p class="cat">Category: <b>${esc(v.category)}</b></p><h2>${v.fast ? 'Everyone, type your clue!' : `${esc(v.turnName)}'s turn`}</h2><p class="say">${v.fast ? `All clues appear together. Round ${v.lap} of 2.${v.waiting.length && v.waiting.length <= 4 ? ` Waiting for ${v.waiting.map(esc).join(', ')}.` : ''}` : `Type one clue on your phone. Round ${v.lap} of 2.`}</p><p class="clock ${v.left <= 10 ? 'hurry' : ''}">${mmss(v.left)}</p>${board}<button class="btn ghost" data-host="next">${v.fast ? 'Show the clues' : 'Skip this player'}</button>`;
   if (v.phase === 'discuss') h = `<p class="cat">Category: <b>${esc(v.category)}</b></p><h2>Who's faking it?</h2><p class="clock ${v.left <= 10 ? 'hurry' : ''}">${mmss(v.left)}</p>${board}<p class="muted">Whose clues don't quite fit? Voting starts when the clock runs out.</p><button class="btn" data-host="next">Start the vote now</button>`;
   if (v.phase === 'vote') h = `<h2>Vote</h2><p class="say">Vote on your phone for the imposter. A tie means the imposter escapes!</p>${progress}${board}<button class="btn ghost" data-host="next">Close the vote</button>`;
   if (v.phase === 'guess') h = `<h2>Caught: ${esc(v.imposterName)}!</h2><p class="say">But it's not over. If they guess the secret word, they steal the win.</p><p class="clock ${v.left <= 10 ? 'hurry' : ''}">${mmss(v.left)}</p><div class="tally">${v.tally.map(t => `<div><b>${t.count}</b> ${esc(t.name)}</div>`).join('')}</div>`;
@@ -475,7 +492,7 @@ export function renderPhone(v, el, send) {
   else if (v.phase === 'clues' && v.myTurn) h = `<h2>Your turn!</h2><p class="muted">Category: <b>${esc(v.category)}</b> · ${v.isImposter ? '<span class="lose">You\'re the imposter. Bluff!</span>' : `Word: <b>${esc(v.word)}</b>`}</p>
     <form id="cf"><label for="clue">One-word clue</label><input id="clue" maxlength="20" autocomplete="off" autocapitalize="off" required><p class="lose" id="err"></p><button class="btn" type="submit">Send clue</button></form>
     ${v.recent.length ? `<p class="muted">Clues so far: ${v.recent.map(c => `${esc(c.name)}: <b>${esc(c.text)}</b>`).join(' · ')}</p>` : ''}`;
-  else if (v.phase === 'clues') h = `<h2>${esc(v.turnName)} is thinking…</h2><p class="muted">Category: <b>${esc(v.category)}</b> · ${v.isImposter ? '<span class="lose">You\'re the imposter</span>' : `Word: <b>${esc(v.word)}</b>`}</p>${v.myClues.length ? `<p>Your clue${v.myClues.length > 1 ? 's' : ''}: <b>${v.myClues.map(esc).join(', ')}</b></p>` : '<p>Get your clue ready. Not too obvious!</p>'}${v.recent.length ? `<div class="recent">${v.recent.map(c => `<div><span>${esc(c.name)}</span><b>${esc(c.text)}</b></div>`).join('')}</div>` : ''}`;
+  else if (v.phase === 'clues') h = `<h2>${v.fast ? 'Clue sent!' : `${esc(v.turnName)} is thinking…`}</h2><p class="muted">Category: <b>${esc(v.category)}</b> · ${v.isImposter ? '<span class="lose">You\'re the imposter</span>' : `Word: <b>${esc(v.word)}</b>`}</p>${v.myClues.length ? `<p>Your clue${v.myClues.length > 1 ? 's' : ''}: <b>${v.myClues.map(esc).join(', ')}</b></p>` : '<p>Get your clue ready. Not too obvious!</p>'}${v.recent.length ? `<div class="recent">${v.recent.map(c => `<div><span>${esc(c.name)}</span><b>${esc(c.text)}</b></div>`).join('')}</div>` : ''}`;
   else if (v.phase === 'discuss') h = `<h2>Discuss</h2><p class="muted">Category: <b>${esc(v.category)}</b> · ${v.isImposter ? '<span class="lose">Act natural. Listen for the word!</span>' : `Word: <b>${esc(v.word)}</b>`}</p><div class="recent">${v.all.map(p => `<div><span>${esc(p.name)}</span><b>${p.clues.map(esc).join(', ')}</b></div>`).join('')}</div>`;
   else if (v.phase === 'vote') h = `<h2>Who's the imposter?</h2>${v.isImposter ? '<p class="muted">Vote for someone else to blend in.</p>' : ''}<div class="opts">${v.options.map(o => `<button class="opt ${v.voted === o.pid ? 'on' : ''}" data-vote="${esc(o.pid)}">${esc(o.name)}</button>`).join('')}</div>${v.voted ? '<p class="muted">Vote in. You can change it until everyone has voted.</p>' : ''}`;
   else if (v.phase === 'guess' && v.isImposter) h = `<h2>You've been caught!</h2><p class="say">Guess the secret word to steal the win.</p><p class="muted">Category: <b>${esc(v.category)}</b></p><form id="gf"><label for="guess">Your guess</label><input id="guess" maxlength="30" autocomplete="off" required><button class="btn" type="submit">Guess</button></form>`;

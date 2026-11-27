@@ -106,7 +106,13 @@ function nextPrompt(s, now) {
 
 export function act(s, pid, a, now = Date.now(), rnd = Math.random) {
   if (!P(s, pid) || !a) return s;
-  if (s.phase === 'write' && a.type === 'lie') {
+  if (s.phase === 'write' && a.type === 'safety' && !s.lies[pid]) {
+    // "Help me": a stock lie nobody else has used yet.
+    const taken = new Set(Object.values(s.lies).map(x => x.toLowerCase()));
+    const pool = (fact(s).decoys || []).filter(d => !taken.has(d.toLowerCase()));
+    s.lies[pid] = pool.length ? pool[Math.floor(rnd() * pool.length)] : 'a very confused goose';
+    if (s.players.every(p => s.lies[p.pid])) startPick(s, now, rnd);
+  } else if (s.phase === 'write' && a.type === 'lie') {
     const c = cleanLie(a.text, fact(s));
     if (!c.ok) return s;
     s.lies[pid] = c.text;
@@ -254,7 +260,7 @@ export function renderPhone(v, el, send) {
   let h = '';
   const top = `<p class="muted">Fact ${v.n + 1} of ${v.total}${v.double ? ' · <b>Double points</b>' : ''}</p><div class="fact small">${blank(v.q)}</div>`;
   if (v.phase === 'spectate') h = '<h2>Game in progress</h2><p>You\'ll join the next game.</p>';
-  else if (v.phase === 'write' && !v.myLie) h = `${top}<form id="lf"><label for="lie">Your fake answer</label><input id="lie" maxlength="30" autocomplete="off" required><p class="lose" id="err"></p><button class="btn" type="submit">Submit lie</button></form><p class="muted">Tip: match the style. A number for a number, a short word for a word.</p>`;
+  else if (v.phase === 'write' && !v.myLie) h = `${top}<form id="lf"><label for="lie">Your fake answer</label><input id="lie" maxlength="30" autocomplete="off" required><p class="lose" id="err"></p><button class="btn" type="submit">Submit lie</button></form><button class="btn ghost" id="safety">🛟 Stuck? Give me one</button><p class="muted">Tip: match the style. A number for a number, a short word for a word.</p>`;
   else if (v.phase === 'write') h = `${top}<h2>Lie locked in</h2><p class="say">"${esc(v.myLie)}"</p><p class="muted">Waiting for everyone else…</p>`;
   else if (v.phase === 'pick') h = `${top}<h2>Find the truth</h2><div class="opts">${v.options.map(o => `<button class="opt ${v.picked === o.id ? 'on' : ''}" data-pick="${esc(o.id)}">${esc(o.text)}</button>`).join('')}</div>${v.picked ? '<p class="muted">Locked in. You can change it until time\'s up.</p>' : '<p class="muted">Your own lie isn\'t on this list.</p>'}`;
   else if (v.phase === 'reveal' || v.phase === 'scores') h = `${top}<h2>${v.foundTruth ? '<span class="win">You found the truth!</span>' : 'Watch the TV…'}</h2><p class="say">The answer: <b>${esc(v.answer)}</b></p>${v.myLie ? `<p>Your lie "${esc(v.myLie)}" fooled ${v.fooled.length ? `<b>${v.fooled.map(esc).join(', ')}</b>` : 'nobody'}.</p>` : ''}${v.phase === 'scores' ? `<p class="say">+${pts(v.gained)} · ${pts(v.score)} total</p>` : ''}`;
@@ -276,4 +282,5 @@ export function renderPhone(v, el, send) {
       setTimeout(() => { if (document.body.contains(lf)) { lf.querySelector('button').disabled = false; lf.querySelector('#err').textContent = 'That\'s actually the truth! Write a lie instead.'; } }, 4000);
     };
   }
+  el.querySelector('#safety')?.addEventListener('click', e => { e.target.disabled = true; send({ type: 'safety' }); });
 }
