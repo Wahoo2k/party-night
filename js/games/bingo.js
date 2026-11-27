@@ -8,6 +8,7 @@ export const meta = {
   min: 2,
   max: 40,
   blurb: 'Cards on your phone, the TV calls the numbers. Shout it first!',
+  kids: true,
 };
 
 export const PATTERNS = [

@@ -8,6 +8,7 @@ export const meta = {
   min: 3,
   max: 20,
   blurb: 'Act out the picture on your phone. Great for kids who can\'t read yet.',
+  kids: true,
 };
 
 export const CARDS = [

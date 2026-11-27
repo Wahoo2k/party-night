@@ -123,3 +123,23 @@ export function stopAmbient() { clearInterval(ambient); ambient = null; }
 
 // Phones: a short buzz when it's your turn (Android; iPhones ignore it).
 export const buzz = (p = 120) => { try { navigator.vibrate?.(p); } catch {} };
+
+// A single note, for games that play tunes or patterns.
+export function note(f, dur = 0.35, t = 0, type = 'triangle', vol = 0.35) { if (ready()) tone({ type, f0: f, dur, t, vol }); }
+
+// A bouncy dance loop (Freeze Dance). Pentatonic melody over a simple bass and a click beat.
+let music = null;
+export function startMusic(seed = 0) {
+  stopMusic();
+  const mel = [523, 587, 659, 784, 880, 784, 659, 587, 523, 659, 784, 1047, 880, 784, 659, 523];
+  const bass = [131, 131, 165, 165, 196, 196, 175, 175];
+  let i = seed % 16;
+  music = setInterval(() => {
+    if (!ready()) return;
+    if (i % 2 === 0) tone({ type: 'square', f0: bass[(i >> 1) % 8], dur: 0.22, vol: 0.12 });
+    if ((i * 7 + seed) % 3 !== 0) tone({ type: 'triangle', f0: mel[(i * 5 + seed) % 16], dur: 0.2, vol: 0.18 });
+    if (i % 4 === 0) noise({ dur: 0.05, vol: 0.12, freq: 4000, type: 'highpass' });
+    i++;
+  }, 200);
+}
+export function stopMusic() { clearInterval(music); music = null; }

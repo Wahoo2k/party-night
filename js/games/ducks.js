@@ -9,6 +9,7 @@ export const meta = {
   min: 2,
   max: 10,
   blurb: 'Toss two rubber ducks, see how they land, and push your luck.',
+  kids: true,
 };
 
 export const TARGET = 100;

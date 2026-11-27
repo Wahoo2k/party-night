@@ -802,3 +802,34 @@ p.center .clock{display:inline-block;font-size:1em;margin:0 0 0 8px;padding:2px 
 .dbopt small{display:block;font:600 13px/1.3 system-ui,sans-serif;opacity:.7;margin-top:4px}
 .dbopt.real{background:#7fc8a9;box-shadow:0 0 0 4px #fff}
 @media(max-width:900px){.dbrow{grid-template-columns:1fr}}
+/* little kids games */
+.kidturn{color:#7fc8a9}
+.kidscore{font-size:28px;margin:0 0 8px;letter-spacing:2px}
+.mmgrid{display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:clamp(6px,1vw,12px);margin:12px 0}
+.mmcard{aspect-ratio:1;border-radius:14px;border:0;background:linear-gradient(135deg,#5a6fd8,#8a4fd1);display:grid;place-items:center;cursor:pointer;box-shadow:0 5px 0 #0005;transition:transform .3s}
+.mmcard span{font-size:clamp(28px,4vw,60px)}
+.mmcard.up{background:#f4e9c1;transform:rotateY(0);animation:aflip .4s}
+.mmcard.got{background:#7fc8a9;opacity:.85}
+.mmcard:not(.up) span{opacity:.5;font-size:clamp(18px,2vw,30px)}
+.ccpads{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:520px;margin:14px auto}
+.ccpad{aspect-ratio:1.4;border-radius:24px;border:0;background:var(--c);filter:brightness(.6) saturate(.8);display:grid;place-items:center;cursor:pointer;transition:filter .1s,transform .1s;box-shadow:0 6px 0 #0006}
+.ccpad span{font-size:clamp(44px,6vw,80px)}
+.ccpad.lit{filter:brightness(1.25) saturate(1.2);transform:scale(1.06);box-shadow:0 0 40px var(--c)}
+.ccpad:disabled{cursor:default}
+.ccplayers{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}
+.ccplayers div{display:grid;justify-items:center;padding:8px 12px;border-radius:12px;background:#232a5c}.ccplayers .ok{background:#2f6b4a}.ccplayers .bad{background:#6b2f2f}
+.ccseq{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.ccseq span{display:grid;place-items:center;width:64px;height:64px;border-radius:14px;background:var(--c);font-size:36px}
+.ccdots{display:flex;gap:6px;justify-content:center;margin:8px 0}.ccdots i{width:14px;height:14px;border-radius:50%;background:#fff3}.ccdots i.on{background:#7fc8a9}
+.huntbig{display:grid;justify-items:center;gap:10px;padding:clamp(20px,3vw,40px);border-radius:24px;background:var(--c,#232a5c);color:#fff;text-shadow:0 2px 6px #0008;font-size:clamp(80px,10vw,150px);line-height:1;margin:10px 0;animation:rise .4s both}
+.huntbig b{font:900 clamp(26px,3vw,52px)/1.1 Outfit,sans-serif;text-align:center}
+.huntbig.ready{background:#232a5c}.huntbig.freezebig{background:#3f9fe0}
+.huntfound{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;font:800 22px/1.2 Outfit,sans-serif}
+.kidbtn{width:100%;min-height:42vh;border-radius:28px;border:0;background:#3fa34d;color:#fff;font:900 40px/1.1 Outfit,sans-serif;box-shadow:0 10px 0 #0006;cursor:pointer;touch-action:manipulation}
+.kidbtn:active{transform:translateY(6px);box-shadow:0 4px 0 #0006}
+.kidbtn.wait{background:#5a6fd8;min-height:25vh;font-size:26px;opacity:.7}.kidbtn.freeze{background:#3f9fe0;animation:pulse .8s infinite}
+.dancefloor{display:flex;justify-content:center;gap:clamp(8px,2vw,30px);font-size:clamp(48px,6vw,90px);margin:20px 0}
+.dancefloor span{display:inline-block;animation:boogie .5s ease-in-out infinite alternate}
+@keyframes boogie{from{transform:translateY(0) rotate(-12deg)}to{transform:translateY(-24px) rotate(12deg)}}
+.huntbig.dancing{animation:boogie .5s ease-in-out infinite alternate}
+.game .kidbadge{position:absolute;top:10px;right:10px;font-size:13px;padding:2px 8px;border-radius:99px;background:#7fc8a9;color:#0e1230;font-weight:800}
+.game{position:relative}

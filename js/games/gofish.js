@@ -9,6 +9,7 @@ export const meta = {
   min: 2,
   max: 6,
   blurb: 'Ask for cards, make matches. Picture cards for little ones.',
+  kids: true,
 };
 
 export const ANIMALS = [['🐶', 'Dog'], ['🐱', 'Cat'], ['🐸', 'Frog'], ['🐷', 'Pig'], ['🐮', 'Cow'], ['🐵', 'Monkey'], ['🦁', 'Lion'], ['🐧', 'Penguin'], ['🐢', 'Turtle'], ['🐙', 'Octopus'], ['🦄', 'Unicorn'], ['🐝', 'Bee'], ['🦖', 'Dino']];
