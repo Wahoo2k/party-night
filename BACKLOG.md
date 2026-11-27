@@ -150,3 +150,8 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - `.github/workflows/audio.yml`: "Audio" workflow, run by hand from the Actions tab; uses the repository secret ELEVENLABS_API_KEY and commits the files.
 - One clean pass is about 113,000 credits (narration 104,798 characters; 31 effects and stings at about 200 each; 3 music pieces). Credit figures for effects and music are from third-party pages, not ElevenLabs' own.
 - Tested only against a stand-in server here; the sandbox can't reach ElevenLabs. The music endpoint (/v1/music with prompt and music_length_ms) is from memory and unverified.
+
+## GOAT Toss in 3D (Nov 27)
+- The table is a plane in a CSS 3D scene (`.gtable.g3d`), with a leather cup that shakes and pours. The goats' paths are worked out in js/games/ducks.js (`tossPlan`): gravity, three or four bounces that get lower and slower, spin tied to distance travelled, a small rock as they settle. The path is seeded by the toss id, so a redraw mid-toss continues in place. Toss time is now 3.0 s (was 2.6 s).
+- The remote screen (watch.html) mirrors still frames, so it shows the cup and then the result, not the flight.
+- Voice auditions: audio/audition/index.html (host: Charlie, Liam, Jessica, Callum, Laura; night: George, Brian, Callum, Lily, Bill). The key has no user-read permission, so runs can't report the credit balance.

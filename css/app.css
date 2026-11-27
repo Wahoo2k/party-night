@@ -2190,3 +2190,20 @@ body.onstage[data-game=imposter] .clueboard{grid-template-columns:1fr 1fr;gap:12
 body.onstage[data-game=imposter] .stage .panel{text-align:center}
 body.onstage[data-game=imposter] .cluerow{text-align:left}
 body.onstage[data-game=imposter] .stage .panel>.btn{display:flex;margin:10px auto 0}
+
+/* GOAT Toss in 3D: a tabletop seen from above and in front, a cup that pours, and goats that fall and bounce on it.
+   Positions are set from js/games/ducks.js; these rules build the scene. */
+.gtable.g3d{display:block;padding:0;height:460px;perspective:1050px;perspective-origin:50% -50%;background:radial-gradient(120% 90% at 50% 0,#3b2a20,#120b08 75%);box-shadow:inset 0 0 0 5px #e3b26a66,0 14px 30px #0006}
+.g3d .gworld{position:absolute;left:50%;top:89%;width:0;height:0;transform-style:preserve-3d;transform:translateZ(-120px)}
+.g3d .gtop{position:absolute;left:-850px;bottom:0;width:1700px;height:900px;transform-origin:50% 100%;transform:rotateX(90deg);border-radius:30px 30px 0 0;
+  background:radial-gradient(60% 55% at 50% 72%,#ffe7b855,#0000 70%),repeating-linear-gradient(90deg,#0000 0 168px,#2a160b55 168px 171px),repeating-linear-gradient(92deg,#8a5a34 0 23px,#7d5230 23px 41px,#946238 41px 70px,#805331 70px 96px),#7a4f2d;box-shadow:inset 0 0 160px #000a}
+.g3d .glip{position:absolute;left:-850px;top:0;width:1700px;height:120px;background:linear-gradient(#5b3a20,#2c1a0d 60%,#120a05);box-shadow:inset 0 3px 0 #b98550}
+.g3d .gsh{position:absolute;left:0;top:0;width:230px;height:86px;border-radius:50%;background:radial-gradient(#000c,#0000 68%);opacity:0;will-change:transform}
+.g3d .gsh.cupsh{opacity:.55;transform:translate(325px,612px);width:150px;height:60px}
+.g3d .g3{position:absolute;left:-135px;bottom:0;width:270px;height:270px;opacity:0;will-change:transform}
+.g3d .g3 .goatpic{width:100%;transform-origin:50% 62%;filter:drop-shadow(0 3px 2px #0006)}
+.g3d .gcup{position:absolute;left:-85px;bottom:0;width:170px;height:212px;transform:translate3d(-450px,0,-250px);transform-origin:50% 55%;filter:drop-shadow(0 4px 3px #0007)}
+.g3d .gcup svg{width:100%;height:100%;display:block}
+.g3d .gcup.pour{animation:gcup 3s linear both}
+@keyframes gcup{0%{transform:translate3d(-450px,-90px,-250px) rotate(-8deg)}5%{transform:translate3d(-442px,-104px,-250px) rotate(12deg)}10%{transform:translate3d(-458px,-88px,-250px) rotate(-13deg)}15%{transform:translate3d(-442px,-104px,-250px) rotate(12deg)}20%{transform:translate3d(-455px,-92px,-250px) rotate(-9deg)}26%,46%{transform:translate3d(-430px,-120px,-250px) rotate(112deg)}60%,100%{transform:translate3d(-450px,0,-250px) rotate(0)}}
+.gtable.g3d.empty .say{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);margin:0;padding:10px 24px;border-radius:99px;background:#0e1230cc;color:#fff;font-size:28px;white-space:nowrap}

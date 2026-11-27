@@ -15,7 +15,7 @@ export const meta = {
 };
 
 export const TARGET = 100;
-export const TIMES = { anim: 2600, endTurn: 3400, idle: 30000 };
+export const TIMES = { anim: 3000, endTurn: 3400, idle: 30000 };
 
 // How one goat lands. One flank has a painted spot, so the two "lying down" sides can be told apart.
 export const POSES = {
@@ -188,6 +188,7 @@ export function tvView(s, now = Date.now()) {
     tosses: s.tosses.map(r => ({ name: r.name, pts: r.pts, bust: !!r.bust, pile: !!r.pile })),
     last: s.last, eventId: s.eventId, lastEvent: s.lastEvent,
     animating: now < s.busyUntil,
+    animLeft: Math.max(0, s.busyUntil - now),
     ending: !!s.ending, endReason: s.endReason, lost: s.lost, banked: s.banked,
     board: board(s),
     winner: s.winner ? nameOf(s, s.winner) : null,
@@ -221,8 +222,79 @@ const ROT = { left: 90, right: -90, back: 180, stand: 0, nose: 62, horn: 138, pi
 const LIFT = { left: 18, right: 18, back: 10, stand: 0, nose: 4, horn: 6, pile: 0 };   // how far the turned piece sinks to rest on the table (% of its size)
 const goatImg = (k) => `<span class="goatpic ${k === 'right' ? 'flip' : ''}" style="--rot:${ROT[k] || 0}deg;--lift:${LIFT[k] || 0}%"><img src="art/goat.png" alt="">${k === 'right' ? '' : '<u></u>'}</span>`;
 
-function goat(poseKey, i, animate, eid) {
-  return `<div class="goat ${animate ? 'tumble' : ''} g${i}" style="--dx:${i ? 1 : -1}" data-e="${eid}"><i class="gshadow"></i>${goatImg(poseKey)}</div>`;
+
+// ---------- the toss, in 3D ----------
+// The table is a real plane in a CSS 3D scene and the goats are upright pieces standing in it, so the browser does
+// the perspective. A toss shakes the cup, tips it, and the two goats fly out, fall under gravity, bounce a few
+// times (each bounce lower and slower) and spin until they stop on the side the game already chose.
+// The whole path is worked out from the toss's id, so a redraw halfway through carries on from the same place.
+const T_REL = 880, G = 2500, BOUNCE = 0.46, DRAG = 0.68;
+const rng = seed => () => { seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+const CUP = { x: -450, d: 250 };
+let planned = { key: '', plan: null };
+function tossPlan(eid, a, b, pile) {
+  const key = [eid, a, b, pile].join('|');
+  if (planned.key === key) return planned.plan;
+  const r = rng(eid * 7919 + 13);
+  const goats = [0, 1].map(i => {
+    const from = { x: CUP.x + 125, d: CUP.d - 10 - i * 30, h: 150 };
+    const to = pile ? { x: i ? 70 : -40, d: 150, h: i ? 78 : 0 } : { x: (i ? 190 : -150) + (r() - 0.5) * 110, d: 90 + r() * 150, h: 0 };
+    // Fall and bounce: heights over time, and how much ground is covered (slower after every bounce).
+    const pts = []; let h = from.h, vh = 420 + r() * 160, t = 0, speed = 1, dist = 0, bounces = [];
+    const dt = 1 / 120;
+    while (t < 2.4) {
+      vh -= G * dt; h += vh * dt; dist += speed * dt; t += dt;
+      if (h <= 0) { h = 0; if (Math.abs(vh) < 150) { pts.push([t, 0, dist]); break; } vh = -vh * (BOUNCE + r() * 0.08); speed *= DRAG; bounces.push(t); }
+      pts.push([t, h, dist]);
+    }
+    const slide = 0.16; for (let k = 1; k <= 12; k++) { const q = k / 12; dist += speed * (slide / 12) * (1 - q); pts.push([t + slide * q, 0, dist]); }
+    const total = dist, end = t + slide;
+    const key2 = i ? b : a, flip = !pile && key2 === 'right';
+    return { from, to, pts: pts.map(([tt, hh, dd]) => [tt, hh, dd / total]), end, bounces, rot: ROT[pile ? 'pile' : key2] || 0, lift: LIFT[pile ? 'pile' : key2] || 0, flip, spins: (2 + Math.floor(r() * 2)) * 360 + r() * 90, dir: i ? -1 : 1 };
+  });
+  planned = { key, plan: { goats } };
+  return planned.plan;
+}
+// Where everything is, `ms` after the toss began.
+function tossPlace(root, plan, ms) {
+  const sh = root.querySelectorAll('.gsh'), gs = root.querySelectorAll('.g3');
+  plan.goats.forEach((g, i) => {
+    const el = gs[i], t = (ms - T_REL - i * 60) / 1000;
+    if (!el) return;
+    if (t < 0) { el.style.opacity = 0; if (sh[i]) sh[i].style.opacity = 0; return; }
+    let k = g.pts.length - 1; if (t < g.end) { k = 0; while (k < g.pts.length - 1 && g.pts[k][0] < t) k++; }
+    const [, h0, p] = g.pts[k], rest = Math.max(0, t - g.end);
+    const x = g.from.x + (g.to.x - g.from.x) * p, d = g.from.d + (g.to.d - g.from.d) * p;
+    const land = Math.min(1, Math.max(0, (p - 0.82) / 0.18));                    // the last stretch: settle onto its resting side
+    const h = h0 + g.from.h * 0 + g.to.h * land;
+    const wobble = rest < 0.5 && t >= g.end ? 9 * Math.exp(-7 * rest) * Math.sin(26 * rest) : 0;
+    const rot = g.rot + g.dir * g.spins * (1 - p) ** 1.25 + wobble;
+    el.style.opacity = 1;
+    el.style.transform = `translate3d(${x.toFixed(1)}px,${(-h).toFixed(1)}px,${(-d).toFixed(1)}px)`;
+    el.firstElementChild.style.transform = `translateY(${(g.lift * land).toFixed(1)}%) rotate(${rot.toFixed(1)}deg)${g.flip ? ' scaleX(-1)' : ''}`;
+    if (sh[i]) { const lift = Math.min(1, h / 260); sh[i].style.opacity = 0.5 - 0.3 * lift; sh[i].style.transform = `translate(${(850 + x - 115).toFixed(1)}px,${(900 - d - 43).toFixed(1)}px) scale(${(1 - 0.45 * lift).toFixed(2)})`; }
+  });
+}
+function tossRun(root, v) {
+  const last = v.last;
+  if (!last) return;
+  const plan = tossPlan(v.eventId, last.a, last.b, !!last.pile);
+  const start = v.animating && typeof performance !== 'undefined' ? performance.now() - (TIMES.anim - (v.animLeft ?? 0)) : null;
+  const step = () => {
+    const ms = start === null ? 1e6 : performance.now() - start;
+    tossPlace(root, plan, ms);
+    if (start !== null && ms < TIMES.anim + 600 && root.isConnected && typeof requestAnimationFrame === 'function') requestAnimationFrame(step);
+  };
+  step();
+}
+const CUP_SVG = '<svg viewBox="0 0 120 150" aria-hidden="true"><defs><linearGradient id="gcupg" x1="0" x2="1"><stop offset="0" stop-color="#4a2a14"/><stop offset=".45" stop-color="#8a5226"/><stop offset="1" stop-color="#3a200f"/></linearGradient></defs><path d="M14 14h92l-12 124a8 8 0 0 1-8 7H34a8 8 0 0 1-8-7z" fill="url(#gcupg)"/><ellipse cx="60" cy="15" rx="47" ry="11" fill="#2a1609"/><ellipse cx="60" cy="15" rx="47" ry="11" fill="none" stroke="#e3b26a" stroke-width="4"/><path d="M19 44h82M23 112h74" stroke="#e3b26a" stroke-width="3" stroke-dasharray="7 6" opacity=".75"/></svg>';
+function tossScene(v) {
+  const last = v.last, since = last && v.animating ? TIMES.anim - (v.animLeft ?? 0) : 0;
+  return `<div class="gtable g3d ${last ? '' : 'empty'}"><div class="gworld">
+    <div class="gtop"><i class="gsh"></i><i class="gsh"></i><i class="gsh cupsh"></i></div><div class="glip"></div>
+    <div class="gcup ${last && v.animating ? 'pour' : ''}" style="animation-delay:-${Math.round(since)}ms">${CUP_SVG}</div>
+    ${last ? [last.a, last.b].map(k => `<div class="g3"><span class="goatpic"><img src="art/goat.png" alt="">${!last.pile && k === 'right' ? '' : '<u></u>'}</span></div>`).join('') : ''}
+  </div>${last ? '' : '<p class="say">Swipe up on your phone to toss!</p>'}</div>`;
 }
 
 // ---------- renderers ----------
@@ -232,9 +304,7 @@ export function renderTV(v, el) {
   let h = '';
   if (v.phase === 'turn') {
     const last = v.last;
-    const table = last
-      ? `<div class="gtable ${last.pile ? 'pile' : ''}">${goat(last.pile ? 'pile' : last.a, 0, v.animating, v.eventId)}${goat(last.pile ? 'pile' : last.b, 1, v.animating, v.eventId)}</div>`
-      : `<div class="gtable empty"><p class="say">Swipe up on your phone to toss!</p></div>`;
+    const table = tossScene(v);
     const result = last && !v.animating ? `<div class="toss-name ${last.bust || last.pile ? 'lose' : last.double ? 'win' : ''}">${esc(last.name)} ${last.pts ? `<b>+${last.pts}</b>` : ''}</div>` : '<div class="toss-name blank"></div>';
     const status = v.ending && !v.animating
       ? v.endReason === 'bank' ? `<p class="say win">Banked ${v.banked} points!</p>` : v.endReason === 'bust' ? `<p class="say lose">They butt heads! Lost ${v.lost} points this turn.</p>` : v.endReason === 'pile' ? `<p class="say lose">Goat pile! Back to zero.</p>` : '<p class="say">Turn skipped.</p>'
@@ -244,6 +314,7 @@ export function renderTV(v, el) {
   }
   if (v.phase === 'over') h = `<h2 class="win">${esc(v.winner)} is the G.O.A.T.!</h2><p class="say">Greatest Of All Time, at least until the next game.</p><div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
   el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel">${h}</div>${board}</div>`;
+  const scene = el.querySelector('.g3d'); if (scene && v.last) tossRun(scene, v);
 }
 
 export function renderPhone(v, el, send) {
