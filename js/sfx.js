@@ -131,6 +131,7 @@ export function play(name) {
 
 // Quiet crickets under the night phase.
 export function startAmbient() {
+  if (startLoop('bed-night')) return;
   if (!ready() || ambient) return;
   const id = setInterval(() => {
     if (!ready()) return;
@@ -139,7 +140,7 @@ export function startAmbient() {
   }, 900);
   ambient = id;
 }
-export function stopAmbient() { clearInterval(ambient); ambient = null; }
+export function stopAmbient() { clearInterval(ambient); ambient = null; stopLoop('bed-night'); }
 
 // Phones: a short buzz when it's your turn (Android; iPhones ignore it).
 export const buzz = (p = 120) => { try { navigator.vibrate?.(p); } catch {} };
@@ -178,6 +179,7 @@ export function stopMusic() { clearInterval(music); music = null; }
 let bed = null, bedKind = '';
 const BED = { think: { ms: 420, notes: [392, 0, 494, 587, 0, 494, 392, 0, 440, 0, 523, 659, 0, 523, 440, 0], bass: [98, 98, 110, 110] }, hurry: { ms: 210, notes: [523, 659, 784, 659, 523, 659, 784, 988, 587, 698, 880, 698, 587, 698, 880, 1047], bass: [131, 131, 147, 147] } };
 export function startBed(kind = 'think') {
+  if (rec.sfx.has('bed-' + kind)) { stopLoop(kind === 'think' ? 'bed-hurry' : 'bed-think'); clearInterval(bed); bed = null; bedKind = kind; startLoop('bed-' + kind); return; }
   if (bedKind === kind && bed) return;
   stopBed();
   const b = BED[kind] || BED.think;
@@ -191,4 +193,18 @@ export function startBed(kind = 'think') {
     i++;
   }, b.ms);
 }
-export function stopBed() { clearInterval(bed); bed = null; bedKind = ''; }
+export function stopBed() { clearInterval(bed); bed = null; bedKind = ''; stopLoop('bed-think'); stopLoop('bed-hurry'); }
+
+// Recorded music. Each loop is a file in audio/sfx/ (listed in the manifest); with no file, nothing plays, except the
+// thinking bed and night ambience, which keep their synthesized versions until recorded ones exist.
+const loops = {};
+let ducked = false;
+const level = name => (name.startsWith('bed-') ? 0.35 : 0.5) * (ducked ? 0.35 : 1);
+export function startLoop(name) {
+  if (!ready() || !rec.sfx.has(name) || loops[name]) return !!loops[name];
+  try { const a = new Audio(`audio/sfx/${name}.mp3`); a.loop = true; a.volume = level(name); a.play().catch(() => {}); loops[name] = a; return true; } catch { return false; }
+}
+export function stopLoop(name) { const a = loops[name]; if (a) { try { a.pause(); } catch {} delete loops[name]; } }
+// Music drops under the narrator while a line is spoken.
+export function duck(on) { ducked = !!on; for (const [n, a] of Object.entries(loops)) a.volume = level(n); }
+tap.duck = duck;

@@ -1,5 +1,5 @@
 // Recorded narrator: with clips available the TV plays them sentence by sentence and never uses the browser voice;
-// sentences with a player's name are skipped; with no clips at all the browser voice stands in.
+// sentences with a player's name are skipped; with no clips at all the narrator is silent.
 import { chromium } from '/opt/npm-tools/node_modules/playwright/index.mjs';
 import fs from 'node:fs';
 const rows = fs.readFileSync('audio/record-list.csv', 'utf8').split('\n').slice(1).filter(Boolean).map(l => { const m = l.match(/^([^,]+),([^,]+),([^,]*),([^,]*),"(.*)"$/); return m && { id: m[1], voice: m[2], game: m[3], text: m[5].replace(/""/g, '"') }; }).filter(Boolean);
@@ -31,5 +31,5 @@ ok(texts.some(t => /^Name /.test(t)), 'the category is voiced: ' + JSON.stringif
 const n = await run(all, 'werewolf');
 ok(n.clips.length && n.clips.every(c => rows.find(r => c.endsWith(r.id + '.mp3'))?.voice === 'night'), 'night games use the night narrator clips');
 const z = await run([], 'potato');
-ok(z.clips.length === 0 && z.tts > 0, 'with nothing recorded yet the browser voice stands in: ' + JSON.stringify(z));
+ok(z.clips.length === 0 && z.tts === 0, 'with nothing recorded the narrator is silent, never the browser voice: ' + JSON.stringify(z));
 console.log(errors.length ? 'FAIL\n' + errors.join('\n') : 'ok voice-e2e ' + JSON.stringify(texts)); await b.close(); process.exit(errors.length ? 1 : 0);

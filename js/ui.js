@@ -61,8 +61,7 @@ let current = null;
 function stopCurrent() {
   if (!current) return;
   try { current.audio?.pause(); } catch {}
-  if (current.tts) try { synth()?.cancel(); } catch {}
-  current = null;
+  current = null; tap.duck?.(false);
 }
 function pump() {
   if (current) return;
@@ -70,7 +69,8 @@ function pump() {
   while ((item = queue.shift())) { if (!item.low || Date.now() - item.at < 5000) break; }
   if (!item) return;
   current = item;
-  const done = () => { if (current === item) { current = null; pump(); } };
+  tap.duck?.(true);
+  const done = () => { if (current === item) { current = null; tap.duck?.(false); pump(); } };
   if (item.clips) {
     // One clip per sentence, played back to back.
     let i = 0;
@@ -83,30 +83,15 @@ function pump() {
     };
     return next();
   }
-  if (!synth()) return done();
-  try {
-    item.tts = true;
-    const parts = item.text.match(/[^.!?]+[.!?]*/g) || [item.text];
-    const v = pickVoice();
-    parts.forEach((part, k) => {
-      const u = new SpeechSynthesisUtterance(part.trim());
-      if (v) { u.voice = v; u.lang = v.lang; }
-      u.rate = 0.95;
-      u.pitch = 1;
-      if (k === parts.length - 1) { u.onend = done; u.onerror = done; }
-      synth().speak(u);
-    });
-    setTimeout(done, 1500 + item.text.length * 90);
-  } catch { done(); }
+  done();
 }
 export function say(text, force, low) {
   if (text) tap.fn?.('say', [String(text), !!low]);
   if ((!voiceOn && !force) || !text) return;
+  // Recorded clips only: a line with no recording is not spoken. The browser's own voice is never used.
   const clips = clipsFor(text);
-  // Recorded clips only. The browser's own voice is never used once any recordings exist; until the first ones are
-  // made it stands in as a placeholder so test games aren't silent.
-  if (!clips.length && rec.have.size) return;
-  const item = { text: String(text), clips: clips.length ? clips : null, low: !!low, at: Date.now() };
+  if (!clips.length) return;
+  const item = { text: String(text), clips, low: !!low, at: Date.now() };
   if (low) { if (queue.length < 2) queue.push(item); }
   else {
     queue.length = 0;

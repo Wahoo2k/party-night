@@ -3,7 +3,7 @@ import { GAMES, COMING_SOON, SHELVES, NIGHTS } from './games/index.js';
 import { openRoom } from './net.js';
 import { esc, store, newCode, say, sayLow, voiceContext, voice, voices, enableDpad, autofocus, drawScene, titleCard, confetti, clawMarks } from './ui.js';
 import { art } from './art.js';
-import { play, sfx, startAmbient, stopAmbient, startBed, stopBed, quiet } from './sfx.js';
+import { play, sfx, startAmbient, stopAmbient, startBed, stopBed, startLoop, stopLoop, quiet } from './sfx.js';
 import { newKeys, cleanPub, samePub, sharedKey, seal, unseal } from './secure.js';
 import { cleanAct, textsIn, maskView, maskLine } from './content.js';
 import { settleName, cleanName, isRude, uniqueName, funName, MAX_NAME } from './names.js';
@@ -213,6 +213,7 @@ function announce() {
     return;
   }
   if (s.phase === 'over') setTimeout(() => { if (host.state?.phase === 'over') banter('gameover'); }, 4500);
+  if (c?.title && introArt && sfx.on) play('sting-' + (THEME_OF[host.gameId] || 'night'));   // each game family opens with its own short theme
   if (c?.title) titleCard(c.title, c.sub, c.tone, introArt ? art(host.gameId, ICONS[host.gameId]) : ''); if (c?.title) introArt = false;
   else if (s.phase !== 'over') flash('wipe');
   // A title card covers the screen for about three seconds, so the phase's clock doesn't start until it clears.
@@ -409,6 +410,7 @@ function ceremony() {
   el.innerHTML = `<h2>${tie ? "It's a tie!" : 'And the winner is…'}</h2><div class="cpods">${[1, 0, 2].filter(i => top[i]).map(i => { const f = face(top[i].name); return `<div class="cpod c${i + 1}"><i style="--pc:${f?.[1] || '#232a5c'}">${f?.[0] || '🏅'}</i><b>${esc(top[i].name)}</b><span>${val(top[i])}</span><em>${i + 1}</em></div>`; }).join('')}</div><p>Press any button to continue</p>`;
   document.body.append(el);
   tap.fn?.('ceremony', [el.className, el.dataset.theme, el.innerHTML, 3300, 11000]);
+  if (sfx.on && host.settings.music) setTimeout(() => play('music-win'), 3600);
   // While the ceremony is up it swallows remote presses, so OK closes it instead of also pressing Play again underneath.
   const t0 = Date.now();
   const key = e => { e.preventDefault(); e.stopImmediatePropagation(); if (Date.now() - t0 > 4500) close(); };
@@ -703,8 +705,6 @@ function renderLobby() {
         <span class="muted">Relaxed gives everyone 50% more time.</span>
       </div>
       <div class="row">
-        <label class="inline" for="vsel">Narrator voice</label>
-        <select id="vsel">${voices().slice(0, 12).map(v => `<option ${v.name === voice.name ? 'selected' : ''}>${esc(v.name)}</option>`).join('') || '<option>Default</option>'}</select>
         <button class="btn ghost" data-host="testvoice">Test voice</button>
       </div>
       <div class="row">
@@ -792,6 +792,8 @@ function render() {
   document.body.dataset.theme = host.state ? THEME_OF[host.gameId] || '' : '';
   document.body.dataset.game = host.state ? host.gameId : '';
   document.body.classList.toggle('inlobby', !host.state);
+  // Lobby music plays on the menu and the join screen, and stops when a game starts.
+  if (!host.state && host.settings.music && sfx.on) startLoop('music-lobby'); else stopLoop('music-lobby');
   document.body.classList.toggle('streamer', !!host.settings.streamer);
   document.body.classList.toggle('nodraw', !!host.blurDraw);
   document.body.classList.toggle('nohow', !host.settings.howto || (host.played?.[host.gameId] || 0) > 1);
@@ -808,8 +810,6 @@ function render() {
   vetoExtras();
   vb.querySelectorAll('[data-host]').forEach(b => (b.onclick = () => hostAction(b.dataset.host)));
   app.querySelectorAll('[data-host]').forEach(b => (b.onclick = () => hostAction(b.dataset.host)));
-  const vsel = app.querySelector('#vsel');
-  if (vsel) vsel.onchange = () => { voice.name = vsel.value; say('Good evening, villagers.', true); };
   app.querySelectorAll('[data-game]').forEach(b => (b.onclick = () => { host.gameId = b.dataset.game; host.screen = 'gather'; host.queue = []; host.night = null; if (sfx.on) play('lockin'); flash('wipe'); changed(); }));
   app.querySelectorAll('[data-shelf]').forEach(b => (b.onclick = () => { host.shelf = b.dataset.shelf; save(); render(); }));
   autofocus(app);

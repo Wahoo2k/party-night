@@ -26,10 +26,22 @@ Every sound today is synthesized in `js/sfx.js`. Each row is one recorded file t
 | points | 2 | Points landing on a phone | Quick ascending coin-collect sparkle, under 1 second |
 | lockin | 2 | An answer locked in | Soft satisfying click with a tiny chime, very short |
 
-## Music
-| Name | What it is for | Prompt to generate |
+## Music and stings
+Nothing here is synthesized except the two thinking beds and the night ambience; the others are silent until a file exists. Loops must be seamless. The game already plays each one at the right moment and lowers music under the narrator.
+
+| File name | When it plays | Prompt to generate |
 |---|---|---|
-| bed-think | Thinking time while a timer runs | Loopable light quiz-show thinking music, pizzicato strings and soft marimba, 100 bpm, 30 seconds, seamless loop |
-| bed-hurry | Last ten seconds | Loopable urgent ticking quiz music, faster, rising tension, 15 seconds, seamless loop |
-| lobby-1 to lobby-4 | Lobby and game list (four tunes today) | Loopable upbeat playful party lobby music, ukulele, claps and light synth, 60 seconds, seamless loop. Four variations |
-| night-bed | Under the night games | Loopable quiet eerie storybook night ambience with soft music box, 60 seconds, seamless loop |
+| music-lobby | Game list and join screen, looping | Upbeat playful party lobby music, ukulele, hand claps, light synth bass, cheerful and a bit cheeky, 90 seconds, seamless loop |
+| bed-think | While a timer runs, looping | Light quiz-show thinking music, pizzicato strings and soft marimba, 100 bpm, 30 seconds, seamless loop |
+| bed-hurry | Last ten seconds of a timer, looping | Urgent ticking quiz music, faster, rising tension, 15 seconds, seamless loop |
+| bed-night | Night phases in the night games, looping | Quiet eerie storybook night ambience, crickets, soft music box, distant wind, 60 seconds, seamless loop |
+| music-win | Under the winners' podium, once | Triumphant celebratory fanfare with drums and brass that settles into a happy groove, 10 seconds |
+| sting-comic | First title card of comic-style games | Punchy 3 second cartoon brass and slide-whistle sting |
+| sting-paper | Writing and guessing games | Warm 3 second acoustic guitar and typewriter-bell sting |
+| sting-sketch | Drawing games | Playful 3 second xylophone and pencil-scribble sting |
+| sting-kids | Kids' games | Bright 3 second toy piano and kazoo sting |
+| sting-show | Game-show games | Big 3 second game-show brass and drum sting with applause tail |
+| sting-noir | Spy and mystery games | Sneaky 3 second upright bass, finger snaps and muted trumpet sting |
+| sting-teams | Team games | Sporty 3 second whistle, drumline and crowd-shout sting |
+| sting-felt | Card games | Smooth 3 second lounge piano and shuffled-cards sting |
+| sting-night | Night games | Dark 3 second low strings swell with a wolf howl |
