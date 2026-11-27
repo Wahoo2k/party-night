@@ -564,12 +564,28 @@ let editing = null;
 // A glyph for each game in the menu.
 const ICONS = { werewolf: '🐺', imposter: '🕵️', bluff: '🤥', whosaid: '💬', ducks: '🦆', trivia: '🧠', spin: '🎡', crowd: '📊', bingo: '🎱', quick: '⚡', ladder: '🪜', cases: '💼', funny: '😂', letters: '🔤', taboo: '🚫', agents: '🕶️', sketch: '✏️', meld: '🧿', bowl: '🥗', crew: '🤝', charades: '🎭', clash: '🃏', blackjack: '♠️', gofish: '🐟', bluffcards: '🎴', hearts: '♥️', shade: '🎨', estimate: '🎯', truths: '🤞', wordhunt: '🔎', midnight: '🌙', missions: '🗝️', dares: '😈', split: '✂️', doodle: '🖼️', memory: '🧩', copycat: '🐱', hunt: '🌈', freeze: '🧊', haunted: '👻', bomb: '💣', potato: '🥔', mystery: '💎', bracket: '🏆', faker: '🤫', meter: '📈', rebus: '🧩' };
 
+// Each game lives in its own visual world: a color scheme, a background and a headline typeface. Games not listed keep the night village.
+const THEME_OF = {};
+Object.entries({
+  comic: ['funny', 'bracket', 'split', 'dares', 'bluffcards'], paper: ['bluff', 'truths', 'whosaid', 'meter', 'letters'], sketch: ['sketch', 'doodle', 'shade'],
+  kids: ['hunt', 'freeze', 'copycat', 'memory', 'ducks', 'potato', 'bingo', 'charades', 'gofish'], show: ['trivia', 'spin', 'crowd', 'ladder', 'cases', 'quick', 'estimate', 'rebus'],
+  noir: ['imposter', 'faker', 'wordhunt', 'agents', 'missions', 'mystery', 'bomb'], teams: ['taboo', 'bowl', 'crew', 'meld'], felt: ['clash', 'blackjack', 'hearts'],
+}).forEach(([t, ids]) => ids.forEach(id => (THEME_OF[id] = t)));
+// Headlines arrive a word at a time.
+function wordsIn() {
+  app.querySelectorAll('.stage.enter .panel > h2, .stage.enter .panel > .cq').forEach(el => {
+    if (el.children.length || el.textContent.length > 140) return;
+    el.innerHTML = el.textContent.split(' ').map((w, i) => `<span class="wd" style="--i:${i}">${esc(w)}</span>`).join(' ');
+  });
+}
+
 // The menu's live preview: bots really play the highlighted game, sped up, on a small stage.
 let pv = null;
 function previewGame(id) {
   if (!GAMES[id]) return;
   if (pv?.id !== id) pv = { id, s: null, now: Date.now(), stuck: 0, last: '', over: 0, players: ['Ava', 'Ben', 'Cleo', 'Dax', 'Eli', 'Fay'].slice(0, Math.max(GAMES[id].meta.min, Math.min(5, GAMES[id].meta.max))).map((n, i) => ({ pid: 'bot-pv' + i, name: n })) };
   const m = GAMES[id].meta, q = x => app.querySelector(x);
+  const stageEl = q('.pvstage'); if (stageEl) { stageEl.dataset.theme = THEME_OF[id] || ''; stageEl.parentElement.dataset.theme = THEME_OF[id] || ''; }
   if (q('#pvname')) { q('#pvname').textContent = m.name; q('#pvicon').textContent = ICONS[id] || '🎲'; q('#pvblurb').textContent = m.blurb; q('#pvtags').innerHTML = `<span>👥 ${m.min}–${m.max} players</span>${m.kids ? '<span>🧒 Little kids</span>' : ''}${SHELVES.filter(f => f.games?.includes(id) && !['featured', 'kids'].includes(f.id)).slice(0, 2).map(f => `<span>${esc(f.name)}</span>`).join('')}`; }
   app.querySelectorAll('.mgame').forEach(b => b.classList.toggle('on', b.dataset.game === id));
   previewStep(true);
@@ -597,7 +613,11 @@ function previewStep(first) {
     ['day', 'night'].forEach((c, i) => document.body.classList.toggle(c, was[i]));
     el.querySelectorAll('.how').forEach(h => h.remove());
   } catch (e) { el.innerHTML = `<div class="pvfall">${ICONS[pv.id] || '🎲'}</div>`; pv.s = null; }
-  const box = el.parentElement, k = box.clientHeight / 470; el.style.transform = `scale(${k})`; el.style.width = box.clientWidth / k + 'px';
+  // Fit the whole game screen inside the box: lay it out at a fixed width, measure how tall it came out, and scale to fit both ways.
+  const box = el.parentElement;
+  el.style.transform = 'none'; el.style.width = '1040px'; el.style.height = 'auto';
+  const h = Math.max(300, el.scrollHeight), k = Math.min(box.clientWidth / 1040, box.clientHeight / h);
+  el.style.transform = `translate(${Math.max(0, (box.clientWidth - 1040 * k) / 2)}px, ${Math.max(0, (box.clientHeight - h * k) / 2)}px) scale(${k})`;
 }
 setInterval(() => previewStep(false), 900);
 
@@ -696,10 +716,11 @@ function renderLobby() {
 
 function render() {
   if (!host.state) renderLobby();
-  else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); decorate(); pops(fresh); guideTip(); slideScores(); cardPops(fresh); }
+  else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); if (fresh) wordsIn(); decorate(); pops(fresh); guideTip(); slideScores(); cardPops(fresh); }
   document.body.classList.toggle('night', host.state?.phase === 'night');
   // How-to screens show in full the first time a room plays a game, then get out of the way.
   quiet.on = !host.state;
+  document.body.dataset.theme = host.state ? THEME_OF[host.gameId] || '' : '';
   document.body.classList.toggle('inlobby', !host.state);
   document.body.classList.toggle('streamer', !!host.settings.streamer);
   document.body.classList.toggle('nodraw', !!host.blurDraw);

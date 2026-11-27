@@ -1257,3 +1257,35 @@ body.inlobby:not(.phone) .scene{height:clamp(90px,15vh,150px)}
 @keyframes rbzoom{from{transform:scale(9)}60%{transform:scale(3.5)}to{transform:scale(1)}}
 .rbbox.done .rb-pic span{animation:none;filter:none;transform:none}
 .rbbox~p.center .clock,.rbhint+p .clock{font-size:clamp(28px,3vw,48px);padding:4px 18px}
+.pvstage{height:auto}
+
+/* ---------- game worlds: each family of games has its own colors, background and headline type ---------- */
+[data-theme=comic]{--panel:#2b1b6b;--line:#ff5a5f;--moon:#ffe66d;--moss:#5ef2c0;--red:#ff3b5c;--dim:#d9d0ff;--hfont:'Bangers','Outfit',sans-serif;--hsp:.04em;--pat:radial-gradient(#00000022 18%,#0000 19%) 0 0/22px 22px,linear-gradient(160deg,#ffd23f,#ff9f1c)}
+[data-theme=paper]{--panel:#24434f;--line:#4f8494;--moon:#ffe9b0;--red:#e2603d;--dim:#cfe3e8;--hfont:'Righteous','Outfit',sans-serif;--hsp:0;--pat:repeating-linear-gradient(#0000 0 34px,#9bb7c455 34px 36px),linear-gradient(#efe3c8,#e3d2ad)}
+[data-theme=sketch]{--panel:#2d3142;--line:#f08a4b;--moon:#ffd9a0;--red:#f08a4b;--dim:#d5d8e6;--hfont:'Fredoka','Outfit',sans-serif;--hsp:0;--pat:linear-gradient(#5a8fd833 2px,#0000 2px) 0 0/40px 40px,linear-gradient(90deg,#5a8fd833 2px,#0000 2px) 0 0/40px 40px,#f3f6fb}
+[data-theme=kids]{--panel:#2a4d9b;--line:#8fbcff;--moon:#fff3a8;--red:#ff5fa2;--moss:#8dffb0;--dim:#dbe8ff;--hfont:'Fredoka','Outfit',sans-serif;--hsp:0;--pat:radial-gradient(#ffffff66 12%,#0000 13%) 0 0/60px 60px,radial-gradient(#ffffff44 8%,#0000 9%) 30px 30px/60px 60px,linear-gradient(#5cc3ff,#b9ecff)}
+[data-theme=show]{--panel:#24083f;--line:#8a4fe0;--moon:#ffd166;--red:#ff3d8b;--dim:#dcc9ff;--hfont:'Righteous','Outfit',sans-serif;--hsp:.02em;--pat:repeating-conic-gradient(from 0deg at 50% 120%,#5a1a9a 0 8deg,#3b0f6b 8deg 16deg)}
+[data-theme=noir]{--panel:#0f2419;--line:#2a7a50;--ink:#d7ffe4;--moon:#b9ffcf;--red:#ff4d4d;--moss:#5dff9b;--dim:#9fcfb3;--hfont:'Special Elite','Courier New',monospace;--hsp:0;--pat:repeating-linear-gradient(#0000 0 3px,#00000055 3px 4px),radial-gradient(ellipse at 50% 30%,#14402a,#050d09)}
+[data-theme=teams]{--panel:#1d2440;--line:#ffb26b;--moon:#ffe1b8;--red:#ff6b3c;--dim:#d6dcf5;--hfont:'Righteous','Outfit',sans-serif;--hsp:0;--pat:linear-gradient(115deg,#ff8a3c 0 50%,#1fb5a8 50% 100%)}
+[data-theme=felt]{--panel:#123524;--line:#3a9a68;--moon:#ffe9a8;--red:#d93a3a;--dim:#bfe3cf;--hfont:'Righteous','Outfit',sans-serif;--hsp:0;--pat:radial-gradient(ellipse at 50% 40%,#2a8a58,#0d3b25)}
+body[data-theme]:not([data-theme='']){background:var(--pat);background-attachment:fixed}
+.pvstage[data-theme]:not([data-theme='']){color:var(--ink)}
+.pvbox[data-theme]:not([data-theme='']){background:var(--pat)}
+[data-theme]:not([data-theme='']) .panel>h2,[data-theme]:not([data-theme='']) .cq,[data-theme]:not([data-theme='']) .scores h3{font-family:var(--hfont);letter-spacing:var(--hsp);font-weight:400}
+[data-theme]:not([data-theme='']) .cq{font-size:clamp(28px,3.2vw,52px);line-height:1.12}
+[data-theme]:not([data-theme='']) .panel,[data-theme]:not([data-theme='']) .scores{border-width:3px;box-shadow:0 10px 0 #0003,0 18px 40px #0005}
+[data-theme=kids] .panel,[data-theme=kids] .scores{border-radius:30px}
+[data-theme=comic] .panel{transform:rotate(-.4deg)}[data-theme=comic] .scores{transform:rotate(.6deg)}
+[data-theme=comic] .cq,[data-theme=comic] .panel>h2{color:#ffe66d;text-shadow:3px 3px 0 #ff3b5c}
+[data-theme=show] .cq{color:#ffd166;text-shadow:0 0 18px #ffd16688}
+[data-theme=noir] .cq,[data-theme=noir] .panel>h2{color:#b9ffcf;text-shadow:0 0 10px #5dff9b66}
+[data-theme=show]:not(.pvbox):not(.pvstage){animation:none}
+body[data-theme]:not([data-theme='']):not(.phone) .scene{height:clamp(56px,9vh,90px);opacity:.92}
+body[data-theme]:not([data-theme='']):not(.phone) .scene .title{font-size:clamp(26px,3vw,44px);top:10px}
+body[data-theme]:not([data-theme='']) #backdrop i{opacity:.0;mix-blend-mode:overlay}
+/* headlines land a word at a time */
+.wd{display:inline-block;animation:wdin .45s cubic-bezier(.3,1.5,.5,1) both;animation-delay:calc(var(--i)*.07s)}
+@keyframes wdin{from{opacity:0;transform:translateY(.6em) rotate(-5deg) scale(1.25)}}
+body[data-theme]:not([data-theme='']):not(.phone) .scene svg{display:none}
+body[data-theme]:not([data-theme='']):not(.phone) .scene .title{font-family:var(--hfont);color:#fff;text-shadow:0 3px 0 #0005}
+.menu,.lobby.gather,.lobby.one{height:calc(100vh - clamp(90px,15vh,150px) - 16vh)}
