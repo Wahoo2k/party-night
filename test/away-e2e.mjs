@@ -22,7 +22,9 @@ ok((await names()).includes('Remy'), 'a live phone keeps its seat: ' + (await na
 await tv.click('[data-game=werewolf]'); await tv.click('[data-host=start]');
 await me.waitForSelector('#helpsheet', { timeout: 8000 }).then(() => {}, () => errors.push('how-to sheet did not open on the first game'));
 await me.waitForTimeout(700); await me.screenshot({ path: `${out}/away-sheet.png` });
-ok(/WEREWOLF|SEER|DOCTOR|VILLAGER/.test(await me.textContent('#helpsheet')), 'sheet explains the role');
+// The role tips stay off the sheet until the player has looked at their own card, so the first sheet shows only the round steps.
+ok(/Night:.*Morning:.*Vote:/s.test(await me.textContent('#helpsheet')), 'sheet explains how a round goes');
+ok(!/WEREWOLF|SEER|DOCTOR|VILLAGER/.test(await me.textContent('#helpsheet')), 'sheet does not give the role away before the card is seen');
 await me.click('#hsok');
 ok(await me.locator('.actbar.go').count() === 1, 'action bar says it is your move');
 ok(/HOLD/.test(await me.textContent('.actbar')), 'action bar says what to do: ' + (await me.textContent('.actbar')));

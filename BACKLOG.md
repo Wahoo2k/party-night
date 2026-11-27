@@ -128,3 +128,18 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Settings regrouped into Sound, Pace and Room with a one-line hint each; test tools folded away.
 - Renames approved by Tom and applied: Bluff is Tall Tales, Quick Games is Show of Hands, Missions is Inside Job. Ids and file names unchanged (`bluff`, `quick`, `missions`). The audio script needs a rebuild before recording (`node test/narration-script.mjs`).
 - Next asked for by Tom: a website with game overviews and a way to buy; pricing with a subscription, single games and bundles (see the pricing notes in the plan doc when written).
+
+## Intros, game cards, shelves, keepsake, rough spots, live demos (Nov 27)
+- Intros: every game now has written intro steps with an example. They live in one file, `js/games/guide.js` (`HOW`), and are folded into `meta.how` by `js/games/index.js`. The four games that already set their own `meta.how` keep it.
+- Game cards: `FACTS` in the same file gives each game a best player count, rough minutes and a mood. Shown on the menu cards (players and minutes), the hero tags, the intro screen and the website. The minutes and best counts are estimates and need a playtest.
+- Shelves: `LAUNCH` (24 games) in index.js. Rows are Start here (12 headliners), Party, Game shows & puzzles, Secret roles, Family & all ages, Little kids, then More games (the other 23). Little kids keeps six games from outside the 24 (Picture Charades, Bingo, Go Fish, Copy Cat, Color Hunt, Freeze Dance) because families with small children need them up front. Cards and Drawing rows are gone.
+- Keepsake: once a game has been played, phones in the lobby get "Save tonight's results": a picture drawn on the phone (champion, standings, who won what) that goes to the share sheet or downloads. Test: test/keepsake-e2e.mjs.
+- Rough spots:
+  - Vote and result screens checked on slowed captures: Act Natural, Werewolf, Bracket Battle, Spin & Solve, Imposter, Inside Job, Trivia Board wager, Midnight Wolves ending, Copy Cat. Fixed: Act Natural round tag sat beside the result banner; Bracket Battle "ADVANCES" stamp was unreadable and the champion's name was bigger than the winning answer; Spin & Solve's round end left half the screen empty (the wheel now stays); Imposter's board sat in a narrow column (now two-up across the stage). Not captured: Trivia Board's final bet, Imposter's last-chance guess.
+  - Bots that act on a coin flip (Bracket Battle votes, others) almost never acted, because each "no" restarted their wait. Fixed in `runBots`.
+  - Name chip showing an id: Werewolf and Inside Job use `me` for the player's id and the phone header printed it. The TV now sends the name as `_as`.
+  - Midnight Wolves ending names the winners; they also count toward the night's tally (`winners` in the TV view).
+  - Copy Cat heading stays on one line.
+- Demo mode: `tv.html?local=1&demo=<game id>` plays that game with bots on a loop, saves and reads nothing in the browser, and is silent (`DEMO` in js/ui.js). The website uses it in a frame: a "See it play" section on the home page and a "Watch it play" window on every game card with the intro steps beside it.
+- Narration script rebuilt after the renames and GOAT Toss: 3,992 clips, about 105,000 characters. No "duck" lines remain. Intro steps are on screen only and are not narrated.
+- Stale test fixed: away-e2e expected role names on the first how-to sheet, but the sheet hides role tips until the player has looked at their card.

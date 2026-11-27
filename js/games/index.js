@@ -4,6 +4,7 @@
 //   hostAct(state, action) -> state  tick(state) -> state        narration(state) -> string
 //   tvView(state) / phoneView(state, pid)   renderTV(view, el) / renderPhone(view, el, send)
 // Later: an `owned` list from the player's account decides which games unlock.
+import { HOW, FACTS } from './guide.js';
 import * as werewolf from './werewolf.js';
 import * as imposter from './imposter.js';
 import * as bluff from './bluff.js';
@@ -54,17 +55,24 @@ import * as rebus from './rebus.js';
 
 export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards, hearts, shade, estimate, truths, wordhunt, midnight, missions, dares, split, doodle, memory, copycat, hunt, freeze, haunted, bomb, potato, mystery , bracket, faker, meter, rebus};
 
+// Intro steps and card facts live in one file (guide.js) and are folded into each game's meta here.
+for (const [id, G] of Object.entries(GAMES)) {
+  if (!G.meta.how && HOW[id]) G.meta.how = HOW[id];
+  if (FACTS[id]) Object.assign(G.meta, { best: FACTS[id][0], mins: FACTS[id][1], mood: FACTS[id][2] });
+}
+
 // Lobby shelves. A game can sit on more than one.
+// The 24 games out front at launch. Everything else sits on the "More games" row at the bottom.
+export const LAUNCH = ['funny', 'bluff', 'whosaid', 'ducks', 'faker', 'sketch', 'doodle', 'werewolf', 'agents', 'taboo', 'trivia', 'spin', 'potato', 'quick', 'bracket', 'truths', 'meld', 'meter', 'crowd', 'rebus', 'clash', 'bowl', 'imposter', 'memory'];
 export const SHELVES = [
-  { id: 'featured', name: '⭐ Featured', games: ['imposter', 'ducks', 'potato', 'bingo', 'quick', 'sketch', 'bowl', 'funny', 'meld', 'doodle', 'whosaid', 'crew', 'charades', 'clash', 'hunt', 'freeze', 'copycat', 'werewolf', 'midnight', 'taboo'] },
+  { id: 'featured', name: '⭐ Start here', games: ['funny', 'ducks', 'bluff', 'whosaid', 'werewolf', 'sketch', 'trivia', 'faker', 'doodle', 'agents', 'taboo', 'spin'] },
   { id: 'all', name: 'All games' },
-  { id: 'kids', name: '👶 Little kids', games: ['charades', 'gofish', 'bingo', 'ducks', 'memory', 'copycat', 'hunt', 'freeze'] },
-  { id: 'party', name: '🎉 Party', games: ['funny', 'bracket', 'faker', 'meter', 'rebus', 'quick', 'split', 'whosaid', 'truths', 'bluff', 'dares', 'meld', 'bowl', 'taboo', 'charades', 'shade', 'potato'] },
-  { id: 'trivia', name: '🧠 Trivia & game shows', games: ['rebus', 'trivia', 'spin', 'crowd', 'ladder', 'cases', 'estimate', 'haunted', 'letters'] },
-  { id: 'secret', name: '🕵️ Secret roles', games: ['werewolf', 'midnight', 'imposter', 'missions', 'wordhunt', 'agents', 'mystery'] },
-  { id: 'cards', name: '🃏 Cards', games: ['clash', 'blackjack', 'gofish', 'bluffcards', 'hearts'] },
-  { id: 'draw', name: '🎨 Drawing', games: ['sketch', 'doodle'] },
-  { id: 'team', name: '🤝 Teams & co-op', games: ['taboo', 'agents', 'crowd', 'bowl', 'crew', 'bomb'] },
+  { id: 'party', name: '🎉 Party', games: ['quick', 'potato', 'bracket', 'truths', 'meld', 'meter', 'bowl', 'funny', 'bluff', 'whosaid', 'faker'] },
+  { id: 'trivia', name: '🧠 Game shows & puzzles', games: ['trivia', 'spin', 'crowd', 'rebus'] },
+  { id: 'secret', name: '🕵️ Secret roles', games: ['werewolf', 'imposter', 'agents', 'faker'] },
+  { id: 'family', name: '👨‍👩‍👧 Family & all ages', games: ['ducks', 'memory', 'clash', 'sketch', 'doodle', 'bowl', 'crowd'] },
+  { id: 'kids', name: '👶 Little kids', games: ['ducks', 'memory', 'charades', 'bingo', 'gofish', 'copycat', 'hunt', 'freeze'] },
+  { id: 'more', name: '➕ More games', games: Object.keys(GAMES).filter(id => !LAUNCH.includes(id)) },
 ];
 
 export const COMING_SOON = [

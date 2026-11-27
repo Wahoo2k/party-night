@@ -228,11 +228,14 @@ export function cue(s) {
   return null;
 }
 
+// Bots draw their lines from a shuffled bag, so two bots don't hand in the same answer to one prompt.
+let botBag = [];
+const botLine = rnd => { if (!botBag.length) botBag = [...BOT_LINES].sort(() => rnd() - 0.5); return botBag.pop(); };
 export function botAct(v, rnd = Math.random) {
   const any = a => a[Math.floor(rnd() * a.length)];
-  if (v.phase === 'write') { const todo = v.mine.find(m => m.answer === null); return todo ? { type: 'answer', m: todo.i, text: any(BOT_LINES) } : null; }
+  if (v.phase === 'write') { const todo = v.mine.find(m => m.answer === null); return todo ? { type: 'answer', m: todo.i, text: botLine(rnd) } : null; }
   if (v.phase === 'vote' && v.canVote && !v.voted) return { type: 'vote', pick: any(v.options).pid };
-  if (v.phase === 'finalWrite' && v.myFinal === null) return { type: 'answer', text: any(BOT_LINES) };
+  if (v.phase === 'finalWrite' && v.myFinal === null) return { type: 'answer', text: botLine(rnd) };
   if (v.phase === 'finalVote' && !v.voted && v.options?.length) return { type: 'vote', pick: any(v.options).pid };
   return null;
 }

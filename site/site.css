@@ -112,3 +112,26 @@ footer .sp{margin-right:auto}
   .steps,.facts,.plans{grid-template-columns:1fr}.nav a{padding:8px 10px;font-size:15px}.top .btn{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+/* Watch a game play */
+.game{cursor:pointer}
+.game:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.gshot{position:relative;display:block}
+.gshot em{position:absolute;left:10px;bottom:10px;padding:5px 12px;border-radius:99px;background:#0b0f2cdd;color:#fff;font-style:normal;font-weight:700;font-size:13.5px}
+.game:hover .gshot em{background:var(--coral)}
+.screen{position:relative;aspect-ratio:16/9;border-radius:16px;background:#05071a;box-shadow:0 0 0 6px #1d2466,0 24px 60px #000a;margin-bottom:38px}
+.screen iframe{position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:16px;pointer-events:none}
+.screen .live{position:absolute;left:2px;bottom:-36px;padding:3px 0 3px 18px;font-size:13.5px;font-weight:700;color:var(--dim)}
+.screen .live::before{content:'';position:absolute;left:0;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;background:var(--coral);animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.25}}
+.screen.big{max-width:980px}
+.livetabs{margin-bottom:16px}
+dialog.watch{width:min(1180px,calc(100vw - 24px));max-height:calc(100dvh - 24px);padding:0;border:1px solid var(--line);border-radius:22px;background:var(--bg2);color:var(--ink);overflow:auto}
+dialog.watch::backdrop{background:#03051acc;backdrop-filter:blur(4px)}
+.winner{position:relative;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:26px;padding:26px;align-items:start}
+.wtext{display:grid;gap:12px;align-content:start;padding-right:26px}
+.wtext .lead{font-size:18px}
+.wtext .how{margin:4px 0 6px;padding-left:22px;display:grid;gap:8px;color:var(--dim);font-size:15.5px;line-height:1.45}
+.wtext .how li::marker{color:var(--gold);font-weight:800}
+.wclose{position:absolute;right:12px;top:10px;z-index:2;width:40px;height:40px;border-radius:50%;border:0;background:#ffffff1c;color:#fff;font-size:24px;line-height:1;cursor:pointer}
+@media (max-width:860px){.winner{grid-template-columns:1fr;padding:16px;gap:16px}.wtext{padding-right:0}.wclose{background:#0b0f2ccc}}

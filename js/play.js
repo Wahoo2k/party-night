@@ -92,7 +92,7 @@ let lastPhaseSeen = '';
 function render(v) {
   document.body.classList.toggle('paused', !!v._paused);
   document.body.classList.toggle('nodraw', !!v._nodraw);
-  if (v._me) { myFace = v._me; document.body.style.setProperty('--me', v._me[1]); if (statusEl.dataset.s === 'live') statusEl.textContent = `${v._me[0]} ${v.me || name} · ${code}`; }
+  if (v._me) { myFace = v._me; document.body.style.setProperty('--me', v._me[1]); if (statusEl.dataset.s === 'live') statusEl.textContent = `${v._me[0]} ${v._as || (v.phase === 'lobby' && v.me) || name} · ${code}`; }
   // In a game the header shrinks to one line with the game's name and art, and the phone takes the game's colors.
   const inGame = !!v.game && !['lobby', 'audience', 'kicked', 'full'].includes(v.phase) && !!GAMES[v.game];
   document.body.classList.toggle('ingame', inGame);
@@ -132,11 +132,13 @@ function render(v) {
       <p class="muted">Game: ${esc(v.game)} · ${v.players.length} playing</p>
       <div class="roster">${v.players.map(n => `<div class="chip">${esc(n)}</div>`).join('')}</div>
       ${v.faces ? `<div class="facepick"><p class="muted">Pick your animal</p><div class="faces">${v.faces.map((f, i) => `<button class="facebtn ${v._me && v._me[0] === f ? 'on' : ''}" data-face="${i}" ${v.taken.includes(f) ? 'disabled' : ''}>${f}</button>`).join('')}</div><button class="btn ghost" id="wave">👋 Wave at the TV</button></div>` : ''}
+      ${v._night ? `<button class="btn" id="keepsake">📸 Save tonight's results</button>` : ''}
       ${v.canPrompt ? `<form id="pf" class="audask"><p class="muted">✍️ Add your own prompt for Funny Answers (${v.myPrompts.length}/3)</p>${v.myPrompts.map(t => `<p class="small">“${esc(t)}”</p>`).join('')}${v.myPrompts.length < 3 ? '<input id="pt" maxlength="70" placeholder="The worst thing to say at…" autocomplete="off"><button class="btn ghost">Add</button>' : ''}</form>` : ''}
       ${v._remote ? `<div class="remote"><p class="muted">👑 You're the remote</p><button class="btn" data-rm="start" ${v.canStart ? '' : 'disabled'}>Start the game</button></div>` : ''}
       <button class="btn ghost" id="leave">Leave room</button></div>`;
     app.querySelector('#leave').onclick = leave;
     app.querySelectorAll('[data-face]').forEach(b => (b.onclick = () => room?.send({ t: 'face', pid, i: +b.dataset.face })));
+    const ks = app.querySelector('#keepsake'); if (ks) ks.onclick = () => keepsake(v._night, ks);
     const wv = app.querySelector('#wave'); if (wv) wv.onclick = () => { room?.send({ t: 'react', pid, e: '👋' }); wv.classList.remove('hit'); void wv.offsetWidth; wv.classList.add('hit'); };
     app.querySelector('#pf')?.addEventListener('submit', e => { e.preventDefault(); const t = app.querySelector('#pt')?.value.trim(); if (t) room?.send({ t: 'suggest', pid, text: t }); });
     app.querySelectorAll('[data-rm]').forEach(b => (b.onclick = () => send({ type: '_host', a: b.dataset.rm })));
@@ -162,6 +164,46 @@ function render(v) {
 // (joining counts) unlocks it.
 let actx = null;
 addEventListener('pointerdown', () => { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume?.(); } catch {} }, { passive: true });
+// Tonight's results as a picture to keep or send: drawn on the phone, then handed to the share sheet (or saved).
+// It holds only what was on the TV: who won each game and the night's standings.
+function keepsakeCanvas(n) {
+  const W = 1080, H = 1350, c = Object.assign(document.createElement('canvas'), { width: W, height: H }), x = c.getContext('2d');
+  const g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#1b1f5e'); g.addColorStop(1, '#0b0f2c'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+  x.fillStyle = '#ffd16622'; for (let i = 0; i < 40; i++) { x.beginPath(); x.arc((i * 397) % W, (i * 811) % H, 3 + (i % 5) * 3, 0, 7); x.fill(); }
+  const fit = (t, max) => { t = String(t); while (t.length > 3 && x.measureText(t).width > max) t = t.slice(0, -2).trimEnd() + '…'; return t; };
+  x.textAlign = 'center'; x.fillStyle = '#ffd166'; x.font = '800 44px system-ui,sans-serif'; x.fillText('PARTY NIGHT', W / 2, 110);
+  x.fillStyle = '#b9bfe6'; x.font = '600 34px system-ui,sans-serif'; x.fillText(n.date, W / 2, 162);
+  let y = 290;
+  if (n.top[0]) {
+    x.font = '120px system-ui,sans-serif'; x.fillText(n.top[0][2] || '🏆', W / 2, y); y += 100;
+    x.fillStyle = '#fff'; x.font = '800 92px system-ui,sans-serif'; x.fillText(fit(n.top[0][0], W - 160), W / 2, y); y += 62;
+    x.fillStyle = '#ffd166'; x.font = '700 40px system-ui,sans-serif'; x.fillText('Champion of the night', W / 2, y); y += 84;
+  }
+  x.textAlign = 'left';
+  n.top.slice(0, 6).forEach(([name, pts], i) => {
+    x.fillStyle = i ? '#ffffff14' : '#ffd16633'; x.beginPath(); x.roundRect(120, y - 46, W - 240, 64, 18); x.fill();
+    x.fillStyle = '#fff'; x.font = '700 38px system-ui,sans-serif'; x.fillText(`${i + 1}.  ${fit(name, 560)}`, 150, y);
+    x.textAlign = 'right'; x.fillStyle = '#ffd166'; x.fillText(`${pts} pts`, W - 150, y); x.textAlign = 'left'; y += 76;
+  });
+  y += 30; x.fillStyle = '#b9bfe6'; x.font = '800 30px system-ui,sans-serif'; x.fillText('WHO WON WHAT', 120, y); y += 56;
+  const room = Math.max(1, Math.floor((H - 90 - y) / 52)), games = n.games.slice(-room);
+  games.forEach(([game, who]) => {
+    x.fillStyle = '#fff'; x.font = '700 34px system-ui,sans-serif'; const gt = fit(game, 420); x.fillText(gt, 120, y);
+    x.fillStyle = '#b9bfe6'; x.font = '500 34px system-ui,sans-serif'; x.textAlign = 'right'; x.fillText(fit(who || '—', W - 300 - x.measureText(gt).width), W - 120, y); x.textAlign = 'left'; y += 52;
+  });
+  x.textAlign = 'center'; x.fillStyle = '#8a91c4'; x.font = '500 28px system-ui,sans-serif'; x.fillText(`${n.count} game${n.count === 1 ? '' : 's'} played`, W / 2, H - 50);
+  return c;
+}
+async function keepsake(n, btn) {
+  try {
+    const blob = await new Promise(r => keepsakeCanvas(n).toBlob(r, 'image/png'));
+    const file = new File([blob], 'party-night.png', { type: 'image/png' });
+    if (navigator.canShare?.({ files: [file] })) { await navigator.share({ files: [file], title: 'Party Night' }); return; }
+    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'party-night.png' });
+    document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    toast('Saved to your downloads');
+  } catch (e) { if (e?.name !== 'AbortError') { btn.textContent = 'Could not save the picture'; } }
+}
 function chime() {
   if (!actx || actx.state !== 'running') return;
   try { [[660, 0], [880, 0.12]].forEach(([f, t]) => { const o = actx.createOscillator(), g = actx.createGain(); o.type = 'sine'; o.frequency.value = f; g.gain.setValueAtTime(0.0001, actx.currentTime + t); g.gain.exponentialRampToValueAtTime(0.18, actx.currentTime + t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + t + 0.22); o.connect(g).connect(actx.destination); o.start(actx.currentTime + t); o.stop(actx.currentTime + t + 0.25); }); } catch {}

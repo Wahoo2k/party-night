@@ -4,10 +4,13 @@ import { rec, clipsFor, voiceFor } from './recorded.js';
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => '&#' + c.charCodeAt(0) + ';');
 
+// Demo mode (?demo=<game> on the TV page, used by the website): bots play one game on a loop. Nothing is saved or
+// read from this browser, and it makes no sound, so it can't disturb a real room on the same device.
+export const DEMO = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('demo') : null;
 export const store = {
-  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
-  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
-  del(k) { try { localStorage.removeItem(k); } catch {} },
+  get(k) { if (DEMO) return null; try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k, v) { if (DEMO) return; try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  del(k) { if (DEMO) return; try { localStorage.removeItem(k); } catch {} },
 };
 
 export const uid = () => Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 6);
@@ -87,6 +90,7 @@ function pump() {
 }
 export function say(text, force, low) {
   if (text) tap.fn?.('say', [String(text), !!low]);
+  if (DEMO) return;
   if ((!voiceOn && !force) || !text) return;
   // Recorded clips only: a line with no recording is not spoken. The browser's own voice is never used.
   const clips = clipsFor(text);

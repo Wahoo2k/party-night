@@ -286,7 +286,7 @@ export function renderTV(v, el) {
   if (v.phase === 'turn') status = v.spinning ? `<p class="say">${esc(v.who)} spins…</p>` : v.sub === 'letter' ? `<p class="say">${esc(v.who)} landed on <b class="win">${money(v.wedge)}</b>. Call a consonant!</p>` : v.sub === 'solve' ? `<p class="say">${esc(v.who)} is solving…</p>` : `<p class="say">${v.msg ? esc(v.msg) + ' ' : ''}<b>${esc(v.who)}</b>: spin, buy a vowel, or solve.</p>`;
   let h = `<p class="cat">${esc(v.cat)}</p>${boardHtml}`;
   if (v.phase === 'turn') h += `<div class="spinrow">${wheel}<div>${status}${used}<button class="btn ghost" data-host="next">Skip turn</button></div></div>`;
-  if (v.phase === 'roundEnd') h += `<h2 class="win">${esc(v.solvedBy)} solved it!</h2><button class="btn" data-host="next">Next puzzle</button>`;
+  if (v.phase === 'roundEnd') h += `<div class="spinrow">${wheel}<div><h2 class="win">${esc(v.solvedBy)} solved it!</h2><button class="btn" data-host="next">Next puzzle</button></div></div>`;
   if (v.phase === 'over') h += `<h2 class="win">${esc(v.winner)} wins!</h2><div class="podium">${[...v.board].sort((a, b) => b.total - a.total).slice(0, 3).map((p, i) => `<div class="pod p${i + 1}"><b>${esc(p.name)}</b><span>${money(p.total)}</span></div>`).join('')}</div><div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
   el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel">${h}</div>${scores}</div>`;
 }

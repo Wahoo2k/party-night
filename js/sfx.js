@@ -1,11 +1,11 @@
 import { tap } from './tap.js';
 import { rec } from './recorded.js';
 // Sound effects synthesized with Web Audio, so there are no audio files to load or license.
-import { store } from './ui.js';
+import { store, DEMO } from './ui.js';
 
 let ctx = null;
 let master = null;
-let on = store.get('pg-sfx') ?? true;
+let on = DEMO ? false : store.get('pg-sfx') ?? true;
 let ambient = null;
 
 // Browsers only allow audio after a click or key press, so unlock on the first one.

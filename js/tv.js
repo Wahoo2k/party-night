@@ -1,7 +1,7 @@
 // TV / host page: owns the room, the player list and the game state.
 import { GAMES, COMING_SOON, SHELVES, NIGHTS } from './games/index.js';
 import { openRoom } from './net.js';
-import { esc, store, newCode, say, sayLow, voiceContext, fitScreen, stageFit, keepFitted, voice, voices, enableDpad, autofocus, drawScene, titleCard, confetti, clawMarks } from './ui.js';
+import { esc, store, DEMO, newCode, say, sayLow, voiceContext, fitScreen, stageFit, keepFitted, voice, voices, enableDpad, autofocus, drawScene, titleCard, confetti, clawMarks } from './ui.js';
 import { art } from './art.js';
 import { play, sfx, startAmbient, stopAmbient, startBed, stopBed, startLoop, stopLoop, quiet } from './sfx.js';
 import { newKeys, cleanPub, samePub, sharedKey, seal, unseal } from './secure.js';
@@ -207,7 +207,7 @@ function renderIntro() {
   const humans = host.players.filter(p => !p.bot);
   app.innerHTML = `<div class="intro ${first ? 'enter' : ''}">
     <div class="introart">${art(id, ICONS[id])}</div>
-    <div class="introtext"><p class="introkick">How to play</p><h2>${esc(m.name)}</h2><ol class="introsteps">${rules.map((r, i) => `<li style="--i:${i}">${esc(r)}</li>`).join('')}</ol></div>
+    <div class="introtext"><p class="introkick">How to play</p><h2>${esc(m.name)}</h2><p class="introfacts">${m.best ? `<span>⭐ Best with ${m.best}</span>` : ''}${m.mins ? `<span>⏱ About ${m.mins} min</span>` : ''}${m.mood ? `<span>${esc(m.mood)}</span>` : ''}</p><ol class="introsteps">${rules.map((r, i) => `<li style="--i:${i}">${esc(r)}</li>`).join('')}</ol></div>
     <div class="introready"><div class="introchips">${humans.map(p => `<span class="introchip ${host.intro.ready[p.pid] ? 'ok' : ''} ${p.away ? 'away' : ''}"><i style="--pc:${p.face?.[1] || '#232a5c'}">${p.face?.[0] || '🙂'}</i>${esc(p.name)}${host.intro.ready[p.pid] ? ' ✅' : ''}</span>`).join('')}</div>
       <p class="introhint">Read the steps, then tap <b>✅ Ready</b> on your phone. The game starts when everyone is ready.</p>
       <div class="row"><button class="btn" data-host="start">Start now</button><button class="btn ghost" data-host="lobby">← Back</button></div></div>
@@ -229,9 +229,9 @@ function viewFor(pid) {
   }
   if (!host.state) {
     const me = host.players.find(p => p.pid === pid) || {};
-    return { phase: 'lobby', faces: FACES.map(f => f[0]), taken: host.players.filter(p => p.pid !== pid).map(p => p.face?.[0]), _reacts: REACTIONS, players: host.players.map(p => p.name), game: game().meta.name, me: me.name, fixed: !!me.fixed, byHost: !!me.locked, _me: me.face, ...(pid === remotePid() ? { _remote: true, canStart: host.players.length >= game().meta.min } : {}), ...(game().meta.id === 'funny' ? { canPrompt: true, myPrompts: (host.custom || []).filter(c => c.pid === pid).map(c => c.text) } : {}) };
+    return { phase: 'lobby', faces: FACES.map(f => f[0]), taken: host.players.filter(p => p.pid !== pid).map(p => p.face?.[0]), ...(host.tally?.games.length ? { _night: nightCard() } : {}), _reacts: REACTIONS, players: host.players.map(p => p.name), game: game().meta.name, me: me.name, fixed: !!me.fixed, byHost: !!me.locked, _me: me.face, ...(pid === remotePid() ? { _remote: true, canStart: host.players.length >= game().meta.min } : {}), ...(game().meta.id === 'funny' ? { canPrompt: true, myPrompts: (host.custom || []).filter(c => c.pid === pid).map(c => c.text) } : {}) };
   }
-  return { ...maskView(game().phoneView(host.state, pid), host.hidden), game: host.gameId, _name: game().meta.name, _how: howFor(), _me: host.players.find(p => p.pid === pid)?.face, ...(host.paused ? { _paused: true } : {}), ...(gains[pid] ? { _gain: gains[pid] } : {}), ...(places[pid] ? { _place: places[pid] } : {}), ...(stands[pid] && !game().meta.secret ? { _stand: stands[pid] } : {}), _theme: THEME_OF[host.gameId] || '', _reacts: REACTIONS, ...(finalRound ? { _final: true } : {}), ...(host.blurDraw ? { _nodraw: true } : {}), ...(pid === remotePid() ? { _remote: true } : {}) };
+  return { ...maskView(game().phoneView(host.state, pid), host.hidden), game: host.gameId, _name: game().meta.name, _how: howFor(), _as: host.players.find(p => p.pid === pid)?.name, _me: host.players.find(p => p.pid === pid)?.face, ...(host.paused ? { _paused: true } : {}), ...(gains[pid] ? { _gain: gains[pid] } : {}), ...(places[pid] ? { _place: places[pid] } : {}), ...(stands[pid] && !game().meta.secret ? { _stand: stands[pid] } : {}), _theme: THEME_OF[host.gameId] || '', _reacts: REACTIONS, ...(finalRound ? { _final: true } : {}), ...(host.blurDraw ? { _nodraw: true } : {}), ...(pid === remotePid() ? { _remote: true } : {}) };
 }
 
 // Each phone hears about its own points the moment they land, and its finishing place at the end.
@@ -600,10 +600,17 @@ function countNight() {
     const top = Math.max(...v.teams.map(x => x.score));
     winners = v.teams.filter(x => x.score === top).flatMap(x => x.members || []);
   } else if (typeof v.winner === 'string' && host.players.some(p => p.name === v.winner)) winners = [v.winner];
+  else if (Array.isArray(v.winners)) winners = v.winners.filter(n => host.players.some(p => p.name === n));
   winners.forEach(n => { row(n).wins++; row(n).pts = (row(n).pts || 0) + 3; });
   if (list && host.gameId !== 'imposter') list.slice(0, 3).forEach((p, i) => { if (!winners.includes(p.name)) row(p.name).pts = (row(p.name).pts || 0) + (i === 1 ? 2 : 1); });
   t.games.push({ game: game().meta.name, winners });
   save();
+}
+// What a phone needs to draw tonight's results as a picture to keep.
+function nightCard() {
+  const t = host.tally, face = n => host.players.find(p => p.name === n)?.face?.[0] || '';
+  const top = Object.entries(t.by).sort((a, b) => (b[1].pts || 0) - (a[1].pts || 0) || b[1].wins - a[1].wins).map(([n, r]) => [n, r.pts || 0, face(n)]);
+  return { date: new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }), top, games: t.games.map(g => [g.game, g.winners.join(' & ')]), count: t.games.length };
 }
 function nightAwards() {
   const t = host.tally;
@@ -620,7 +627,7 @@ function nightAwards() {
   ceremonyOff?.();
   const el = document.createElement('div');
   el.className = 'ceremony first nightawards';
-  el.innerHTML = `<h2>Tonight's awards</h2><div class="nawards">${awards.map(([title, n, note], i) => { const f = face(n); return `<div class="naward" style="animation-delay:${0.4 + i * 0.9}s"><small>${title}</small><i style="--pc:${f?.[1] || '#232a5c'}">${f?.[0] || '🏅'}</i><b>${esc(n)}</b><span>${esc(note)}</span></div>`; }).join('')}</div><div class="nlist">${t.games.map(g => `<span><b>${esc(g.game)}</b> ${g.winners.length ? esc(g.winners.join(' & ')) : '—'}</span>`).join('')}</div><p>Press any button to close</p>`;
+  el.innerHTML = `<h2>Tonight's awards</h2><div class="nawards">${awards.map(([title, n, note], i) => { const f = face(n); return `<div class="naward" style="animation-delay:${0.4 + i * 0.9}s"><small>${title}</small><i style="--pc:${f?.[1] || '#232a5c'}">${f?.[0] || '🏅'}</i><b>${esc(n)}</b><span>${esc(note)}</span></div>`; }).join('')}</div><div class="nlist">${t.games.map(g => `<span><b>${esc(g.game)}</b> ${g.winners.length ? esc(g.winners.join(' & ')) : '—'}</span>`).join('')}</div><p>📸 Everyone can save tonight's results from their phone, back on the menu. Press any button to close.</p>`;
   document.body.append(el);
   tap.fn?.('ceremony', [el.className, '', el.innerHTML, 0, 0]);
   const t0 = Date.now();
@@ -696,9 +703,9 @@ function hostAction(a) {
   }
   if (a === 'sfx') { sfx.on = !sfx.on; if (sfx.on) play('join'); return render(); }
   if (a === 'addbot' && !host.state && host.players.length < game().meta.max) {
-    const used = new Set(host.players.map(p => p.name));
+    const used = new Set(host.players.map(p => (DEMO ? 'Bot ' : '') + p.name));
     const name = BOT_NAMES.find(n => !used.has(n)) || 'Bot ' + (host.players.length + 1);
-    host.players.push({ pid: 'bot-' + Math.random().toString(36).slice(2, 8), name, bot: true });
+    host.players.push({ pid: 'bot-' + Math.random().toString(36).slice(2, 8), name: DEMO ? name.replace(/^Bot /, '') : name, bot: true });
     return changed();
   }
   if (a.startsWith('edit:')) { editing = a.slice(5); return render(); }
@@ -740,9 +747,10 @@ function runBots() {
   for (const p of host.players) {
     if (!p.bot) continue;
     const a = g.botAct(g.phoneView(host.state, p.pid));
-    if (!a) { delete botWait[p.pid]; continue; }
     const key = host.state.phase + host.state.round;
-    if (!botWait[p.pid] || botWait[p.pid].key !== key) botWait[p.pid] = { key, at: now + 2000 + Math.random() * 6000 };
+    // Some bots only act on a coin flip. A 'no' before their wait is up must not restart the wait, or they'd never act.
+    if (!a) { if (!botWait[p.pid] || botWait[p.pid].key !== key || now >= botWait[p.pid].at) delete botWait[p.pid]; continue; }
+    if (!botWait[p.pid] || botWait[p.pid].key !== key) botWait[p.pid] = { key, at: now + (DEMO ? 1200 + Math.random() * 2600 : 2000 + Math.random() * 6000) };
     if (now >= botWait[p.pid].at) { g.act(host.state, p.pid, a, now); delete botWait[p.pid]; acted = true; }
   }
   if (acted) changed();
@@ -785,7 +793,7 @@ function previewGame(id) {
   if (pv?.id !== id) pv = { id, s: null, now: Date.now(), stuck: 0, last: '', over: 0, players: ['Ava', 'Ben', 'Cleo', 'Dax', 'Eli', 'Fay'].slice(0, Math.max(GAMES[id].meta.min, Math.min(5, GAMES[id].meta.max))).map((n, i) => ({ pid: 'bot-pv' + i, name: n })) };
   const m = GAMES[id].meta, q = x => app.querySelector(x);
   const stageEl = q('.pvstage'); if (stageEl) { stageEl.dataset.theme = THEME_OF[id] || ''; stageEl.parentElement.dataset.theme = THEME_OF[id] || ''; }
-  if (q('#pvname')) { q('#pvname').textContent = m.name; q('#pvicon').innerHTML = art(id, ICONS[id]); q('#pvblurb').textContent = m.blurb; q('#pvtags').innerHTML = `<span>👥 ${m.min}–${m.max} players</span>${m.kids ? '<span>🧒 Little kids</span>' : ''}${SHELVES.filter(f => f.games?.includes(id) && !['featured', 'kids'].includes(f.id)).slice(0, 2).map(f => `<span>${esc(f.name)}</span>`).join('')}`; }
+  if (q('#pvname')) { q('#pvname').textContent = m.name; q('#pvicon').innerHTML = art(id, ICONS[id]); q('#pvblurb').textContent = m.blurb; q('#pvtags').innerHTML = `<span>👥 ${m.min}–${m.max} players</span>${m.best ? `<span>⭐ Best with ${m.best}</span>` : ''}${m.mins ? `<span>⏱ About ${m.mins} min</span>` : ''}${m.mood ? `<span>${esc(m.mood)}</span>` : ''}${m.kids ? '<span>🧒 Little kids</span>' : ''}`; }
   previewStep(true);
 }
 function previewStep(first) {
@@ -832,7 +840,7 @@ function renderLobby() {
     if (!GAMES[host.gameId]) host.gameId = 'werewolf';
     const rows = SHELVES.filter(f => f.games).map(f => ({ id: f.id, name: f.name, games: f.games.filter(id => GAMES[id]) }));
     if (!menuAt || !rows.some(r => r.id === menuAt.row && r.games.includes(menuAt.game))) { const r = rows.find(x => x.games.includes(host.gameId)) || rows[0]; menuAt = { row: r.id, game: r.games.includes(host.gameId) ? host.gameId : r.games[0] }; }
-    const card = (id, row) => { const m = GAMES[id].meta; return `<button class="gcard ${menuAt.row === row && menuAt.game === id ? 'on' : ''}" data-game="${id}" data-row="${row}"><span class="gimg">${art(id, ICONS[id])}</span><b>${esc(m.name)}</b>${m.kids ? '<small class="gbadge">🧒</small>' : ''}${watching() && SAME_ROOM.includes(id) ? '<small class="sameroom">🏠 same room</small>' : ''}</button>`; };
+    const card = (id, row) => { const m = GAMES[id].meta; return `<button class="gcard ${menuAt.row === row && menuAt.game === id ? 'on' : ''}" data-game="${id}" data-row="${row}"><span class="gimg">${art(id, ICONS[id])}</span><b>${esc(m.name)}</b><small class="gfacts">${m.min}–${m.max} · ${m.mins} min</small>${m.kids ? '<small class="gbadge">🧒</small>' : ''}${watching() && SAME_ROOM.includes(id) ? '<small class="sameroom">🏠 same room</small>' : ''}</button>`; };
     app.innerHTML = `<div class="hub">
     <section class="hero" id="hero">
       <div class="heroinfo">
@@ -1096,6 +1104,27 @@ try { speechSynthesis.addEventListener('voiceschanged', () => { if (!host.state)
 
 if (host.state) lastPhase = host.state.phase + host.state.round;
 connect();
+
+// Demo mode for the website: bots play one game on a loop, with no host. See DEMO in ui.js.
+if (DEMO && GAMES[DEMO]) {
+  document.body.classList.add('demo');
+  Object.assign(host, { gameId: DEMO, screen: 'gather', players: [] });
+  Object.assign(host.settings, { howto: false, music: false });
+  const m = GAMES[DEMO].meta, n = Math.max(m.min, Math.min(m.max, 6, (+String(m.best || '').match(/\d+/)?.[0] || 4) + 1));
+  for (let i = 0; i < n; i++) hostAction('addbot');
+  setTimeout(() => hostAction('start'), 500);
+  let key = '', since = Date.now();
+  setInterval(() => {
+    const s = host.state, now = Date.now();
+    if (!s) return;
+    const k = s.phase + '|' + s.round + '|' + (s.eventId || '') + '|' + (s.deadline || 0);
+    if (k !== key) { key = k; since = now; return; }
+    if (s.phase === 'over') { if (now - since > 9000) { since = now; hostAction('again'); } return; }
+    // A screen that waits for the host (a Ready button, a new turn) is moved on after a short read.
+    const waiting = app.querySelector('.stage [data-host=next]') && !(s.deadline > now);
+    if ((waiting && now - since > 7000) || now - since > 14000) { since = now; hostAction('next'); }   // long talks and timers are cut short
+  }, 1000);
+}
 
 // A quiet lobby gets an occasional nudge from the host.
 setInterval(() => { const now = Date.now(); if (!host.state && host.players.length && now - lastInput > 90000 && now - lastIdle > 240000) { lastIdle = now; banter('lobby'); } }, 20000);

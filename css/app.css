@@ -2154,3 +2154,39 @@ body.onstage[data-game=split] .spbar>div{padding:16px 0}
 .hero .heroinfo{grid-column:1;grid-row:1}
 .hero .herobar{grid-column:1/-1;grid-row:2}
 @media (max-height:700px){.hero .pvbox{display:none}.hero{grid-template-columns:minmax(0,1fr)}.joinbox .qr{width:64px}}
+
+/* Game facts: on the menu cards, the hero tags and the intro screen. */
+.gcard .gfacts{display:block;font-size:clamp(10px,calc(.8*var(--vw,1vw)),14px);font-weight:600;opacity:.7;margin-top:1px}
+.introfacts{display:flex;flex-wrap:wrap;gap:8px;margin:-4px 0 6px}
+.introfacts span{padding:4px 14px;border-radius:99px;background:#ffffff1c;font-size:clamp(14px,calc(1.3*var(--vw,1vw)),22px);font-weight:700}
+#keepsake{margin-top:10px;width:100%}
+
+/* Result screens seen for the first time on a slowed capture (Nov 27). */
+body.onstage[data-game=faker] .cat{display:table;margin:0 auto 14px}
+body.onstage[data-game=bracket] .fa-by b.win{border-color:#ff3b5c;color:#ff3b5c;background:#fff}
+body.onstage[data-game=bracket] .bkchamp{font-size:34px;padding:26px 40px}
+body.onstage[data-game=bracket] .bkchamp b{font-size:88px}
+body.onstage[data-game=bracket] .bkchamp span{font-weight:700}
+body.onstage[data-game=bracket] .stage .panel>.btn{display:flex;margin:14px auto 0}
+/* Midnight Wolves: the winners get their moment before the card-by-card table. */
+.mwwin{display:grid;justify-items:center;gap:6px;margin:10px 0 4px}
+.mwwin small{font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--moon,#ffcf6b)}
+.mwwin .roster{justify-content:center}
+.mwwin .chip{background:#ffcf6b;color:#1a1238;font-weight:800}
+.stage.enter .mwwin{animation:slam .6s 3.1s both}
+body.onstage[data-game=midnight] .mwwin .chip{font-size:28px;padding:10px 20px}
+body.onstage[data-game=midnight] .stage.enter .mwrow{animation-delay:calc(4.2s + var(--i,0)*.25s)}
+/* Copy Cat: the heading stays on one line. */
+body.onstage[data-game=copycat] .stage .panel>h2{white-space:nowrap;font-size:clamp(30px,calc(3.6*var(--vw,1vw)),54px)}
+
+/* Demo mode (website): only the game, nothing to press. */
+body.demo{cursor:default}
+body.demo #joinqr,body.demo #vetobar,body.demo .after,body.demo #status,body.demo .stage [data-host],body.demo .standings~#joinqr{display:none!important}
+/* Imposter on the stage: the clue board already names every player, so the score list steps aside and the board
+   runs two-up. The screen fills the TV instead of sitting in a narrow column. */
+body.onstage[data-game=imposter] .stage{grid-template-columns:minmax(0,1fr)}
+body.onstage[data-game=imposter] .side .scores{display:none}
+body.onstage[data-game=imposter] .clueboard{grid-template-columns:1fr 1fr;gap:12px 16px}
+body.onstage[data-game=imposter] .stage .panel{text-align:center}
+body.onstage[data-game=imposter] .cluerow{text-align:left}
+body.onstage[data-game=imposter] .stage .panel>.btn{display:flex;margin:10px auto 0}
