@@ -1,4 +1,4 @@
-// Bluff: a strange-but-true fact appears with a blank. Everyone writes a believable lie,
+// Tall Tales (was Bluff; the id is still `bluff`): a strange-but-true fact appears with a blank. Everyone writes a believable lie,
 // then everyone tries to pick the truth from the lies. Points for finding the truth and for fooling others.
 import { esc } from '../ui.js';
 import { isRude } from '../names.js';
@@ -7,7 +7,7 @@ import { FACTS } from './bluff-facts.js';
 export const meta = {
   how: ['The TV shows a strange fact with a word missing.', 'Make up a fake answer on your phone that sounds real.', 'All the fakes are shown with the truth mixed in. Pick the one you think is real.', 'Score for finding the truth, and for every player your lie fools.'],
   id: 'bluff',
-  name: 'Bluff',
+  name: 'Tall Tales',
   min: 3,
   max: 10,
   blurb: 'Write a fake answer to a strange true fact, then sniff out the real one.',

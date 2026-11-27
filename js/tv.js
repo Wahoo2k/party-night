@@ -89,6 +89,7 @@ function standings(v) {
 }
 
 // After the podium: one clear choice of what happens next, instead of two small buttons inside the game's last screen.
+const joinHost = () => { try { const u = new URL(joinUrl()); return (u.host + u.pathname).replace(/\/play\.html$/, '').replace(/\/$/, ''); } catch { return location.host; } };
 function suggestNext() {
   if (host.queue?.length) return host.queue[0];
   const n = host.players.length, ok = id => id !== host.gameId && GAMES[id] && n >= GAMES[id].meta.min && n <= GAMES[id].meta.max && !(host.settings.kids && GAMES[id].meta.kids === false);
@@ -841,7 +842,10 @@ function renderLobby() {
         <div class="heroact"><span class="playhint">▶ Press OK to play</span><span id="pvicon" hidden></span></div>
       </div>
       <div class="pvbox"><div class="pvstage" inert aria-hidden="true"></div><span class="pvlabel">Live preview</span></div>
-      <div class="herobar"><span class="mroom">Room <b class="code mini">${host.code}</b> · ${n} in</span><button class="btn ghost small" data-host="settings">⚙ Settings</button><button class="btn ghost small" data-host="addbot">🤖 Add a bot</button>${host.tally?.games.length ? '<button class="btn ghost small" data-host="awards">🏆 Awards</button>' : ''}</div>
+      <div class="herobar">
+        <div class="joinbox">${host.settings.streamer ? '' : `<div class="qr">${qr(joinUrl())}</div>`}<div class="jtext"><small>${n ? 'Join on your phone' : 'Scan to join, or go to'}</small><span class="jurl">${esc(joinHost())}</span><b class="code mini">${host.settings.streamer ? '••••' : host.code}</b></div></div>
+        <div class="joined">${host.players.length ? host.players.map(p => `<span class="jface ${p.away ? 'away' : ''}" style="--pc:${p.face?.[1] || '#232a5c'}"><i>${p.face?.[0] || '🙂'}</i><em>${esc(p.name)}</em></span>`).join('') : '<span class="jwait">Waiting for the first player…</span>'}</div>
+        <div class="herobtns"><button class="btn ghost small" data-host="settings">⚙ Settings</button>${tq.has('local') || host.players.some(p => p.bot) ? '<button class="btn ghost small" data-host="addbot">🤖 Add a bot</button>' : ''}${host.tally?.games.length ? '<button class="btn ghost small" data-host="awards">🏆 Awards</button>' : ''}</div></div>
     </section>
     <section class="grows" id="grows">
       ${rows.map(r => `<div class="grow" data-row="${r.id}"><h3>${esc(r.name)}</h3><div class="rail">${r.games.map(id => card(id, r.id)).join('')}</div></div>`).join('')}
@@ -869,31 +873,32 @@ function renderLobby() {
   }
   if (screen === 'settings') {
     app.innerHTML = `<div class="lobby one"><section class="panel settings"><h2>Settings</h2>
-      <div class="row">
-        <button class="btn ghost" data-host="voice">Narrator: ${voice.on ? 'on' : 'off'}</button>
-        <button class="btn ghost" data-host="sfx">Sound effects: ${sfx.on ? 'on' : 'off'}</button>
-        <button class="btn ghost" data-host="newcode">New room</button>
+      <div class="setgrid">
+        <div class="setgroup"><h3>Sound</h3>
+          <button class="setrow ${voice.on ? 'on' : ''}" data-host="voice"><span><b>Narrator</b><small>The host voice that runs the show</small></span><em>${voice.on ? 'On' : 'Off'}</em></button>
+          <button class="setrow ${host.settings.music ? 'on' : ''}" data-host="music"><span><b>Music</b><small>Background music in the lobby and games</small></span><em>${host.settings.music ? 'On' : 'Off'}</em></button>
+          <button class="setrow ${sfx.on ? 'on' : ''}" data-host="sfx"><span><b>Sound effects</b><small>Buzzers, drumrolls and cheers</small></span><em>${sfx.on ? 'On' : 'Off'}</em></button>
+          <button class="setrow ${host.settings.banter !== false ? 'on' : ''}" data-host="banter"><span><b>Host jokes</b><small>Extra one-liners between moments</small></span><em>${host.settings.banter === false ? 'Off' : 'On'}</em></button>
+        </div>
+        <div class="setgroup"><h3>Pace</h3>
+          <button class="setrow ${host.settings.auto !== false ? 'on' : ''}" data-host="autonext"><span><b>Rounds move on by themselves</b><small>Turn off to press Next yourself</small></span><em>${host.settings.auto === false ? 'Off' : 'On'}</em></button>
+          <button class="setrow ${host.settings.relaxed ? 'on' : ''}" data-host="relaxed"><span><b>Relaxed timers</b><small>Everyone gets 50% more time</small></span><em>${host.settings.relaxed ? 'On' : 'Off'}</em></button>
+          <button class="setrow" data-host="short"><span><b>Game length</b><small>Short games for a quick night</small></span><em>${host.settings.short ? 'Short' : 'Full'}</em></button>
+          <button class="setrow ${host.settings.howto ? 'on' : ''}" data-host="howto"><span><b>How-to screens</b><small>Explain each game the first time</small></span><em>${host.settings.howto ? 'First time' : 'Off'}</em></button>
+        </div>
+        <div class="setgroup"><h3>Room</h3>
+          <button class="setrow ${host.settings.kids ? 'on' : ''}" data-host="kids"><span><b>Kids mode</b><small>Family-safe prompts only</small></span><em>${host.settings.kids ? 'On' : 'Off'}</em></button>
+          <button class="setrow" data-host="remote"><span><b>Phone remote</b><small>Who can press Next and Pause from a phone</small></span><em>${remotePid() ? esc(host.players.find(p => p.pid === remotePid()).name) : host.settings.remote === false ? 'off' : 'first to join'}</em></button>
+          <button class="setrow" data-host="streamer"><span><b>Room code</b><small>Hide it when sharing your screen</small></span><em>${host.settings.streamer ? 'Hidden' : 'Shown'}</em></button>
+          <button class="setrow" data-host="newcode"><span><b>New room</b><small>Everyone has to join again</small></span><em>Change</em></button>
+        </div>
       </div>
-      <div class="row">
-        <button class="btn ghost" data-host="relaxed">Relaxed timers: ${host.settings.relaxed ? 'on' : 'off'}</button>
-        <button class="btn ghost" data-host="howto">How-to screens: ${host.settings.howto ? 'first time' : 'off'}</button>
-        <button class="btn ghost" data-host="music">Music: ${host.settings.music ? 'on' : 'off'}</button>
-        <button class="btn ghost" data-host="autonext">Rounds move on by themselves: ${host.settings.auto === false ? 'off' : 'on'}</button>
-        <button class="btn ghost" data-host="banter">Host banter: ${host.settings.banter === false ? 'off' : 'on'}</button>
-        <button class="btn ghost" data-host="short">Game length: ${host.settings.short ? 'short' : 'full'}</button>
-        <button class="btn ghost" data-host="remote">Phone remote: ${remotePid() ? esc(host.players.find(p => p.pid === remotePid()).name) : host.settings.remote === false ? 'off' : 'first to join'}</button>
-        <button class="btn ghost" data-host="streamer">Room code: ${host.settings.streamer ? 'hidden' : 'shown'}</button>
-        <button class="btn ghost" data-host="kids">Kids mode: ${host.settings.kids ? 'on' : 'off'}</button>
-        <span class="muted">Relaxed gives everyone 50% more time.</span>
-      </div>
-      <div class="row">
+      <details class="settest" ${host.players.some(p => p.bot) ? 'open' : ''}><summary>Testing tools</summary><div class="row">
         <button class="btn ghost" data-host="testvoice">Test voice</button>
-      </div>
-      <div class="row">
         <button class="btn ghost" data-host="addbot">Add a bot player</button>
         ${host.players.some(p => p.bot) ? '<button class="btn ghost" data-host="clearbots">Remove bots</button>' : ''}
         <span class="muted">Bots fill empty seats for testing. They play at random.</span>
-      </div>
+      </div></details>
       <div class="row"><button class="btn" data-host="menu">← Back to games</button></div>
     </section></div>`;
     host.players.forEach(p => seen.add(p.pid));

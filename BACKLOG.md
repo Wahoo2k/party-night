@@ -122,3 +122,9 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Every one of the 47 games has now been through the stage work. Depth differs: 12 headliners with their own layouts, 12 with their own touches, 23 with size and styling.
 - Not seen on screen for these 23: Bingo while calling, and most vote/result phases beyond the one or two captured per game.
 - Still open from the review bug list: Missions name chip showing an id (not reproduced), Midnight Wolves ending without a winners' moment, Copy Cat heading wrap.
+
+## Join moment, settings, renames (Nov 27)
+- Hub: a join box with QR, web address and a large room code along the bottom of the hero, and players' animals popping in as they join. "Add a bot" only shows in local test mode or once a bot exists (it lives under Settings > Testing tools).
+- Settings regrouped into Sound, Pace and Room with a one-line hint each; test tools folded away.
+- Renames approved by Tom and applied: Bluff is Tall Tales, Quick Games is Show of Hands, Missions is Inside Job. Ids and file names unchanged (`bluff`, `quick`, `missions`). The audio script needs a rebuild before recording (`node test/narration-script.mjs`).
+- Next asked for by Tom: a website with game overviews and a way to buy; pricing with a subscription, single games and bundles (see the pricing notes in the plan doc when written).

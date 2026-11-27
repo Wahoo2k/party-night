@@ -1,4 +1,4 @@
-// Missions: a hidden-traitor game. A few players are secretly traitors who know each other.
+// Inside Job (was Missions; the id is still `missions`): a hidden-traitor game. A few players are secretly traitors who know each other.
 // Each round a leader picks a team, everyone votes on it, and the team secretly plays Success or Fail.
 // Three successful missions win it for the crew; three failed missions win it for the traitors.
 // (The Resistance-style.)
@@ -6,7 +6,7 @@ import { esc } from '../ui.js';
 
 export const meta = {
   id: 'missions',
-  name: 'Missions',
+  name: 'Inside Job',
   min: 5,
   max: 10,
   blurb: 'Pick a team, run the mission. A traitor might fail it.',
@@ -95,7 +95,7 @@ export function hostAct(s, a, now = Date.now(), rnd = Math.random) {
 export function tick(s, now = Date.now(), rnd = Math.random) { return s.deadline && now >= s.deadline ? hostAct(s, 'next', now, rnd) : s; }
 
 export function narration(s) {
-  if (s.phase === 'roles') return `Welcome to Missions. ${s.traitors.length} of you are secret traitors. Check your phone to see which side you're on.`;
+  if (s.phase === 'roles') return `Welcome to Inside Job. ${s.traitors.length} of you are secret traitors. Check your phone to see which side you're on.`;
   if (s.phase === 'pick') return `Mission ${s.m + 1}. ${nameOf(s, leader(s))} is the leader. Pick a team of ${s.sizes[s.m]}.`;
   if (s.phase === 'vote') return 'Everyone, vote on this team.';
   if (s.phase === 'voteShow') return s.lastVote.approved ? 'The team is approved. Off you go!' : `The team is turned down.${s.rejects >= 3 ? ` That's ${s.rejects} in a row. Careful, five and the traitors win!` : ''}`;
@@ -105,7 +105,7 @@ export function narration(s) {
   return '';
 }
 export function cue(s) {
-  if (s.phase === 'roles') return { sound: 'join', wait: 700, title: 'Missions', sub: 'Check your secret role', tone: 'night' };
+  if (s.phase === 'roles') return { sound: 'join', wait: 700, title: 'Inside Job', sub: 'Check your secret role', tone: 'night' };
   if (s.phase === 'pick') return { sound: 'join', wait: 500, title: `Mission ${s.m + 1}`, sub: `${nameOf(s, leader(s))} leads` };
   if (s.phase === 'vote') return { sound: 'vote', wait: 300 };
   if (s.phase === 'voteShow') return { sound: s.lastVote.approved ? 'safe' : 'lose', wait: 500 };

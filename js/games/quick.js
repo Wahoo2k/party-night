@@ -1,4 +1,4 @@
-// Quick Games: a mixed pack of fast opinion rounds.
+// Show of Hands (was Quick Games; the id is still `quick`): a mixed pack of fast opinion rounds.
 //   Hot Take:          pick your answer, then guess what most of the room picked.
 //   Would You Rather:  pick a side, then guess which side wins.
 //   Most Likely To:    vote for the player most likely to... and score for reading the room.
@@ -6,7 +6,7 @@ import { esc } from '../ui.js';
 
 export const meta = {
   id: 'quick',
-  name: 'Quick Games',
+  name: 'Show of Hands',
   min: 3,
   max: 20,
   blurb: 'Hot takes, Would You Rather and Most Likely To. Guess how the room votes.',
