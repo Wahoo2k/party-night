@@ -44,9 +44,9 @@ import * as copycat from './copycat.js';
 import * as hunt from './hunt.js';
 import * as freeze from './freeze.js';
 import * as haunted from './haunted.js';
+import * as bomb from './bomb.js';
 
-export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards, hearts, shade, estimate, truths, wordhunt, midnight, missions, dares, split, doodle, memory, copycat, hunt, freeze, haunted };
+export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards, hearts, shade, estimate, truths, wordhunt, midnight, missions, dares, split, doodle, memory, copycat, hunt, freeze, haunted, bomb };
 
 export const COMING_SOON = [
-  { name: 'Bomb Squad', blurb: 'Co-op: everyone holds part of the manual. Talk fast, cut the right wire.' },
 ];
