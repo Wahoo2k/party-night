@@ -264,7 +264,7 @@ export function phoneView(s, pid) {
     v.owner = nameOf(s, s.chains[s.show.c][0].by);
     v.entries = showList(s).map(e => ({ k: e.k, kind: e.kind, name: e.name, text: e.text, mine: e.by === pid, hearted: (s.hearts[s.show.c + '.' + e.k] || []).includes(pid) }));
   }
-  if (s.phase === 'over') { const sc = scores(s); v.place = sc.findIndex(x => x.pid === pid) + 1; v.hearts = sc.find(x => x.pid === pid).hearts; v.mine = s.chains.flat().find(e => e && e.kind === 'draw' && e.by === pid)?.strokes || null; }
+  if (s.phase === 'over') { const sc = scores(s); v.place = sc.findIndex(x => x.pid === pid) + 1; v.hearts = sc.find(x => x.pid === pid).hearts; v.mine = s.chains.flat().find(e => e && e.kind === 'draw' && e.by === pid)?.strokes || null; v.chain = (s.chains.find(c => c[0]?.by === pid) || []).filter(Boolean).map(e => ({ kind: e.kind, text: e.text || '', strokes: e.strokes || null, name: nameOf(s, e.by) })); }
   return v;
 }
 
@@ -338,7 +338,8 @@ export function renderPhone(v, el, send) {
     el.querySelectorAll('[data-k]').forEach(b => (b.onclick = () => send({ type: 'heart', c: v.c, k: Number(b.dataset.k) })));
     return;
   }
-  if (v.phase === 'over') el.innerHTML = `<h2 class="${v.place === 1 && v.hearts ? 'win' : ''}">${v.place === 1 && v.hearts ? 'Most loved!' : 'Thanks for playing!'}</h2><p class="say">You got ❤️ ${v.hearts}.</p>${v.mine ? `<div class="mydraw">${svgFor(v.mine)}</div><button class="btn ghost" id="savedraw">Save my drawing</button>` : ''}`;
+  if (v.phase === 'over') el.innerHTML = `<h2 class="${v.place === 1 && v.hearts ? 'win' : ''}">${v.place === 1 && v.hearts ? 'Most loved!' : 'Thanks for playing!'}</h2><p class="say">You got ❤️ ${v.hearts}.</p>${v.mine ? `<div class="mydraw">${svgFor(v.mine)}</div><button class="btn ghost" id="savedraw">Save my drawing</button>` : ''}${v.chain?.length > 1 ? '<button class="btn ghost" id="savechain">Save my whole chain</button>' : ''}`;
+  el.querySelector('#savechain')?.addEventListener('click', () => saveChain(v.chain));
   el.querySelector('#savedraw')?.addEventListener('click', () => savePng(el.querySelector('.mydraw svg')));
 }
 
@@ -395,4 +396,24 @@ function savePng(svg) {
     const a = document.createElement('a'); a.download = 'party-night-drawing.png'; a.href = c.toDataURL('image/png'); document.body.append(a); a.click(); a.remove();
   };
   img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml.includes('xmlns=') ? xml : xml.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"'));
+}
+
+// The whole chain as one tall picture: what was written, how it was drawn, what it was guessed as, and so on.
+async function saveChain(chain) {
+  const W = 700, ROW = { text: 110, draw: 560 };
+  const H = 90 + chain.reduce((n, e) => n + ROW[e.kind === 'draw' ? 'draw' : 'text'], 0);
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const g = c.getContext('2d'); g.fillStyle = '#0e1230'; g.fillRect(0, 0, W, H);
+  g.fillStyle = '#f4e9c1'; g.font = 'bold 34px sans-serif'; g.fillText('Party Night · Sketch Telephone', 30, 56);
+  let y = 90;
+  for (const e of chain) {
+    g.fillStyle = '#aab'; g.font = '20px sans-serif'; g.fillText(`${e.kind === 'draw' ? 'drawn' : 'written'} by ${e.name}`, 30, y + 26);
+    if (e.kind === 'draw') {
+      const holder = document.createElement('div'); holder.innerHTML = svgFor(e.strokes);
+      const xml = new XMLSerializer().serializeToString(holder.firstElementChild);
+      await new Promise(done => { const img = new Image(); img.onload = () => { g.drawImage(img, 100, y + 40, 500, 500); done(); }; img.onerror = done; img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml.includes('xmlns=') ? xml : xml.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"')); });
+    } else { g.fillStyle = '#fff'; g.font = 'bold 30px sans-serif'; g.fillText(`“${e.text.slice(0, 40)}”`, 30, y + 70); }
+    y += ROW[e.kind === 'draw' ? 'draw' : 'text'];
+  }
+  const a = document.createElement('a'); a.download = 'party-night-chain.png'; a.href = c.toDataURL('image/png'); document.body.append(a); a.click(); a.remove();
 }

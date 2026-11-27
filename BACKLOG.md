@@ -26,3 +26,14 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - **Illustrated card art** in place of emoji.
 - **Clue Crew** hard mode; **Color Clash** stacking rule; **Salad Bowl** funny-misses recap.
 - **Second half of the narrator script** added to the Narration Script doc.
+
+## From the evaluation report, still open
+- **New games for the gaps:** Two of a Kind (two players), Name That Noise (sound game for kids), Village Fair (a 30-minute mixed playlist with one score).
+- **Game Show pack rebuild** on one shared trivia bank.
+- **Written cases for Mystery Manor;** more Bomb Squad modules and Haunted Quiz mini-games.
+- **Translation readiness:** move game text out of the code; screen-reader labels; high-contrast mode.
+- **Content:** the six bank-driven launch games were expanded but not confirmed at three times their original size.
+- **Player-written prompts** for Quick Games (Funny Answers has them).
+- **Recap card** for Who Said That (Sketch Telephone can save a drawing and a whole chain).
+- **A short web address.**
+- **The report's nine open questions** (launch size, family or adult lead, hours, budget, testers, cross-store accounts, Mystery Manor theme, Blackjack and Hearts, final name).

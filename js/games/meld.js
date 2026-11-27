@@ -197,3 +197,8 @@ export function renderPhone(v, el, send) {
   if (v.phase === 'reveal') { el.innerHTML = `<h2 class="${v.pts ? 'win' : ''}">+${v.pts}</h2>${bar(v.scale, { target: v.target, marks: v.mine !== undefined ? [{ g: v.mine, label: 'You' }] : [] })}<p class="muted">${v.score} points</p>`; return; }
   if (v.phase === 'over') el.innerHTML = `<h2 class="${v.place === 1 ? 'win' : ''}">${v.place === 1 ? 'You read minds best!' : `You came #${v.place}`}</h2><p class="muted">${v.score} points</p>`;
 }
+
+// First-game coach lines, one per step.
+export function guide(s) {
+  return { clue: 'Only the mind reader sees the secret spot. Their clue should be something that sits exactly there on the scale.', guess: 'Talk it over out loud! Then everyone slides their own dial to where they think the spot is and locks in.', reveal: 'The closer your dial, the more points. The mind reader scores when the room gets close, so good clues matter.' }[s.phase] || '';
+}

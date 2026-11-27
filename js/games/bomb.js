@@ -143,3 +143,8 @@ export function renderPhone(v, el, send) {
   el.innerHTML = h;
   el.querySelectorAll('[data-cut]').forEach(b => (b.onclick = () => { el.querySelectorAll('[data-cut]').forEach(x => (x.disabled = true)); b.classList.add('cut'); try { navigator.vibrate?.(100); } catch {} send({ type: 'cut', i: Number(b.dataset.cut) }); }));
 }
+
+// First-game coach lines, one per step.
+export function guide(s) {
+  return { brief: 'One team, one bomb. Some phones see the bomb, the others see pages of the manual. Nobody sees both, so you have to talk.', defuse: 'Bomb holders: describe exactly what you see. Manual readers: find the rule that matches and say what to do. A wrong move costs a strike.', result: 'Each bomb gets harder. Swap who describes and who reads to keep it fair.' }[s.phase] || '';
+}

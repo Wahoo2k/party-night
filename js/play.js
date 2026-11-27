@@ -66,6 +66,8 @@ async function send(a) {
 }
 
 function onMessage(m) {
+  // The TV moved to a new room and is taking everyone with it.
+  if (m && m.t === 'move' && room && /^[A-Z]{4}$/.test(m.code || '')) { store.del('pg-pid-' + code); code = m.code; store.set('pg-code', code); try { room.close(); } catch {} room = null; lastView = ''; heard = 0; return void setTimeout(join, 900); }
   if (!m || m.t !== 'view' || m.to !== pid) return;
   if (m.enc) {
     // Decrypt in arrival order; drop anything older than what we've already shown.
@@ -89,6 +91,7 @@ function onMessage(m) {
 let lastPhaseSeen = '';
 function render(v) {
   document.body.classList.toggle('paused', !!v._paused);
+  document.body.classList.toggle('nodraw', !!v._nodraw);
   if (v._me) { myFace = v._me; document.body.style.setProperty('--me', v._me[1]); if (statusEl.dataset.s === 'live') statusEl.textContent = `${v._me[0]} ${v.me || name} · ${code}`; }
   const key = v.phase + (v.round || '');
   const isNew = key !== lastPhaseSeen;
@@ -113,8 +116,12 @@ function render(v) {
     app.innerHTML = `<div class="panel"><h2>You're in, ${esc(v.me || name)}</h2>${v.byHost ? '<p class="note">The host set your name.</p>' : v.fixed ? `<p class="note">${v.me && name && v.me.toLowerCase().startsWith(name.toLowerCase()) ? 'Someone already had that name, so you got a number.' : 'We tidied up your name.'}</p>` : ''}<p class="say">Watch the TV. The game starts when the host is ready.</p>
       <p class="muted">Game: ${esc(v.game)} · ${v.players.length} playing</p>
       <div class="roster">${v.players.map(n => `<div class="chip">${esc(n)}</div>`).join('')}</div>
+      ${v.canPrompt ? `<form id="pf" class="audask"><p class="muted">✍️ Add your own prompt for Funny Answers (${v.myPrompts.length}/3)</p>${v.myPrompts.map(t => `<p class="small">“${esc(t)}”</p>`).join('')}${v.myPrompts.length < 3 ? '<input id="pt" maxlength="70" placeholder="The worst thing to say at…" autocomplete="off"><button class="btn ghost">Add</button>' : ''}</form>` : ''}
+      ${v._remote ? `<div class="remote"><p class="muted">👑 You're the remote</p><button class="btn" data-rm="start" ${v.canStart ? '' : 'disabled'}>Start the game</button></div>` : ''}
       <button class="btn ghost" id="leave">Leave room</button></div>`;
     app.querySelector('#leave').onclick = leave;
+    app.querySelector('#pf')?.addEventListener('submit', e => { e.preventDefault(); const t = app.querySelector('#pt')?.value.trim(); if (t) room?.send({ t: 'suggest', pid, text: t }); });
+    app.querySelectorAll('[data-rm]').forEach(b => (b.onclick = () => send({ type: '_host', a: b.dataset.rm })));
     return;
   }
   const wrap = document.createElement('div');
@@ -122,6 +129,13 @@ function render(v) {
   app.replaceChildren(wrap);
   (GAMES[v.game] || GAMES.werewolf).renderPhone(v, wrap, send);
   polish(v, wrap, isNew);
+  if (v._remote) {
+    // The remote strip: the same Next and Pause the TV remote has, plus Play again and Lobby at the end.
+    const r = document.createElement('div'); r.className = 'remote strip';
+    r.innerHTML = `<span>👑</span>${v.phase === 'over' ? '<button class="btn ghost small" data-rm="again">Play again</button><button class="btn ghost small" data-rm="lobby">Lobby</button>' : `<button class="btn ghost small" data-rm="next">Next ⏭</button><button class="btn ghost small" data-rm="pause">${v._paused ? 'Resume ▶' : 'Pause ⏸'}</button>`}`;
+    app.append(r);
+    r.querySelectorAll('[data-rm]').forEach(b => (b.onclick = () => send({ type: '_host', a: b.dataset.rm })));
+  }
 }
 
 // Phone polish shared by every game: a buzz and a banner when it becomes your turn to do something, a nudge to

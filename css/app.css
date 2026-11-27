@@ -1144,3 +1144,18 @@ body.phone #backdrop{display:none}
 .landed{display:inline-block}.landed.popin{animation:ccfly .4s cubic-bezier(.2,.9,.3,1.1) both}
 .mydraw{margin:10px 0;background:#fffdf6;border-radius:12px}.mydraw svg{width:100%;display:block}
 .pc.dealt{animation:ccfly .4s cubic-bezier(.2,.9,.3,1.1) both}
+
+/* ---------- hide drawings, streamer mode, phone remote, shapes with color ---------- */
+.nodraw svg.sk{filter:blur(26px) saturate(0)}
+.streamer .join .code,.streamer .join .qr,.streamer .join .url{filter:blur(16px)}
+.streamer #status{filter:blur(6px)}
+.remote{display:grid;gap:8px;margin:12px 0;padding:12px;border-radius:14px;background:#2a2466}
+.remote.strip{display:flex;align-items:center;gap:8px;margin:12px 0 0;padding:8px 12px}
+.remote.strip span{font-size:20px}.remote.strip .btn{flex:1}
+.team.t0 h3::before,.tc0::before{content:'☀ '}
+.team.t1 h3::before,.tc1::before{content:'☾ '}
+.acard.rev.k0::after,.acard.peek.k0::after{content:'☀';position:absolute;top:4px;right:8px;font-size:.8em;opacity:.8}
+.acard.rev.k1::after,.acard.peek.k1::after{content:'☾';position:absolute;top:4px;right:8px;font-size:.8em;opacity:.8}
+.acard.rev.kx::after,.acard.peek.kx::after{content:'☠';position:absolute;top:4px;right:8px;font-size:.8em}
+.acard{position:relative}
+.cc{position:relative}.cc-shape{position:absolute;left:50%;bottom:6%;transform:translateX(-50%);font-size:.38em;opacity:.85;line-height:1}

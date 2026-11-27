@@ -193,7 +193,7 @@ export function phoneView(s, pid) {
 export function cardHTML(c, extra = '', attrs = '') {
   const wild = isWild(c);
   const sym = /^\d$/.test(c.v) ? c.v : LABEL[c.v];
-  return `<div class="cc ${wild ? 'wild' : ''} ${extra}" style="--cc:${wild ? '#232a5c' : COLORS[c.c].hex}" ${attrs}><span class="cc-corner">${sym}</span><span class="cc-mid">${sym}</span><span class="cc-corner br">${sym}</span></div>`;
+  return `<div class="cc ${wild ? 'wild' : ''} ${extra}" style="--cc:${wild ? '#232a5c' : COLORS[c.c].hex}" ${attrs}><span class="cc-corner">${sym}</span><span class="cc-mid">${sym}</span><span class="cc-shape">${wild ? '' : ['☀', '☁', '☘', '♨'][c.c] || ''}</span><span class="cc-corner br">${sym}</span></div>`;
 }
 
 export function renderTV(v, el) {

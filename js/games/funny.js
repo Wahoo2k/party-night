@@ -76,7 +76,10 @@ export function cleanAnswer(t) {
   return { ok: true, text: s };
 }
 
-export function setup(players, rnd = Math.random, prev = null) {
+// Prompt text by number: the built-in list first, then any the players wrote in the lobby.
+const PT = (s, i) => (i >= PROMPTS.length ? s.custom?.[i - PROMPTS.length] : PROMPTS[i]) || PROMPTS[0];
+
+export function setup(players, rnd = Math.random, prev = null, opts = {}) {
   const used = new Set(prev?.usedPrompts || []);
   let pool = PROMPTS.map((_, i) => i).filter(i => !used.has(i));
   if (pool.length < players.length * ROUNDS) pool = PROMPTS.map((_, i) => i);
@@ -85,7 +88,8 @@ export function setup(players, rnd = Math.random, prev = null) {
   const s = {
     game: 'funny',
     players: players.map(p => ({ pid: p.pid, name: p.name })),
-    pool: shuffle(pool, rnd), round: 0, scores,
+    custom: (opts.custom || []).slice(0, 24),
+    pool: [...shuffle(pool, rnd), ...shuffle((opts.custom || []).slice(0, 24).map((_, i) => PROMPTS.length + i), rnd)], round: 0, scores,
     finalPrompt: FINALS[Math.floor(rnd() * FINALS.length)],
     usedPrompts: [...used].slice(-30),
     eventId: 0,
@@ -202,7 +206,7 @@ export function tick(s, now = Date.now(), rnd = Math.random) {
 export function narration(s) {
   switch (s.phase) {
     case 'write': return s.round === 0 ? 'Welcome to Funny Answers! Check your phone and answer your two prompts. Funny beats true!' : 'Round two, and points are doubled. Get writing!';
-    case 'vote': { const m = s.matchups[s.m]; return `${PROMPTS[m.prompt]}.`; }
+    case 'vote': { const m = s.matchups[s.m]; return `${PT(s, m.prompt)}.`; }
     case 'finalWrite': return `Final round! Everyone answers the same prompt. ${s.finalPrompt}.`;
     case 'finalVote': return 'Vote for your favorite!';
     case 'over': return 'That\'s the game!';
@@ -241,7 +245,7 @@ export function tvView(s, now = Date.now()) {
   if (s.phase === 'vote' || s.phase === 'result') {
     const m = s.matchups[s.m];
     // Answers are shown anonymously until the result.
-    v.prompt = PROMPTS[m.prompt]; v.n = s.m + 1; v.of = s.matchups.length;
+    v.prompt = PT(s, m.prompt); v.n = s.m + 1; v.of = s.matchups.length;
     v.answers = [m.a, m.b].map(pid => ({ text: m.answers[pid] || '(no answer)', name: s.phase === 'result' ? nameOf(s, pid) : null, votes: s.phase === 'result' ? m.count[pid] : null, gained: s.phase === 'result' ? m.gained[pid] : null, sweep: s.phase === 'result' && m.sweep === pid, crowd: s.phase === 'result' && m.crowd === pid, voters: s.phase === 'result' ? Object.entries(m.votes).filter(([, x]) => x === pid).map(([p]) => nameOf(s, p)) : [] }));
     v.votesIn = Object.keys(m.votes).length; v.need = voters(s, m).length;
   }
@@ -254,7 +258,7 @@ export function tvView(s, now = Date.now()) {
   if (s.phase === 'over') {
     // The answer that won its matchup by the biggest share of votes.
     let best = null;
-    for (const m of s.matchups) for (const pid of [m.a, m.b]) { const n = m.count?.[pid] || 0, tot = (m.count?.[m.a] || 0) + (m.count?.[m.b] || 0); if (m.answers[pid] && tot && (!best || n / tot > best.share || (n / tot === best.share && n > best.n))) best = { share: n / tot, n, text: m.answers[pid], name: nameOf(s, pid), prompt: PROMPTS[m.prompt] }; }
+    for (const m of s.matchups) for (const pid of [m.a, m.b]) { const n = m.count?.[pid] || 0, tot = (m.count?.[m.a] || 0) + (m.count?.[m.b] || 0); if (m.answers[pid] && tot && (!best || n / tot > best.share || (n / tot === best.share && n > best.n))) best = { share: n / tot, n, text: m.answers[pid], name: nameOf(s, pid), prompt: PT(s, m.prompt) }; }
     if (best && best.n) v.quip = best;
   }
   return v;
@@ -263,10 +267,10 @@ export function tvView(s, now = Date.now()) {
 export function phoneView(s, pid) {
   if (!P(s, pid)) return { phase: 'spectate' };
   const v = { phase: s.phase, score: s.scores[pid], round: s.round + 1 };
-  if (s.phase === 'write') v.mine = myMatchups(s, pid).map(m => ({ i: m.i, prompt: PROMPTS[m.prompt], answer: m.answers[pid] ?? null }));
+  if (s.phase === 'write') v.mine = myMatchups(s, pid).map(m => ({ i: m.i, prompt: PT(s, m.prompt), answer: m.answers[pid] ?? null }));
   if (s.phase === 'vote' || s.phase === 'result') {
     const m = s.matchups[s.m];
-    v.prompt = PROMPTS[m.prompt];
+    v.prompt = PT(s, m.prompt);
     v.mineUp = m.a === pid || m.b === pid;
     v.canVote = voters(s, m).includes(pid);
     v.voted = m.votes[pid] || null;
@@ -320,7 +324,7 @@ export function audienceView(s, pid) {
   if (s.phase !== 'vote') return null;
   const m = s.matchups[s.m];
   if (!m.answers[m.a] || !m.answers[m.b]) return null;
-  return { q: PROMPTS[m.prompt], options: [m.a, m.b].map(p => ({ v: p, label: m.answers[p] })), picked: m.aud?.[pid] || null };
+  return { q: PT(s, m.prompt), options: [m.a, m.b].map(p => ({ v: p, label: m.answers[p] })), picked: m.aud?.[pid] || null };
 }
 export function audienceAct(s, pid, a) {
   if (s.phase !== 'vote' || a?.type !== 'aud') return;

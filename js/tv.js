@@ -73,9 +73,9 @@ function viewFor(pid) {
   }
   if (!host.state) {
     const me = host.players.find(p => p.pid === pid) || {};
-    return { phase: 'lobby', players: host.players.map(p => p.name), game: game().meta.name, me: me.name, fixed: !!me.fixed, byHost: !!me.locked, _me: me.face };
+    return { phase: 'lobby', players: host.players.map(p => p.name), game: game().meta.name, me: me.name, fixed: !!me.fixed, byHost: !!me.locked, _me: me.face, ...(pid === remotePid() ? { _remote: true, canStart: host.players.length >= game().meta.min } : {}), ...(game().meta.id === 'funny' ? { canPrompt: true, myPrompts: (host.custom || []).filter(c => c.pid === pid).map(c => c.text) } : {}) };
   }
-  return { ...maskView(game().phoneView(host.state, pid), host.hidden), game: host.gameId, _me: host.players.find(p => p.pid === pid)?.face, ...(host.paused ? { _paused: true } : {}), ...(gains[pid] ? { _gain: gains[pid] } : {}), ...(places[pid] ? { _place: places[pid] } : {}), ...(finalRound ? { _final: true } : {}) };
+  return { ...maskView(game().phoneView(host.state, pid), host.hidden), game: host.gameId, _me: host.players.find(p => p.pid === pid)?.face, ...(host.paused ? { _paused: true } : {}), ...(gains[pid] ? { _gain: gains[pid] } : {}), ...(places[pid] ? { _place: places[pid] } : {}), ...(finalRound ? { _final: true } : {}), ...(host.blurDraw ? { _nodraw: true } : {}), ...(pid === remotePid() ? { _remote: true } : {}) };
 }
 
 // Each phone hears about its own points the moment they land, and its finishing place at the end.
@@ -105,6 +105,17 @@ function checkFinal() {
   document.body.classList.toggle('finalround', finalRound);
   if (finalRound && !finalSaid) { finalSaid = true; if (sfx.on) play('fanfare'); setTimeout(() => say('Final round!'), 300); flash('gold'); }
 }
+
+// Extra buttons beside Pause: End game (press twice), and Hide drawing in the drawing games.
+let endArmed = 0;
+function vetoExtras() {
+  const vbar = document.getElementById('vetobar');
+  if (!vbar || !host.state) return;
+  if (!vbar.querySelector('[data-host=endgame]')) vbar.insertAdjacentHTML('afterbegin', `<button class="btn ghost small" data-host="endgame">${Date.now() - endArmed < 4000 ? 'Press again to end' : '✕ End game'}</button>`);
+  if (['sketch', 'doodle'].includes(host.gameId) && !vbar.querySelector('[data-host=blurdraw]')) vbar.insertAdjacentHTML('afterbegin', `<button class="btn ghost small" data-host="blurdraw">🙈 ${host.blurDraw ? 'Show' : 'Hide'} drawing</button>`);
+}
+// The phone remote: one player's phone (the first to join, unless turned off) can press Next, Pause and Start for the TV.
+const remotePid = () => (host.settings.remote === false ? null : host.players.find(p => !p.bot)?.pid || null);
 
 function sendViews(force) {
   if (!room) return;
@@ -149,7 +160,7 @@ function changed() {
   save();
   if (host.state) {
     const key = host.state.phase + host.state.round;
-    if (key !== lastPhase) { lastPhase = key; fresh = true; announce(); }
+    if (key !== lastPhase) { lastPhase = key; fresh = true; host.blurDraw = false; announce(); }
     const ce = game().cueEvent?.(host.state);
     if (ce && ce.id !== lastEventId) {
       lastEventId = ce.id;
@@ -236,6 +247,11 @@ function onMessage(m) {
     }
     if (p) { lastSent[p.pid] = null; changed(); }
     else room.send({ t: 'view', to: m.pid, view: { phase: host.state ? 'spectate' : 'full' } });
+  } else if (m.t === 'suggest') {
+    // A player-written prompt, offered from the lobby. Three each, cleaned like any typed answer.
+    const p = host.players.find(x => x.pid === m.pid);
+    const text = cleanAct({ type: 'answer', text: String(m.text || '').slice(0, 70) }, host.settings.kids)?.text?.replace(/[<>{}\[\]\\`]/g, '').trim();
+    if (p && !host.state && text && text.length > 5 && !isRude(text) && (host.custom = host.custom || []).filter(c => c.pid === m.pid).length < 3 && host.custom.length < 24) { host.custom.push({ pid: m.pid, text }); lastSent[m.pid] = null; changed(); }
   } else if (m.t === 'bye') {
     host.audience = host.audience.filter(x => x.pid !== m.pid);
     if (!host.state) host.players = host.players.filter(x => x.pid !== m.pid);
@@ -246,8 +262,9 @@ function onMessage(m) {
     if (!who || now - (lastReact[m.pid] || 0) < 700) return;
     lastReact[m.pid] = now;
     floatReaction(m.e, who.name);
-  } else if (m.t === 'act' && host.state) {
-    const actor = host.players.find(p => p.pid === m.pid);
+  } else if (m.t === 'act') {
+    const actor = host.players.find(p => p.pid === m.pid) || host.audience.find(p => p.pid === m.pid);
+    if (!actor) return;
     if (actor?.pub && hostKeys) {
       // Encrypted action: decrypt, and ignore replays of old ones.
       if (!m.enc) return;
@@ -264,6 +281,7 @@ function onMessage(m) {
 
 function handleAct(pidFrom, rawAct) {
   const m = { pid: pidFrom, a: rawAct };
+  if (rawAct?.type === '_host') { if (pidFrom === remotePid() && ['next', 'pause', 'start', 'again', 'lobby'].includes(rawAct.a)) hostAction(rawAct.a); return; }
   if (!host.state || host.paused) return;
   if (isAudience(pidFrom)) { if (game().audienceAct) { game().audienceAct(host.state, pidFrom, rawAct); changed(); } return; }
   {
@@ -393,18 +411,19 @@ function countNight() {
     const top = Math.max(...v.teams.map(x => x.score));
     winners = v.teams.filter(x => x.score === top).flatMap(x => x.members || []);
   } else if (typeof v.winner === 'string' && host.players.some(p => p.name === v.winner)) winners = [v.winner];
-  winners.forEach(n => row(n).wins++);
+  winners.forEach(n => { row(n).wins++; row(n).pts = (row(n).pts || 0) + 3; });
+  if (list && host.gameId !== 'imposter') list.slice(0, 3).forEach((p, i) => { if (!winners.includes(p.name)) row(p.name).pts = (row(p.name).pts || 0) + (i === 1 ? 2 : 1); });
   t.games.push({ game: game().meta.name, winners });
   save();
 }
 function nightAwards() {
   const t = host.tally;
   if (!t?.games.length) return;
-  const names = Object.keys(t.by), top = k => names.slice().sort((a, b) => t.by[b][k] - t.by[a][k] || t.by[b].podiums - t.by[a].podiums)[0];
+  const names = Object.keys(t.by), top = k => names.slice().sort((a, b) => (t.by[b].pts || 0) - (t.by[a].pts || 0) || t.by[b][k] - t.by[a][k])[0];
   const face = n => host.players.find(p => p.name === n)?.face;
   const awards = [];
   const champ = top('wins');
-  if (t.by[champ].wins) awards.push(['🏆 Champion of the night', champ, `${t.by[champ].wins} win${t.by[champ].wins === 1 ? '' : 's'}`]);
+  if (t.by[champ].pts) awards.push(['🏆 Champion of the night', champ, `${t.by[champ].pts || 0} night points · ${t.by[champ].wins} win${t.by[champ].wins === 1 ? '' : 's'}`]);
   const pod = names.filter(n => n !== champ).sort((a, b) => t.by[b].podiums - t.by[a].podiums)[0];
   if (pod && t.by[pod].podiums) awards.push(['🥈 Always in the mix', pod, `${t.by[pod].podiums} top-three finish${t.by[pod].podiums === 1 ? "" : "es"}`]);
   const sport = names.filter(n => n !== champ && n !== pod).sort((a, b) => t.by[b].last - t.by[a].last || t.by[b].games - t.by[a].games)[0];
@@ -428,7 +447,8 @@ function startGame() {
   // The audience gets promoted into open seats for the next game.
   while (host.audience.length && host.players.length < game().meta.max) host.players.push(host.audience.shift());
   const prev = host.state && host.state.game === host.gameId ? host.state : host.lastByGame?.[host.gameId];
-  host.state = game().setup(host.players, Math.random, prev, { short: !!host.settings.short, ...(host.opts?.[host.gameId] || {}) });
+  host.state = game().setup(host.players, Math.random, prev, { short: !!host.settings.short, ...(host.opts?.[host.gameId] || {}), custom: (host.custom || []).map(c => c.text) });
+  if (host.gameId === 'funny') host.custom = [];
   lastEventId = 0; popped.clear(); gains = {}; places = {}; lastScore = {}; finalRound = false; finalSaid = false;
   host.played = { ...(host.played || {}), [host.gameId]: (host.played?.[host.gameId] || 0) + 1 }; host.counted = false;
   lastPhase = '';
@@ -441,7 +461,13 @@ function hostAction(a) {
   if (a.startsWith('night:')) { const nt = NIGHTS.find(x => x.id === a.slice(6)); if (nt) { host.queue = nt.games.slice(1); host.night = nt.id; host.gameId = nt.games[0]; host.shelf = 'all'; save(); } return changed(); }
   if (a === 'endnight') { host.queue = []; host.night = null; save(); return render(); }
   if (a === 'lobby') { host.lastByGame = { ...(host.lastByGame || {}), [host.gameId]: host.state }; host.state = null; ceremonyOff?.(); if (host.queue?.length) host.gameId = host.queue.shift(); else host.night = null; stopAmbient(); document.body.classList.remove('day'); return changed(); }
-  if (a === 'newcode') { host = { code: newCode(), players: [], gameId: host.gameId, state: null }; save(); return connect(); }
+  if (a === 'newcode') {
+    // Same players again: tell every phone the new code so nobody has to rejoin by hand.
+    const next = newCode(), keep = { settings: host.settings, tally: host.tally, played: host.played, opts: host.opts, lastByGame: host.lastByGame, shelf: host.shelf };
+    try { room?.send({ t: 'move', code: next }); } catch {}
+    host = { ...keep, code: next, players: [], audience: [], gameId: host.gameId, state: null };
+    save(); return setTimeout(connect, 400);
+  }
   if (a === 'voice') { voice.on = !voice.on; return render(); }
   if (a === 'testvoice') return say('Night falls on the village. Somewhere in the dark, the wolves are hungry.', true);
   if (a === 'relaxed') { host.settings.relaxed = !host.settings.relaxed; save(); return render(); }
@@ -452,6 +478,11 @@ function hostAction(a) {
     save(); render(); return sendViews();
   }
   if (a.startsWith('opt:')) { const o = (game().meta.options || []).find(x => x.id === a.slice(4)); if (o) { const mine = (host.opts = host.opts || {})[host.gameId] = host.opts[host.gameId] || {}; const i = o.choices.findIndex(c => c[0] === (mine[o.id] ?? o.choices[0][0])); mine[o.id] = o.choices[(i + 1) % o.choices.length][0]; save(); } return render(); }
+  if (a === 'endgame') { if (Date.now() - endArmed < 4000) { endArmed = 0; stopBed(); return hostAction('lobby'); } endArmed = Date.now(); setTimeout(render, 4100); return render(); }
+  if (a === 'blurdraw') { host.blurDraw = !host.blurDraw; save(); return changed(); }
+  if (a === 'remote') { host.settings.remote = host.settings.remote === false; save(); return changed(); }
+  if (a === 'streamer') { host.settings.streamer = !host.settings.streamer; save(); return render(); }
+  if (a === 'clearprompts') { host.custom = []; save(); return changed(); }
   if (a === 'awards') return nightAwards();
   if (a === 'cleartally') { host.tally = null; save(); return render(); }
   if (a === 'music') { host.settings.music = !host.settings.music; if (!host.settings.music) stopBed(); save(); return render(); }
@@ -554,11 +585,12 @@ function renderLobby() {
             : seat(i, '<i>Join!</i>', 'open'); }).join('')}</div>`;
       })()}
       ${g.meta.options?.length ? `<div class="row gameopts"><span class="muted">${esc(g.meta.name)} options</span>${g.meta.options.map(o => { const cur = host.opts?.[host.gameId]?.[o.id] ?? o.choices[0][0]; return `<button class="btn ghost" data-host="opt:${o.id}">${esc(o.name)}: ${esc((o.choices.find(c => c[0] === cur) || o.choices[0])[1])}</button>`; }).join('')}</div>` : ''}
+      ${host.gameId === 'funny' ? `<p class="muted">✍️ Players can add their own prompts from their phones: <b>${(host.custom || []).length}</b> added.${(host.custom || []).length ? ' <button class="btn ghost small" data-host="clearprompts">Clear</button>' : ''}</p>` : ''}
       ${host.players.length ? '<p class="muted small">Select a name to rename or remove that player.</p>' : ''}
       ${host.audience.length ? `<p class="muted">Audience (${host.audience.length}): ${host.audience.map(a => esc(a.name)).join(', ')}. They join automatically when a seat opens.</p>` : ''}
       ${(() => { const p = host.players.find(x => x.pid === editing); return p ? `<div class="editbox"><label for="rename">Rename ${esc(p.name)}</label><div class="row"><input id="rename" maxlength="${MAX_NAME}" value="${esc(p.name)}" autocomplete="off"><button class="btn" data-host="rename">Save</button><button class="btn ghost" data-host="randomname">Random name</button><button class="btn ghost" data-host="kick">Remove player</button><button class="btn ghost" data-host="canceledit">Cancel</button></div></div>` : ''; })()}
       ${(() => { const nt = NIGHTS.find(x => x.id === host.night); return nt ? `<div class="nightbar"><b>${nt.icon} ${esc(nt.name)}</b><span>Now: <b>${esc(g.meta.name)}</b>${host.queue?.length ? ` · Then: ${host.queue.map(id => esc(GAMES[id].meta.name)).join(' → ')}` : ' · last game'}</span><button class="btn ghost small" data-host="endnight">Pick games myself</button></div>` : `<h3>Start a game night</h3><div class="nights">${NIGHTS.map(x => `<button class="night" data-host="night:${x.id}"><span>${x.icon}</span><b>${esc(x.name)}</b><small>${esc(x.blurb)}</small><small>${x.games.map(id => esc(GAMES[id].meta.name)).join(' → ')}</small></button>`).join('')}</div>`; })()}
-      ${host.tally?.games.length ? `<div class="nightbar tonight"><b>Tonight</b><span>${Object.entries(host.tally.by).filter(e => e[1].wins).sort((a, b) => b[1].wins - a[1].wins).slice(0, 5).map(([n, r]) => `${esc(n)} 🏆×${r.wins}`).join(' · ') || `${host.tally.games.length} game${host.tally.games.length === 1 ? '' : 's'} played`}</span><button class="btn ghost small" data-host="awards">Tonight's awards</button><button class="btn ghost small" data-host="cleartally">Reset</button></div>` : ''}
+      ${host.tally?.games.length ? `<div class="nightbar tonight"><b>Tonight</b><span>${Object.entries(host.tally.by).filter(e => e[1].pts).sort((a, b) => b[1].pts - a[1].pts).slice(0, 6).map(([n, r]) => `${esc(n)} <b>${r.pts}</b>`).join(' · ') || `${host.tally.games.length} game${host.tally.games.length === 1 ? '' : 's'} played`}</span><button class="btn ghost small" data-host="awards">Tonight's awards</button><button class="btn ghost small" data-host="cleartally">Reset</button></div>` : ''}
       <h3>${host.night ? 'Game' : 'Or pick a game'}</h3>
       <div class="games">
         <div class="shelves">${SHELVES.map(f => `<button class="shelf ${(host.shelf || 'featured') === f.id ? 'on' : ''}" data-shelf="${f.id}">${esc(f.name)}</button>`).join('')}</div>
@@ -576,6 +608,8 @@ function renderLobby() {
         <button class="btn ghost" data-host="howto">How-to screens: ${host.settings.howto ? 'first time' : 'off'}</button>
         <button class="btn ghost" data-host="music">Music: ${host.settings.music ? 'on' : 'off'}</button>
         <button class="btn ghost" data-host="short">Game length: ${host.settings.short ? 'short' : 'full'}</button>
+        <button class="btn ghost" data-host="remote">Phone remote: ${remotePid() ? esc(host.players.find(p => p.pid === remotePid()).name) : host.settings.remote === false ? 'off' : 'first to join'}</button>
+        <button class="btn ghost" data-host="streamer">Room code: ${host.settings.streamer ? 'hidden' : 'shown'}</button>
         <button class="btn ghost" data-host="kids">Kids mode: ${host.settings.kids ? 'on' : 'off'}</button>
         <span class="muted">Relaxed gives everyone 50% more time.</span>
       </div>
@@ -599,6 +633,8 @@ function render() {
   else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); decorate(); pops(fresh); guideTip(); slideScores(); cardPops(fresh); }
   document.body.classList.toggle('night', host.state?.phase === 'night');
   // How-to screens show in full the first time a room plays a game, then get out of the way.
+  document.body.classList.toggle('streamer', !!host.settings.streamer);
+  document.body.classList.toggle('nodraw', !!host.blurDraw);
   document.body.classList.toggle('nohow', !host.settings.howto || (host.played?.[host.gameId] || 0) > 1);
   const badge = document.getElementById('aud') || Object.assign(document.createElement('div'), { id: 'aud' });
   if (!badge.isConnected) document.body.append(badge);
@@ -610,6 +646,7 @@ function render() {
   host.hidden = host.hidden || [];
   const isHidden = t => host.hidden.some(h => h.toLowerCase() === t.toLowerCase());
   vb.innerHTML = vetoOpen && host.state ? `<div class="vetopanel"><h3>Hide an answer</h3><p class="muted small">Tap anything players typed to hide it from the TV, phones and narrator. Tap again to show it.</p><div class="vetolist">${recentTexts.map((x, i) => `<button class="btn ghost ${isHidden(x.t) ? 'on' : ''}" data-host="hide:${i}">${isHidden(x.t) ? '🙈 ' : ''}${esc(x.t)} <small class="muted">${esc(x.name)}</small></button>`).join('') || '<p class="muted">Nothing typed yet.</p>'}</div><button class="btn" data-host="veto">Done</button></div>` : `<button class="btn ghost vetobtn" data-host="pause">${host.paused ? '▶ Resume' : '⏸ Pause'}</button><button class="btn ghost vetobtn" data-host="veto">🙈 Hide an answer</button>${host.paused ? '<div class="pausecover"><b>Paused</b><span>Press Resume when everyone is back</span></div>' : ''}`;
+  vetoExtras();
   vb.querySelectorAll('[data-host]').forEach(b => (b.onclick = () => hostAction(b.dataset.host)));
   app.querySelectorAll('[data-host]').forEach(b => (b.onclick = () => hostAction(b.dataset.host)));
   const vsel = app.querySelector('#vsel');
@@ -650,6 +687,7 @@ const OWN_AUDIO = ['freeze', 'copycat'], SECRET = ['potato', 'freeze'];
 function timerBar() {
   const s = host.state, now = Date.now();
   const vbar = document.getElementById('vetobar'); if (vbar) vbar.style.display = s ? '' : 'none';
+  vetoExtras();
   // Only timers the game itself shows on screen: a hidden fuse (Hot Potato, Freeze Dance) must stay hidden.
   const live = s && !host.paused && s.phase !== 'over' && s.deadline > now && !SECRET.includes(host.gameId) && !!app.querySelector('.clock');
   tbar.hidden = !live;
