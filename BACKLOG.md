@@ -79,3 +79,10 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Waiting on Chrome: `art/bg-table.jpg` and `art/win-table.jpg` are generated in Canva (media MAHcIJ_sFnQ and MAHcIN_OemU) but not uploaded; a wood-tone gradient shows until they are.
 - Next: reveal sequencer as a shared part (Funny Answers does it in CSS only), between-round scoreboard, end-of-game flow, then headliners 2 to 12; phone polish; goats rework. Self-running rounds need a real-people playtest (it relies on the bots' idea of "nothing left to do").
 - Not rechecked after the stage change: the per-game browser tests other than funny, bluff, bingo, ducks, kids, intro, away, watch, remote.
+
+## Polish plan, second pass (Nov 27)
+- Table backdrop and winner scene uploaded (art/bg-table.jpg, art/win-table.jpg).
+- Reveal beats (shared): mark result parts with `data-beat="1..n"` (or `data-beat-class` to add a class at that moment); `runBeats` in js/tv.js reveals them one at a time with a sound and holds the self-running countdown until 3.5 s after the last beat. Used by Funny Answers, Bracket Battle, Split the Room, Two Truths & a Lie, Who Said That?.
+- Between-round standings (`standings` in js/tv.js): full-screen rank list for about 5 s when a game's round number goes up and it has a plain score list; rows slide to the new order. Mirrored to the remote screen as a still list.
+- End of game (`afterParty`): Play again / Up next (night playlist first, then an unplayed game from the same shelf that fits the player count) / All games, plus tonight's leaders once two games are done. The games' own Play again and Back buttons are hidden on the stage.
+- To do next: headliners 2 to 12 get their own screens; games' own last-screen podiums are now redundant with the rail and can go; standings only fire for games that expose `round` and `scores`.

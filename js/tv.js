@@ -65,6 +65,69 @@ function ensureFaces() {
   }
 }
 // After a game draws its screen, put each player's character beside their name in the shared score, podium and roster parts.
+// Between rounds: a short standings screen, so the race is felt all game and not only at the podium. Rows start in
+// the order from the last time it was shown, then slide to the new order.
+let stand = { game: '', round: 0, order: [], scores: {} };
+function standings(v) {
+  const list = Array.isArray(v.scores) && v.scores.length >= 2 && v.scores[0]?.name && typeof v.scores[0].score === 'number' ? v.scores : null;
+  if (stand.game !== host.gameId || !list || (v.round || 0) < stand.round) { stand = { game: host.gameId, round: v.round || 0, order: [], scores: {} }; return; }
+  if (!(v.round > stand.round) || v.phase === 'over') return;
+  const done = stand.round; stand.round = v.round;
+  if (!done || !list.some(p => p.score) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const now = [...list].sort((a, b) => b.score - a.score).slice(0, 8), before = [...now].sort((a, b) => (stand.order.indexOf(a.name) + 1 || 99) - (stand.order.indexOf(b.name) + 1 || 99));
+  const max = Math.max(1, now[0].score), face = n => host.players.find(p => p.name === n)?.face;
+  const row = (p, i) => { const f = face(p.name), gain = p.score - (stand.scores[p.name] || 0); return `<div class="strow" data-n="${esc(p.name)}" style="--i:${i}"><i style="--pc:${f?.[1] || '#232a5c'}">${f?.[0] || '🙂'}</i><b>${esc(p.name)}</b><div class="stbar"><span style="width:${Math.max(3, (100 * p.score) / max)}%"></span></div><em>${p.score.toLocaleString()}</em>${gain > 0 ? `<small>+${gain.toLocaleString()}</small>` : '<small></small>'}</div>`; };
+  const el = document.createElement('div'); el.className = 'standings'; el.dataset.theme = THEME_OF[host.gameId] || '';
+  el.innerHTML = `<h2>After round ${done}</h2><div class="strows" style="--n:${now.length}">${before.map(row).join('')}</div>`;
+  document.body.append(el);
+  tap.fn?.('ceremony', ['standings', el.dataset.theme, `<h2>After round ${done}</h2><div class="strows" style="--n:${now.length}">${now.map(row).join('')}</div>`, 0, 5200]);
+  if (sfx.on) play('whoosh');
+  setTimeout(() => { now.forEach((p, i) => el.querySelector(`[data-n="${CSS.escape(p.name)}"]`)?.style.setProperty('--i', i)); if (sfx.on) play('pop'); }, 1300);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 450); }, 5200);
+  el.onclick = () => el.remove();
+  stand.order = now.map(p => p.name); stand.scores = Object.fromEntries(list.map(p => [p.name, p.score]));
+}
+
+// After the podium: one clear choice of what happens next, instead of two small buttons inside the game's last screen.
+function suggestNext() {
+  if (host.queue?.length) return host.queue[0];
+  const n = host.players.length, ok = id => id !== host.gameId && GAMES[id] && n >= GAMES[id].meta.min && n <= GAMES[id].meta.max && !(host.settings.kids && GAMES[id].meta.kids === false);
+  const shelf = SHELVES.find(s => s.games?.includes(host.gameId) && s.id !== 'featured') || SHELVES[0];
+  const pool = [...(shelf.games || []), ...SHELVES[0].games].filter(ok);
+  return pool.find(id => !host.played?.[id]) || pool[0] || null;
+}
+function afterParty() {
+  const nx = suggestNext(), G = nx && GAMES[nx];
+  const t = host.tally, night = t?.games.length > 1 ? Object.entries(t.by).filter(e => e[1].pts).sort((a, b) => b[1].pts - a[1].pts).slice(0, 5) : [];
+  app.insertAdjacentHTML('beforeend', `<div class="after">
+    <button class="acard" data-host="again"><span class="aart">${art(host.gameId, ICONS[host.gameId])}</span><span class="atext"><small>Same game</small><b>Play again</b></span></button>
+    ${G ? `<button class="acard next" data-host="playnext:${nx}"><span class="aart">${art(nx, ICONS[nx])}</span><span class="atext"><small>Up next</small><b>${esc(G.meta.name)}</b></span></button>` : ''}
+    <button class="acard" data-host="lobby"><span class="aart all">🎲</span><span class="atext"><small>Something else</small><b>All games</b></span></button>
+    ${night.length ? `<p class="anight"><b>Tonight</b> ${night.map(([n, r], i) => `${i ? '· ' : '👑 '}${esc(n)} <b>${r.pts}</b>`).join(' ')}</p>` : ''}</div>`);
+}
+
+// Reveal beats. A game marks parts of a result with data-beat="1", "2", ... and they appear one at a time, each with
+// a sound, instead of all at once. data-beat-class adds a class at that moment instead (to color a row that is already
+// showing). The timing is kept per phase, so a redraw in the middle doesn't restart or skip the sequence.
+const BEAT_FIRST = 900, BEAT_GAP = 1100;
+let beats = { key: '', start: 0, timers: [], last: 0 };
+function runBeats() {
+  const els = host.state ? [...app.querySelectorAll('[data-beat]')] : [];
+  if (!els.length) { beats.last = 0; return; }
+  const s = host.state, key = [host.gameId, s.phase, s.round, s.n, s.step, s.turn, s.idx, s.q, s.i, s.k].join('|');
+  if (key !== beats.key) { beats.timers.forEach(clearTimeout); beats = { key, start: Date.now(), timers: [], last: 0 }; }
+  beats.timers.forEach(clearTimeout); beats.timers = [];
+  const top = Math.max(...els.map(e => +e.dataset.beat || 1));
+  beats.last = beats.start + BEAT_FIRST + (top - 1) * BEAT_GAP;
+  for (const el of els) {
+    const n = +el.dataset.beat || 1, due = beats.start + BEAT_FIRST + (n - 1) * BEAT_GAP, cls = el.dataset.beatClass;
+    const show = fresh => { if (cls) el.classList.add(...cls.split(' ')); else el.classList.remove('beat-off'); if (fresh) { el.classList.add('beat-in'); if (sfx.on) play(n === top ? 'lockin' : 'pop'); shareScreen(); } };
+    if (Date.now() >= due) { show(false); continue; }
+    if (!cls) el.classList.add('beat-off');
+    beats.timers.push(setTimeout(() => { if (el.isConnected) show(true); }, due - Date.now()));
+  }
+}
+
 // Self-running rounds. When the TV is showing a "Next" button and nobody has anything left to do on their phone,
 // the game moves on by itself after a short read. The host can still press Next sooner, or pause.
 // Phases where a real person has to get ready (a new actor, a new team, a talk) are left to the host.
@@ -78,6 +141,7 @@ function autoNext() {
   if (hold) { auto.quiet = 0; if (btn) delete btn.dataset.count; return; }
   const key = [host.gameId, s.phase, s.round, s.n, s.step, s.turn, s.idx, s.q].join('|');
   if (key !== auto.key) { const words = app.querySelector('.stage .panel')?.textContent.length || 0; auto = { key, quiet: 0, at: Date.now() + Math.min(14000, 6500 + Math.max(0, words - 120) * 30) * (host.settings.relaxed ? 1.5 : 1) }; }
+  if (beats.last) auto.at = Math.max(auto.at, beats.last + 3500);   // never move on before the reveal has finished
   const left = Math.ceil((auto.at - Date.now()) / 1000);
   btn.dataset.count = Math.max(0, left);
   if (left <= 0 && ++auto.quiet >= 2) { auto.key = ''; hostAction('next'); }   // two checks in a row, so one slow phone isn't cut off
@@ -584,6 +648,7 @@ function hostAction(a) {
   if (a.startsWith('night:')) { const nt = NIGHTS.find(x => x.id === a.slice(6)); if (nt) { host.queue = nt.games.slice(1); host.night = nt.id; host.gameId = nt.games[0]; host.screen = 'gather'; save(); } return changed(); }
   if (a === 'endnight') { host.queue = []; host.night = null; save(); return render(); }
   if (a === 'lobby' && host.intro && !host.state) { host.intro = null; host.screen = 'gather'; save(); return changed(); }
+  if (a.startsWith('playnext:') && GAMES[a.slice(9)]) { host.lastByGame = { ...(host.lastByGame || {}), [host.gameId]: host.state }; host.state = null; ceremonyOff?.(); if (host.queue?.[0] === a.slice(9)) host.queue.shift(); host.gameId = a.slice(9); host.screen = 'gather'; stopAmbient(); document.body.classList.remove('day'); return changed(); }
   if (a === 'lobby') { host.lastByGame = { ...(host.lastByGame || {}), [host.gameId]: host.state }; host.state = null; ceremonyOff?.(); if (host.queue?.length) { host.gameId = host.queue.shift(); host.screen = 'gather'; } else { host.night = null; host.screen = 'menu'; } stopAmbient(); document.body.classList.remove('day'); return changed(); }
   if (a === 'newcode') {
     // Same players again: tell every phone the new code so nobody has to rejoin by hand.
@@ -897,7 +962,7 @@ function render() {
   if (host.intro && host.state) host.intro = null;
   if (!host.state && host.intro) renderIntro();
   else if (!host.state) renderLobby();
-  else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); if (fresh) wordsIn(); decorate(); pops(fresh); guideTip(); slideScores(); cardPops(fresh); }
+  else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); if (fresh) wordsIn(); if (v.phase === 'over') afterParty(); decorate(); pops(fresh); guideTip(); slideScores(); cardPops(fresh); standings(v); }
   document.body.classList.toggle('night', host.state?.phase === 'night');
   // How-to screens show in full the first time a room plays a game, then get out of the way.
   quiet.on = !host.state;
@@ -930,6 +995,7 @@ function render() {
   vetoExtras();
   vb.querySelectorAll('[data-host]').forEach(b => (b.onclick = () => hostAction(b.dataset.host)));
   app.querySelectorAll('[data-host]').forEach(b => (b.onclick = () => hostAction(b.dataset.host)));
+  runBeats();
   autoNext();
   app.querySelectorAll('[data-game]').forEach(b => (b.onclick = () => { host.gameId = b.dataset.game; host.screen = 'gather'; host.queue = []; host.night = null; if (sfx.on) play('lockin'); flash('wipe'); changed(); }));
   app.querySelectorAll('[data-shelf]').forEach(b => (b.onclick = () => { host.shelf = b.dataset.shelf; save(); render(); }));
