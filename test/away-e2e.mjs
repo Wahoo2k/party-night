@@ -1,0 +1,30 @@
+// A phone that goes quiet: marked away, then dropped from the lobby; and the phone's action bar and how-to sheet.
+import { chromium } from '/opt/npm-tools/node_modules/playwright/index.mjs';
+const out = process.env.SHOTS || 'test';
+const b = await chromium.launch({ executablePath: '/usr/bin/google-chrome' });
+const errors = []; const ok = (c, m) => { if (!c) errors.push(m); };
+const ctx = await b.newContext({ viewport: { width: 1280, height: 720 } });
+const tv = await ctx.newPage(); tv.on('pageerror', e => errors.push('tv ' + e.message));
+await tv.goto('http://localhost:8765/tv.html?local=1&away=12&gone=30'); await tv.waitForSelector('.gcard');
+for (let i = 0; i < 5; i++) await tv.click('[data-host=addbot]');
+const code = await tv.evaluate(() => JSON.parse(localStorage.getItem('pg-host')).code);
+const join = async name => { const p = await ctx.newPage(); await p.setViewportSize({ width: 390, height: 780 }); p.on('pageerror', e => errors.push('phone ' + e.message)); await p.goto('http://localhost:8765/play.html?local=1'); await p.fill('#code', code); await p.fill('#name', name); await p.click('#join'); await p.waitForSelector("text=You're in"); return p; };
+const gone = await join('Ghosty'), me = await join('Remy');
+const names = () => tv.evaluate(() => JSON.parse(localStorage.getItem('pg-host')).players.map(p => p.name + (p.away ? '*' : '')));
+ok((await names()).includes('Ghosty'), 'joined');
+await gone.close();
+await tv.waitForTimeout(19000);
+ok((await names()).includes('Ghosty*'), 'marked away after going quiet: ' + (await names()));
+await tv.waitForTimeout(24000);
+ok(!(await names()).some(n => n.startsWith('Ghosty')), 'dropped from the lobby: ' + (await names()));
+ok((await names()).includes('Remy'), 'a live phone keeps its seat: ' + (await names()));
+// phone guidance in Werewolf
+await tv.click('[data-game=werewolf]'); await tv.click('[data-host=start]');
+await me.waitForSelector('#helpsheet', { timeout: 8000 }).then(() => {}, () => errors.push('how-to sheet did not open on the first game'));
+await me.waitForTimeout(700); await me.screenshot({ path: `${out}/away-sheet.png` });
+ok(/WEREWOLF|SEER|DOCTOR|VILLAGER/.test(await me.textContent('#helpsheet')), 'sheet explains the role');
+await me.click('#hsok');
+ok(await me.locator('.actbar.go').count() === 1, 'action bar says it is your move');
+ok(/HOLD/.test(await me.textContent('.actbar')), 'action bar says what to do: ' + (await me.textContent('.actbar')));
+await me.screenshot({ path: `${out}/away-phone.png` });
+console.log(errors.length ? 'FAIL\n' + errors.join('\n') : 'ok away-e2e'); await b.close(); process.exit(errors.length ? 1 : 0);

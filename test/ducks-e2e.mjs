@@ -12,7 +12,7 @@ await me.setViewportSize({ width: 390, height: 760 });
 await me.goto(base + 'play.html?local=1'); await me.fill('#code', code); await me.fill('#name', 'Tom'); await me.click('#join');
 await me.waitForSelector("text=You're in");
 await tv.click('[data-host=addbot]');
-await tv.click('[data-shelf=all]'); await tv.click('[data-game=ducks]'); await tv.click('[data-host=start]');
+await tv.click('[data-game=ducks]'); await tv.click('[data-host=start]');
 const st = () => tv.evaluate(() => JSON.parse(localStorage.getItem('pg-host')).state);
 const myPid = await me.evaluate(() => Object.entries(sessionStorage).find(([k]) => k.startsWith('pg-pid'))[1].replace(/"/g, ''));
 let shots = 0, tossesByMe = 0;

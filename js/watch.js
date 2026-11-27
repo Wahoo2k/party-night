@@ -42,7 +42,7 @@ function ceremonyOff() { cer?.el.remove(); cer?.timers.forEach(clearTimeout); ce
 const FX = {
   play: n => { if (sfx.on && /^[a-z]+$/.test(n)) play(n); },
   say: (t, low) => say(text(t).slice(0, 400), false, !!low),
-  titleCard: (a, b, c, d) => titleCard(text(a), text(b), text(c).replace(/[^a-z ]/g, ''), clean(d)),
+  titleCard: (a, b, c, d) => titleCard(text(a), text(b), text(c).replace(/[^a-z -]/g, ''), clean(d)),
   confetti: () => confetti(),
   clawMarks: () => clawMarks(),
   flash: k => flash(k),

@@ -28,3 +28,6 @@ Save each file into `art/` with the name shown. The app picks them up by name; a
 - `pic-<animal>.jpg` (square, 512px): painted animal cards for Memory Match and Go Fish (map in js/art.js `PIC`).
 - `mp-<answer>.jpg` (square, 720px): photo-style mystery pictures for Brain Teasers; file name is the answer in lower case.
 - `win-<theme>.jpg` (16:9): scene behind the winners' podium, one per theme.
+
+## Cover style rule
+Covers show real-looking adult people (mixed backgrounds), painted cinematic style, never cartoon animal mascots. Kept as-is: agents, blackjack, bluffcards, haunted, werewolf, wordhunt, shade, potato, midnight (animals or props that read as grown-up). Replaced Nov 27: whosaid, bluff, bomb, bowl, crew, crowd, dares, faker, gofish, meter, split, copycat, memory, estimate, freeze, rebus, sketch. Still to redo with the Ducky Toss rework: ducks.

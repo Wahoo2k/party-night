@@ -1416,3 +1416,133 @@ body.compact .chcard span{font-size:30px}
 body.compact .guide{margin-top:8px;padding:6px 10px;font-size:14px}
 body.compact .podium{margin:8px 0}
 body.compact .menu,body.compact .lobby.gather,body.compact .lobby.one{height:calc(100vh - 46px - 22px);min-height:0}
+
+/* The hub: hero for the game in focus, rows of cover cards below. No scroll bars anywhere. */
+body.hubmode:not(.phone) .scene{height:54px}
+body.hubmode:not(.phone) .scene svg{display:none}
+body.hubmode:not(.phone) .scene .title{font-size:clamp(24px,2.4vw,38px);top:8px}
+body.hubmode:not(.phone) .wrap{padding:6px max(3vw,16px) 8px;max-width:none}
+.hub{height:calc(100vh - 54px - 28px);display:grid;grid-template-rows:minmax(0,44fr) minmax(0,56fr);gap:14px;min-height:0}
+.hero{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,42%);grid-template-rows:minmax(0,1fr) auto;gap:10px 28px;padding:clamp(14px,2vw,30px);border-radius:26px;overflow:hidden;background:#0b0f2c;box-shadow:0 18px 50px #0008;isolation:isolate}
+.hero::before{content:"";position:absolute;inset:0;z-index:-2;background:var(--art,none) center 35%/cover no-repeat;transition:background-image .25s}
+.hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#0b0f2cf2 0,#0b0f2cd9 30%,#0b0f2c80 55%,#0b0f2c40 100%),linear-gradient(0deg,#0b0f2cb3,#0b0f2c00 40%)}
+.heroinfo{grid-row:1/3;align-self:center;min-width:0;display:grid;gap:8px;align-content:center}
+.heroinfo h2{margin:0;font:400 clamp(38px,5.4vw,96px)/.95 'Pirata One',serif;color:#fff;text-shadow:0 4px 0 #0007;animation:heroin .35s both}
+.heroinfo p{margin:0;max-width:34em;font-size:clamp(16px,1.55vw,26px);line-height:1.3;color:#e6e8ff}
+.heroinfo .pvtags span{background:#ffffff1f;backdrop-filter:blur(4px)}
+.heroact{display:flex;align-items:center;gap:14px;margin-top:6px}
+.playhint{padding:10px 20px;border-radius:999px;background:var(--moon,#ffcf6b);color:#0e1230;font:800 clamp(15px,1.3vw,22px)/1 Outfit,sans-serif;box-shadow:0 6px 0 #0005}
+.hero .pvbox{grid-column:2;grid-row:1;align-self:center;aspect-ratio:16/9;flex:none;width:100%;max-height:100%;justify-self:end;box-shadow:0 0 0 3px #ffffff33,0 16px 40px #000a}
+.herobar{grid-column:2;grid-row:2;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px}
+.herobar .mroom{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:#0e1230cc;font-size:clamp(13px,1.1vw,18px);color:var(--dim)}
+.herobar .code.mini{font-size:1.3em;letter-spacing:.14em;padding:0;border:0;background:none;color:#fff}
+@keyframes heroin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.grows{position:relative;min-height:0;overflow:hidden auto;scrollbar-width:none;scroll-behavior:smooth;-webkit-mask-image:linear-gradient(#000 0,#000 86%,#0000 100%);mask-image:linear-gradient(#000 0,#000 86%,#0000 100%);padding-bottom:30px}
+.grows::-webkit-scrollbar,.rail::-webkit-scrollbar{display:none}
+.grow{padding:2px 0 10px;scroll-margin:4px}
+.grow h3{margin:0 0 6px 6px;font:800 clamp(15px,1.35vw,24px)/1.1 Outfit,sans-serif;color:#cfd4ff;letter-spacing:.01em}
+.rail{position:relative;display:flex;gap:clamp(10px,1.1vw,18px);overflow:auto hidden;scrollbar-width:none;padding:10px 12px 12px;scroll-padding:0 60px;-webkit-mask-image:linear-gradient(90deg,#000 0,#000 94%,#0000 100%);mask-image:linear-gradient(90deg,#000 0,#000 94%,#0000 100%)}
+.gcard{position:relative;flex:none;width:clamp(150px,15.2vw,300px);padding:0;border:0;background:none;color:#aeb4dc;text-align:left;cursor:pointer;display:grid;gap:6px;transition:transform .16s cubic-bezier(.2,.9,.3,1.2),color .16s;scroll-margin:0 60px}
+.gcard .gimg{display:block;aspect-ratio:4/3;border-radius:16px;overflow:hidden;background:#141a45;box-shadow:0 6px 16px #0007;transition:box-shadow .16s}
+.gcard .gimg .art{display:block;width:100%;height:100%;object-fit:cover;border-radius:0;box-shadow:none;animation:none}
+.gcard b{font:700 clamp(13px,1.15vw,20px)/1.15 Outfit,sans-serif;padding:0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gcard .gbadge{position:absolute;top:8px;right:8px;padding:2px 6px;border-radius:99px;background:#0e1230cc;font-size:14px}
+.gcard .sameroom{position:absolute;top:8px;left:8px;margin:0;padding:3px 8px;border-radius:99px;background:#0e1230dd;color:#fff;font-size:11px;opacity:1}
+.gcard:hover,.gcard:focus-visible,.gcard.on{color:#fff;outline:0;transform:scale(1.07);z-index:2}
+.gcard:focus-visible .gimg,.gcard.on .gimg{box-shadow:0 0 0 4px var(--moon,#ffcf6b),0 14px 30px #000b}
+.gcard.night .nightimg{display:grid;place-items:center;background:linear-gradient(135deg,#3a43a0,#7a3fa8)}
+.gcard.night .nightimg i{font-style:normal;font-size:clamp(40px,4.6vw,84px)}
+.gcard .nightsub{padding:0 4px;font-size:clamp(11px,.9vw,15px);color:#aab;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.compact .hub{height:calc(100vh - 46px - 26px)}
+/* Players whose phone has gone quiet */
+.away{opacity:.45}
+.seat.away::after{content:"💤";position:absolute;right:-6px;top:-10px;font-size:20px}
+
+/* Phone: the action bar and the how-to sheet */
+.actbar{position:sticky;top:0;z-index:6;display:grid;gap:3px;margin:-6px -6px 12px;padding:10px 14px;border-radius:14px;text-align:left;box-shadow:0 6px 16px #0006}
+.actbar b{font:800 19px/1.1 Outfit,system-ui,sans-serif}
+.actbar span{font:600 15px/1.3 Outfit,system-ui,sans-serif}
+.actbar small{font-size:12.5px;line-height:1.3;opacity:.85}
+.actbar.go{background:#ffcf6b;color:#0e1230;animation:actpulse 1.6s ease-in-out 2}
+.actbar.wait{background:#232a5c;color:#dfe3ff}
+@keyframes actpulse{50%{box-shadow:0 0 0 6px #ffcf6b55,0 6px 16px #0006}}
+#helpbtn{position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:30;padding:8px 12px;border-radius:999px;border:1px solid #fff5;background:#0e1230ee;color:#fff;font:700 13px/1 Outfit,system-ui,sans-serif}
+#helpsheet{position:fixed;inset:0;z-index:60;display:grid;place-items:end center;background:#000a}
+#helpsheet .hs{width:min(100%,520px);max-height:88vh;overflow:auto;padding:20px 18px calc(20px + env(safe-area-inset-bottom,0px));border-radius:22px 22px 0 0;background:#161b4a;color:#fff;animation:rise .3s both}
+#helpsheet h2{margin:0 0 10px}#helpsheet h3{margin:14px 0 6px;font-size:16px}
+#helpsheet ol{margin:0;padding-left:1.3em;display:grid;gap:8px;font-size:16px;line-height:1.35}
+.hsrole{padding:12px 14px;border-radius:14px;background:#ffcf6b;color:#0e1230;font-weight:700;line-height:1.35}
+.hsgoal{margin:10px 0 0;font-weight:700}
+.heroact{margin:4px 0 0}
+.grows::after{content:"";display:block;height:60vh}
+.hub>*{min-width:0}
+body.hubmode:not(.phone) #app{padding:6px max(3vw,16px) 8px}
+
+/* Game intro: the TV explains the game and waits for phones to tap Ready */
+.intro{display:grid;grid-template-columns:minmax(0,38%) minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;gap:clamp(14px,2vw,32px) clamp(18px,3vw,48px);align-items:center;min-height:calc(100vh - 220px);padding:clamp(16px,2vw,34px);border-radius:26px;background:color-mix(in srgb,var(--panel,#161b4a) 88%,transparent);backdrop-filter:blur(6px);box-shadow:0 18px 50px #0008}
+.introart .art{width:100%;border-radius:22px;box-shadow:0 14px 40px #000a}
+.introkick{margin:0;font:800 clamp(14px,1.3vw,22px)/1 Outfit,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--moon,#ffcf6b)}
+.introtext h2{margin:6px 0 14px;font:400 clamp(40px,5vw,88px)/1 var(--hfont,'Pirata One',serif);color:#fff}
+.introsteps{margin:0;padding:0;list-style:none;display:grid;gap:clamp(8px,1.1vw,16px);counter-reset:st}
+.introsteps li{counter-increment:st;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;font-size:clamp(18px,1.9vw,32px);line-height:1.25;color:#f1f2ff}
+.introsteps li::before{content:counter(st);display:grid;place-items:center;width:1.6em;height:1.6em;border-radius:50%;background:var(--moon,#ffcf6b);color:#0e1230;font-weight:800;font-size:.85em}
+.intro.enter .introsteps li{animation:rise .5s both;animation-delay:calc(.5s + var(--i) * 1.1s)}
+.intro.enter .introart{animation:paintedin .7s both}
+.introready{grid-column:1/-1;display:grid;gap:10px;justify-items:center;text-align:center}
+.introchips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.introchip{display:inline-flex;align-items:center;gap:8px;padding:6px 14px 6px 6px;border-radius:999px;background:#0e123099;font:700 clamp(15px,1.3vw,22px)/1 Outfit,sans-serif;color:#cfd4ff;border:2px solid transparent}
+.introchip i{display:grid;place-items:center;width:1.7em;height:1.7em;border-radius:50%;background:var(--pc);font-style:normal}
+.introchip.ok{border-color:#7fe0a8;color:#fff;background:#1d5a3c}
+.introhint{margin:0;font-size:clamp(15px,1.4vw,24px);color:#dfe3ff}
+.pintro ol{padding-left:1.3em;display:grid;gap:10px;font-size:17px;line-height:1.35;text-align:left}
+.pintro .btn.big{width:100%;padding:18px;font-size:20px;margin-top:8px}
+.hsrole{display:block;width:100%;border:0;text-align:left;font:700 16px/1.35 Outfit,system-ui,sans-serif;cursor:pointer}
+.hsrole .cover{display:none}.hsrole.hid .cover{display:block}.hsrole.hid .secret{display:none}
+.hsrole.hid{background:#232a5c;color:#fff}
+
+/* Title cards look and move differently in each game family (class th-<theme> is added by the TV) */
+.tcard[class*=th-] .tc-s{display:none}
+@keyframes tcpop{0%{transform:scale(.2) rotate(-12deg);opacity:0}10%{transform:scale(1.06) rotate(2deg);opacity:1}16%,86%{transform:none;opacity:1}100%{transform:scale(1.25);opacity:0}}
+@keyframes tcslide{0%{transform:translateX(-100%)}12%,86%{transform:none;opacity:1}100%{transform:translateX(100%);opacity:1}}
+@keyframes tcwipe{0%{clip-path:inset(0 100% 0 0)}14%,86%{clip-path:inset(0 0 0 0)}100%{clip-path:inset(0 0 0 100%)}}
+@keyframes tcdrop{0%{transform:translateY(-100%)}9%{transform:translateY(0)}12%{transform:translateY(-4%)}15%,86%{transform:none;opacity:1}100%{transform:translateY(100%)}}
+@keyframes tcflip{0%{transform:perspective(1400px) rotateX(90deg);opacity:0}13%,86%{transform:perspective(1400px) rotateX(0);opacity:1}100%{transform:perspective(1400px) rotateX(-90deg);opacity:0}}
+@keyframes tcsplit{0%{clip-path:polygon(50% 0,50% 0,50% 100%,50% 100%)}13%,86%{clip-path:polygon(0 0,100% 0,100% 100%,0 100%)}100%{clip-path:polygon(50% 0,50% 0,50% 100%,50% 100%)}}
+@keyframes tcfade{0%{opacity:0}12%,86%{opacity:1}100%{opacity:0}}
+.tcard.th-comic{animation-name:tcpop;background:radial-gradient(#0000001f 18%,#0000 19%) 0 0/26px 26px,repeating-conic-gradient(from 0deg,#ffd23f 0 10deg,#ffb627 10deg 20deg)}
+.tcard.th-comic h2{font-family:'Bangers','Outfit',sans-serif;color:#fff;-webkit-text-stroke:.04em #2b1b6b;text-shadow:.07em .07em 0 #e2483d,.1em .1em 0 #2b1b6b;transform:rotate(-4deg);letter-spacing:.04em}
+.tcard.th-comic p{color:#2b1b6b;font-weight:800;opacity:1}
+.tcard.th-paper{animation-name:tcslide;background:repeating-linear-gradient(#0000 0 46px,#7fa3b455 46px 48px),linear-gradient(90deg,#0000 0 9%,#e2603d66 9% 9.3%,#0000 9.3%),#f1e6cb}
+.tcard.th-paper h2{font-family:'Special Elite','Courier New',monospace;color:#24434f;text-shadow:none;letter-spacing:0}
+.tcard.th-paper p{color:#4a6b78;opacity:1}
+.tcard.th-sketch{animation-name:tcwipe;background:linear-gradient(#5a8fd833 2px,#0000 2px) 0 0/44px 44px,linear-gradient(90deg,#5a8fd833 2px,#0000 2px) 0 0/44px 44px,#f6f8fc}
+.tcard.th-sketch h2{font-family:'Fredoka','Outfit',sans-serif;color:#f08a4b;text-shadow:.04em .05em 0 #2d3142}
+.tcard.th-sketch p{color:#2d3142;opacity:1}
+.tcard.th-kids{animation-name:tcdrop;background:radial-gradient(#ffffff80 12%,#0000 13%) 0 0/90px 90px,radial-gradient(#ffffff55 8%,#0000 9%) 45px 45px/90px 90px,linear-gradient(#4db8ff,#a8e6ff)}
+.tcard.th-kids h2{font-family:'Fredoka','Outfit',sans-serif;color:#fff;text-shadow:0 .07em 0 #2a4d9b,0 .14em .3em #0005}
+.tcard.th-kids p{color:#17336e;font-weight:700;opacity:1}
+.tcard.th-show{animation-name:tccurtain;background:radial-gradient(ellipse at 50% 120%,#0000 30%,#1a0530 75%),repeating-conic-gradient(from 0deg at 50% 120%,#6a1fb8 0 8deg,#3b0f6b 8deg 16deg)}
+.tcard.th-show::before{content:"";position:absolute;inset:3vh 3vw;border:.7vh dotted #ffd166;border-radius:28px;opacity:.85;animation:pulse 1s steps(2) infinite}
+.tcard.th-show h2{font-family:'Righteous','Outfit',sans-serif;color:#ffd166;text-shadow:0 0 .35em #ffd166aa,0 .06em 0 #6b2a00}
+.tcard.th-noir{animation-name:tciris;background:repeating-linear-gradient(#0000 0 3px,#00000066 3px 4px),radial-gradient(ellipse at 50% 40%,#14402a,#030906)}
+.tcard.th-noir::before,.tcard.th-noir::after{content:"";position:absolute;left:0;right:0;height:11vh;background:#000}.tcard.th-noir::before{top:0}.tcard.th-noir::after{bottom:0}
+.tcard.th-noir h2{font-family:'Special Elite','Courier New',monospace;color:#b9ffcf;text-shadow:0 0 .3em #5dff9b88;letter-spacing:.06em}
+.tcard.th-noir p{color:#9fcfb3}
+.tcard.th-teams{animation-name:tcsplit;background:linear-gradient(115deg,#ff8a3c 0 50%,#1fb5a8 50% 100%)}
+.tcard.th-teams h2{font-family:'Righteous','Outfit',sans-serif;color:#fff;text-shadow:0 .07em 0 #1d2440}
+.tcard.th-teams p{color:#1d2440;font-weight:800;opacity:1}
+.tcard.th-felt{animation-name:tcflip;background:radial-gradient(ellipse at 50% 45%,#2f9a63,#0a2f1e)}
+.tcard.th-felt::before{content:"♠ ♥ ♣ ♦";position:absolute;top:8vh;left:0;right:0;font-size:6vh;letter-spacing:.6em;color:#ffe9a855}
+.tcard.th-felt h2{font-family:'Righteous','Outfit',sans-serif;color:#ffe9a8;text-shadow:0 .06em 0 #0a2f1e}
+.tcard.th-night{animation-name:tcfade}
+.tcard.th-night::before{content:"";position:absolute;right:12vw;top:9vh;width:16vh;height:16vh;border-radius:50%;background:radial-gradient(circle at 38% 38%,#fff8d8,#f2d27a);box-shadow:0 0 12vh #f2d27a88}
+/* Bad news and dawn tints still read through the themed cards */
+.tcard[class*=th-].blood:not(.th-night){filter:saturate(.75) hue-rotate(-18deg) brightness(.85)}
+
+/* Join code on screen all game */
+#joinqr{position:fixed;left:max(1.2vw,12px);bottom:max(1.2vh,10px);z-index:11;display:flex;align-items:center;gap:10px;padding:6px 14px 6px 6px;border-radius:16px;background:#0e1230d9;color:#cfd4ff;font:600 clamp(11px,.9vw,15px)/1.2 Outfit,system-ui,sans-serif;backdrop-filter:blur(4px)}
+#joinqr .qr{width:clamp(64px,7.4vh,92px);margin:0;padding:4px;border-radius:8px}
+#joinqr span{display:grid}
+#joinqr b{font-size:1.7em;letter-spacing:.14em;color:#fff}
+body.watch #joinqr{display:none}
+.introready{justify-items:center}

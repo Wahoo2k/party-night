@@ -112,6 +112,15 @@ function render(v) {
   }
   if (v.phase === 'kicked') { clearInterval(hello); room?.close(); room = null; app.innerHTML = `<div class="panel"><h2>You were removed</h2><p class="say">The host removed you from this room.</p></div>`; return; }
   if (v.phase === 'full') { app.innerHTML = `<div class="panel"><h2>That room is full</h2><button class="btn" id="back">Try another code</button></div>`; app.querySelector('#back').onclick = leave; return; }
+  if (v.phase === 'intro') {
+    // The game is being explained on the TV: the same steps here, and a Ready button.
+    localStore.set('pg-seen-' + v.game, 1);
+    app.innerHTML = `<div class="panel pintro"><p class="introkick">How to play</p><h2>${esc(v._name)}</h2><ol>${(v._how || []).map(x => `<li>${esc(x)}</li>`).join('')}</ol>${v.ready ? '<div class="actbar wait"><b>✅ You\'re ready</b><span>Waiting for everyone else. Watch the TV.</span></div>' : '<button class="btn big" id="rdy">✅ Got it. I\'m ready!</button>'}${v._remote && v.ready ? '<button class="btn ghost" data-rm="start">👑 Start now</button>' : ''}</div>`;
+    const r = app.querySelector('#rdy'); if (r) r.onclick = () => { r.disabled = true; send({ type: '_ready' }); };
+    app.querySelectorAll('[data-rm]').forEach(b => (b.onclick = () => send({ type: '_host', a: b.dataset.rm })));
+    document.getElementById('helpbtn')?.remove();
+    return;
+  }
   if (v.phase === 'lobby') {
     app.innerHTML = `<div class="panel"><h2>You're in, ${esc(v.me || name)}</h2>${v.byHost ? '<p class="note">The host set your name.</p>' : v.fixed ? `<p class="note">${v.me && name && v.me.toLowerCase().startsWith(name.toLowerCase()) ? 'Someone already had that name, so you got a number.' : 'We tidied up your name.'}</p>` : ''}<p class="say">Watch the TV. The game starts when the host is ready.</p>
       <p class="muted">Game: ${esc(v.game)} · ${v.players.length} playing</p>
@@ -143,12 +152,17 @@ function render(v) {
 let couldAct = false, lastGain = 0, lastPlace = '';
 function polish(v, wrap, isNew) {
   const canAct = !!wrap.querySelector('button:not([disabled]):not(#leave), input:not([disabled]), textarea, canvas, [data-pad], svg.pad');
-  if (canAct && !couldAct && !v._paused) {
-    buzz([60, 40, 60]);
-    const b = Object.assign(document.createElement('div'), { className: 'yourturn', textContent: 'Your move!' });
-    wrap.prepend(b); setTimeout(() => b.remove(), 1600);
+  // A bar across the top of every screen says, in one line, whether it is your move and what to do.
+  const help = (GAMES[v.game] || {}).phoneHelp?.(v) || null;
+  const go = help ? !help.wait && canAct : canAct;
+  if (go && !couldAct && !v._paused) buzz([60, 40, 60]);
+  if (v.phase !== 'over' && v.phase !== 'spectate') {
+    const bar = document.createElement('div');
+    bar.className = 'actbar ' + (go ? 'go' : 'wait');
+    bar.innerHTML = `<b>${go ? '👉 Your move' : '📺 Watch the TV'}</b><span>${esc(help?.now || (go ? 'Do the step below. Everyone is waiting on you!' : 'Nothing to do on your phone right now.'))}</span>`;
+    wrap.prepend(bar);
   }
-  if (!canAct && v.phase !== 'over') wrap.insertAdjacentHTML('beforeend', '<p class="watchtv">📺 Eyes on the TV</p>');
+  helpButton(v, help, isNew);
   couldAct = canAct;
   if (v._final && isNew) toast('Final round!', 'gold');
   if (v._gain && v._gain.id !== lastGain) { lastGain = v._gain.id; toast('+' + v._gain.n.toLocaleString(), 'gain'); buzz([30, 30, 30, 30, 120]); }
@@ -158,6 +172,25 @@ function polish(v, wrap, isNew) {
     wrap.insertAdjacentHTML('afterbegin', `<div class="myplace p${Math.min(v._place.n, 4)}"><b>${v._place.n === 1 ? '🏆 ' : ''}${nth}</b><span>of ${v._place.of}</span></div>`);
     if (key !== lastPlace) { lastPlace = key; if (v._place.n === 1) buzz([80, 60, 80, 60, 200]); }
   } else lastPlace = '';
+}
+
+// "How to play" is one tap away on every screen, and opens by itself the first time someone plays a game.
+function helpButton(v, help, isNew) {
+  let btn = document.getElementById('helpbtn');
+  if (!v.game || !v._how) { btn?.remove(); return; }
+  if (!btn) { btn = Object.assign(document.createElement('button'), { id: 'helpbtn', textContent: '❓ How to play' }); document.body.append(btn); }
+  const open = () => {
+    document.getElementById('helpsheet')?.remove();
+    const sh = document.createElement('div'); sh.id = 'helpsheet';
+    sh.innerHTML = `<div class="hs"><h2>${esc(v._name || 'How to play')}</h2>${help?.role ? `<button class="hsrole hid" id="hsrole"><span class="cover">🤫 Tap to show your secret role tips (hide your screen first)</span><span class="secret">${esc(help.role)}${help.goal ? `<br><br>🎯 ${esc(help.goal)}` : ''}</span></button>` : ''}<h3>How a round goes</h3><ol>${(help?.steps || v._how).map(x => `<li>${esc(x)}</li>`).join('')}</ol><p class="muted">Your phone always shows a bar at the top: <b>👉 Your move</b> means tap something now. <b>📺 Watch the TV</b> means wait.</p><button class="btn" id="hsok">Got it</button></div>`;
+    document.body.append(sh);
+    sh.querySelector('#hsok').onclick = () => sh.remove();
+    const hr = sh.querySelector('#hsrole'); if (hr) hr.onclick = () => hr.classList.toggle('hid');
+    sh.onclick = e => { if (e.target === sh) sh.remove(); };
+  };
+  btn.onclick = open;
+  const key = 'pg-seen-' + v.game;
+  if (isNew && !localStore.get(key)) { localStore.set(key, 1); open(); }
 }
 function toast(text, cls) {
   const t = Object.assign(document.createElement('div'), { className: 'ptoast ' + cls, textContent: text });

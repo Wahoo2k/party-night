@@ -18,7 +18,7 @@ for (const name of ['Tom', 'Ann', 'Raj', 'Lee']) {
   await me.goto(base + 'play.html?local=1'); await me.fill('#code', code); await me.fill('#name', name); await me.click('#join');
   await me.waitForSelector("text=You're in"); phones.push(me);
 }
-await tv.click('[data-shelf=all]'); await tv.click('[data-game=imposter]'); await tv.click('[data-host=start]');
+await tv.click('[data-game=imposter]'); await tv.click('[data-host=start]');
 await tv.waitForTimeout(2500);
 const st = () => tv.evaluate(() => JSON.parse(localStorage.getItem('pg-host')));
 let h = await st();

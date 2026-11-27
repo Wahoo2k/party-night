@@ -16,7 +16,7 @@ async function run(have, gameId) {
   const tv = await ctx.newPage(); tv.on('pageerror', e => errors.push(e.message));
   await tv.goto('http://localhost:8765/tv.html?local=1'); await tv.waitForSelector('.code');
   for (let i = 0; i < 5; i++) await tv.click('[data-host=addbot]');
-  await tv.click('[data-shelf=all]'); await tv.click(`[data-game=${gameId}]`); await tv.click('[data-host=start]');
+  await tv.click(`[data-game=${gameId}]`); await tv.click('[data-host=start]');
   await tv.waitForTimeout(9000);
   const r = await tv.evaluate(() => ({ clips: window.__clips, tts: window.__tts }));
   await ctx.close(); return r;

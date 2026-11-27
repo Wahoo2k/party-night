@@ -18,6 +18,8 @@ enableDpad();
 
 // Saved so a TV refresh doesn't lose the game.
 let host = store.get('pg-host') || { code: newCode(), players: [], gameId: 'werewolf', state: null };
+// A room left over from another day starts fresh: new code, empty seats, same settings.
+if (host.at && Date.now() - host.at > 12 * 3600 * 1000) host = { ...host, code: newCode(), players: [], audience: [], state: null, queue: [], night: null, screen: 'menu', paused: 0 };
 host.audience = host.audience || [];
 host.settings = { relaxed: false, howto: true, kids: false, music: true, ...(host.settings || {}) };
 host.hidden = host.hidden || [];
@@ -41,7 +43,7 @@ const hostLine = m => quip(m, { game: host.gameId, kids: !!host.settings.kids ||
 const banter = (m, chance = 1) => { if (host.settings.banter !== false && !host.paused && Math.random() < chance) sayLow(hostLine(m)); };
 let saidLead = false, lastInput = Date.now(), lastIdle = 0;
 ['keydown', 'pointerdown'].forEach(e => addEventListener(e, () => (lastInput = Date.now()), { passive: true }));
-const save = () => store.set('pg-host', host);
+const save = () => { host.at = Date.now(); store.set('pg-host', host); };
 const joinUrl = () => {
   const u = new URL('play.html', location.href);
   u.search = '';
@@ -68,24 +70,81 @@ function decorate() {
     const text = el.textContent.replace(/^[^\p{L}\p{N}]+/u, '');
     const p = list.find(x => text === x.name || text.startsWith(x.name + ' ') || text.startsWith(x.name));
     if (!p?.face) return;
+    if (p.away && host.state) el.classList.add('away');
     const i = document.createElement('i');
     i.className = 'pface'; i.textContent = p.face[0]; i.style.setProperty('--pc', p.face[1]);
     el.prepend(i);
   });
 }
 
+// Phones say hello every few seconds while their page is open. A player who goes quiet is marked away after half a
+// minute; in the lobby they lose their seat after two minutes (they get it back the moment their phone returns).
+const tq = new URLSearchParams(location.search);   // ?away= and ?gone= (seconds) shorten the waits for tests
+const lastSeen = {}, AWAY_MS = (+tq.get('away') || 30) * 1000, GONE_MS = (+tq.get('gone') || 120) * 1000, bootAt = Date.now();
+const idleFor = p => Date.now() - (lastSeen[p.pid] || bootAt - GONE_MS + Math.min(20000, GONE_MS));   // after a TV restart, 20 seconds to check back in
+setInterval(() => {
+  let ch = false;
+  for (const p of [...host.players]) {
+    if (p.bot) continue;
+    const idle = idleFor(p), away = idle > AWAY_MS;
+    if (!!p.away !== away) { p.away = away; ch = true; }
+    if (!host.state && idle > GONE_MS) { host.players = host.players.filter(x => x !== p); ch = true; }
+  }
+  const n = host.audience.length;
+  host.audience = host.audience.filter(a => idleFor(a) <= GONE_MS);
+  if (ch || n !== host.audience.length) changed();
+}, 5000);
 const REACTIONS = ['👏', '😂', '😱', '🔥', '❤️', '👎'];
 const isAudience = pid => host.audience.some(a => a.pid === pid);
+// The rules each game shows on the TV, kept so every phone can open them at any time.
+const howCache = {};
+function rulesFor(id) {
+  if (howCache[id]) return howCache[id];
+  try {
+    const G = GAMES[id], n = Math.max(G.meta.min, Math.min(G.meta.max, host.players.length || G.meta.min));
+    const ps = Array.from({ length: n }, (_, i) => ({ pid: 'r' + i, name: host.players[i]?.name || 'Player ' + (i + 1) }));
+    const tmp = document.createElement('div'), cls = document.body.className;
+    G.renderTV({ ...G.tvView(G.setup(ps, Math.random, null, {}), Date.now()), fresh: false }, tmp);
+    document.body.className = cls;
+    const li = [...tmp.querySelectorAll('.how li')].map(x => x.textContent.trim()).filter(Boolean);
+    if (li.length) howCache[id] = li;
+  } catch {}
+  return howCache[id] || [GAMES[id].meta.blurb];
+}
+// The intro: before the first game of a title, the TV explains it and waits for every phone to tap Ready.
+const wantsIntro = () => host.settings.howto && !host.played?.[host.gameId] && host.players.some(p => !p.bot) && (!tq.has('local') || tq.has('intro'));
+const introReady = () => host.players.filter(p => !p.bot && !p.away).every(p => host.intro?.ready[p.pid]);
+function renderIntro() {
+  const id = host.intro.id, m = GAMES[id].meta, rules = rulesFor(id), first = !host.intro.shown;
+  host.intro.shown = true;
+  const humans = host.players.filter(p => !p.bot);
+  app.innerHTML = `<div class="intro ${first ? 'enter' : ''}">
+    <div class="introart">${art(id, ICONS[id])}</div>
+    <div class="introtext"><p class="introkick">How to play</p><h2>${esc(m.name)}</h2><ol class="introsteps">${rules.map((r, i) => `<li style="--i:${i}">${esc(r)}</li>`).join('')}</ol></div>
+    <div class="introready"><div class="introchips">${humans.map(p => `<span class="introchip ${host.intro.ready[p.pid] ? 'ok' : ''} ${p.away ? 'away' : ''}"><i style="--pc:${p.face?.[1] || '#232a5c'}">${p.face?.[0] || '🙂'}</i>${esc(p.name)}${host.intro.ready[p.pid] ? ' ✅' : ''}</span>`).join('')}</div>
+      <p class="introhint">Read the steps, then tap <b>✅ Ready</b> on your phone. The game starts when everyone is ready.</p>
+      <div class="row"><button class="btn" data-host="start">Start now</button><button class="btn ghost" data-host="lobby">← Back</button></div></div>
+  </div>`;
+}
+function howFor() {
+  const li = [...app.querySelectorAll('.how li')].map(x => x.textContent.trim()).filter(Boolean);
+  if (li.length) howCache[host.gameId] = li;
+  return howCache[host.gameId] || [game().meta.blurb];
+}
 function viewFor(pid) {
   if (isAudience(pid)) {
     const me = host.audience.find(a => a.pid === pid);
     return { phase: 'audience', me: me.name, game: game().meta.name, playing: !!host.state, players: host.players.map(p => p.name), reactions: REACTIONS, ask: host.state && game().audienceView ? maskView(game().audienceView(host.state, pid) || null, host.hidden) : null };
   }
+  if (!host.state && host.intro) {
+    const me = host.players.find(p => p.pid === pid) || {};
+    return { phase: 'intro', game: host.intro.id, _name: GAMES[host.intro.id].meta.name, _how: rulesFor(host.intro.id), ready: !!host.intro.ready[pid], _me: me.face, ...(pid === remotePid() ? { _remote: true } : {}) };
+  }
   if (!host.state) {
     const me = host.players.find(p => p.pid === pid) || {};
     return { phase: 'lobby', players: host.players.map(p => p.name), game: game().meta.name, me: me.name, fixed: !!me.fixed, byHost: !!me.locked, _me: me.face, ...(pid === remotePid() ? { _remote: true, canStart: host.players.length >= game().meta.min } : {}), ...(game().meta.id === 'funny' ? { canPrompt: true, myPrompts: (host.custom || []).filter(c => c.pid === pid).map(c => c.text) } : {}) };
   }
-  return { ...maskView(game().phoneView(host.state, pid), host.hidden), game: host.gameId, _me: host.players.find(p => p.pid === pid)?.face, ...(host.paused ? { _paused: true } : {}), ...(gains[pid] ? { _gain: gains[pid] } : {}), ...(places[pid] ? { _place: places[pid] } : {}), ...(finalRound ? { _final: true } : {}), ...(host.blurDraw ? { _nodraw: true } : {}), ...(pid === remotePid() ? { _remote: true } : {}) };
+  return { ...maskView(game().phoneView(host.state, pid), host.hidden), game: host.gameId, _name: game().meta.name, _how: howFor(), _me: host.players.find(p => p.pid === pid)?.face, ...(host.paused ? { _paused: true } : {}), ...(gains[pid] ? { _gain: gains[pid] } : {}), ...(places[pid] ? { _place: places[pid] } : {}), ...(finalRound ? { _final: true } : {}), ...(host.blurDraw ? { _nodraw: true } : {}), ...(pid === remotePid() ? { _remote: true } : {}) };
 }
 
 // Each phone hears about its own points the moment they land, and its finishing place at the end.
@@ -215,7 +274,7 @@ function announce() {
   }
   if (s.phase === 'over') setTimeout(() => { if (host.state?.phase === 'over') banter('gameover'); }, 4500);
   if (c?.title && introArt && sfx.on) play('sting-' + (THEME_OF[host.gameId] || 'night'));   // each game family opens with its own short theme
-  if (c?.title) titleCard(c.title, c.sub, c.tone, introArt ? art(host.gameId, ICONS[host.gameId]) : ''); if (c?.title) introArt = false;
+  if (c?.title) titleCard(c.title, c.sub, `${c.tone || ''} th-${THEME_OF[host.gameId] || 'night'}`, introArt ? art(host.gameId, ICONS[host.gameId]) : ''); if (c?.title) introArt = false;
   else if (s.phase !== 'over') flash('wipe');
   // A title card covers the screen for about three seconds, so the phase's clock doesn't start until it clears.
   if (c?.title && s.deadline > Date.now()) { shiftTimes(s, 2600); stretchedFor += 2600; }
@@ -230,6 +289,7 @@ function announce() {
 
 function onMessage(m) {
   if (!m || typeof m !== 'object' || typeof m.pid !== 'string') return;
+  lastSeen[m.pid] = Date.now();
   const raw = String(m.name || '').slice(0, 60);
   if (m.t === 'hello') {
     if (kicked.has(m.pid)) return room.send({ t: 'view', to: m.pid, view: { phase: 'kicked' } });
@@ -307,6 +367,7 @@ function onMessage(m) {
 
 function handleAct(pidFrom, rawAct) {
   const m = { pid: pidFrom, a: rawAct };
+  if (rawAct?.type === '_ready') { if (host.intro && host.players.some(p => p.pid === pidFrom)) { host.intro.ready[pidFrom] = 1; if (introReady()) startGame(); else changed(); } return; }
   if (rawAct?.type === '_host') { if (pidFrom === remotePid() && ['next', 'pause', 'start', 'again', 'lobby'].includes(rawAct.a)) hostAction(rawAct.a); return; }
   if (!host.state || host.paused) return;
   if (isAudience(pidFrom)) { if (game().audienceAct) { game().audienceAct(host.state, pidFrom, rawAct); changed(); } return; }
@@ -392,6 +453,7 @@ function slideScores() {
   });
   rowAt = next;
 }
+let menuAt = null;   // the card in focus on the hub: { row, game }
 let introArt = false;   // the first title card of each game carries its cover art
 let ceremonyOff = null;
 // The winners' ceremony, shared by every game that ends with a score table: third, second, then a drumroll and first.
@@ -476,6 +538,9 @@ function nightAwards() {
 }
 
 function startGame(again) {
+  // First time this room plays the game: explain it and wait for everyone before anything starts.
+  if (!host.intro && !again && wantsIntro()) { host.intro = { id: host.gameId, ready: {}, at: Date.now() }; if (sfx.on) play('fanfare'); return changed(); }
+  host.intro = null;
   host.paused = 0;
   // The audience gets promoted into open seats for the next game.
   while (host.audience.length && host.players.length < game().meta.max) host.players.push(host.audience.shift());
@@ -495,6 +560,7 @@ function hostAction(a) {
   if (a === 'again') return startGame(true);
   if (a.startsWith('night:')) { const nt = NIGHTS.find(x => x.id === a.slice(6)); if (nt) { host.queue = nt.games.slice(1); host.night = nt.id; host.gameId = nt.games[0]; host.screen = 'gather'; save(); } return changed(); }
   if (a === 'endnight') { host.queue = []; host.night = null; save(); return render(); }
+  if (a === 'lobby' && host.intro && !host.state) { host.intro = null; host.screen = 'gather'; save(); return changed(); }
   if (a === 'lobby') { host.lastByGame = { ...(host.lastByGame || {}), [host.gameId]: host.state }; host.state = null; ceremonyOff?.(); if (host.queue?.length) { host.gameId = host.queue.shift(); host.screen = 'gather'; } else { host.night = null; host.screen = 'menu'; } stopAmbient(); document.body.classList.remove('day'); return changed(); }
   if (a === 'newcode') {
     // Same players again: tell every phone the new code so nobody has to rejoin by hand.
@@ -623,7 +689,6 @@ function previewGame(id) {
   const m = GAMES[id].meta, q = x => app.querySelector(x);
   const stageEl = q('.pvstage'); if (stageEl) { stageEl.dataset.theme = THEME_OF[id] || ''; stageEl.parentElement.dataset.theme = THEME_OF[id] || ''; }
   if (q('#pvname')) { q('#pvname').textContent = m.name; q('#pvicon').innerHTML = art(id, ICONS[id]); q('#pvblurb').textContent = m.blurb; q('#pvtags').innerHTML = `<span>👥 ${m.min}–${m.max} players</span>${m.kids ? '<span>🧒 Little kids</span>' : ''}${SHELVES.filter(f => f.games?.includes(id) && !['featured', 'kids'].includes(f.id)).slice(0, 2).map(f => `<span>${esc(f.name)}</span>`).join('')}`; }
-  app.querySelectorAll('.mgame').forEach(b => b.classList.toggle('on', b.dataset.game === id));
   previewStep(true);
 }
 function previewStep(first) {
@@ -665,25 +730,44 @@ function renderLobby() {
   const screen = host.screen || 'menu';
   const nightbar = (() => { const nt = NIGHTS.find(x => x.id === host.night); return nt ? `<div class="nightbar"><b>${nt.icon} ${esc(nt.name)}</b><span>Now: <b>${esc(g.meta.name)}</b>${host.queue?.length ? ` · Then: ${host.queue.map(id => esc(GAMES[id].meta.name)).join(' → ')}` : ' · last game'}</span></div>` : ''; })();
   if (screen === 'menu') {
-    const shelf = SHELVES.find(x => x.id === (host.shelf || 'featured'));
-    const list = Object.values(GAMES).filter(m => !shelf?.games || shelf.games.includes(m.meta.id));
-    if (!list.some(m => m.meta.id === host.gameId)) host.gameId = list[0].meta.id;
-    app.innerHTML = `<div class="menu">
-    <section class="panel mlist">
-      <div class="shelves">${SHELVES.map(f => `<button class="shelf ${(host.shelf || 'featured') === f.id ? 'on' : ''}" data-shelf="${f.id}">${esc(f.name)}</button>`).join('')}</div>
-      <div class="mgames">${list.map(m => `<button class="mgame ${m.meta.id === host.gameId ? 'on' : ''}" data-game="${m.meta.id}"><i>${ICONS[m.meta.id] || '🎲'}</i><b>${esc(m.meta.name)}</b>${m.meta.kids ? '<small>🧒</small>' : ''}${watching() && SAME_ROOM.includes(m.meta.id) ? '<small class="sameroom">🏠 same room</small>' : ''}</button>`).join('')}</div>
-      <div class="mfoot"><button class="btn ghost small" data-host="settings">⚙ Settings</button><button class="btn ghost small" data-host="addbot">🤖 Add a bot</button>${host.tally?.games.length ? '<button class="btn ghost small" data-host="awards">🏆 Awards</button>' : ''}</div>
+    // The hub: a big hero for the game in focus (its painted cover behind, a live preview beside), and rows of cover
+    // cards underneath, one row per kind of game. The remote moves through the cards; rows slide, nothing scrolls by hand.
+    if (!GAMES[host.gameId]) host.gameId = 'werewolf';
+    const rows = SHELVES.filter(f => f.games).map(f => ({ id: f.id, name: f.name, games: f.games.filter(id => GAMES[id]) }));
+    if (!menuAt || !rows.some(r => r.id === menuAt.row && r.games.includes(menuAt.game))) { const r = rows.find(x => x.games.includes(host.gameId)) || rows[0]; menuAt = { row: r.id, game: r.games.includes(host.gameId) ? host.gameId : r.games[0] }; }
+    const card = (id, row) => { const m = GAMES[id].meta; return `<button class="gcard ${menuAt.row === row && menuAt.game === id ? 'on' : ''}" data-game="${id}" data-row="${row}"><span class="gimg">${art(id, ICONS[id])}</span><b>${esc(m.name)}</b>${m.kids ? '<small class="gbadge">🧒</small>' : ''}${watching() && SAME_ROOM.includes(id) ? '<small class="sameroom">🏠 same room</small>' : ''}</button>`; };
+    app.innerHTML = `<div class="hub">
+    <section class="hero" id="hero">
+      <div class="heroinfo">
+        <div id="pvtags" class="pvtags"></div>
+        <h2 id="pvname"></h2>
+        <p id="pvblurb"></p>
+        <div class="heroact"><span class="playhint">▶ Press OK to play</span><span id="pvicon" hidden></span></div>
+      </div>
+      <div class="pvbox"><div class="pvstage" inert aria-hidden="true"></div><span class="pvlabel">Live preview</span></div>
+      <div class="herobar"><span class="mroom">Room <b class="code mini">${host.code}</b> · ${n} in</span><button class="btn ghost small" data-host="settings">⚙ Settings</button><button class="btn ghost small" data-host="addbot">🤖 Add a bot</button>${host.tally?.games.length ? '<button class="btn ghost small" data-host="awards">🏆 Awards</button>' : ''}</div>
     </section>
-    <section class="panel mprev">
-      <div class="mhead"><span id="pvicon"></span><div><h2 id="pvname"></h2><p id="pvblurb"></p><div id="pvtags" class="pvtags"></div></div><div class="mroom">Room<b class="code mini">${host.code}</b><small>${n} in</small></div></div>
-      <div class="pvbox"><div class="pvstage" inert aria-hidden="true"></div><span class="pvlabel">Preview · press OK to play</span></div>
-      <div class="mnights"><span class="muted">Or a ready-made night:</span>${NIGHTS.map(x => `<button class="btn ghost small" data-host="night:${x.id}" title="${x.games.map(id => esc(GAMES[id].meta.name)).join(' → ')}">${x.icon} ${esc(x.name)}</button>`).join('')}</div>
+    <section class="grows" id="grows">
+      ${rows.map(r => `<div class="grow" data-row="${r.id}"><h3>${esc(r.name)}</h3><div class="rail">${r.games.map(id => card(id, r.id)).join('')}</div></div>`).join('')}
+      <div class="grow" data-row="nights"><h3>🌙 Ready-made nights</h3><div class="rail">${NIGHTS.map(x => `<button class="gcard night" data-host="night:${x.id}"><span class="gimg nightimg"><i>${x.icon}</i></span><b>${esc(x.name)}</b><small class="nightsub">${esc(x.blurb)}</small></button>`).join('')}</div></div>
     </section>
   </div>`;
-    app.querySelectorAll('.mgame').forEach(b => { const go = () => { if (pv?.id !== b.dataset.game || !app.querySelector('.pvstage').firstChild) { if (pv && pv.id !== b.dataset.game && sfx.on) play('pop'); host.gameId = b.dataset.game; previewGame(b.dataset.game); } }; b.onfocus = go; b.onmouseenter = go; });
-    previewGame(host.gameId);
-    if (!app.contains(document.activeElement)) app.querySelector('.mgame.on')?.focus({ preventScroll: true });
-    app.querySelector('.mgame.on')?.scrollIntoView({ block: 'nearest' });
+    const hero = app.querySelector('#hero');
+    // Bring a card's row to the top of the rows area and the card itself toward the middle of its row.
+    const show = (c, smooth) => {
+      const row = c.closest('.grow'), rail = c.closest('.rail'), box = app.querySelector('#grows'), behavior = smooth ? 'smooth' : 'auto';
+      box.scrollTo({ top: Math.max(0, row.offsetTop - 2), behavior });
+      rail.scrollTo({ left: Math.max(0, c.offsetLeft - (rail.clientWidth - c.offsetWidth) / 2), behavior });
+    };
+    const pick = id => { hero.style.setProperty('--art', `url("${new URL(`art/${id}.jpg`, location.href).href}")`); if (pv?.id !== id || !app.querySelector('.pvstage').firstChild) { if (pv && pv.id !== id && sfx.on) play('pop'); host.gameId = id; previewGame(id); } };
+    app.querySelectorAll('.gcard[data-game]').forEach(c => {
+      c.onfocus = () => { menuAt = { row: c.dataset.row, game: c.dataset.game }; app.querySelectorAll('.gcard.on').forEach(x => x.classList.remove('on')); c.classList.add('on'); show(c, true); pick(c.dataset.game); };
+      c.onmouseenter = () => pick(c.dataset.game);
+    });
+    app.querySelectorAll('.gcard.night').forEach(c => (c.onfocus = () => show(c, true)));
+    pick(menuAt.game);
+    const cur = app.querySelector('.gcard.on');
+    if (cur) { show(cur, false); if (!app.contains(document.activeElement)) cur.focus({ preventScroll: true }); }
     host.players.forEach(p => seen.add(p.pid));
     return;
   }
@@ -735,7 +819,7 @@ function renderLobby() {
         return `<div class="ring n${Math.min(total, 12)}"><div class="fireflies">${Array.from({ length: 14 }, (_, k) => `<i style="left:${(k * 37) % 100}%;top:${(k * 53) % 100}%;animation-delay:${-(k * 0.9)}s"></i>`).join('')}</div>
           <div class="ringmid">${art(host.gameId, ICONS[host.gameId])}<h2>${esc(g.meta.name)}</h2><p>${n ? `${n} player${n === 1 ? '' : 's'} in` : 'Grab a seat!'}${need ? ` · need ${need} more` : ''}</p><button class="btn" data-host="start" ${need ? 'disabled' : ''}>${need ? 'Waiting…' : "Everybody's in!"}</button></div>
           ${Array.from({ length: total }, (_, i) => { const p = host.players[i]; return p
-            ? seat(i, `<i style="--pc:${p.face?.[1] || '#232a5c'}">${p.face?.[0] || '🙂'}</i><b>${esc(p.name)}</b>${i === 0 ? '<em>👑</em>' : ''}`, `taken ${p.bot ? 'bot' : ''} ${seen.has(p.pid) ? '' : 'pop'} ${editing === p.pid ? 'on' : ''}`, `data-host="edit:${esc(p.pid)}" title="Rename or remove"`)
+            ? seat(i, `<i style="--pc:${p.face?.[1] || '#232a5c'}">${p.face?.[0] || '🙂'}</i><b>${esc(p.name)}</b>${i === 0 ? '<em>👑</em>' : ''}`, `taken ${p.bot ? 'bot' : ''} ${p.away ? 'away' : ''} ${seen.has(p.pid) ? '' : 'pop'} ${editing === p.pid ? 'on' : ''}`, `data-host="edit:${esc(p.pid)}" title="Rename or remove"`)
             : seat(i, '<i>Join!</i>', 'open'); }).join('')}</div>`;
       })()}
       <div class="row gfoot"><button class="btn ghost small" data-host="menu">← Games</button><button class="btn ghost small" data-host="addbot">🤖 Add a bot</button>${host.players.some(p => p.bot) ? '<button class="btn ghost small" data-host="clearbots">Remove bots</button>' : ''}<span class="muted small">Tap a seat to rename or remove.</span></div>
@@ -785,16 +869,20 @@ const SAME_ROOM = ['charades', 'faker', 'freeze', 'hunt', 'dares'];
 
 function render() {
   voiceContext(host.players.map(p => p.name), host.state ? host.gameId : '');
-  if (!host.state) renderLobby();
+  if (host.intro && host.state) host.intro = null;
+  if (!host.state && host.intro) renderIntro();
+  else if (!host.state) renderLobby();
   else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); if (fresh) wordsIn(); decorate(); pops(fresh); guideTip(); slideScores(); cardPops(fresh); }
   document.body.classList.toggle('night', host.state?.phase === 'night');
   // How-to screens show in full the first time a room plays a game, then get out of the way.
   quiet.on = !host.state;
-  document.body.dataset.theme = host.state ? THEME_OF[host.gameId] || '' : '';
-  document.body.dataset.game = host.state ? host.gameId : '';
-  document.body.classList.toggle('inlobby', !host.state);
+  const onStage = host.state || host.intro;
+  document.body.dataset.theme = onStage ? THEME_OF[host.gameId] || '' : '';
+  document.body.dataset.game = onStage ? host.gameId : '';
+  document.body.classList.toggle('inlobby', !onStage);
+  document.body.classList.toggle('hubmode', !onStage && (host.screen || 'menu') === 'menu');
   // Lobby music plays on the menu and the join screen, and stops when a game starts.
-  if (!host.state && host.settings.music && sfx.on) startLoop('music-lobby'); else stopLoop('music-lobby');
+  if (!onStage && host.settings.music && sfx.on) startLoop('music-lobby'); else stopLoop('music-lobby');
   document.body.classList.toggle('streamer', !!host.settings.streamer);
   document.body.classList.toggle('nodraw', !!host.blurDraw);
   document.body.classList.toggle('nohow', !host.settings.howto || (host.played?.[host.gameId] || 0) > 1);
@@ -802,6 +890,11 @@ function render() {
   if (!badge.isConnected) document.body.append(badge);
   badge.hidden = !host.audience.length && !watching();
   badge.textContent = [host.audience.length ? `👥 ${host.audience.length} watching` : '', watching() ? `📺 ${watching()} remote screen${watching() === 1 ? '' : 's'}` : ''].filter(Boolean).join(' · ');
+  // The join code stays on screen all game, so anyone can join late or get back in after a dropped connection.
+  let jq = document.getElementById('joinqr');
+  if (!jq) { jq = Object.assign(document.createElement('div'), { id: 'joinqr' }); document.body.append(jq); }
+  jq.hidden = !onStage || !!host.settings.streamer;
+  if (!jq.hidden && jq.dataset.code !== host.code) { jq.dataset.code = host.code; jq.innerHTML = `<div class="qr">${qr(joinUrl())}</div><span>Join or rejoin<b>${host.code}</b></span>`; }
   let vb = document.getElementById('vetobar');
   if (!vb) { vb = Object.assign(document.createElement('div'), { id: 'vetobar' }); document.body.append(vb); }
   vb.hidden = !host.state;
@@ -895,3 +988,6 @@ connect();
 
 // A quiet lobby gets an occasional nudge from the host.
 setInterval(() => { const now = Date.now(); if (!host.state && host.players.length && now - lastInput > 90000 && now - lastIdle > 240000) { lastIdle = now; banter('lobby'); } }, 20000);
+
+// The intro never holds a room hostage: after 75 seconds the game starts anyway.
+setInterval(() => { if (host.intro && !host.state && Date.now() - host.intro.at > 75000) startGame(); }, 3000);
