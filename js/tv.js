@@ -8,6 +8,7 @@ import { newKeys, cleanPub, samePub, sharedKey, seal, unseal } from './secure.js
 import { cleanAct, textsIn, maskView, maskLine } from './content.js';
 import { settleName, cleanName, isRude, uniqueName, funName, MAX_NAME } from './names.js';
 import { tap } from './tap.js';
+import { quip } from './quips.js';
 
 const app = document.getElementById('app');
 const statusEl = document.getElementById('status');
@@ -33,6 +34,8 @@ let viewSeq = Date.now();
 let lastPhase = '';
 
 const game = () => GAMES[host.gameId];
+// A host line for a moment, in the right voice for the game on screen (kids' games get the gentle set).
+const hostLine = m => quip(m, { game: host.gameId, kids: !!host.settings.kids || !!game()?.meta.kids });
 const save = () => store.set('pg-host', host);
 const joinUrl = () => {
   const u = new URL('play.html', location.href);
@@ -105,7 +108,7 @@ function checkFinal() {
   const f = host.state && ROUNDS_OF[host.gameId], r = f ? f(game().tvView(host.state, Date.now())) : null;
   finalRound = !!(r && r[1] > 2 && r[0] === r[1] && host.state.phase !== 'over');
   document.body.classList.toggle('finalround', finalRound);
-  if (finalRound && !finalSaid) { finalSaid = true; if (sfx.on) play('fanfare'); setTimeout(() => say('Final round!'), 300); flash('gold'); }
+  if (finalRound && !finalSaid) { finalSaid = true; if (sfx.on) play('fanfare'); setTimeout(() => say(hostLine('final')), 300); flash('gold'); }
 }
 
 // Extra buttons beside Pause: End game (press twice), and Hide drawing in the drawing games.
@@ -228,7 +231,7 @@ function onMessage(m) {
       host.players.push((p = { pid: m.pid, name, asked: raw, fixed: fixedName, pub }));
       ensureFaces();
       game().addPlayer(host.state, { pid: p.pid, name });
-      play('join'); say(`${name} jumps in!`);
+      play('join'); say(hostLine('join'));
       lastSent[p.pid] = null;
       return changed();
     }
@@ -482,8 +485,8 @@ function hostAction(a) {
   if (a === 'relaxed') { host.settings.relaxed = !host.settings.relaxed; save(); return render(); }
   if (a === 'howto') { host.settings.howto = !host.settings.howto; save(); return render(); }
   if (a === 'pause' && host.state) {
-    if (!host.paused) { host.paused = Date.now(); stopAmbient(); }
-    else { const ms = Date.now() - host.paused; shiftTimes(host.state, ms); stretchedFor += ms; host.paused = 0; }
+    if (!host.paused) { host.paused = Date.now(); stopAmbient(); say(hostLine('pause')); }
+    else { const ms = Date.now() - host.paused; shiftTimes(host.state, ms); stretchedFor += ms; host.paused = 0; say(hostLine('resume')); }
     save(); render(); return sendViews();
   }
   if (a.startsWith('opt:')) { const o = (game().meta.options || []).find(x => x.id === a.slice(4)); if (o) { const mine = (host.opts = host.opts || {})[host.gameId] = host.opts[host.gameId] || {}; const i = o.choices.findIndex(c => c[0] === (mine[o.id] ?? o.choices[0][0])); mine[o.id] = o.choices[(i + 1) % o.choices.length][0]; save(); } return render(); }
@@ -854,7 +857,7 @@ setInterval(() => {
       clock.textContent = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
       clock.classList.toggle('hurry', left <= 10);
       if (left <= 10 && left > 0) play('tick');
-      if (left === 30) say('Thirty seconds left.');
+      if (left === 30) say(hostLine('thirty'));
     }
   }
 }, 1000);
