@@ -116,7 +116,12 @@ export function act(s, pid, a, now = Date.now(), rnd = Math.random) {
     s.busyUntil = now + TIMES.anim;
     s.deadline = now + TIMES.idle;
     if (r.pile) { s.lost = s.scores[pid]; s.scores[pid] = 0; s.turnPts = 0; endTurn(s, now + TIMES.anim, 'pile'); }
-    else if (r.splash) { s.lost = s.turnPts; s.turnPts = 0; endTurn(s, now + TIMES.anim, 'splash'); }
+    else if (r.splash) {
+      // Catch-up: whoever is in last place and well behind keeps half of the turn's points on a splash.
+      const all = Object.values(s.scores), mine = s.scores[current(s)];
+      const keep = mine === Math.min(...all) && Math.max(...all) - mine >= 30 ? Math.floor(s.turnPts / 2) : 0;
+      s.scores[current(s)] += keep; s.kept = keep; s.lost = s.turnPts - keep; s.turnPts = 0; endTurn(s, now + TIMES.anim, 'splash');
+    }
     else {
       s.turnPts += r.pts;
       // Auto-bank the moment you'd cross the target, so nobody has to remember to.
@@ -158,7 +163,7 @@ export function cueEvent(s) {
   const r = s.last;
   if (!r) return null;
   if (r.pile) return { id: s.eventId, sound: 'lose', react: 'groan', fx: 'shake', say: 'Duck pile! There goes your whole score!', delay: TIMES.anim };
-  if (r.splash) return { id: s.eventId, sound: 'death', react: 'groan', fx: 'splash', say: 'Splash! Turn over.', delay: TIMES.anim };
+  if (r.splash) return { id: s.eventId, sound: 'death', react: 'groan', fx: 'splash', say: s.kept ? `Splash! But the last duck keeps ${s.kept}.` : 'Splash! Turn over.', delay: TIMES.anim };
   if (r.double) return { id: s.eventId, sound: 'win', react: 'cheer', fx: 'gold', say: `${r.name}! ${r.pts} points!`, delay: TIMES.anim };
   return { id: s.eventId, sound: r.pts >= 10 ? 'safe' : 'tick', say: r.pts >= 10 ? `${r.name}! ${r.pts}!` : '', delay: TIMES.anim };
 }
@@ -250,7 +255,8 @@ export function renderTV(v, el) {
     <div class="srow"><span>Beak lean</span><b>15</b></div>
     <div class="srow"><span>Doubles</span><b>×4</b></div>
     <div class="srow lose"><span>Splash (sides don't match)</span><b>lose turn</b></div>
-    <div class="srow lose"><span>Duck pile</span><b>lose all</b></div></div>`;
+    <div class="srow lose"><span>Duck pile</span><b>lose all</b></div>
+    <p class="muted small">Catch-up: in last place and 30+ behind? A splash only costs half your turn.</p></div>`;
   el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel">${h}</div><div class="side">${board}${legend}</div></div>`;
 }
 

@@ -27,5 +27,7 @@ async function run(id, steps) {
 }
 const which = process.argv[2];
 const all = { funny: { vote: [700], result: [1500], over: [5000] }, meld: { reveal: [1000, 2800] }, potato: { live: [6000], boom: [300] }, doodle: { fake: [1500], reveal: [900, 2800] }, quick: { vote: [4000], reveal: [1200, 3000] }, midnight: { over: [5500] }, crew: { reveal: [1600] }, imposter: { clues: [6000] } };
-for (const [id, steps] of Object.entries(all)) if (!which || which === id) await run(id, steps);
+const extra = { estimate: { bet: [1500] }, werewolf: { night: [5000] }, imposter: { over: [5200] }, bingo: { calling: [20000] }, crew: { over: [4500] } };
+if (which && which.includes(',')) { for (const id of which.split(',')) await run(id, extra[id] || all[id] || {}); }
+else for (const [id, steps] of Object.entries(all)) if (!which || which === id) await run(id, steps);
 console.log('errors', errors); await b.close(); process.exit(errors.length ? 1 : 0);

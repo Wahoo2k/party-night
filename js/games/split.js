@@ -3,6 +3,7 @@
 import { esc } from '../ui.js';
 import { isRude } from '../names.js';
 
+import { freshOrder } from './cards.js';
 export const meta = {
   id: 'split',
   name: 'Split the Room',
@@ -33,8 +34,9 @@ export function cleanFill(t) {
   return { ok: true, text: x };
 }
 
-export function setup(players, rnd = Math.random) {
-  const s = { game: 'split', players: players.map(p => ({ pid: p.pid, name: p.name })), scores: Object.fromEntries(players.map(p => [p.pid, 0])), r: 0, round: 0, deck: shuffle([...PROMPTS.keys()], rnd) };
+export function setup(players, rnd = Math.random, prev = null) {
+  const fo = freshOrder(PROMPTS.length, prev, 8, rnd);
+  const s = { seenIdx: fo.seenIdx, game: 'split', players: players.map(p => ({ pid: p.pid, name: p.name })), scores: Object.fromEntries(players.map(p => [p.pid, 0])), r: 0, round: 0, deck: fo.order.slice().reverse() };
   startRound(s, Date.now(), rnd);
   return s;
 }

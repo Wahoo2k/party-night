@@ -1074,3 +1074,13 @@ body.finalround:not(.phone)::after{content:'FINAL ROUND';position:fixed;right:-7
 .mpin.avg{animation:none;transition:left .4s}
 .tally.ballots div{font-size:clamp(14px,1.3vw,20px);padding:6px 12px}
 .stage.enter .ballots div{animation:rise .4s 3.6s both}
+
+/* ---------- card games: hands are dealt in, one card at a time ---------- */
+@keyframes deal{from{opacity:0;transform:translate(-40px,-60px) rotate(-25deg) scale(.7)}}
+.stage.enter .pc,body.phone #app.enter .pc,body.phone #app.enter .cc{animation:deal .32s cubic-bezier(.2,.9,.3,1.1) both;animation-delay:calc(var(--i,0)*.05s)}
+.pc:nth-child(2),.cc:nth-child(2){--i:1}.pc:nth-child(3),.cc:nth-child(3){--i:2}.pc:nth-child(4),.cc:nth-child(4){--i:3}.pc:nth-child(5),.cc:nth-child(5){--i:4}.pc:nth-child(6),.cc:nth-child(6){--i:5}.pc:nth-child(7),.cc:nth-child(7){--i:6}.pc:nth-child(8),.cc:nth-child(8){--i:7}.pc:nth-child(9),.cc:nth-child(9){--i:8}.pc:nth-child(10),.cc:nth-child(10){--i:9}.pc:nth-child(11),.cc:nth-child(11){--i:10}.pc:nth-child(12),.cc:nth-child(12){--i:11}.pc:nth-child(n+13),.cc:nth-child(n+13){--i:12}
+/* Werewolf: the whole story plays back at the end */
+.wwstory{margin:12px 0;padding:14px 18px;border-radius:14px;background:#0f1336;max-height:38vh;overflow:auto}
+.wwstory h3{margin:0 0 6px}.wwstory p{margin:4px 0;font-size:clamp(15px,1.3vw,20px)}
+.stage.enter .wwstory p{animation:rise .4s both;animation-delay:calc(3.2s + var(--i,0)*.5s)}
+.wwstory p:nth-child(3){--i:1}.wwstory p:nth-child(4){--i:2}.wwstory p:nth-child(5){--i:3}.wwstory p:nth-child(6){--i:4}.wwstory p:nth-child(7){--i:5}.wwstory p:nth-child(8){--i:6}.wwstory p:nth-child(n+9){--i:7}

@@ -145,8 +145,14 @@ export function note(f, dur = 0.35, t = 0, type = 'triangle', vol = 0.35) { if (
 let music = null;
 export function startMusic(seed = 0) {
   stopMusic();
-  const mel = [523, 587, 659, 784, 880, 784, 659, 587, 523, 659, 784, 1047, 880, 784, 659, 523];
-  const bass = [131, 131, 165, 165, 196, 196, 175, 175];
+  // Four tunes at four speeds, picked by the round, so Freeze Dance isn't the same song every time (one is slow motion).
+  const TUNES = [
+    { ms: 200, mel: [523, 587, 659, 784, 880, 784, 659, 587, 523, 659, 784, 1047, 880, 784, 659, 523], bass: [131, 131, 165, 165, 196, 196, 175, 175] },
+    { ms: 170, mel: [659, 784, 880, 988, 880, 784, 659, 587, 659, 880, 988, 1175, 988, 880, 784, 659], bass: [110, 110, 147, 147, 165, 165, 147, 147] },
+    { ms: 240, mel: [392, 494, 587, 494, 440, 523, 659, 523, 392, 494, 587, 784, 659, 587, 494, 392], bass: [98, 98, 131, 131, 147, 147, 98, 98] },
+    { ms: 330, mel: [523, 494, 440, 392, 440, 494, 523, 659, 587, 523, 494, 440, 392, 440, 494, 523], bass: [131, 131, 110, 110, 87, 87, 98, 98] },
+  ];
+  const { mel, bass, ms } = TUNES[Math.abs(seed) % TUNES.length];
   let i = seed % 16;
   music = setInterval(() => {
     if (!ready()) return;
@@ -154,7 +160,7 @@ export function startMusic(seed = 0) {
     if ((i * 7 + seed) % 3 !== 0) tone({ type: 'triangle', f0: mel[(i * 5 + seed) % 16], dur: 0.2, vol: 0.18 });
     if (i % 4 === 0) noise({ dur: 0.05, vol: 0.12, freq: 4000, type: 'highpass' });
     i++;
-  }, 200);
+  }, ms);
 }
 export function stopMusic() { clearInterval(music); music = null; }
 

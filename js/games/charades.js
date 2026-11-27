@@ -2,6 +2,7 @@
 // the actor taps their name and both get a point. Pictures mean kids who can't read yet can play too.
 import { esc } from '../ui.js';
 
+import { freshOrder } from './cards.js';
 export const meta = {
   id: 'charades',
   name: 'Picture Charades',
@@ -38,10 +39,12 @@ const shuffle = (a, rnd) => { for (let i = a.length - 1; i > 0; i--) { const j =
 export const PASSES = 3;
 export function setup(players, rnd = Math.random, prev = null, opts = {}) {
   const order = shuffle(players.map(p => ({ pid: p.pid, name: p.name })), rnd);
+  const fo = freshOrder(CARDS.length, prev, Math.min(order.length, opts.short ? 5 : 12) * 6, rnd);
   return {
+    seenIdx: fo.seenIdx,
     game: 'charades', players: order, turns: Math.min(order.length, opts.short ? 5 : 12), turn: 0, round: 0,
     scores: Object.fromEntries(order.map(p => [p.pid, 0])),
-    deck: shuffle(CARDS.map((_, i) => i), rnd), card: null, log: [], lastTurn: null,
+    deck: fo.order.slice().reverse(), card: null, log: [], lastTurn: null,
     phase: 'ready', deadline: Date.now() + TIMES.ready, eventId: 0, lastEvent: null,
   };
 }
@@ -130,7 +133,7 @@ export function tvView(s, now = Date.now()) {
 
 export function phoneView(s, pid) {
   if (!s.players.some(p => p.pid === pid)) return { phase: 'spectate' };
-  const v = { phase: s.phase, isActor: pid === actor(s), actor: nameOf(s, actor(s)), score: s.scores[pid] };
+  const v = { phase: s.phase, isActor: pid === actor(s), actor: nameOf(s, actor(s)), score: s.scores[pid], passes: Math.max(0, PASSES - s.log.filter(l => !l.by).length) };
   if (s.phase === 'turn' && v.isActor && s.card !== null) {
     v.card = CARDS[s.card]; v.cardId = s.card;
     v.others = s.players.filter(p => p.pid !== pid).map(p => ({ pid: p.pid, name: p.name }));
@@ -155,7 +158,7 @@ export function renderPhone(v, el, send) {
   if (v.phase === 'spectate') { el.innerHTML = '<h2>Game in progress</h2>'; return; }
   let h = `<p class="muted">${v.score} point${v.score === 1 ? "" : "s"}</p>`;
   if (v.phase === 'ready') h += v.isActor ? `<h2>You're acting!</h2><p class="say">Act out each picture. No talking! When someone gets it, tap their name.</p><button class="btn" data-start>Start (50 seconds)</button>` : `<h2>${esc(v.actor)} is up</h2><p class="say">Watch and shout your guesses!</p>`;
-  else if (v.phase === 'turn' && v.card) h += `<div class="chbig"><span>${v.card[0]}</span><b>${esc(v.card[1])}</b></div><p class="muted">Who guessed it?</p><div class="chwho">${v.others.map(o => `<button class="btn" data-by="${esc(o.pid)}">${esc(o.name)}</button>`).join('')}</div><button class="btn ghost" data-skip>Skip this one</button>`;
+  else if (v.phase === 'turn' && v.card) h += `<div class="chbig"><span>${v.card[0]}</span><b>${esc(v.card[1])}</b></div><p class="muted">Who guessed it?</p><div class="chwho">${v.others.map(o => `<button class="btn" data-by="${esc(o.pid)}">${esc(o.name)}</button>`).join('')}</div><button class="btn ghost" data-skip ${v.passes ? '' : 'disabled'}>${v.passes ? `Pass (${v.passes} left)` : 'No passes left'}</button>`;
   else if (v.phase === 'turn') h += `<h2>Guess out loud!</h2><p class="say">${esc(v.actor)} is acting. No peeking at their phone!</p>`;
   else if (v.phase === 'turnEnd') h += '<h2>Time!</h2><p class="say">Check the TV.</p>';
   else if (v.phase === 'over') h += `<h2 class="${v.place === 1 ? 'win' : ''}">${v.place === 1 ? 'You won!' : `You came #${v.place}`}</h2>`;

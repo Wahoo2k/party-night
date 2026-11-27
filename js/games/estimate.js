@@ -2,6 +2,7 @@
 // and everyone bets on the guess they think is closest without going over. (Wits & Wagers-style.)
 import { esc } from '../ui.js';
 
+import { freshOrder } from './cards.js';
 export const meta = {
   id: 'estimate',
   name: 'Estimate & Bet',
@@ -44,10 +45,12 @@ export function winningSlot(guesses, answer) {
   return under.length ? String(Math.max(...under)) : LOW;
 }
 
-export function setup(players, rnd = Math.random) {
+export function setup(players, rnd = Math.random, prev = null) {
+  const fo = freshOrder(QUESTIONS.length, prev, PER_GAME, rnd);
   const s = {
+    seenIdx: fo.seenIdx,
     game: 'estimate', players: players.map(p => ({ pid: p.pid, name: p.name })),
-    qs: shuffle([...QUESTIONS.keys()], rnd).slice(0, PER_GAME), q: 0, round: 0,
+    qs: fo.order.slice(0, PER_GAME), q: 0, round: 0,
     scores: Object.fromEntries(players.map(p => [p.pid, 0])),
   };
   start(s, Date.now());

@@ -43,7 +43,7 @@ export function act(s, pid, a, now = Date.now(), rnd = Math.random) {
 }
 export function hostAct(s, a, now = Date.now(), rnd = Math.random) {
   if (a !== 'next') return s;
-  if (s.phase === 'ready') { s.phase = 'live'; s.round++; s.since = now; s.boomAt = now + 12000 + Math.floor(rnd() * 18000); s.deadline = s.boomAt; }
+  if (s.phase === 'ready') { s.phase = 'live'; s.round++; s.since = now; s.boomAt = now + Math.floor((12000 + rnd() * 18000) * Math.max(0.6, 1 - s.r * 0.06)); s.deadline = s.boomAt; }
   else if (s.phase === 'live') { s.burns[s.holder]++; s.burned = s.holder; s.phase = 'boom'; s.round++; s.deadline = now + TIMES.boom; }
   else if (s.phase === 'boom') { s.r++; if (s.r >= s.cats.length) { s.phase = 'over'; s.round++; s.deadline = 0; } else ready(s, now, rnd); }
   return s;

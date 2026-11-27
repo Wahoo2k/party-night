@@ -3,6 +3,7 @@
 // few seconds to cry foul. Most points when the clock runs out wins.
 import { esc } from '../ui.js';
 
+import { freshOrder } from './cards.js';
 export const meta = {
   id: 'dares',
   name: 'Secret Missions',
@@ -25,8 +26,9 @@ export const TIMES = { game: 15 * 60000, check: 12000 };
 const HAND = 3, SWAPS = 2;
 const shuffle = (a, rnd) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
-export function setup(players, rnd = Math.random) {
-  const s = { game: 'dares', players: players.map(p => ({ pid: p.pid, name: p.name })), deck: shuffle([...MISSIONS.keys()], rnd), hands: {}, swaps: {}, scores: {}, claims: [], feed: [], phase: 'play', round: 0, deadline: Date.now() + TIMES.game, nextId: 1, eventId: 0 };
+export function setup(players, rnd = Math.random, prev = null) {
+  const fo = freshOrder(MISSIONS.length, prev, Math.min(MISSIONS.length, players.length * 5), rnd);
+  const s = { seenIdx: fo.seenIdx, game: 'dares', players: players.map(p => ({ pid: p.pid, name: p.name })), deck: fo.order, hands: {}, swaps: {}, scores: {}, claims: [], feed: [], phase: 'play', round: 0, deadline: Date.now() + TIMES.game, nextId: 1, eventId: 0 };
   s.players.forEach(p => { s.hands[p.pid] = []; s.swaps[p.pid] = SWAPS; s.scores[p.pid] = 0; for (let i = 0; i < HAND; i++) draw(s, p.pid, rnd); });
   return s;
 }
