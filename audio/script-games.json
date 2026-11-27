@@ -1,0 +1,1217 @@
+{
+ "_about": "Narrator lines for the featured games other than Werewolf (see script.json). Top level is the game; inside, each key is a moment and each entry is one variant, saved as audio/<game>/<id>.mp3. Names and anything players type are never spoken; those stay on screen.",
+ "shared": {
+  "lobby": [
+   [
+    "lobby-1",
+    "Welcome to Party Night! Grab your phone, scan the code, and pull up a seat."
+   ],
+   [
+    "lobby-2",
+    "Evening, everyone. The village is open. Join on your phone and we'll get started."
+   ]
+  ],
+  "pick-game": [
+   [
+    "pick-game-1",
+    "Whenever you're ready, pick a game. I'll wait. I'm very patient."
+   ]
+  ],
+  "thirty": [
+   [
+    "thirty-1",
+    "Thirty seconds left."
+   ],
+   [
+    "thirty-2",
+    "Half a minute. No pressure."
+   ]
+  ],
+  "ten": [
+   [
+    "ten-1",
+    "Ten seconds!"
+   ]
+  ],
+  "times-up": [
+   [
+    "times-up-1",
+    "Time's up! Pencils down. Thumbs down. Everything down."
+   ]
+  ],
+  "everyone-in": [
+   [
+    "everyone-in-1",
+    "That's everyone. Let's see what you've done."
+   ]
+  ],
+  "paused": [
+   [
+    "paused-1",
+    "Paused. Go get a snack. I'll keep your seat warm."
+   ]
+  ],
+  "resumed": [
+   [
+    "resumed-1",
+    "And we're back."
+   ]
+  ],
+  "game-over": [
+   [
+    "game-over-1",
+    "And that's the game! Take a bow, all of you."
+   ],
+   [
+    "game-over-2",
+    "What a round. Some of you should be proud. You know who you are."
+   ]
+  ],
+  "next-up": [
+   [
+    "next-up-1",
+    "Don't get too comfortable. The next game is ready."
+   ]
+  ],
+  "goodnight": [
+   [
+    "goodnight-1",
+    "That's the end of game night. Thank you for visiting the village. Come back soon."
+   ]
+  ]
+ },
+ "imposter": {
+  "intro": [
+   [
+    "intro-1",
+    "Welcome to Imposter. Everyone gets the same secret word. Everyone except one of you. Check your phone, and keep a straight face."
+   ],
+   [
+    "intro-2",
+    "One of you is about to pretend very, very hard. Look at your phone for the secret word."
+   ]
+  ],
+  "clues": [
+   [
+    "clues-1",
+    "Time for clues. One word each. Helpful enough to prove you know the word, vague enough that the imposter learns nothing."
+   ]
+  ],
+  "clues-fast": [
+   [
+    "clues-fast-1",
+    "Everyone, type one clue. They'll all appear together."
+   ]
+  ],
+  "lap2": [
+   [
+    "lap2-1",
+    "Once more around. Imposter, I hope you were listening."
+   ]
+  ],
+  "discuss": [
+   [
+    "discuss-1",
+    "Now talk it over. Whose clue was a little too vague? Who's sweating?"
+   ]
+  ],
+  "vote": [
+   [
+    "vote-1",
+    "Time to vote. Point your finger, politely, on your phone."
+   ]
+  ],
+  "caught": [
+   [
+    "caught-1",
+    "Caught! But wait. The imposter gets one guess at the secret word. Get it right, and they steal the win."
+   ]
+  ],
+  "escaped": [
+   [
+    "escaped-1",
+    "Oh dear. That was not the imposter. The real one has been smiling this whole time."
+   ]
+  ],
+  "stole": [
+   [
+    "stole-1",
+    "They guessed it! Caught red-handed, and they still win. Outrageous."
+   ]
+  ],
+  "crew-wins": [
+   [
+    "crew-wins-1",
+    "Wrong word! The crew wins. Well spotted, everyone."
+   ]
+  ]
+ },
+ "ducks": {
+  "intro": [
+   [
+    "intro-1",
+    "Welcome to Ducky Toss. Toss two rubber ducks, score points for how they land, and decide: bank it, or toss again? Get greedy, and you could lose it all."
+   ],
+   [
+    "intro-2",
+    "Two ducks. One question. How lucky do you feel?"
+   ]
+  ],
+  "your-turn": [
+   [
+    "your-turn-1",
+    "Next tosser, you're up."
+   ],
+   [
+    "your-turn-2",
+    "Fresh ducks. Give them a toss."
+   ]
+  ],
+  "big-roll": [
+   [
+    "big-roll-1",
+    "Ooh! That's a rare one. Big points!"
+   ]
+  ],
+  "bust": [
+   [
+    "bust-1",
+    "Splash! Both ducks belly-up. That turn's points are gone."
+   ],
+   [
+    "bust-2",
+    "And that is why they say: bank it."
+   ]
+  ],
+  "banked": [
+   [
+    "banked-1",
+    "Banked. Sensible. Boring, but sensible."
+   ]
+  ],
+  "close": [
+   [
+    "close-1",
+    "We have a leader closing in on the finish. Everyone else, time to take some risks."
+   ]
+  ],
+  "win": [
+   [
+    "win-1",
+    "We have a Ducky Toss champion! The ducks salute you."
+   ]
+  ]
+ },
+ "potato": {
+  "intro": [
+   [
+    "intro-1",
+    "Hot Potato! I'll give you a category. Say an answer out loud, then toss the potato on your phone. Whoever's holding it when it blows gets burned."
+   ],
+   [
+    "intro-2",
+    "This potato is hot, and it is ticking. Say an answer, pass it on, and hope."
+   ]
+  ],
+  "go": [
+   [
+    "go-1",
+    "Go!"
+   ],
+   [
+    "go-2",
+    "The potato is live!"
+   ]
+  ],
+  "boom": [
+   [
+    "boom-1",
+    "Boom! Somebody got burned."
+   ],
+   [
+    "boom-2",
+    "Kaboom. That's going to leave a mark."
+   ]
+  ],
+  "next": [
+   [
+    "next-1",
+    "New category. Shake it off."
+   ]
+  ],
+  "win": [
+   [
+    "win-1",
+    "The coolest hands in the village! Well played."
+   ]
+  ]
+ },
+ "bingo": {
+  "intro": [
+   [
+    "intro-1",
+    "It's Bingo time! Your card is on your phone. Tap the squares as I call them, and when you've got it, hit that Bingo button."
+   ],
+   [
+    "intro-2",
+    "Eyes down, everyone. Let's play Bingo."
+   ]
+  ],
+  "pattern-line": [
+   [
+    "pattern-line-1",
+    "We're playing for one line. Any row, any column, or corner to corner."
+   ]
+  ],
+  "pattern-corners": [
+   [
+    "pattern-corners-1",
+    "This game is four corners. Just the corners."
+   ]
+  ],
+  "pattern-blackout": [
+   [
+    "pattern-blackout-1",
+    "This one's a blackout. Every single square. Settle in."
+   ]
+  ],
+  "false": [
+   [
+    "false-1",
+    "Not quite! Check your card. We keep going."
+   ],
+   [
+    "false-2",
+    "Ooh, a false alarm. Nice try."
+   ]
+  ],
+  "bingo": [
+   [
+    "bingo-1",
+    "Bingo! We have a winner!"
+   ],
+   [
+    "bingo-2",
+    "That's a Bingo! Somebody's been paying attention."
+   ]
+  ]
+ },
+ "quick": {
+  "intro": [
+   [
+    "intro-1",
+    "Quick Games! Fast questions, big opinions. There are no wrong answers. Only answers we'll judge you for."
+   ],
+   [
+    "intro-2",
+    "Let's find out what this room really thinks."
+   ]
+  ],
+  "hot": [
+   [
+    "hot-1",
+    "Hot take! Pick your side, then guess what most of the room picked."
+   ]
+  ],
+  "wyr": [
+   [
+    "wyr-1",
+    "Would you rather? Choose quickly. Overthinking is cheating."
+   ]
+  ],
+  "mlt": [
+   [
+    "mlt-1",
+    "Most likely to! Vote for the person in this room who fits best. Be honest. They can take it."
+   ]
+  ],
+  "reveal-split": [
+   [
+    "reveal-split-1",
+    "Look at that. Split right down the middle. Feel free to argue."
+   ]
+  ],
+  "reveal-landslide": [
+   [
+    "reveal-landslide-1",
+    "Well, that was not close."
+   ]
+  ],
+  "win": [
+   [
+    "win-1",
+    "That's Quick Games. You've all learned something about each other. Sorry about that."
+   ]
+  ]
+ },
+ "sketch": {
+  "intro": [
+   [
+    "intro-1",
+    "Welcome to Sketch Telephone. Write something weird. The next person will have to draw it."
+   ],
+   [
+    "intro-2",
+    "It starts with a few innocent words. It will not end that way."
+   ]
+  ],
+  "draw": [
+   [
+    "draw-1",
+    "Now draw what you were given. No letters. No numbers. Just art."
+   ],
+   [
+    "draw-2",
+    "Time to draw. Remember: confidence matters more than talent."
+   ]
+  ],
+  "guess": [
+   [
+    "guess-1",
+    "What on earth is that drawing? Describe it in a few words."
+   ],
+   [
+    "guess-2",
+    "Look at the masterpiece on your phone. What is it?"
+   ]
+  ],
+  "reveal": [
+   [
+    "reveal-1",
+    "Time for the big reveal. Let's see how it all fell apart."
+   ]
+  ],
+  "chain-start": [
+   [
+    "chain-start-1",
+    "It started like this."
+   ],
+   [
+    "chain-start-2",
+    "Here's the next one. It began so simply."
+   ]
+  ],
+  "chain-end": [
+   [
+    "chain-end-1",
+    "And that's where it ended up. Remarkable."
+   ],
+   [
+    "chain-end-2",
+    "Nailed it. Sort of."
+   ]
+  ],
+  "hearts": [
+   [
+    "hearts-1",
+    "Tap the heart on your phone for the ones you love."
+   ]
+  ],
+  "win": [
+   [
+    "win-1",
+    "And the most loved artist of the evening is on your screen. Frame that."
+   ]
+  ]
+ },
+ "bowl": {
+  "intro": [
+   [
+    "intro-1",
+    "Welcome to Salad Bowl. Everyone, secretly add three names to the bowl. Famous people, characters, anyone this group would know."
+   ],
+   [
+    "intro-2",
+    "First, we fill the bowl. Three names each. Keep them secret."
+   ]
+  ],
+  "round1": [
+   [
+    "round1-1",
+    "Round one: describe it. Say anything you like, except the name itself."
+   ]
+  ],
+  "round2": [
+   [
+    "round2-1",
+    "Round two: one word. Same names, but you get exactly one word per name. Choose wisely."
+   ]
+  ],
+  "round3": [
+   [
+    "round3-1",
+    "Round three: act it out. Same names again. No talking. Not a sound."
+   ]
+  ],
+  "ready": [
+   [
+    "ready-1",
+    "Clue-giver, press start when your team is ready."
+   ]
+  ],
+  "time": [
+   [
+    "time-1",
+    "Time! Hands off the bowl."
+   ]
+  ],
+  "empty": [
+   [
+    "empty-1",
+    "The bowl is empty! Don't worry, the names are going back in."
+   ]
+  ],
+  "win": [
+   [
+    "win-1",
+    "And the winning team takes the Salad Bowl. A real bowl is not included."
+   ]
+  ]
+ },
+ "funny": {
+  "intro": [
+   [
+    "intro-1",
+    "Welcome to Funny Answers. You'll each get a couple of prompts. Write the funniest answer you can. Then the room decides who did it better."
+   ],
+   [
+    "intro-2",
+    "Time to be funny on purpose. Check your phone for your prompts."
+   ]
+  ],
+  "vote": [
+   [
+    "vote-1",
+    "Two answers enter. Vote for your favorite."
+   ],
+   [
+    "vote-2",
+    "Which one is funnier? Vote now."
+   ]
+  ],
+  "sweep": [
+   [
+    "sweep-1",
+    "A clean sweep! Every single vote."
+   ],
+   [
+    "sweep-2",
+    "Unanimous! That one's going on the fridge."
+   ]
+  ],
+  "tie": [
+   [
+    "tie-1",
+    "A tie! You're both equally funny. Or equally not."
+   ]
+  ],
+  "round2": [
+   [
+    "round2-1",
+    "Round two. The points are doubled, so try twice as hard."
+   ]
+  ],
+  "final": [
+   [
+    "final-1",
+    "Final round. Everyone answers the same prompt, and everyone votes. Triple points."
+   ]
+  ],
+  "win": [
+   [
+    "win-1",
+    "We have a winner. Officially the funniest person in the room. Don't let it go to your head."
+   ]
+  ]
+ },
+ "meld": {
+  "intro": [
+   [
+    "intro-1",
+    "Welcome to Mind Meld. One of you sees a secret spot between two opposites, and gives a clue. Everyone else slides their dial to where they think it is."
+   ],
+   [
+    "intro-2",
+    "Let's find out how well you can read each other's minds."
+   ]
+  ],
+  "clue": [
+   [
+    "clue-1",
+    "Mind reader, check your phone. Give a clue that sits right on that secret spot."
+   ]
+  ],
+  "guess": [
+   [
+    "guess-1",
+    "There's your clue. Talk it over, then set your dials."
+   ]
+  ],
+  "reveal": [
+   [
+    "reveal-1",
+    "Let's see where it really was."
+   ]
+  ],
+  "bullseye": [
+   [
+    "bullseye-1",
+    "Bullseye! Right on the spot."
+   ]
+  ],
+  "meld": [
+   [
+    "meld-1",
+    "Mind meld! You're all thinking as one. Slightly worrying."
+   ]
+  ],
+  "miss": [
+   [
+    "miss-1",
+    "Oh. Oh no. Not even close. We'll say no more about it."
+   ]
+  ],
+  "win": [
+   [
+    "win-1",
+    "And our best mind reader is revealed. Everyone else, guard your thoughts."
+   ]
+  ]
+ },
+ "doodle": {
+  "intro": [
+   [
+    "intro-1",
+    "Welcome to Doodle Bluff. Each of you has a secret title. Draw it as well as you can. Nobody else knows what it is."
+   ],
+   [
+    "intro-2",
+    "Artists, to your phones. Draw your secret title. No words allowed."
+   ]
+  ],
+  "fake": [
+   [
+    "fake-1",
+    "Behold. What is this drawing called? Write a fake title that sounds like the real thing."
+   ],
+   [
+    "fake-2",
+    "Here's our next masterpiece. Invent a title for it."
+   ]
+  ],
+  "pick": [
+   [
+    "pick-1",
+    "One of these titles is real. The rest are lies. Which is which?"
+   ]
+  ],
+  "reveal": [
+   [
+    "reveal-1",
+    "And the real title was..."
+   ],
+   [
+    "reveal-2",
+    "Let's see who was fooled."
+   ]
+  ],
+  "fooled-all": [
+   [
+    "fooled-all-1",
+    "That fake fooled almost everyone. Magnificent lying."
+   ]
+  ],
+  "win": [
+   [
+    "win-1",
+    "And that's Doodle Bluff. Some fine art, and some very fine lies."
+   ]
+  ]
+ },
+ "whosaid": {
+  "intro": [
+   [
+    "intro-1",
+    "Welcome to Who Said That. First, answer a few questions about yourself. Be honest. Then we'll see who really knows who."
+   ],
+   [
+    "intro-2",
+    "Let's find out how well you know each other. Start by answering on your phone."
+   ]
+  ],
+  "guess": [
+   [
+    "guess-1",
+    "Here's an answer. Who said it?"
+   ],
+   [
+    "guess-2",
+    "Somebody in this room wrote this. But who?"
+   ]
+  ],
+  "reveal": [
+   [
+    "reveal-1",
+    "And it was..."
+   ],
+   [
+    "reveal-2",
+    "The truth comes out."
+   ]
+  ],
+  "nobody": [
+   [
+    "nobody-1",
+    "Nobody got that one! We have a mystery person among us."
+   ]
+  ],
+  "everybody": [
+   [
+    "everybody-1",
+    "Everyone got it. Some people are an open book."
+   ]
+  ],
+  "win": [
+   [
+    "win-1",
+    "And the person who knows this group best is on your screen. A little too well, perhaps."
+   ]
+  ]
+ },
+ "crew": {
+  "intro": [
+   [
+    "intro-1",
+    "Welcome to Clue Crew. You're all on one team. One of you guesses the secret word. Everyone else writes a one-word clue. But be careful: matching clues cancel each other out."
+   ],
+   [
+    "intro-2",
+    "Tonight you win together or lose together. Guesser, no peeking at phones."
+   ]
+  ],
+  "clue": [
+   [
+    "clue-1",
+    "Write your clue. One word. Try to think of something nobody else will."
+   ]
+  ],
+  "cancel": [
+   [
+    "cancel-1",
+    "Uh oh. Some of you had the same idea. Those clues are gone."
+   ]
+  ],
+  "all-cancel": [
+   [
+    "all-cancel-1",
+    "Every clue cancelled! Guesser, you're on your own. Good luck."
+   ]
+  ],
+  "guess": [
+   [
+    "guess-1",
+    "Guesser, here's what survived. What's the word?"
+   ]
+  ],
+  "right": [
+   [
+    "right-1",
+    "Yes! That's the word!"
+   ],
+   [
+    "right-2",
+    "Got it! Lovely teamwork."
+   ]
+  ],
+  "wrong": [
+   [
+    "wrong-1",
+    "Not the word. And that costs you an extra card."
+   ]
+  ],
+  "pass": [
+   [
+    "pass-1",
+    "A pass. Sometimes that's the wise move."
+   ]
+  ],
+  "end-great": [
+   [
+    "end-great-1",
+    "What a crew! You practically share a brain."
+   ]
+  ],
+  "end-low": [
+   [
+    "end-low-1",
+    "Well. You tried. Maybe sit closer together next time."
+   ]
+  ]
+ },
+ "charades": {
+  "intro": [
+   [
+    "intro-1",
+    "Welcome to Picture Charades. The actor's phone shows a picture. Act it out. No talking, no sounds. Everyone else, shout your guesses!"
+   ],
+   [
+    "intro-2",
+    "It's charades! Actors, your picture is on your phone. Not a word."
+   ]
+  ],
+  "ready": [
+   [
+    "ready-1",
+    "Our next actor is up. Press start when you're ready."
+   ],
+   [
+    "ready-2",
+    "A new performer takes the stage."
+   ]
+  ],
+  "go": [
+   [
+    "go-1",
+    "And... action!"
+   ]
+  ],
+  "got": [
+   [
+    "got-1",
+    "Yes!"
+   ],
+   [
+    "got-2",
+    "Got it!"
+   ]
+  ],
+  "time": [
+   [
+    "time-1",
+    "Time! Take a bow."
+   ]
+  ],
+  "win": [
+   [
+    "win-1",
+    "And the award for best performance goes to the name on your screen. Bravo!"
+   ]
+  ]
+ },
+ "clash": {
+  "intro": [
+   [
+    "intro-1",
+    "Welcome to Color Clash. Match the color or the symbol on the top card. First to play every card wins."
+   ],
+   [
+    "intro-2",
+    "Cards are dealt. Match the color or the symbol, and be the first to empty your hand."
+   ]
+  ],
+  "skip": [
+   [
+    "skip-1",
+    "Skipped! Sorry about that."
+   ]
+  ],
+  "reverse": [
+   [
+    "reverse-1",
+    "Reverse! Back the other way."
+   ]
+  ],
+  "draw2": [
+   [
+    "draw2-1",
+    "Draw two. Ouch."
+   ]
+  ],
+  "wild4": [
+   [
+    "wild4-1",
+    "Draw four! That's just mean."
+   ],
+   [
+    "wild4-2",
+    "Four cards. There go your plans."
+   ]
+  ],
+  "swap": [
+   [
+    "swap-1",
+    "Swap hands! Hand them over."
+   ]
+  ],
+  "last-card": [
+   [
+    "last-card-1",
+    "One card left! Somebody stop them!"
+   ]
+  ],
+  "win": [
+   [
+    "win-1",
+    "Out of cards! We have a Color Clash winner."
+   ]
+  ]
+ },
+ "hunt": {
+  "intro": [
+   [
+    "intro-1",
+    "Color Hunt! When I say go, run and touch what I ask for. Then tap your phone. Ready?"
+   ],
+   [
+    "intro-2",
+    "Hunters, get ready! Leave your phones on the couch, find it, then run back and tap."
+   ]
+  ],
+  "ready": [
+   [
+    "ready-1",
+    "Get ready..."
+   ],
+   [
+    "ready-2",
+    "Here it comes..."
+   ]
+  ],
+  "red": [
+   [
+    "red-1",
+    "Find something red! Go go go!"
+   ]
+  ],
+  "blue": [
+   [
+    "blue-1",
+    "Find something blue! Go go go!"
+   ]
+  ],
+  "green": [
+   [
+    "green-1",
+    "Find something green! Go go go!"
+   ]
+  ],
+  "yellow": [
+   [
+    "yellow-1",
+    "Find something yellow! Go go go!"
+   ]
+  ],
+  "orange": [
+   [
+    "orange-1",
+    "Find something orange! Go go go!"
+   ]
+  ],
+  "purple": [
+   [
+    "purple-1",
+    "Find something purple! Go go go!"
+   ]
+  ],
+  "white": [
+   [
+    "white-1",
+    "Find something white! Go go go!"
+   ]
+  ],
+  "black": [
+   [
+    "black-1",
+    "Find something black! Go go go!"
+   ]
+  ],
+  "pink": [
+   [
+    "pink-1",
+    "Find something pink! Go go go!"
+   ]
+  ],
+  "brown": [
+   [
+    "brown-1",
+    "Find something brown! Go go go!"
+   ]
+  ],
+  "round": [
+   [
+    "round-1",
+    "Find something round, like a ball! Go!"
+   ]
+  ],
+  "soft": [
+   [
+    "soft-1",
+    "Find something soft, like a pillow! Go!"
+   ]
+  ],
+  "shoe": [
+   [
+    "shoe-1",
+    "Find a shoe! Go!"
+   ]
+  ],
+  "book": [
+   [
+    "book-1",
+    "Find a book! Go!"
+   ]
+  ],
+  "spoon": [
+   [
+    "spoon-1",
+    "Find a spoon! Go!"
+   ]
+  ],
+  "star": [
+   [
+    "star-1",
+    "Find something with a star on it! Go!"
+   ]
+  ],
+  "square": [
+   [
+    "square-1",
+    "Find something square, like a box! Go!"
+   ]
+  ],
+  "chair": [
+   [
+    "chair-1",
+    "Touch your nose, then find a chair! Go!"
+   ]
+  ],
+  "first": [
+   [
+    "first-1",
+    "We have our first hunter back! Super fast!"
+   ]
+  ],
+  "all-back": [
+   [
+    "all-back-1",
+    "Everybody found it! Great hunting."
+   ]
+  ],
+  "win": [
+   [
+    "win-1",
+    "The hunt is over! You were all amazing. Now put everything back."
+   ]
+  ]
+ },
+ "freeze": {
+  "intro": [
+   [
+    "intro-1",
+    "Freeze Dance! Dance while the music plays. When it stops, freeze like a statue and tap your phone. But don't tap too early!"
+   ],
+   [
+    "intro-2",
+    "Time to dance! When the music stops, you stop. Ready?"
+   ]
+  ],
+  "dance": [
+   [
+    "dance-1",
+    "Dance!"
+   ],
+   [
+    "dance-2",
+    "Show me your best moves!"
+   ]
+  ],
+  "freeze": [
+   [
+    "freeze-1",
+    "Freeze!"
+   ],
+   [
+    "freeze-2",
+    "Stop! Nobody move!"
+   ]
+  ],
+  "early": [
+   [
+    "early-1",
+    "Oops! Somebody tapped too early. Wait for the music to stop."
+   ]
+  ],
+  "win": [
+   [
+    "win-1",
+    "What dancers! Our freeze champion is on the screen. Everybody take a bow."
+   ]
+  ]
+ },
+ "copycat": {
+  "intro": [
+   [
+    "intro-1",
+    "Welcome to Copy Cat. Watch the lights and listen. Then copy the pattern on your phone. It gets longer every round."
+   ],
+   [
+    "intro-2",
+    "Watch closely. I'm going to show you a pattern, and you're going to copy it."
+   ]
+  ],
+  "watch": [
+   [
+    "watch-1",
+    "Watch carefully."
+   ],
+   [
+    "watch-2",
+    "Eyes on the TV."
+   ]
+  ],
+  "your-turn": [
+   [
+    "your-turn-1",
+    "Your turn! Copy the pattern."
+   ]
+  ],
+  "all-right": [
+   [
+    "all-right-1",
+    "Everybody got it! Let's make it harder."
+   ]
+  ],
+  "lost-heart": [
+   [
+    "lost-heart-1",
+    "Oops, that cost a heart. Keep going!"
+   ]
+  ],
+  "long": [
+   [
+    "long-1",
+    "Eight in a row! This is getting serious."
+   ]
+  ],
+  "win": [
+   [
+    "win-1",
+    "What a memory! Our Copy Cat champion is on the screen."
+   ]
+  ]
+ },
+ "midnight": {
+  "intro": [
+   [
+    "intro-1",
+    "Welcome to Midnight Wolves. One night. One vote. Look at your card, and tell no one. Three more cards lie face down in the middle of the village."
+   ],
+   [
+    "intro-2",
+    "Tonight will be short, and strange. Check your card. Remember it. It may not stay yours."
+   ]
+  ],
+  "night": [
+   [
+    "night-1",
+    "Night falls. Everyone, look at your phone. If you have a power, use it now. If you don't, tap anyway, so nobody can tell."
+   ]
+  ],
+  "morning": [
+   [
+    "morning-1",
+    "The sun rises. Read what you learned in the night. And remember: your card may have changed while you slept."
+   ]
+  ],
+  "day": [
+   [
+    "day-1",
+    "Now talk. Who are you? Who were you? Somebody here is a wolf, and they will lie about it."
+   ]
+  ],
+  "vote": [
+   [
+    "vote-1",
+    "One vote. Make it count. Who is the wolf?"
+   ]
+  ],
+  "win-village": [
+   [
+    "win-village-1",
+    "A wolf has been caught! The village wins."
+   ],
+   [
+    "win-village-2",
+    "The village chose well. The wolf is found."
+   ]
+  ],
+  "win-wolves": [
+   [
+    "win-wolves-1",
+    "The wolves walk free. The village chose wrong."
+   ],
+   [
+    "win-wolves-2",
+    "No wolf was caught. Sleep well. If you can."
+   ]
+  ],
+  "no-wolves": [
+   [
+    "no-wolves-1",
+    "There were no wolves at all. And you trusted each other. How lovely. The village wins."
+   ]
+  ]
+ },
+ "taboo": {
+  "intro": [
+   [
+    "intro-1",
+    "Welcome to Taboo Talk. Describe the word on your phone so your team can guess it. But don't say the forbidden words. The other team is watching."
+   ],
+   [
+    "intro-2",
+    "Two teams. One rule: don't say the words in red."
+   ]
+  ],
+  "ready": [
+   [
+    "ready-1",
+    "Clue-giver, press start when your team is ready. Other team, fingers on your buzzers."
+   ]
+  ],
+  "got": [
+   [
+    "got-1",
+    "Got it!"
+   ]
+  ],
+  "buzz": [
+   [
+    "buzz-1",
+    "Taboo!"
+   ],
+   [
+    "buzz-2",
+    "Buzzed! That was a forbidden word."
+   ]
+  ],
+  "time": [
+   [
+    "time-1",
+    "Time! Switch teams."
+   ]
+  ],
+  "win": [
+   [
+    "win-1",
+    "And that's the game. The winning team may now say whatever words they like."
+   ]
+  ],
+  "tie": [
+   [
+    "tie-1",
+    "It's a tie! Nobody wins. Or everybody does. Your choice."
+   ]
+  ]
+ }
+}
