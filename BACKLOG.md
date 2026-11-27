@@ -42,6 +42,8 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - **Real photos** for the mystery-picture puzzles (blurred, pixelated, zoomed). Today they use emoji; photos need licensed images.
 - **Art auction game** and **live drawing duel** (the last two of the Jackbox-favorites gaps).
 
-## Painted cover art
-- Five covers were generated in Canva (Werewolf, Imposter, Funny Answers, Quick Games, Sketch Telephone) before the Canva image credits ran out. Only small 200-pixel previews are in `art/`; the full-size originals (2336 x 1760) are in the Canva account and need exporting.
-- Remaining featured covers to generate once credits refresh: Salad Bowl, Hot Potato, Ducky Toss, Mind Meld, Bingo, Charades, Brain Teasers, Bracket Battle, Act Natural, Room Meter and the rest.
+## Painted art
+- **Done:** painted covers for 24 games (all featured games plus Bracket Battle, Act Natural, Room Meter, Brain Teasers), and the full Werewolf set (backdrop, four role portraits, two ending scenes). Files are in `art/` at about 1600 px.
+- **Covers still to make (23):** bluff, trivia, spin, crowd, ladder, cases, letters, agents, blackjack, gofish, bluffcards, hearts, shade, estimate, truths, wordhunt, missions, dares, split, memory, haunted, bomb, mystery.
+- **In-game art still to make:** a backdrop for each game world, role cards for Midnight Wolves, picture cards for Charades / Memory Match / Go Fish / Bingo, photo-style images for the Brain Teasers mystery pictures, and ending scenes.
+- **How it's done:** generate in Canva through the connector, then move the full-size files into `art/` through Chrome. Prompts and file names are in `art/PROMPTS.md`.
