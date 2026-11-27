@@ -1,4 +1,5 @@
 import { tap } from './tap.js';
+import { rec } from './recorded.js';
 // Sound effects synthesized with Web Audio, so there are no audio files to load or license.
 import { store } from './ui.js';
 
@@ -121,7 +122,10 @@ const SOUNDS = {
 
 export function play(name) {
   if (!quiet.on) tap.fn?.('play', [name]);
-  if (!ready() || !SOUNDS[name]) return;
+  if (!ready()) return;
+  // A recorded effect, when one has been made for this name; the synthesized one otherwise.
+  if (rec.sfx.has(name)) { try { const a = new Audio(`audio/sfx/${name}.mp3`); a.volume = 0.8; a.play().catch(() => {}); return; } catch {} }
+  if (!SOUNDS[name]) return;
   try { SOUNDS[name](); } catch {}
 }
 

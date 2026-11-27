@@ -1,7 +1,7 @@
 // TV / host page: owns the room, the player list and the game state.
 import { GAMES, COMING_SOON, SHELVES, NIGHTS } from './games/index.js';
 import { openRoom } from './net.js';
-import { esc, store, newCode, say, voice, voices, enableDpad, autofocus, drawScene, titleCard, confetti, clawMarks } from './ui.js';
+import { esc, store, newCode, say, sayLow, voiceContext, voice, voices, enableDpad, autofocus, drawScene, titleCard, confetti, clawMarks } from './ui.js';
 import { art } from './art.js';
 import { play, sfx, startAmbient, stopAmbient, startBed, stopBed, quiet } from './sfx.js';
 import { newKeys, cleanPub, samePub, sharedKey, seal, unseal } from './secure.js';
@@ -36,6 +36,10 @@ let lastPhase = '';
 const game = () => GAMES[host.gameId];
 // A host line for a moment, in the right voice for the game on screen (kids' games get the gentle set).
 const hostLine = m => quip(m, { game: host.gameId, kids: !!host.settings.kids || !!game()?.meta.kids });
+// Banter: an optional host line that never interrupts the game's own narration.
+const banter = (m, chance = 1) => { if (host.settings.banter !== false && !host.paused && Math.random() < chance) sayLow(hostLine(m)); };
+let saidLead = false, lastInput = Date.now(), lastIdle = 0;
+['keydown', 'pointerdown'].forEach(e => addEventListener(e, () => (lastInput = Date.now()), { passive: true }));
 const save = () => store.set('pg-host', host);
 const joinUrl = () => {
   const u = new URL('play.html', location.href);
@@ -165,7 +169,17 @@ function changed() {
   save();
   if (host.state) {
     const key = host.state.phase + host.state.round;
-    if (key !== lastPhase) { lastPhase = key; fresh = true; host.blurDraw = false; announce(); }
+    if (key !== lastPhase) {
+      lastPhase = key; fresh = true; host.blurDraw = false;
+      if (/reveal|result|scores/.test(host.state.phase)) {
+        // Once a game, the host remarks on a runaway leader or a very close race; otherwise an occasional lead-in.
+        const l = scoreList(), a = l?.[0]?.score, b = l?.[1]?.score;
+        if (!saidLead && l && l.length >= 3 && a >= 4 && (a - b) / a > 0.45) { saidLead = true; banter('runaway'); }
+        else if (!saidLead && l && l.length >= 3 && a >= 6 && (a - b) / a < 0.05 && a !== b) { saidLead = true; banter('close'); }
+        else banter('reveal', 0.3);
+      }
+      announce();
+    }
     const ce = game().cueEvent?.(host.state);
     if (ce && ce.id !== lastEventId) {
       lastEventId = ce.id;
@@ -193,7 +207,12 @@ function announce() {
   }
   const line = g.narration(s);
   // Game over with a score table: the shared winners' ceremony replaces the game's own title card.
-  if (s.phase === 'over' && host.gameId !== 'imposter' && ceremony()) { sayTimer = setTimeout(() => say(maskLine(line, host.hidden)), 4200); return; }
+  if (s.phase === 'over' && host.gameId !== 'imposter' && ceremony()) {
+    sayTimer = setTimeout(() => say(maskLine(line, host.hidden)), 4200);
+    const l = scoreList(); setTimeout(() => { if (host.state?.phase === 'over') banter(l && l[0].score === l[1]?.score ? 'tie' : 'winner'); }, 8000);
+    return;
+  }
+  if (s.phase === 'over') setTimeout(() => { if (host.state?.phase === 'over') banter('gameover'); }, 4500);
   if (c?.title) titleCard(c.title, c.sub, c.tone, introArt ? art(host.gameId, ICONS[host.gameId]) : ''); if (c?.title) introArt = false;
   else if (s.phase !== 'over') flash('wipe');
   // A title card covers the screen for about three seconds, so the phase's clock doesn't start until it clears.
@@ -450,10 +469,10 @@ function nightAwards() {
   el.onclick = close; addEventListener('keydown', key, true); ceremonyOff = () => { el.remove(); removeEventListener('keydown', key, true); ceremonyOff = null; };
   if (sfx.on) { play('fanfare'); setTimeout(() => play('cheer'), 600); }
   setTimeout(confetti, 500);
-  say(awards.map(a => `${a[0].replace(/^\S+ /, '')}: ${a[1]}.`).join(' '));
+  say(hostLine('awards') + ' ' + awards.map(a => `${a[0].replace(/^\S+ /, '')}: ${a[1]}.`).join(' '));
 }
 
-function startGame() {
+function startGame(again) {
   host.paused = 0;
   // The audience gets promoted into open seats for the next game.
   while (host.audience.length && host.players.length < game().meta.max) host.players.push(host.audience.shift());
@@ -463,13 +482,14 @@ function startGame() {
   introArt = true;
   lastEventId = 0; popped.clear(); gains = {}; places = {}; lastScore = {}; finalRound = false; finalSaid = false;
   host.played = { ...(host.played || {}), [host.gameId]: (host.played?.[host.gameId] || 0) + 1 }; host.counted = false;
-  lastPhase = '';
+  lastPhase = ''; saidLead = false;
   changed();
+  setTimeout(() => banter(again ? 'again' : 'start'), 400);
 }
 
 function hostAction(a) {
   if (a === 'start') return startGame();
-  if (a === 'again') return startGame();
+  if (a === 'again') return startGame(true);
   if (a.startsWith('night:')) { const nt = NIGHTS.find(x => x.id === a.slice(6)); if (nt) { host.queue = nt.games.slice(1); host.night = nt.id; host.gameId = nt.games[0]; host.screen = 'gather'; save(); } return changed(); }
   if (a === 'endnight') { host.queue = []; host.night = null; save(); return render(); }
   if (a === 'lobby') { host.lastByGame = { ...(host.lastByGame || {}), [host.gameId]: host.state }; host.state = null; ceremonyOff?.(); if (host.queue?.length) { host.gameId = host.queue.shift(); host.screen = 'gather'; } else { host.night = null; host.screen = 'menu'; } stopAmbient(); document.body.classList.remove('day'); return changed(); }
@@ -498,6 +518,7 @@ function hostAction(a) {
   if (a === 'menu' || a === 'settings') { host.screen = a; save(); return render(); }
   if (a === 'awards') return nightAwards();
   if (a === 'cleartally') { host.tally = null; save(); return render(); }
+  if (a === 'banter') { host.settings.banter = host.settings.banter === false; save(); return render(); }
   if (a === 'music') { host.settings.music = !host.settings.music; if (!host.settings.music) stopBed(); save(); return render(); }
   if (a === 'short') { host.settings.short = !host.settings.short; save(); return render(); }
   if (a === 'kids') { host.settings.kids = !host.settings.kids; save(); return render(); }
@@ -674,6 +695,7 @@ function renderLobby() {
         <button class="btn ghost" data-host="relaxed">Relaxed timers: ${host.settings.relaxed ? 'on' : 'off'}</button>
         <button class="btn ghost" data-host="howto">How-to screens: ${host.settings.howto ? 'first time' : 'off'}</button>
         <button class="btn ghost" data-host="music">Music: ${host.settings.music ? 'on' : 'off'}</button>
+        <button class="btn ghost" data-host="banter">Host banter: ${host.settings.banter === false ? 'off' : 'on'}</button>
         <button class="btn ghost" data-host="short">Game length: ${host.settings.short ? 'short' : 'full'}</button>
         <button class="btn ghost" data-host="remote">Phone remote: ${remotePid() ? esc(host.players.find(p => p.pid === remotePid()).name) : host.settings.remote === false ? 'off' : 'first to join'}</button>
         <button class="btn ghost" data-host="streamer">Room code: ${host.settings.streamer ? 'hidden' : 'shown'}</button>
@@ -761,6 +783,7 @@ const watchUrl = () => { const u = new URL('watch.html', location.href); u.searc
 const SAME_ROOM = ['charades', 'faker', 'freeze', 'hunt', 'dares'];
 
 function render() {
+  voiceContext(host.players.map(p => p.name), host.state ? host.gameId : '');
   if (!host.state) renderLobby();
   else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); if (fresh) wordsIn(); decorate(); pops(fresh); guideTip(); slideScores(); cardPops(fresh); }
   document.body.classList.toggle('night', host.state?.phase === 'night');
@@ -843,9 +866,9 @@ setInterval(timerBar, 1000);
 setInterval(() => {
   if (!host.state || host.paused) return;
   runBots();
-  const before = JSON.stringify(host.state);
+  const before = JSON.stringify(host.state), expired = host.state.deadline && Date.now() >= host.state.deadline && !SECRET.includes(host.gameId), wasPhase = host.state.phase;
   game().tick(host.state, Date.now());
-  if (JSON.stringify(host.state) !== before) return changed();
+  if (JSON.stringify(host.state) !== before) { if (expired && host.state.phase !== wasPhase && host.state.phase !== 'over') banter('timesup', 0.5); return changed(); }
   stretch();
   // Some views change with time alone (e.g. an animation finishing): redraw only when the view itself changes.
   if (viewKey(tvView()) !== lastViewKey) render();
@@ -858,6 +881,7 @@ setInterval(() => {
       clock.classList.toggle('hurry', left <= 10);
       if (left <= 10 && left > 0) play('tick');
       if (left === 30) say(hostLine('thirty'));
+      if (left === 14 && barTotal >= 40000) banter('waiting', 0.35);
     }
   }
 }, 1000);
@@ -866,3 +890,6 @@ try { speechSynthesis.addEventListener('voiceschanged', () => { if (!host.state)
 
 if (host.state) lastPhase = host.state.phase + host.state.round;
 connect();
+
+// A quiet lobby gets an occasional nudge from the host.
+setInterval(() => { const now = Date.now(); if (!host.state && host.players.length && now - lastInput > 90000 && now - lastIdle > 240000) { lastIdle = now; banter('lobby'); } }, 20000);

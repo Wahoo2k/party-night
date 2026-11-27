@@ -1,4 +1,5 @@
 import { tap } from './tap.js';
+import { rec, clipsFor, voiceFor } from './recorded.js';
 // Shared helpers for the TV and phone pages.
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => '&#' + c.charCodeAt(0) + ';');
@@ -52,23 +53,70 @@ export const voice = {
   set name(n) { chosen = n; store.set('pg-voice-name', n); },
 };
 
-export function say(text, force) {
-  if (text) tap.fn?.('say', [String(text)]);
-  if ((!voiceOn && !force) || !text || !synth()) return;
+// The narrator. Lines play one at a time from a queue: a recorded clip when one exists for the line, the browser voice
+// otherwise. Game narration is "high": it replaces anything waiting and cuts off older narration. Host banter is
+// "low": it waits its turn, never interrupts, and is dropped if it can't start within a few seconds.
+const queue = [];
+let current = null;
+function stopCurrent() {
+  if (!current) return;
+  try { current.audio?.pause(); } catch {}
+  if (current.tts) try { synth()?.cancel(); } catch {}
+  current = null;
+}
+function pump() {
+  if (current) return;
+  let item;
+  while ((item = queue.shift())) { if (!item.low || Date.now() - item.at < 5000) break; }
+  if (!item) return;
+  current = item;
+  const done = () => { if (current === item) { current = null; pump(); } };
+  if (item.clips) {
+    // One clip per sentence, played back to back.
+    let i = 0;
+    const next = () => {
+      if (current !== item) return;
+      if (i >= item.clips.length) return done();
+      const a = (item.audio = new Audio(item.clips[i++]));
+      a.onended = next; a.onerror = next;
+      a.play().catch(next);
+    };
+    return next();
+  }
+  if (!synth()) return done();
   try {
-    synth().cancel();
-    // Speak sentence by sentence: long utterances get cut off in Chrome, and pauses sound more natural.
-    const parts = text.match(/[^.!?]+[.!?]*/g) || [text];
+    item.tts = true;
+    const parts = item.text.match(/[^.!?]+[.!?]*/g) || [item.text];
     const v = pickVoice();
-    for (const part of parts) {
+    parts.forEach((part, k) => {
       const u = new SpeechSynthesisUtterance(part.trim());
       if (v) { u.voice = v; u.lang = v.lang; }
       u.rate = 0.95;
       u.pitch = 1;
+      if (k === parts.length - 1) { u.onend = done; u.onerror = done; }
       synth().speak(u);
-    }
-  } catch {}
+    });
+    setTimeout(done, 1500 + item.text.length * 90);
+  } catch { done(); }
 }
+export function say(text, force, low) {
+  if (text) tap.fn?.('say', [String(text), !!low]);
+  if ((!voiceOn && !force) || !text) return;
+  const clips = clipsFor(text);
+  // Recorded clips only. The browser's own voice is never used once any recordings exist; until the first ones are
+  // made it stands in as a placeholder so test games aren't silent.
+  if (!clips.length && rec.have.size) return;
+  const item = { text: String(text), clips: clips.length ? clips : null, low: !!low, at: Date.now() };
+  if (low) { if (queue.length < 2) queue.push(item); }
+  else {
+    queue.length = 0;
+    if (current && !current.low) stopCurrent();
+    queue.push(item);
+  }
+  pump();
+}
+// Host banter: said only when the narrator is free.
+export const sayLow = text => say(text, false, true);
 
 // Arrow-key focus movement so the TV page works with a remote control (D-pad).
 export function enableDpad(root = document) {
@@ -176,3 +224,6 @@ export function clawMarks() {
   document.body.append(d);
   setTimeout(() => d.remove(), 5000);
 }
+
+// The TV tells the narrator who is playing and which game is on, so recorded lines can be matched in the right voice.
+export function voiceContext(names, game) { rec.names = names || []; rec.voice = voiceFor(game); }

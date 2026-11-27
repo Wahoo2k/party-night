@@ -40,7 +40,7 @@ const text = x => String(x ?? '').replace(/[<>]/g, '');
 function ceremonyOff() { cer?.el.remove(); cer?.timers.forEach(clearTimeout); cer = null; }
 const FX = {
   play: n => { if (sfx.on && /^[a-z]+$/.test(n)) play(n); },
-  say: t => say(text(t).slice(0, 400)),
+  say: (t, low) => say(text(t).slice(0, 400), false, !!low),
   titleCard: (a, b, c, d) => titleCard(text(a), text(b), text(c).replace(/[^a-z ]/g, ''), clean(d)),
   confetti: () => confetti(),
   clawMarks: () => clawMarks(),
