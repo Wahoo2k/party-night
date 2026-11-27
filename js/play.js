@@ -25,6 +25,7 @@ let room = null;
 let lastView = '';
 let heard = 0;
 let hello = null;
+let myFace = null;
 
 function joinForm(err = '') {
   app.innerHTML = `<form class="panel" id="f">
@@ -88,6 +89,7 @@ function onMessage(m) {
 let lastPhaseSeen = '';
 function render(v) {
   document.body.classList.toggle('paused', !!v._paused);
+  if (v._me) { myFace = v._me; document.body.style.setProperty('--me', v._me[1]); if (statusEl.dataset.s === 'live') statusEl.textContent = `${v._me[0]} ${v.me || name} · ${code}`; }
   const key = v.phase + (v.round || '');
   const isNew = key !== lastPhaseSeen;
   if (isNew) { app.classList.remove('enter'); void app.offsetWidth; app.classList.add('enter'); }
@@ -141,7 +143,7 @@ async function join() {
   store.set(key, pid);
   app.innerHTML = `<div class="panel"><h2>Joining ${esc(code)}…</h2><p class="muted">Make sure the TV is showing this room code.</p></div>`;
   room = await openRoom(code, onMessage, s => {
-    statusEl.textContent = s === 'live' ? `Room ${code} · ${name}` : s === 'connecting' ? 'Connecting…' : 'Connection lost, retrying…';
+    statusEl.textContent = s === 'live' ? `${myFace ? myFace[0] + ' ' : ''}${name} · ${code}` : s === 'connecting' ? 'Connecting…' : 'Connection lost, retrying…';
     statusEl.dataset.s = s;
   });
   if (!keys) { try { keys = await newKeys(); if (keys) store.set('pg-keys', keys); } catch { keys = null; } }

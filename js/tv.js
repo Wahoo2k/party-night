@@ -40,6 +40,30 @@ const joinUrl = () => {
   return u.toString();
 };
 
+// Every player gets a village character and a color that follow them through every game.
+const FACES = [['🦊', '#f28a3d'], ['🦉', '#c9a15a'], ['🐸', '#5fbf6b'], ['🐻', '#b0763f'], ['🐰', '#f2a0c0'], ['🦝', '#9aa3b8'], ['🦔', '#d9b38c'], ['🐢', '#3fa38f'], ['🦆', '#f2c94c'], ['🦋', '#6fa8ff'], ['🐝', '#f2b21d'], ['🦌', '#c98b5a'], ['🐺', '#8fa0c8'], ['🐱', '#f2b880'], ['🐶', '#d8a36a'], ['🐭', '#c0c0cc'], ['🐷', '#f29aa8'], ['🐮', '#e8e2d0'], ['🐞', '#e2473b'], ['🦜', '#4fc3a1']];
+function ensureFaces() {
+  const everyone = [...host.players, ...host.audience];
+  for (const p of everyone) {
+    if (p.face) continue;
+    const used = new Set(everyone.map(x => x.face?.[0]));
+    p.face = FACES.find(f => !used.has(f[0])) || FACES[Math.floor(Math.random() * FACES.length)];
+  }
+}
+// After a game draws its screen, put each player's character beside their name in the shared score, podium and roster parts.
+function decorate() {
+  const list = [...host.players].sort((a, b) => b.name.length - a.name.length);
+  app.querySelectorAll('.srow > span:first-child, .pod > b, .roster .chip, .ccseat > b, .gfseat > b, .hseat > b, .bjseat > b, .mmcast b, .ccplayers b').forEach(el => {
+    if (el.querySelector('.pface')) return;
+    const text = el.textContent.replace(/^[^\p{L}\p{N}]+/u, '');
+    const p = list.find(x => text === x.name || text.startsWith(x.name + ' ') || text.startsWith(x.name));
+    if (!p?.face) return;
+    const i = document.createElement('i');
+    i.className = 'pface'; i.textContent = p.face[0]; i.style.setProperty('--pc', p.face[1]);
+    el.prepend(i);
+  });
+}
+
 const REACTIONS = ['👏', '😂', '😱', '🔥', '❤️', '👎'];
 const isAudience = pid => host.audience.some(a => a.pid === pid);
 function viewFor(pid) {
@@ -49,9 +73,9 @@ function viewFor(pid) {
   }
   if (!host.state) {
     const me = host.players.find(p => p.pid === pid) || {};
-    return { phase: 'lobby', players: host.players.map(p => p.name), game: game().meta.name, me: me.name, fixed: !!me.fixed, byHost: !!me.locked };
+    return { phase: 'lobby', players: host.players.map(p => p.name), game: game().meta.name, me: me.name, fixed: !!me.fixed, byHost: !!me.locked, _me: me.face };
   }
-  return { ...maskView(game().phoneView(host.state, pid), host.hidden), game: host.gameId, ...(host.paused ? { _paused: true } : {}) };
+  return { ...maskView(game().phoneView(host.state, pid), host.hidden), game: host.gameId, _me: host.players.find(p => p.pid === pid)?.face, ...(host.paused ? { _paused: true } : {}) };
 }
 
 function sendViews(force) {
@@ -91,6 +115,7 @@ let lastEventId = 0;
 let lastViewKey = '';
 const viewKey = v => JSON.stringify({ ...v, left: 0 });
 function changed() {
+  ensureFaces();
   stretch();
   save();
   if (host.state) {
@@ -333,7 +358,7 @@ function renderLobby() {
     </section>
     <section class="panel">
       <h2>${n ? `${n} player${n === 1 ? '' : 's'} in` : 'Waiting for players'}</h2>
-      <div class="roster">${host.players.map(p => `<button class="chip ${p.bot ? 'bot' : ''} ${seen.has(p.pid) ? '' : 'pop'} ${editing === p.pid ? 'on' : ''}" data-host="edit:${esc(p.pid)}" title="Rename or remove">${esc(p.name)}</button>`).join('') || '<p class="muted">Names appear here as phones join.</p>'}</div>
+      <div class="roster">${host.players.map(p => `<button class="chip ${p.bot ? 'bot' : ''} ${seen.has(p.pid) ? '' : 'pop'} ${editing === p.pid ? 'on' : ''}" data-host="edit:${esc(p.pid)}" title="Rename or remove" style="--rc:${p.face?.[1] || ''}"><i class="pface" style="--pc:${p.face?.[1] || ''}">${p.face?.[0] || ''}</i>${esc(p.name)}</button>`).join('') || '<p class="muted">Names appear here as phones join.</p>'}</div>
       ${host.players.length ? '<p class="muted small">Select a name to rename or remove that player.</p>' : ''}
       ${host.audience.length ? `<p class="muted">Audience (${host.audience.length}): ${host.audience.map(a => esc(a.name)).join(', ')}. They join automatically when a seat opens.</p>` : ''}
       ${(() => { const p = host.players.find(x => x.pid === editing); return p ? `<div class="editbox"><label for="rename">Rename ${esc(p.name)}</label><div class="row"><input id="rename" maxlength="${MAX_NAME}" value="${esc(p.name)}" autocomplete="off"><button class="btn" data-host="rename">Save</button><button class="btn ghost" data-host="randomname">Random name</button><button class="btn ghost" data-host="kick">Remove player</button><button class="btn ghost" data-host="canceledit">Cancel</button></div></div>` : ''; })()}
@@ -373,7 +398,7 @@ function renderLobby() {
 
 function render() {
   if (!host.state) renderLobby();
-  else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); }
+  else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); decorate(); }
   document.body.classList.toggle('night', host.state?.phase === 'night');
   document.body.classList.toggle('nohow', !host.settings.howto);
   const badge = document.getElementById('aud') || Object.assign(document.createElement('div'), { id: 'aud' });

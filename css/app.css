@@ -922,3 +922,7 @@ body:not(.phone) .shelf{font-size:clamp(15px,1.1vw,22px)}
 .pausecover b{font:400 clamp(60px,9vw,140px)/1 'Pirata One',serif}.pausecover span{font-size:clamp(18px,1.6vw,30px);color:var(--dim)}
 body.phone.paused #app::before{content:'⏸ Paused';display:block;margin-bottom:10px;padding:12px;border-radius:12px;background:var(--moon);color:#0e1230;font-weight:800;text-align:center}
 body.phone.paused #app{opacity:.8}
+/* player characters */
+.pface{display:inline-grid;place-items:center;width:1.7em;height:1.7em;margin-right:.4em;border-radius:50%;background:var(--pc,#232a5c);font-style:normal;font-size:.9em;vertical-align:middle;box-shadow:0 0 0 2px #0003}
+body.phone #status{border:2px solid var(--me,transparent);font-size:15px}
+body.phone .panel{border-top:4px solid var(--me,var(--line))}
