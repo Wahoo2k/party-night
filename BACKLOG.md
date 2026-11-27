@@ -41,3 +41,7 @@ Things decided to do later, in rough priority order within each group. Updated 2
 ## Puzzle ideas parked
 - **Real photos** for the mystery-picture puzzles (blurred, pixelated, zoomed). Today they use emoji; photos need licensed images.
 - **Art auction game** and **live drawing duel** (the last two of the Jackbox-favorites gaps).
+
+## Painted cover art
+- Five covers were generated in Canva (Werewolf, Imposter, Funny Answers, Quick Games, Sketch Telephone) before the Canva image credits ran out. Only small 200-pixel previews are in `art/`; the full-size originals (2336 x 1760) are in the Canva account and need exporting.
+- Remaining featured covers to generate once credits refresh: Salad Bowl, Hot Potato, Ducky Toss, Mind Meld, Bingo, Charades, Brain Teasers, Bracket Battle, Act Natural, Room Meter and the rest.

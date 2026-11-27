@@ -1322,3 +1322,4 @@ body[data-theme]:not([data-theme='']):not(.phone) .scene .title{font-family:var(
 .mgame i .art{width:1.5em;display:inline-block;vertical-align:middle;box-shadow:none;border-radius:6px}
 .tcard .tc-art{width:min(30vw,340px);margin:0 auto 2vh;animation:tcword .6s .1s cubic-bezier(.3,1.6,.5,1) both}
 .ringmid .art{width:clamp(90px,10vw,150px);margin-bottom:4px}
+.art.painted{aspect-ratio:4/3;object-fit:cover;animation:paintedin .6s both}@keyframes paintedin{from{transform:scale(1.08);filter:blur(4px)}}.tcard .tc-art .painted,.ringmid .painted{box-shadow:0 0 0 4px #fff3,0 14px 34px #0008}

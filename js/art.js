@@ -56,4 +56,7 @@ export const ART = {
   crew: () => S(`${[['#ffcf6b', 52], ['#7fc8a9', 86], ['#ff6b3c', 120]].map(([c, x], i) => `<g class="a-hop" style="animation-delay:${i * 0.18}s"><rect x="${x}" y="70" width="28" height="80" rx="14" fill="${c}"/><circle cx="${x + 14}" cy="62" r="15" fill="${c}"/></g>`).join('')}
     <g class="a-pulse"><path d="M100 14l7 14 15 2-11 11 3 15-14-7-14 7 3-15-11-11 15-2z" fill="#fff"/></g>`, '#1d2440'),
 };
-export const art = (id, emoji = '🎲') => (ART[id] ? ART[id]() : S(`<text x="100" y="108" font-size="84" text-anchor="middle" class="a-bob">${emoji}</text>`));
+// Painted covers (generated in Canva) replace the drawn scene where one exists. These five are small previews for now;
+// drop a full-size file with the same name into art/ to sharpen them.
+export const PAINTED = ['werewolf', 'imposter', 'funny', 'quick', 'sketch'];
+export const art = (id, emoji = '🎲') => (PAINTED.includes(id) ? `<img class="art painted" src="art/${id}.png" alt="">` : ART[id] ? ART[id]() : S(`<text x="100" y="108" font-size="84" text-anchor="middle" class="a-bob">${emoji}</text>`));
