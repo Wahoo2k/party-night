@@ -29,3 +29,14 @@ https://wahoo2k.github.io/party-night/ (GitHub Pages from `main`, root)
 - Messages between the TV and each phone are encrypted per player (`js/secure.js`), so players can't read each other's
   roles or answers on the shared channel. The TV itself still holds every secret, so whoever controls the TV page can see them.
 - Werewolf only; Price Guesser, Family Fact Trivia and Celebrity are listed as coming soon.
+
+## Shared kit (what every game gets for free)
+
+- One countdown bar, thinking music, crowd reactions, lock-in sounds, flashes and shake (`js/tv.js`, `js/sfx.js`).
+- Title cards with four transitions, a gold wipe between untitled phases, sliding scoreboards, a drifting backdrop.
+- Winners' ceremony for any game whose TV view has a sorted `scores` list; end-of-night awards from the lobby.
+- Phones: "Your move!" banner, points pop-up, finishing place, fast reconnect. The phone page can be added to the home screen.
+- Optional hooks a game can export: `guide(s)` (first-game coach), `addPlayer(s, p)` (join mid-game), `audienceView` / `audienceAct` (audience voting), `meta.options` (lobby options), `cueEvent` with `fx` and `react`.
+- Mark an element `data-pop="unique-key"` to make it punch in the first time it appears.
+
+See `BACKLOG.md` for what's next.

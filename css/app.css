@@ -1143,3 +1143,4 @@ body.phone #backdrop{display:none}
 .onfire{display:inline-block;color:#ffcf6b;font-weight:800}
 .landed{display:inline-block}.landed.popin{animation:ccfly .4s cubic-bezier(.2,.9,.3,1.1) both}
 .mydraw{margin:10px 0;background:#fffdf6;border-radius:12px}.mydraw svg{width:100%;display:block}
+.pc.dealt{animation:ccfly .4s cubic-bezier(.2,.9,.3,1.1) both}

@@ -326,6 +326,14 @@ function guideTip() {
   if (tip) app.querySelector('.panel')?.insertAdjacentHTML('beforeend', `<div class="guide"><b>💡 First game</b> ${esc(tip)}</div>`);
 }
 
+// Card games: when a pile or hand on the TV gains cards mid-phase (a hit, a draw, a card played), the new ones fly in.
+let cardCounts = [];
+function cardPops(isFresh) {
+  const groups = [...new Set([...app.querySelectorAll('.pc')].map(c => c.parentElement))];
+  const counts = groups.map(g => g.querySelectorAll(':scope > .pc').length);
+  if (!isFresh && counts.length === cardCounts.length) groups.forEach((g, i) => { const kids = g.querySelectorAll(':scope > .pc'); for (let k = cardCounts[i]; k < counts[i]; k++) kids[k]?.classList.add('dealt'); });
+  cardCounts = counts;
+}
 // Scoreboards re-sort with a slide: rows glide to their new places instead of jumping.
 let rowAt = {};
 function slideScores() {
@@ -588,7 +596,7 @@ function renderLobby() {
 
 function render() {
   if (!host.state) renderLobby();
-  else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); decorate(); pops(fresh); guideTip(); slideScores(); }
+  else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); decorate(); pops(fresh); guideTip(); slideScores(); cardPops(fresh); }
   document.body.classList.toggle('night', host.state?.phase === 'night');
   // How-to screens show in full the first time a room plays a game, then get out of the way.
   document.body.classList.toggle('nohow', !host.settings.howto || (host.played?.[host.gameId] || 0) > 1);
