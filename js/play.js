@@ -93,6 +93,12 @@ function render(v) {
   document.body.classList.toggle('paused', !!v._paused);
   document.body.classList.toggle('nodraw', !!v._nodraw);
   if (v._me) { myFace = v._me; document.body.style.setProperty('--me', v._me[1]); if (statusEl.dataset.s === 'live') statusEl.textContent = `${v._me[0]} ${v.me || name} · ${code}`; }
+  // In a game the header shrinks to one line with the game's name and art, and the phone takes the game's colors.
+  const inGame = !!v.game && !['lobby', 'audience', 'kicked', 'full'].includes(v.phase) && !!GAMES[v.game];
+  document.body.classList.toggle('ingame', inGame);
+  document.body.dataset.theme = inGame ? v._theme || '' : '';
+  const titleEl = document.querySelector('.title');
+  if (titleEl) { titleEl.textContent = inGame ? v._name || 'Party Night' : 'Party Night'; document.querySelector('.scene').style.setProperty('--cover', inGame ? `url(art/${v.game}.jpg)` : 'none'); }
   const key = v.phase + (v.round || '');
   const isNew = key !== lastPhaseSeen;
   if (isNew) { app.classList.remove('enter'); void app.offsetWidth; app.classList.add('enter'); }
@@ -125,10 +131,13 @@ function render(v) {
     app.innerHTML = `<div class="panel"><h2>You're in, ${esc(v.me || name)}</h2>${v.byHost ? '<p class="note">The host set your name.</p>' : v.fixed ? `<p class="note">${v.me && name && v.me.toLowerCase().startsWith(name.toLowerCase()) ? 'Someone already had that name, so you got a number.' : 'We tidied up your name.'}</p>` : ''}<p class="say">Watch the TV. The game starts when the host is ready.</p>
       <p class="muted">Game: ${esc(v.game)} · ${v.players.length} playing</p>
       <div class="roster">${v.players.map(n => `<div class="chip">${esc(n)}</div>`).join('')}</div>
+      ${v.faces ? `<div class="facepick"><p class="muted">Pick your animal</p><div class="faces">${v.faces.map((f, i) => `<button class="facebtn ${v._me && v._me[0] === f ? 'on' : ''}" data-face="${i}" ${v.taken.includes(f) ? 'disabled' : ''}>${f}</button>`).join('')}</div><button class="btn ghost" id="wave">👋 Wave at the TV</button></div>` : ''}
       ${v.canPrompt ? `<form id="pf" class="audask"><p class="muted">✍️ Add your own prompt for Funny Answers (${v.myPrompts.length}/3)</p>${v.myPrompts.map(t => `<p class="small">“${esc(t)}”</p>`).join('')}${v.myPrompts.length < 3 ? '<input id="pt" maxlength="70" placeholder="The worst thing to say at…" autocomplete="off"><button class="btn ghost">Add</button>' : ''}</form>` : ''}
       ${v._remote ? `<div class="remote"><p class="muted">👑 You're the remote</p><button class="btn" data-rm="start" ${v.canStart ? '' : 'disabled'}>Start the game</button></div>` : ''}
       <button class="btn ghost" id="leave">Leave room</button></div>`;
     app.querySelector('#leave').onclick = leave;
+    app.querySelectorAll('[data-face]').forEach(b => (b.onclick = () => room?.send({ t: 'face', pid, i: +b.dataset.face })));
+    const wv = app.querySelector('#wave'); if (wv) wv.onclick = () => { room?.send({ t: 'react', pid, e: '👋' }); wv.classList.remove('hit'); void wv.offsetWidth; wv.classList.add('hit'); };
     app.querySelector('#pf')?.addEventListener('submit', e => { e.preventDefault(); const t = app.querySelector('#pt')?.value.trim(); if (t) room?.send({ t: 'suggest', pid, text: t }); });
     app.querySelectorAll('[data-rm]').forEach(b => (b.onclick = () => send({ type: '_host', a: b.dataset.rm })));
     return;
@@ -138,29 +147,46 @@ function render(v) {
   app.replaceChildren(wrap);
   (GAMES[v.game] || GAMES.werewolf).renderPhone(v, wrap, send);
   polish(v, wrap, isNew);
+  document.getElementById('hostfab')?.remove();
   if (v._remote) {
-    // The remote strip: the same Next and Pause the TV remote has, plus Play again and Lobby at the end.
-    const r = document.createElement('div'); r.className = 'remote strip';
-    r.innerHTML = `<span>👑</span>${v.phase === 'over' ? '<button class="btn ghost small" data-rm="again">Play again</button><button class="btn ghost small" data-rm="lobby">Lobby</button>' : `<button class="btn ghost small" data-rm="next">Next ⏭</button><button class="btn ghost small" data-rm="pause">${v._paused ? 'Resume ▶' : 'Pause ⏸'}</button>`}`;
-    app.append(r);
-    r.querySelectorAll('[data-rm]').forEach(b => (b.onclick = () => send({ type: '_host', a: b.dataset.rm })));
+    // Host controls live in a corner button, away from the play buttons, so nobody skips a round by mistake.
+    const r = document.createElement('div'); r.id = 'hostfab'; r.className = remoteOpen ? 'open' : '';
+    r.innerHTML = `<div class="hostmenu">${v.phase === 'over' ? '<button class="btn small" data-rm="again">Play again</button><button class="btn ghost small" data-rm="lobby">All games</button>' : `<button class="btn small" data-rm="next">Next ⏭</button><button class="btn ghost small" data-rm="pause">${v._paused ? 'Resume ▶' : 'Pause ⏸'}</button>`}</div><button class="hostbtn" aria-label="Host controls">👑</button>`;
+    document.body.append(r);
+    r.querySelector('.hostbtn').onclick = () => { remoteOpen = !remoteOpen; r.classList.toggle('open', remoteOpen); };
+    r.querySelectorAll('[data-rm]').forEach(b => (b.onclick = () => { send({ type: '_host', a: b.dataset.rm }); remoteOpen = false; r.classList.remove('open'); }));
   }
+}
+
+// A short two-note chime when it becomes your move. Phones only allow sound after a tap, so the first tap anywhere
+// (joining counts) unlocks it.
+let actx = null;
+addEventListener('pointerdown', () => { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume?.(); } catch {} }, { passive: true });
+function chime() {
+  if (!actx || actx.state !== 'running') return;
+  try { [[660, 0], [880, 0.12]].forEach(([f, t]) => { const o = actx.createOscillator(), g = actx.createGain(); o.type = 'sine'; o.frequency.value = f; g.gain.setValueAtTime(0.0001, actx.currentTime + t); g.gain.exponentialRampToValueAtTime(0.18, actx.currentTime + t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + t + 0.22); o.connect(g).connect(actx.destination); o.start(actx.currentTime + t); o.stop(actx.currentTime + t + 0.25); }); } catch {}
 }
 
 // Phone polish shared by every game: a buzz and a banner when it becomes your turn to do something, a nudge to
 // watch the TV when there's nothing to tap, your points the moment you score, and your place at the end.
-let couldAct = false, lastGain = 0, lastPlace = '';
+let couldAct = false, lastGain = 0, lastPlace = '', remoteOpen = false;
 function polish(v, wrap, isNew) {
   const canAct = !!wrap.querySelector('button:not([disabled]):not(#leave), input:not([disabled]), textarea, canvas, [data-pad], svg.pad');
   // A bar across the top of every screen says, in one line, whether it is your move and what to do.
   const help = (GAMES[v.game] || {}).phoneHelp?.(v) || null;
   const go = help ? !help.wait && canAct : canAct;
-  if (go && !couldAct && !v._paused) buzz([60, 40, 60]);
+  if (go && !couldAct && !v._paused) { buzz([60, 40, 60]); chime(); }
   if (v.phase !== 'over' && v.phase !== 'spectate') {
     const bar = document.createElement('div');
     bar.className = 'actbar ' + (go ? 'go' : 'wait');
     bar.innerHTML = `<b>${go ? '👉 Your move' : '📺 Watch the TV'}</b><span>${esc(help?.now || (go ? 'Do the step below. Everyone is waiting on you!' : 'Nothing to do on your phone right now.'))}</span>`;
     wrap.prepend(bar);
+    // Nothing to tap: show where you stand and let you cheer, instead of an empty screen.
+    if (!go) {
+      const st = v._stand, nth = st && (['', '1st', '2nd', '3rd'][st.n] || st.n + 'th');
+      wrap.insertAdjacentHTML('beforeend', `<div class="idle">${st ? `<div class="idlestand"><b>${nth}</b><span>of ${st.of}</span><em>${st.score.toLocaleString()} pts</em></div>` : ''}<p class="muted small">Cheer on the TV</p><div class="reacts">${(v._reacts || []).map(e => `<button class="reactbtn" data-e="${e}">${e}</button>`).join('')}</div></div>`);
+      wrap.querySelectorAll('.idle [data-e]').forEach(b => (b.onclick = () => { b.classList.remove('hit'); void b.offsetWidth; b.classList.add('hit'); room?.send({ t: 'react', pid, e: b.dataset.e }); }));
+    }
   }
   helpButton(v, help, isNew);
   couldAct = canAct;

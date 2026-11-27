@@ -23,7 +23,7 @@ out.custom = ((await H()).custom || []).map(c => c.text);
 await me.click('[data-rm=start]'); await tv.waitForTimeout(1500);
 out.started = (await H()).state?.game; out.customInGame = (await H()).state?.custom;
 console.log(JSON.stringify(out)); console.log(await me.evaluate(() => document.querySelector('#app').innerText.slice(0,200)));
-await me.waitForSelector('[data-rm=pause]', { timeout: 8000 }); await me.click('#hsok', { timeout: 1500 }).catch(() => {}); await me.click('[data-rm=pause]'); await tv.waitForTimeout(800);
+await me.waitForSelector('.hostbtn', { timeout: 8000 }); await me.click('#hsok', { timeout: 1500 }).catch(() => {}); await me.click('.hostbtn'); await me.click('[data-rm=pause]'); await tv.waitForTimeout(800);
 out.paused = !!(await H()).paused;
 console.log(JSON.stringify(out), 'errors', errors);
 await b.close(); process.exit(errors.length ? 1 : 0);

@@ -106,3 +106,12 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Score rows now slide by their place in the list, so rescaling the stage no longer makes them fly.
 - Tests brought up to date for the hub and end screen: e2e (Werewolf), audience (now on Funny Answers, since Quick Games lets late joiners play), imposter-e2e, phone-e2e.
 - Lighter than the headliners: these twelve got size and styling, not new layouts. Bracket Battle's result and Imposter's vote were not seen on screen (bots too fast).
+
+## Phone polish (Nov 27)
+- In a game the phone header is one slim line with the game's name; the phone takes the game's theme colors (`_theme` in the view).
+- Host controls moved from a strip under the play buttons to a crown button in the bottom-right corner that opens Next / Pause (Play again / All games at the end).
+- Idle phones show your place and points (hidden while everyone is on zero, and in games marked `meta.secret`) and a cheer pad that floats reactions on the TV.
+- A two-note chime plays when it becomes your move (after the first tap on the page; phones block sound before that).
+- Lobby: pick your animal (first come, first served; message `face`) and wave at the TV.
+- Not done: per-game art on the phone header (the cover is set as the header background but mostly hidden under the dark overlay), and a buzz on iPhones (the browser doesn't allow it; needs the phone app wrapper).
+- Check on real phones: the bright comic theme background behind the panel, and the header on narrow screens.

@@ -228,13 +228,13 @@ function viewFor(pid) {
   }
   if (!host.state) {
     const me = host.players.find(p => p.pid === pid) || {};
-    return { phase: 'lobby', players: host.players.map(p => p.name), game: game().meta.name, me: me.name, fixed: !!me.fixed, byHost: !!me.locked, _me: me.face, ...(pid === remotePid() ? { _remote: true, canStart: host.players.length >= game().meta.min } : {}), ...(game().meta.id === 'funny' ? { canPrompt: true, myPrompts: (host.custom || []).filter(c => c.pid === pid).map(c => c.text) } : {}) };
+    return { phase: 'lobby', faces: FACES.map(f => f[0]), taken: host.players.filter(p => p.pid !== pid).map(p => p.face?.[0]), _reacts: REACTIONS, players: host.players.map(p => p.name), game: game().meta.name, me: me.name, fixed: !!me.fixed, byHost: !!me.locked, _me: me.face, ...(pid === remotePid() ? { _remote: true, canStart: host.players.length >= game().meta.min } : {}), ...(game().meta.id === 'funny' ? { canPrompt: true, myPrompts: (host.custom || []).filter(c => c.pid === pid).map(c => c.text) } : {}) };
   }
-  return { ...maskView(game().phoneView(host.state, pid), host.hidden), game: host.gameId, _name: game().meta.name, _how: howFor(), _me: host.players.find(p => p.pid === pid)?.face, ...(host.paused ? { _paused: true } : {}), ...(gains[pid] ? { _gain: gains[pid] } : {}), ...(places[pid] ? { _place: places[pid] } : {}), ...(finalRound ? { _final: true } : {}), ...(host.blurDraw ? { _nodraw: true } : {}), ...(pid === remotePid() ? { _remote: true } : {}) };
+  return { ...maskView(game().phoneView(host.state, pid), host.hidden), game: host.gameId, _name: game().meta.name, _how: howFor(), _me: host.players.find(p => p.pid === pid)?.face, ...(host.paused ? { _paused: true } : {}), ...(gains[pid] ? { _gain: gains[pid] } : {}), ...(places[pid] ? { _place: places[pid] } : {}), ...(stands[pid] && !game().meta.secret ? { _stand: stands[pid] } : {}), _theme: THEME_OF[host.gameId] || '', _reacts: REACTIONS, ...(finalRound ? { _final: true } : {}), ...(host.blurDraw ? { _nodraw: true } : {}), ...(pid === remotePid() ? { _remote: true } : {}) };
 }
 
 // Each phone hears about its own points the moment they land, and its finishing place at the end.
-let gains = {}, places = {}, lastScore = {}, gainId = 0, finalRound = false, finalSaid = false;
+let gains = {}, places = {}, stands = {}, lastScore = {}, gainId = 0, finalRound = false, finalSaid = false;
 function scoreList() {
   const v = game().tvView(host.state, Date.now());
   return Array.isArray(v.scores) && v.scores[0]?.name && typeof v.scores[0].score === 'number' ? v.scores : null;
@@ -249,6 +249,7 @@ function trackScores() {
     if (!p) return;
     if (lastScore[p.pid] !== undefined && row.score > lastScore[p.pid]) gains[p.pid] = { n: row.score - lastScore[p.pid], id: ++gainId };
     lastScore[p.pid] = row.score;
+    if (list.some(x => x.score)) stands[p.pid] = { n: list.filter(x => x.score > row.score).length + 1, of: list.length, score: row.score };   // shown on the idle phone
     if (over && host.gameId !== 'imposter' && list.some(x => x.score !== list[0].score)) places[p.pid] = { n: list.filter(x => x.score > row.score).length + 1, of: list.length };
   });
 }
@@ -428,7 +429,11 @@ function onMessage(m) {
     host.audience = host.audience.filter(x => x.pid !== m.pid);
     if (!host.state) host.players = host.players.filter(x => x.pid !== m.pid);
     changed();
-  } else if (m.t === 'react' && REACTIONS.includes(m.e)) {
+  } else if (m.t === 'face') {
+    // A player picks their own animal in the lobby (first come, first served).
+    const p = host.players.find(x => x.pid === m.pid), f = FACES[m.i | 0];
+    if (p && f && !host.state && !host.players.some(x => x !== p && x.face?.[0] === f[0])) { p.face = f; lastSent[m.pid] = null; if (sfx.on) play('pop'); changed(); }
+  } else if (m.t === 'react' && (REACTIONS.includes(m.e) || m.e === '👋')) {
     const who = [...host.players, ...host.audience].find(x => x.pid === m.pid);
     const now = Date.now();
     if (!who || now - (lastReact[m.pid] || 0) < 700) return;
@@ -637,7 +642,7 @@ function startGame(again) {
   host.state = game().setup(host.players, Math.random, prev, { short: !!host.settings.short, ...(host.opts?.[host.gameId] || {}), custom: (host.custom || []).map(c => c.text) });
   if (host.gameId === 'funny') host.custom = [];
   introArt = true;
-  lastEventId = 0; popped.clear(); gains = {}; places = {}; lastScore = {}; finalRound = false; finalSaid = false;
+  lastEventId = 0; popped.clear(); gains = {}; places = {}; stands = {}; lastScore = {}; finalRound = false; finalSaid = false;
   host.played = { ...(host.played || {}), [host.gameId]: (host.played?.[host.gameId] || 0) + 1 }; host.counted = false;
   lastPhase = ''; saidLead = false;
   changed();
