@@ -2,6 +2,7 @@
 import { GAMES, COMING_SOON, SHELVES, NIGHTS } from './games/index.js';
 import { openRoom } from './net.js';
 import { esc, store, newCode, say, voice, voices, enableDpad, autofocus, drawScene, titleCard, confetti, clawMarks } from './ui.js';
+import { art } from './art.js';
 import { play, sfx, startAmbient, stopAmbient, startBed, stopBed, quiet } from './sfx.js';
 import { newKeys, cleanPub, samePub, sharedKey, seal, unseal } from './secure.js';
 import { cleanAct, textsIn, maskView, maskLine } from './content.js';
@@ -189,7 +190,7 @@ function announce() {
   const line = g.narration(s);
   // Game over with a score table: the shared winners' ceremony replaces the game's own title card.
   if (s.phase === 'over' && host.gameId !== 'imposter' && ceremony()) { sayTimer = setTimeout(() => say(maskLine(line, host.hidden)), 4200); return; }
-  if (c?.title) titleCard(c.title, c.sub, c.tone);
+  if (c?.title) titleCard(c.title, c.sub, c.tone, introArt ? art(host.gameId, ICONS[host.gameId]) : ''); if (c?.title) introArt = false;
   else if (s.phase !== 'over') flash('wipe');
   // A title card covers the screen for about three seconds, so the phase's clock doesn't start until it clears.
   if (c?.title && s.deadline > Date.now()) { shiftTimes(s, 2600); stretchedFor += 2600; }
@@ -364,6 +365,7 @@ function slideScores() {
   });
   rowAt = next;
 }
+let introArt = false;   // the first title card of each game carries its cover art
 let ceremonyOff = null;
 // The winners' ceremony, shared by every game that ends with a score table: third, second, then a drumroll and first.
 function ceremony() {
@@ -449,6 +451,7 @@ function startGame() {
   const prev = host.state && host.state.game === host.gameId ? host.state : host.lastByGame?.[host.gameId];
   host.state = game().setup(host.players, Math.random, prev, { short: !!host.settings.short, ...(host.opts?.[host.gameId] || {}), custom: (host.custom || []).map(c => c.text) });
   if (host.gameId === 'funny') host.custom = [];
+  introArt = true;
   lastEventId = 0; popped.clear(); gains = {}; places = {}; lastScore = {}; finalRound = false; finalSaid = false;
   host.played = { ...(host.played || {}), [host.gameId]: (host.played?.[host.gameId] || 0) + 1 }; host.counted = false;
   lastPhase = '';
@@ -586,7 +589,7 @@ function previewGame(id) {
   if (pv?.id !== id) pv = { id, s: null, now: Date.now(), stuck: 0, last: '', over: 0, players: ['Ava', 'Ben', 'Cleo', 'Dax', 'Eli', 'Fay'].slice(0, Math.max(GAMES[id].meta.min, Math.min(5, GAMES[id].meta.max))).map((n, i) => ({ pid: 'bot-pv' + i, name: n })) };
   const m = GAMES[id].meta, q = x => app.querySelector(x);
   const stageEl = q('.pvstage'); if (stageEl) { stageEl.dataset.theme = THEME_OF[id] || ''; stageEl.parentElement.dataset.theme = THEME_OF[id] || ''; }
-  if (q('#pvname')) { q('#pvname').textContent = m.name; q('#pvicon').textContent = ICONS[id] || '🎲'; q('#pvblurb').textContent = m.blurb; q('#pvtags').innerHTML = `<span>👥 ${m.min}–${m.max} players</span>${m.kids ? '<span>🧒 Little kids</span>' : ''}${SHELVES.filter(f => f.games?.includes(id) && !['featured', 'kids'].includes(f.id)).slice(0, 2).map(f => `<span>${esc(f.name)}</span>`).join('')}`; }
+  if (q('#pvname')) { q('#pvname').textContent = m.name; q('#pvicon').innerHTML = art(id, ICONS[id]); q('#pvblurb').textContent = m.blurb; q('#pvtags').innerHTML = `<span>👥 ${m.min}–${m.max} players</span>${m.kids ? '<span>🧒 Little kids</span>' : ''}${SHELVES.filter(f => f.games?.includes(id) && !['featured', 'kids'].includes(f.id)).slice(0, 2).map(f => `<span>${esc(f.name)}</span>`).join('')}`; }
   app.querySelectorAll('.mgame').forEach(b => b.classList.toggle('on', b.dataset.game === id));
   previewStep(true);
 }
@@ -697,7 +700,7 @@ function renderLobby() {
         const total = Math.max(n, Math.min(g.meta.max, 8));
         const seat = (i, inner, cls, attrs = '') => { const a = ((i + 0.5) / total) * Math.PI * 2 - Math.PI / 2; return `<${attrs ? 'button' : 'div'} class="seat ${cls}" ${attrs} style="left:${(50 + 42 * Math.cos(a)).toFixed(1)}%;top:${(52 + 35 * Math.sin(a)).toFixed(1)}%;--d:${(i * 0.37) % 2}s">${inner}</${attrs ? 'button' : 'div'}>`; };
         return `<div class="ring n${Math.min(total, 12)}"><div class="fireflies">${Array.from({ length: 14 }, (_, k) => `<i style="left:${(k * 37) % 100}%;top:${(k * 53) % 100}%;animation-delay:${-(k * 0.9)}s"></i>`).join('')}</div>
-          <div class="ringmid"><div class="fire">🔥</div><h2>${esc(g.meta.name)}</h2><p>${n ? `${n} player${n === 1 ? '' : 's'} in` : 'Grab a seat!'}${need ? ` · need ${need} more` : ''}</p><button class="btn" data-host="start" ${need ? 'disabled' : ''}>${need ? 'Waiting…' : "Everybody's in!"}</button></div>
+          <div class="ringmid">${art(host.gameId, ICONS[host.gameId])}<h2>${esc(g.meta.name)}</h2><p>${n ? `${n} player${n === 1 ? '' : 's'} in` : 'Grab a seat!'}${need ? ` · need ${need} more` : ''}</p><button class="btn" data-host="start" ${need ? 'disabled' : ''}>${need ? 'Waiting…' : "Everybody's in!"}</button></div>
           ${Array.from({ length: total }, (_, i) => { const p = host.players[i]; return p
             ? seat(i, `<i style="--pc:${p.face?.[1] || '#232a5c'}">${p.face?.[0] || '🙂'}</i><b>${esc(p.name)}</b>${i === 0 ? '<em>👑</em>' : ''}`, `taken ${p.bot ? 'bot' : ''} ${seen.has(p.pid) ? '' : 'pop'} ${editing === p.pid ? 'on' : ''}`, `data-host="edit:${esc(p.pid)}" title="Rename or remove"`)
             : seat(i, '<i>Join!</i>', 'open'); }).join('')}</div>`;

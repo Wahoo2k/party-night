@@ -1289,3 +1289,36 @@ body[data-theme]:not([data-theme='']) #backdrop i{opacity:.0;mix-blend-mode:over
 body[data-theme]:not([data-theme='']):not(.phone) .scene svg{display:none}
 body[data-theme]:not([data-theme='']):not(.phone) .scene .title{font-family:var(--hfont);color:#fff;text-shadow:0 3px 0 #0005}
 .menu,.lobby.gather,.lobby.one{height:calc(100vh - clamp(90px,15vh,150px) - 16vh)}
+
+/* ---------- animated cover art ---------- */
+.art{display:block;width:100%;height:auto;border-radius:18px;box-shadow:0 10px 0 #0003,0 16px 34px #0006}
+.art *{transform-box:fill-box;transform-origin:center}
+.a-bob{animation:abob 2.2s ease-in-out infinite}@keyframes abob{50%{transform:translateY(-6px)}}
+.a-hop{animation:ahop 1.4s cubic-bezier(.3,0,.3,1) infinite}@keyframes ahop{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-14px)}}
+.a-wig{animation:awig .5s ease-in-out infinite alternate}@keyframes awig{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
+.a-sway{animation:awig 2s ease-in-out infinite alternate}
+.a-shiver{animation:ashiver .18s linear infinite alternate}@keyframes ashiver{from{transform:translateX(-1.5px)}to{transform:translateX(1.5px)}}
+.a-pulse{animation:apulse 1.1s ease-in-out infinite}@keyframes apulse{50%{transform:scale(1.14)}}
+.a-glow{animation:aglow 3s ease-in-out infinite}@keyframes aglow{50%{filter:drop-shadow(0 0 10px #f4e9c1)}}
+.a-tw{animation:atw 1.6s ease-in-out infinite}@keyframes atw{50%{opacity:.2}}
+.a-blink{animation:ablink 3.4s infinite}@keyframes ablink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+.a-shift{animation:ashift 2.4s ease-in-out infinite}@keyframes ashift{0%,40%{transform:translateX(-4px)}50%,90%{transform:translateX(4px)}100%{transform:translateX(-4px)}}
+.a-howl{transform-origin:50% 100%;animation:ahowl 3s ease-in-out infinite}@keyframes ahowl{0%,60%,100%{transform:rotate(0)}75%{transform:rotate(-7deg)}}
+.a-flip{animation:aflipc 3s ease-in-out infinite}@keyframes aflipc{0%,70%,100%{transform:scaleX(1)}80%{transform:scaleX(.05)}}
+.a-grow{transform-origin:50% 100%;animation:agrow 2.2s cubic-bezier(.3,0,.3,1) infinite alternate}@keyframes agrow{from{transform:scaleY(.35)}}
+.a-draw{stroke-dasharray:400;animation:adraw 3s ease-in-out infinite}@keyframes adraw{0%{stroke-dashoffset:400}60%,100%{stroke-dashoffset:0}}
+.a-pencil{animation:apencil 3s ease-in-out infinite}@keyframes apencil{0%{transform:translate(-50px,6px)}60%,100%{transform:translate(0,0)}}
+.a-sweep{transform-origin:50% 100%;animation:asweep 2.6s ease-in-out infinite alternate}@keyframes asweep{from{transform:rotate(-58deg)}to{transform:rotate(52deg)}}
+.a-tumble{animation:atumble 2.4s ease-in-out infinite}@keyframes atumble{0%,100%{transform:translateY(0) rotate(0)}40%{transform:translateY(-22px) rotate(190deg)}70%{transform:translateY(4px) rotate(360deg)}}
+.a-wave{animation:awave 2s ease-in-out infinite alternate}@keyframes awave{from{transform:translateX(-10px)}to{transform:translateX(10px)}}
+.a-fill{transform-origin:0 50%;animation:afill 3s ease-in-out infinite alternate}@keyframes afill{from{transform:scaleX(.15)}to{transform:scaleX(.9)}}
+.a-nose{transform-origin:0 50%;animation:anose 2.6s ease-in-out infinite alternate}@keyframes anose{from{transform:scaleX(.25)}to{transform:scaleX(1)}}
+.a-search{animation:asearch 4s ease-in-out infinite}@keyframes asearch{0%,100%{transform:translate(-44px,-22px)}25%{transform:translate(40px,-26px)}50%{transform:translate(-30px,34px)}75%{transform:translate(40px,30px)}}
+.a-lit{animation:alit 2s linear infinite}@keyframes alit{0%,20%{filter:brightness(1.5) drop-shadow(0 0 8px #fff)}25%,100%{filter:brightness(.6)}}
+.a-press{transform-origin:50% 100%;animation:apress 1.1s ease-in-out infinite}@keyframes apress{50%{transform:scaleY(.82)}}
+@media (prefers-reduced-motion:reduce){.art *{animation:none!important}}
+/* where the art shows */
+#pvicon{width:clamp(110px,13vw,210px);flex:none;font-size:0;animation:none}
+.mgame i .art{width:1.5em;display:inline-block;vertical-align:middle;box-shadow:none;border-radius:6px}
+.tcard .tc-art{width:min(30vw,340px);margin:0 auto 2vh;animation:tcword .6s .1s cubic-bezier(.3,1.6,.5,1) both}
+.ringmid .art{width:clamp(90px,10vw,150px);margin-bottom:4px}

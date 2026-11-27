@@ -131,7 +131,7 @@ export function drawScene(svg) {
 }
 
 // Full-screen title card between phases.
-export function titleCard(title, sub = '', tone = '') {
+export function titleCard(title, sub = '', tone = '', picture = '') {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   document.querySelector('.tcard')?.remove();
   const el = document.createElement('div');
@@ -139,7 +139,7 @@ export function titleCard(title, sub = '', tone = '') {
   const kinds = ['iris', 'sweep', 'curtain', 'diag'];
   let h = 0; for (const ch of String(title)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
   el.className = `tcard ${tone} tc-${kinds[h % kinds.length]}`;
-  el.innerHTML = `<i class="tc-s s1"></i><i class="tc-s s2"></i><i class="tc-s s3"></i><div><h2>${String(title).split(' ').map((w, i) => `<span style="--i:${i}">${esc(w)}</span>`).join(' ')}</h2>${sub ? `<p>${esc(sub)}</p>` : ''}</div>`;
+  el.innerHTML = `<i class="tc-s s1"></i><i class="tc-s s2"></i><i class="tc-s s3"></i><div>${picture ? `<div class="tc-art">${picture}</div>` : ''}<h2>${String(title).split(' ').map((w, i) => `<span style="--i:${i}">${esc(w)}</span>`).join(' ')}</h2>${sub ? `<p>${esc(sub)}</p>` : ''}</div>`;
   document.body.append(el);
   setTimeout(() => el.remove(), 3200);
 }
