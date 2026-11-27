@@ -2249,3 +2249,21 @@ body.phone .ducks-mini .gspr{width:84px}
 /* A goat mid-bounce may rise above the table's frame instead of being cut off by it. Sides and bottom still clip. */
 .gtable.g3d{overflow:visible;clip-path:inset(-260px 0 0 0 round 26px)}
 .gl .glpic .gspr{width:34px}.gl{gap:5px;padding:5px 9px 5px 5px}.gl small{font-size:14px}.gl b{margin-left:5px;font-size:17px}
+
+/* Locked games (only when the shop is on) and the unlock screen. */
+.gcard .glock{position:absolute;right:8px;top:8px;display:grid;place-items:center;width:calc(2.4*var(--vw,1vw));height:calc(2.4*var(--vw,1vw));min-width:26px;min-height:26px;border-radius:50%;background:#0b0f2ccc;font-size:clamp(12px,calc(1.1*var(--vw,1vw)),20px)}
+.lobby.gather.unlock .unlockinfo{display:grid;gap:10px;align-content:center;justify-items:start;text-align:left}
+.unlockart{display:block;width:min(46%,420px);aspect-ratio:4/3;border-radius:18px;overflow:hidden;box-shadow:0 14px 30px #0008}
+.unlockart img{width:100%;height:100%;object-fit:cover;display:block}
+.unlockinfo h2{font-size:clamp(30px,calc(4*var(--vw,1vw)),70px);margin:0}
+.unlockinfo .lead{font-size:clamp(16px,calc(1.6*var(--vw,1vw)),28px);opacity:.85;margin:0}
+.unlockways{display:grid;gap:8px;width:100%;margin:6px 0}
+.unlockways>div{display:flex;align-items:baseline;gap:14px;padding:10px 16px;border-radius:14px;background:#ffffff14}
+.unlockways b{min-width:5.2em;font-size:clamp(20px,calc(2.1*var(--vw,1vw)),38px);color:var(--gold,#ffd166)}
+.unlockways b small{font-size:.5em;opacity:.8}
+.unlockways span{font-size:clamp(14px,calc(1.35*var(--vw,1vw)),24px)}
+.lobby.gather.unlock .unlockinfo{display:flex;flex-direction:column;justify-content:center;gap:12px;overflow:hidden}
+.unlockhead{display:flex;gap:calc(1.6*var(--vw,1vw));align-items:center;width:100%}
+.unlockhead>div{display:grid;gap:6px;min-width:0}
+.unlockart{flex:0 0 32%;width:auto;position:relative}
+.unlockinfo h2{font-size:clamp(26px,calc(3.4*var(--vw,1vw)),60px)}

@@ -1,6 +1,8 @@
 // TV / host page: owns the room, the player list and the game state.
 import { GAMES, COMING_SOON, SHELVES, NIGHTS } from './games/index.js';
 import { openRoom } from './net.js';
+import { SHOP, locked, refreshOwn, owned, accountUrl } from './own.js';
+import { PACKS, PRICES, packOf } from './packs.js';
 import { esc, store, DEMO, newCode, say, sayLow, voiceContext, fitScreen, stageFit, keepFitted, voice, voices, enableDpad, autofocus, drawScene, titleCard, confetti, clawMarks } from './ui.js';
 import { art } from './art.js';
 import { play, sfx, startAmbient, stopAmbient, startBed, stopBed, startLoop, stopLoop, quiet } from './sfx.js';
@@ -640,6 +642,7 @@ function nightAwards() {
 }
 
 function startGame(again) {
+  if (locked(host.gameId)) { host.screen = 'gather'; return changed(); }   // not bought: the join screen shows how to unlock it
   // First time this room plays the game: explain it and wait for everyone before anything starts.
   if (!host.intro && !again && wantsIntro()) { host.intro = { id: host.gameId, ready: {}, at: Date.now() }; if (sfx.on) play('fanfare'); return changed(); }
   host.intro = null;
@@ -840,7 +843,7 @@ function renderLobby() {
     if (!GAMES[host.gameId]) host.gameId = 'werewolf';
     const rows = SHELVES.filter(f => f.games).map(f => ({ id: f.id, name: f.name, games: f.games.filter(id => GAMES[id]) }));
     if (!menuAt || !rows.some(r => r.id === menuAt.row && r.games.includes(menuAt.game))) { const r = rows.find(x => x.games.includes(host.gameId)) || rows[0]; menuAt = { row: r.id, game: r.games.includes(host.gameId) ? host.gameId : r.games[0] }; }
-    const card = (id, row) => { const m = GAMES[id].meta; return `<button class="gcard ${menuAt.row === row && menuAt.game === id ? 'on' : ''}" data-game="${id}" data-row="${row}"><span class="gimg">${art(id, ICONS[id])}</span><b>${esc(m.name)}</b><small class="gfacts">${m.min}–${m.max} · ${m.mins} min</small>${m.kids ? '<small class="gbadge">🧒</small>' : ''}${watching() && SAME_ROOM.includes(id) ? '<small class="sameroom">🏠 same room</small>' : ''}</button>`; };
+    const card = (id, row) => { const m = GAMES[id].meta; return `<button class="gcard ${menuAt.row === row && menuAt.game === id ? 'on' : ''}" data-game="${id}" data-row="${row}"><span class="gimg">${art(id, ICONS[id])}</span><b>${esc(m.name)}</b><small class="gfacts">${m.min}–${m.max} · ${m.mins} min</small>${locked(id) ? '<small class="glock" title="Locked">🔒</small>' : ''}${m.kids ? '<small class="gbadge">🧒</small>' : ''}${watching() && SAME_ROOM.includes(id) ? '<small class="sameroom">🏠 same room</small>' : ''}</button>`; };
     app.innerHTML = `<div class="hub">
     <section class="hero" id="hero">
       <div class="heroinfo">
@@ -910,6 +913,28 @@ function renderLobby() {
       <div class="row"><button class="btn" data-host="menu">← Back to games</button></div>
     </section></div>`;
     host.players.forEach(p => seen.add(p.pid));
+    return;
+  }
+  // A game this TV hasn't unlocked: say what it belongs to and how to get it. The QR opens the account page on a
+  // phone with this TV's id in it, so paying there unlocks it here. The TV checks every few seconds while this shows.
+  if (locked(host.gameId)) {
+    const m = game().meta, pack = packOf(host.gameId), money = n => '$' + n.toFixed(2), own = owned();
+    app.innerHTML = `<div class="lobby gather unlock"><section class="panel join">
+        <h2>Unlock on your phone</h2><div class="qr">${qr(accountUrl(pack?.id))}</div>
+        <p class="muted">Scan to sign in and buy.<br>This TV unlocks by itself a few seconds later.</p>
+        ${own.linked ? '<p class="muted small">This TV is linked to an account that doesn\'t have this game yet.</p>' : ''}
+      </section>
+      <section class="panel unlockinfo"><div class="unlockhead"><span class="unlockart">${art(host.gameId, ICONS[host.gameId])}</span>
+        <div><p class="introkick">🔒 ${esc(pack?.name || 'Locked')}</p><h2>${esc(m.name)}</h2><p class="lead">${esc(m.blurb)}</p></div></div>
+        <div class="unlockways">
+          <div><b>${money(PRICES.pack)}</b><span>${esc(pack?.name || 'This pack')}: ${pack?.games.length || ''} games, yours to keep</span></div>
+          <div><b>${money(PRICES.everything)}</b><span>Everything: all ${PACKS.length} packs, yours to keep</span></div>
+          <div><b>${money(PRICES.passMonth)}<small>/month</small></b><span>Party Pass: every game, plus new ones</span></div>
+        </div>
+        <p class="muted small">Only the host buys. Players never pay.</p>
+        <div class="row"><button class="btn" data-host="menu">← Back to games</button></div>
+      </section></div>`;
+    watchUnlock();
     return;
   }
   app.innerHTML = `<div class="lobby gather">
@@ -1103,6 +1128,18 @@ setInterval(() => {
 try { speechSynthesis.addEventListener('voiceschanged', () => { if (!host.state) render(); }); } catch {}
 
 if (host.state) lastPhase = host.state.phase + host.state.round;
+// What this TV owns: asked once at start, again whenever the menu is opened, and every few seconds on the unlock screen.
+let unlockTimer = 0;
+function watchUnlock() {
+  if (unlockTimer) return;
+  unlockTimer = setInterval(async () => {
+    if (!(host.screen === 'gather' && !host.state && locked(host.gameId))) { clearInterval(unlockTimer); unlockTimer = 0; return; }
+    await refreshOwn();
+    if (!locked(host.gameId)) { clearInterval(unlockTimer); unlockTimer = 0; if (sfx.on) play('fanfare'); render(); }
+  }, 4000);
+}
+if (SHOP) refreshOwn().then(() => { if (!host.state) render(); });
+
 connect();
 
 // Demo mode for the website: bots play one game on a loop, with no host. See DEMO in ui.js.

@@ -10,3 +10,6 @@ export const PACKS = [
 ];
 export const PRICES = { pack: 9.99, everything: 39.99, passMonth: 4.99, passYear: 29.99 };
 export const packOf = id => (FREE.includes(id) ? { id: 'free', name: 'Free' } : PACKS.find(p => p.games.includes(id)) || null);
+
+// The shop switch. While false every game is open to everyone; add ?shop=1 to the TV page to try the locks.
+export const SELLING = false;

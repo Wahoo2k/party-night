@@ -8,7 +8,7 @@ const money = n => '$' + n.toFixed(2);
 
 document.querySelector('#top').innerHTML = `<div class="wrapw">
   <a class="logo" href="./">Party <span>Night</span></a>
-  <nav class="nav" aria-label="Site">${[['games.html', 'Games', 'games'], ['pricing.html', 'Pricing', 'pricing'], ['faq.html', 'Questions', 'faq']].map(([h, t, k]) => `<a href="${h}" ${page === k ? 'aria-current="page"' : ''}>${t}</a>`).join('')}</nav>
+  <nav class="nav" aria-label="Site">${[['games.html', 'Games', 'games'], ['pricing.html', 'Pricing', 'pricing'], ['faq.html', 'Questions', 'faq'], ['account.html', 'Account', 'account']].map(([h, t, k]) => `<a href="${h}" ${page === k ? 'aria-current="page"' : ''}>${t}</a>`).join('')}</nav>
   <a class="btn small" href="../tv.html">Play free</a></div>`;
 document.querySelector('#foot').innerHTML = `<div class="wrapw">
   <span class="sp">© ${new Date().getFullYear()} Toolshed Apps LLC</span>
