@@ -46,8 +46,9 @@ import * as freeze from './freeze.js';
 import * as haunted from './haunted.js';
 import * as bomb from './bomb.js';
 import * as potato from './potato.js';
+import * as mystery from './mystery.js';
 
-export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards, hearts, shade, estimate, truths, wordhunt, midnight, missions, dares, split, doodle, memory, copycat, hunt, freeze, haunted, bomb, potato };
+export const GAMES = { werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards, hearts, shade, estimate, truths, wordhunt, midnight, missions, dares, split, doodle, memory, copycat, hunt, freeze, haunted, bomb, potato, mystery };
 
 // Lobby shelves. A game can sit on more than one.
 export const SHELVES = [
@@ -55,7 +56,7 @@ export const SHELVES = [
   { id: 'kids', name: '👶 Little kids', games: ['charades', 'gofish', 'bingo', 'ducks', 'memory', 'copycat', 'hunt', 'freeze'] },
   { id: 'party', name: '🎉 Party', games: ['funny', 'quick', 'split', 'whosaid', 'truths', 'bluff', 'dares', 'meld', 'bowl', 'taboo', 'charades', 'shade', 'potato'] },
   { id: 'trivia', name: '🧠 Trivia & game shows', games: ['trivia', 'spin', 'crowd', 'ladder', 'cases', 'estimate', 'haunted', 'letters'] },
-  { id: 'secret', name: '🕵️ Secret roles', games: ['werewolf', 'midnight', 'imposter', 'missions', 'wordhunt', 'agents'] },
+  { id: 'secret', name: '🕵️ Secret roles', games: ['werewolf', 'midnight', 'imposter', 'missions', 'wordhunt', 'agents', 'mystery'] },
   { id: 'cards', name: '🃏 Cards', games: ['clash', 'blackjack', 'gofish', 'bluffcards', 'hearts'] },
   { id: 'draw', name: '🎨 Drawing', games: ['sketch', 'doodle'] },
   { id: 'team', name: '🤝 Teams & co-op', games: ['taboo', 'agents', 'crowd', 'bowl', 'crew', 'bomb'] },
