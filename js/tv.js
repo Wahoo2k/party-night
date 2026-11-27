@@ -3,6 +3,7 @@ import { GAMES, COMING_SOON, SHELVES, NIGHTS } from './games/index.js';
 import { openRoom } from './net.js';
 import { esc, store, newCode, say, voice, voices, enableDpad, autofocus, drawScene, titleCard, confetti, clawMarks } from './ui.js';
 import { play, sfx, startAmbient, stopAmbient } from './sfx.js';
+import { newKeys, cleanPub, samePub, sharedKey, seal, unseal } from './secure.js';
 import { cleanAct, textsIn, maskView, maskLine } from './content.js';
 import { settleName, cleanName, isRude, uniqueName, funName, MAX_NAME } from './names.js';
 
@@ -21,6 +22,12 @@ let vetoOpen = false;
 const tvView = () => maskView(game().tvView(host.state, Date.now()), host.hidden);
 let room = null;
 let lastSent = {};
+// The TV's key pair for private messages (kept across refreshes and new rooms).
+let hostKeys = store.get('pg-host-keys');
+if (!hostKeys) newKeys().then(k => { hostKeys = k; if (k) store.set('pg-host-keys', k); sendViews(true); }).catch(() => {});
+const sendQ = {};
+const lastActN = {};
+let viewSeq = Date.now();
 let lastPhase = '';
 
 const game = () => GAMES[host.gameId];
@@ -44,7 +51,7 @@ function viewFor(pid) {
     const me = host.players.find(p => p.pid === pid) || {};
     return { phase: 'lobby', players: host.players.map(p => p.name), game: game().meta.name, me: me.name, fixed: !!me.fixed, byHost: !!me.locked };
   }
-  return { ...maskView(game().phoneView(host.state, pid), host.hidden), game: host.gameId };
+  return { ...maskView(game().phoneView(host.state, pid), host.hidden), game: host.gameId, ...(host.paused ? { _paused: true } : {}) };
 }
 
 function sendViews(force) {
@@ -54,9 +61,19 @@ function sendViews(force) {
     const v = JSON.stringify(viewFor(p.pid));
     if (force || lastSent[p.pid] !== v) {
       lastSent[p.pid] = v;
-      room.send({ t: 'view', to: p.pid, view: JSON.parse(v) });
+      sendView(p, JSON.parse(v));
     }
   }
+}
+
+// Views go out encrypted for that one phone whenever both sides have keys.
+function sendView(p, view) {
+  if (!p.pub || !hostKeys) return room.send({ t: 'view', to: p.pid, view });
+  const n = ++viewSeq;
+  sendQ[p.pid] = (sendQ[p.pid] || Promise.resolve()).then(async () => {
+    const key = await sharedKey(hostKeys.priv, p.pub);
+    room?.send({ t: 'view', to: p.pid, hpub: hostKeys.pub, enc: await seal(key, { n, view }) });
+  }).catch(() => {});
 }
 
 // Relaxed timers: every new countdown gets 50% longer.
@@ -116,6 +133,11 @@ function onMessage(m) {
     if (kicked.has(m.pid)) return room.send({ t: 'view', to: m.pid, view: { phase: 'kicked' } });
     let p = host.players.find(x => x.pid === m.pid);
     const aud = host.audience.find(x => x.pid === m.pid);
+    const pub = cleanPub(m.pub);
+    const known = p || aud;
+    // A hello for an existing player must carry that player's own key; anything else is someone else using their id.
+    if (known?.pub && !samePub(known.pub, pub)) return;
+    if (known && !known.pub && pub && !host.state) known.pub = pub;
     const others = [...host.players, ...host.audience].filter(x => x !== p && x !== aud).map(x => x.name);
     // Someone in the audience gets a seat as soon as there's room in the lobby.
     if (aud && !host.state && host.players.length < game().meta.max) {
@@ -125,14 +147,14 @@ function onMessage(m) {
     } else if (aud) { lastSent[aud.pid] = null; return changed(); }
     if (!p && (host.state || host.players.length >= game().meta.max)) {
       const { name, changed: fixedName } = settleName(raw, others);
-      host.audience.push({ pid: m.pid, name, asked: raw, fixed: fixedName });
+      host.audience.push({ pid: m.pid, name, asked: raw, fixed: fixedName, pub });
       play('join');
       lastSent[m.pid] = null;
       return changed();
     }
     if (!p && !host.state && host.players.length < game().meta.max) {
       const { name, changed } = settleName(raw, others);
-      host.players.push((p = { pid: m.pid, name, asked: raw, fixed: changed }));
+      host.players.push((p = { pid: m.pid, name, asked: raw, fixed: changed, pub }));
       play('join');
     } else if (p && !host.state && !p.locked && raw !== p.asked) {
       const { name, changed } = settleName(raw, others);
@@ -151,6 +173,25 @@ function onMessage(m) {
     lastReact[m.pid] = now;
     floatReaction(m.e, who.name);
   } else if (m.t === 'act' && host.state) {
+    const actor = host.players.find(p => p.pid === m.pid);
+    if (actor?.pub && hostKeys) {
+      // Encrypted action: decrypt, and ignore replays of old ones.
+      if (!m.enc) return;
+      sharedKey(hostKeys.priv, actor.pub).then(k => unseal(k, m.enc)).then(d => {
+        if (!d || !(d.n > (lastActN[m.pid] || 0))) return;
+        lastActN[m.pid] = d.n;
+        handleAct(m.pid, d.a);
+      }).catch(() => {});
+      return;
+    }
+    handleAct(m.pid, m.a);
+  }
+}
+
+function handleAct(pidFrom, rawAct) {
+  const m = { pid: pidFrom, a: rawAct };
+  if (!host.state || host.paused) return;
+  {
     const a = cleanAct(m.a, host.settings.kids);
     const who = host.players.find(p => p.pid === m.pid);
     if (a?.type !== 'draft') for (const t of textsIn(a)) { recentTexts = [{ t, name: who?.name || '' }, ...recentTexts.filter(x => x.t.toLowerCase() !== t.toLowerCase())].slice(0, 30); }
@@ -169,7 +210,17 @@ function floatReaction(e, name) {
   setTimeout(() => el.remove(), 3200);
 }
 
+// Pausing: every clock time stored in the game (deadlines and the like) moves later by the time spent paused.
+function shiftTimes(x, ms) {
+  if (!x || typeof x !== 'object') return;
+  for (const k of Object.keys(x)) {
+    if (typeof x[k] === 'number' && x[k] > 1e12 && x[k] < 1e13) x[k] += ms;
+    else if (typeof x[k] === 'object') shiftTimes(x[k], ms);
+  }
+}
+
 function startGame() {
+  host.paused = 0;
   // The audience gets promoted into open seats for the next game.
   while (host.audience.length && host.players.length < game().meta.max) host.players.push(host.audience.shift());
   const prev = host.state && host.state.game === host.gameId ? host.state : host.lastByGame?.[host.gameId];
@@ -190,6 +241,11 @@ function hostAction(a) {
   if (a === 'testvoice') return say('Night falls on the village. Somewhere in the dark, the wolves are hungry.', true);
   if (a === 'relaxed') { host.settings.relaxed = !host.settings.relaxed; save(); return render(); }
   if (a === 'howto') { host.settings.howto = !host.settings.howto; save(); return render(); }
+  if (a === 'pause' && host.state) {
+    if (!host.paused) { host.paused = Date.now(); stopAmbient(); }
+    else { const ms = Date.now() - host.paused; shiftTimes(host.state, ms); stretchedFor += ms; host.paused = 0; }
+    save(); render(); return sendViews();
+  }
   if (a === 'kids') { host.settings.kids = !host.settings.kids; save(); return render(); }
   if (a === 'veto') { vetoOpen = !vetoOpen; return render(); }
   if (a.startsWith('hide:')) {
@@ -329,7 +385,7 @@ function render() {
   vb.hidden = !host.state;
   host.hidden = host.hidden || [];
   const isHidden = t => host.hidden.some(h => h.toLowerCase() === t.toLowerCase());
-  vb.innerHTML = vetoOpen && host.state ? `<div class="vetopanel"><h3>Hide an answer</h3><p class="muted small">Tap anything players typed to hide it from the TV, phones and narrator. Tap again to show it.</p><div class="vetolist">${recentTexts.map((x, i) => `<button class="btn ghost ${isHidden(x.t) ? 'on' : ''}" data-host="hide:${i}">${isHidden(x.t) ? '🙈 ' : ''}${esc(x.t)} <small class="muted">${esc(x.name)}</small></button>`).join('') || '<p class="muted">Nothing typed yet.</p>'}</div><button class="btn" data-host="veto">Done</button></div>` : '<button class="btn ghost vetobtn" data-host="veto">🙈 Hide an answer</button>';
+  vb.innerHTML = vetoOpen && host.state ? `<div class="vetopanel"><h3>Hide an answer</h3><p class="muted small">Tap anything players typed to hide it from the TV, phones and narrator. Tap again to show it.</p><div class="vetolist">${recentTexts.map((x, i) => `<button class="btn ghost ${isHidden(x.t) ? 'on' : ''}" data-host="hide:${i}">${isHidden(x.t) ? '🙈 ' : ''}${esc(x.t)} <small class="muted">${esc(x.name)}</small></button>`).join('') || '<p class="muted">Nothing typed yet.</p>'}</div><button class="btn" data-host="veto">Done</button></div>` : `<button class="btn ghost vetobtn" data-host="pause">${host.paused ? '▶ Resume' : '⏸ Pause'}</button><button class="btn ghost vetobtn" data-host="veto">🙈 Hide an answer</button>${host.paused ? '<div class="pausecover"><b>Paused</b><span>Press Resume when everyone is back</span></div>' : ''}`;
   vb.querySelectorAll('[data-host]').forEach(b => (b.onclick = () => hostAction(b.dataset.host)));
   app.querySelectorAll('[data-host]').forEach(b => (b.onclick = () => hostAction(b.dataset.host)));
   const vsel = app.querySelector('#vsel');
@@ -351,7 +407,7 @@ async function connect() {
 }
 
 setInterval(() => {
-  if (!host.state) return;
+  if (!host.state || host.paused) return;
   runBots();
   const before = JSON.stringify(host.state);
   game().tick(host.state, Date.now());

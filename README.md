@@ -26,6 +26,6 @@ https://wahoo2k.github.io/party-night/ (GitHub Pages from `main`, root)
 - `node test/e2e.mjs` – plays a full game in headless Chrome (TV + 6 phones) in local mode; needs a static server on port 8765.
 
 ## Known limits (prototype)
-- Every phone in a room receives every phone's messages, so a determined player could read roles in browser dev tools.
-  Fix later with per-player channels or server-side game logic.
+- Messages between the TV and each phone are encrypted per player (`js/secure.js`), so players can't read each other's
+  roles or answers on the shared channel. The TV itself still holds every secret, so whoever controls the TV page can see them.
 - Werewolf only; Price Guesser, Family Fact Trivia and Celebrity are listed as coming soon.

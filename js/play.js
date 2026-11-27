@@ -3,6 +3,7 @@ import { GAMES } from './games/index.js';
 import { openRoom } from './net.js';
 import { esc, store as localStore, uid, cleanCode, drawScene } from './ui.js';
 import { buzz } from './sfx.js';
+import { newKeys, cleanPub, sharedKey, seal, unseal } from './secure.js';
 import { cleanName, isRude, funName, MAX_NAME } from './names.js';
 
 const app = document.getElementById('app');
@@ -50,10 +51,33 @@ function joinForm(err = '') {
   };
 }
 
-const send = a => room?.send({ t: 'act', pid, a });
+// Private messages: this phone's key pair, and the TV's public key once we've heard from it.
+let keys = store.get('pg-keys');
+let hostPub = null;
+let lastN = 0;
+let inQ = Promise.resolve();
+async function send(a) {
+  if (!room) return;
+  if (keys && hostPub) {
+    try { const k = await sharedKey(keys.priv, hostPub); return room.send({ t: 'act', pid, enc: await seal(k, { n: Date.now(), a }) }); } catch {}
+  }
+  room.send({ t: 'act', pid, a });
+}
 
 function onMessage(m) {
   if (!m || m.t !== 'view' || m.to !== pid) return;
+  if (m.enc) {
+    // Decrypt in arrival order; drop anything older than what we've already shown.
+    inQ = inQ.then(async () => {
+      const hp = cleanPub(m.hpub);
+      if (!keys || !hp) return;
+      const d = await unseal(await sharedKey(keys.priv, hp), m.enc);
+      if (!d || d.n < lastN) return;
+      lastN = d.n; hostPub = hp;
+      onMessage({ t: 'view', to: pid, view: d.view });
+    }).catch(() => {});
+    return;
+  }
   heard = Date.now();
   const s = JSON.stringify(m.view);
   if (s === lastView) return;
@@ -63,6 +87,7 @@ function onMessage(m) {
 
 let lastPhaseSeen = '';
 function render(v) {
+  document.body.classList.toggle('paused', !!v._paused);
   const key = v.phase + (v.round || '');
   const isNew = key !== lastPhaseSeen;
   if (isNew) { app.classList.remove('enter'); void app.offsetWidth; app.classList.add('enter'); }
@@ -119,7 +144,8 @@ async function join() {
     statusEl.textContent = s === 'live' ? `Room ${code} · ${name}` : s === 'connecting' ? 'Connecting…' : 'Connection lost, retrying…';
     statusEl.dataset.s = s;
   });
-  const ping = () => room?.send({ t: 'hello', pid, name });
+  if (!keys) { try { keys = await newKeys(); if (keys) store.set('pg-keys', keys); } catch { keys = null; } }
+  const ping = () => room?.send({ t: 'hello', pid, name, pub: keys?.pub });
   ping();
   clearInterval(hello);
   // Keep saying hello: it re-syncs after either side refreshes. Fast until the TV answers.
