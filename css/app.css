@@ -1325,15 +1325,17 @@ body[data-theme]:not([data-theme='']):not(.phone) .scene .title{font-family:var(
 .art.painted{aspect-ratio:4/3;object-fit:cover;animation:paintedin .6s both}@keyframes paintedin{from{transform:scale(1.08);filter:blur(4px)}}.tcard .tc-art .painted,.ringmid .painted{box-shadow:0 0 0 4px #fff3,0 14px 34px #0008}
 
 /* ---------- Werewolf: painted backdrop, role portraits and ending scenes (files in art/) ---------- */
-body[data-game=werewolf]:not(.phone){background:linear-gradient(#070a22aa 0,#070a22cc 30%,#070a22ee 100%),url(../art/werewolf-bg.png) center top/cover fixed #070a22}
-body[data-game=werewolf].day:not(.phone){background:linear-gradient(#f4b48a55 0,#1b215288 40%,#0e1230dd 100%),url(../art/werewolf-bg.png) center top/cover fixed #0e1230}
+body[data-game=werewolf]:not(.phone){background:linear-gradient(#070a22aa 0,#070a22cc 30%,#070a22ee 100%),url(../art/werewolf-bg.jpg) center top/cover fixed #070a22}
+body[data-game=werewolf].day:not(.phone){background:linear-gradient(#f4b48a55 0,#1b215288 40%,#0e1230dd 100%),url(../art/werewolf-bg.jpg) center top/cover fixed #0e1230}
 body[data-game=werewolf]:not(.phone) .scene svg{opacity:0}
 body[data-game=werewolf]:not(.phone) .panel,body[data-game=werewolf]:not(.phone) .scores{background:#12174acc;backdrop-filter:blur(6px);border-color:#5a6fd866}
 .rolepic{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:14px;margin-bottom:8px}
 .rolepic+svg{display:none}
 .endscene{display:block;width:100%;max-height:34vh;object-fit:cover;border-radius:14px;margin-bottom:12px;animation:paintedin .8s both}
-body[data-game=werewolf]:not(.phone){background:linear-gradient(#070a2222 0,#070a2255 45%,#070a22aa 100%),url(../art/werewolf-bg.png) center top/cover fixed #070a22}
-body[data-game=werewolf].day:not(.phone){background:linear-gradient(#ffcf8a55 0,#f4b48a33 40%,#0e123088 100%),url(../art/werewolf-bg.png) center top/cover fixed #0e1230}
+body[data-game=werewolf]:not(.phone){background:linear-gradient(#070a2222 0,#070a2255 45%,#070a22aa 100%),url(../art/werewolf-bg.jpg) center top/cover fixed #070a22}
+body[data-game=werewolf].day:not(.phone){background:linear-gradient(#ffcf8a55 0,#f4b48a33 40%,#0e123088 100%),url(../art/werewolf-bg.jpg) center top/cover fixed #0e1230}
 body[data-game=werewolf] #backdrop{display:none}
 body[data-game=werewolf]:not(.phone) .scene{height:clamp(70px,12vh,120px)}
 body[data-game=werewolf]:not(.phone) .scene .title{font-size:clamp(26px,3vw,44px);top:14px;white-space:nowrap}
+body[data-game=werewolf]:not(.phone){background:linear-gradient(#070a2211 0,#070a2244 45%,#070a2299 100%),url(../art/werewolf-bg.jpg) center top/cover fixed #070a22}
+body[data-game=werewolf].day:not(.phone){background:linear-gradient(#ffcf8a44 0,#f4b48a22 40%,#0e123077 100%),url(../art/werewolf-bg.jpg) center top/cover fixed #0e1230}
