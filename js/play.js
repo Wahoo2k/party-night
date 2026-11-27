@@ -189,6 +189,27 @@ function comeBack() {
   backTimer = setTimeout(() => { if (heard >= asked || !room) return; statusEl.textContent = 'Reconnecting…'; try { room.close(); } catch {} room = null; lastView = ''; join(); }, 4000);
 }
 
+// One-phone remote play: a player who can't see the TV can put its picture above their controls.
+let tvOn = !!store.get('pg-showtv') || params.has('remote');
+function tvBox() {
+  let btn = document.getElementById('tvbtn');
+  if (!room || !code) { btn?.remove(); document.getElementById('tvbox')?.remove(); return; }
+  if (!btn) { btn = Object.assign(document.createElement('button'), { id: 'tvbtn' }); btn.onclick = () => { tvOn = !tvOn; store.set('pg-showtv', tvOn); tvBox(); }; document.body.append(btn); }
+  btn.textContent = tvOn ? '📺 Hide TV' : '📺 Show TV';
+  let box = document.getElementById('tvbox');
+  const want = `watch.html?code=${code}&embed=1${params.has('local') ? '&local=1' : ''}`;
+  if (!tvOn) { box?.remove(); return; }
+  if (box && box.dataset.src !== want) { box.remove(); box = null; }
+  if (!box) {
+    box = Object.assign(document.createElement('div'), { id: 'tvbox' }); box.dataset.src = want;
+    box.innerHTML = `<iframe src="${want}" allow="autoplay" title="The TV screen"></iframe>`;
+    app.before(box);
+    const fit = () => { const f = box.firstChild; if (f) { f.style.transform = `scale(${box.clientWidth / 1280})`; } };
+    fit(); addEventListener('resize', fit); new ResizeObserver(fit).observe(box);
+  }
+}
+setInterval(tvBox, 1500);
+
 async function join() {
   stayAwake();
   const key = 'pg-pid-' + code;

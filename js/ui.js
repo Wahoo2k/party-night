@@ -1,3 +1,4 @@
+import { tap } from './tap.js';
 // Shared helpers for the TV and phone pages.
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => '&#' + c.charCodeAt(0) + ';');
@@ -52,6 +53,7 @@ export const voice = {
 };
 
 export function say(text, force) {
+  if (text) tap.fn?.('say', [String(text)]);
   if ((!voiceOn && !force) || !text || !synth()) return;
   try {
     synth().cancel();
@@ -132,6 +134,7 @@ export function drawScene(svg) {
 
 // Full-screen title card between phases.
 export function titleCard(title, sub = '', tone = '', picture = '') {
+  tap.fn?.('titleCard', [title, sub, tone, picture]);
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   document.querySelector('.tcard')?.remove();
   const el = document.createElement('div');
@@ -146,6 +149,7 @@ export function titleCard(title, sub = '', tone = '', picture = '') {
 
 // Confetti burst over the whole screen.
 export function confetti(colors = ['#7fc8a9', '#f4e9c1', '#a9b8ff', '#ffcf6b', '#e2483d']) {
+  tap.fn?.('confetti', []);
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const c = document.createElement('canvas');
   c.className = 'fx';
@@ -164,6 +168,7 @@ export function confetti(colors = ['#7fc8a9', '#f4e9c1', '#a9b8ff', '#ffcf6b', '
 
 // Three claw slashes across the screen.
 export function clawMarks() {
+  tap.fn?.('clawMarks', []);
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const d = document.createElement('div');
   d.className = 'claws';

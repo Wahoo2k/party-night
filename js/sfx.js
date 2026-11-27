@@ -1,3 +1,4 @@
+import { tap } from './tap.js';
 // Sound effects synthesized with Web Audio, so there are no audio files to load or license.
 import { store } from './ui.js';
 
@@ -119,6 +120,7 @@ const SOUNDS = {
 };
 
 export function play(name) {
+  if (!quiet.on) tap.fn?.('play', [name]);
   if (!ready() || !SOUNDS[name]) return;
   try { SOUNDS[name](); } catch {}
 }

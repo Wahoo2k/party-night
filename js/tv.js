@@ -7,6 +7,7 @@ import { play, sfx, startAmbient, stopAmbient, startBed, stopBed, quiet } from '
 import { newKeys, cleanPub, samePub, sharedKey, seal, unseal } from './secure.js';
 import { cleanAct, textsIn, maskView, maskLine } from './content.js';
 import { settleName, cleanName, isRude, uniqueName, funName, MAX_NAME } from './names.js';
+import { tap } from './tap.js';
 
 const app = document.getElementById('app');
 const statusEl = document.getElementById('status');
@@ -298,6 +299,7 @@ let lastLock = 0;
 
 const lastReact = {};
 function floatReaction(e, name) {
+  tap.fn?.('react', [e, name]);
   const el = document.createElement('div');
   el.className = 'react';
   el.style.left = 8 + Math.random() * 84 + 'vw';
@@ -316,10 +318,11 @@ function shiftTimes(x, ms) {
 }
 
 // Full-screen punctuation for a moment: a red buzzer flash, a frost flash, a gold flash, or a screen shake.
-function flash(kind) {
+function flash(kind, inner) {
+  if (!inner) tap.fn?.('flash', [kind]);
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   if (kind === 'shake') { app.classList.remove('shake'); void app.offsetWidth; app.classList.add('shake'); return setTimeout(() => app.classList.remove('shake'), 700); }
-  if (kind === 'boom') flash('shake');
+  if (kind === 'boom') flash('shake', true);
   const el = Object.assign(document.createElement('div'), { className: 'fxflash ' + kind });
   document.body.append(el); setTimeout(() => el.remove(), 1000);
 }
@@ -383,11 +386,12 @@ function ceremony() {
   const top = list.slice(0, 3);
   el.innerHTML = `<h2>${tie ? "It's a tie!" : 'And the winner is…'}</h2><div class="cpods">${[1, 0, 2].filter(i => top[i]).map(i => { const f = face(top[i].name); return `<div class="cpod c${i + 1}"><i style="--pc:${f?.[1] || '#232a5c'}">${f?.[0] || '🏅'}</i><b>${esc(top[i].name)}</b><span>${val(top[i])}</span><em>${i + 1}</em></div>`; }).join('')}</div><p>Press any button to continue</p>`;
   document.body.append(el);
+  tap.fn?.('ceremony', [el.className, el.dataset.theme, el.innerHTML, 3300, 11000]);
   // While the ceremony is up it swallows remote presses, so OK closes it instead of also pressing Play again underneath.
   const t0 = Date.now();
   const key = e => { e.preventDefault(); e.stopImmediatePropagation(); if (Date.now() - t0 > 4500) close(); };
-  const close = () => { el.classList.add('out'); setTimeout(() => el.remove(), 500); removeEventListener('keydown', key, true); };
-  el.onclick = close; addEventListener('keydown', key, true); ceremonyOff = () => { el.remove(); removeEventListener('keydown', key, true); ceremonyOff = null; };
+  const close = () => { tap.fn?.('ceremonyOff', []); el.classList.add('out'); setTimeout(() => el.remove(), 500); removeEventListener('keydown', key, true); };
+  el.onclick = close; addEventListener('keydown', key, true); ceremonyOff = () => { tap.fn?.('ceremonyOff', []); el.remove(); removeEventListener('keydown', key, true); ceremonyOff = null; };
   if (sfx.on) { setTimeout(() => play('pop'), 700); setTimeout(() => play('pop'), 1700); play('drumroll'); setTimeout(() => play('drumroll'), 1500); setTimeout(() => { play('fanfare'); play('cheer'); }, 3300); }
   setTimeout(() => { el.classList.add('first'); confetti(); }, 3300);
   setTimeout(close, 11000);
@@ -436,9 +440,10 @@ function nightAwards() {
   el.className = 'ceremony first nightawards';
   el.innerHTML = `<h2>Tonight's awards</h2><div class="nawards">${awards.map(([title, n, note], i) => { const f = face(n); return `<div class="naward" style="animation-delay:${0.4 + i * 0.9}s"><small>${title}</small><i style="--pc:${f?.[1] || '#232a5c'}">${f?.[0] || '🏅'}</i><b>${esc(n)}</b><span>${esc(note)}</span></div>`; }).join('')}</div><div class="nlist">${t.games.map(g => `<span><b>${esc(g.game)}</b> ${g.winners.length ? esc(g.winners.join(' & ')) : '—'}</span>`).join('')}</div><p>Press any button to close</p>`;
   document.body.append(el);
+  tap.fn?.('ceremony', [el.className, '', el.innerHTML, 0, 0]);
   const t0 = Date.now();
   const key = e => { e.preventDefault(); e.stopImmediatePropagation(); if (Date.now() - t0 > 1500) close(); };
-  const close = () => { el.remove(); removeEventListener('keydown', key, true); };
+  const close = () => { tap.fn?.('ceremonyOff', []); el.remove(); removeEventListener('keydown', key, true); };
   el.onclick = close; addEventListener('keydown', key, true); ceremonyOff = () => { el.remove(); removeEventListener('keydown', key, true); ceremonyOff = null; };
   if (sfx.on) { play('fanfare'); setTimeout(() => play('cheer'), 600); }
   setTimeout(confetti, 500);
@@ -639,7 +644,7 @@ function renderLobby() {
     app.innerHTML = `<div class="menu">
     <section class="panel mlist">
       <div class="shelves">${SHELVES.map(f => `<button class="shelf ${(host.shelf || 'featured') === f.id ? 'on' : ''}" data-shelf="${f.id}">${esc(f.name)}</button>`).join('')}</div>
-      <div class="mgames">${list.map(m => `<button class="mgame ${m.meta.id === host.gameId ? 'on' : ''}" data-game="${m.meta.id}"><i>${ICONS[m.meta.id] || '🎲'}</i><b>${esc(m.meta.name)}</b>${m.meta.kids ? '<small>🧒</small>' : ''}</button>`).join('')}</div>
+      <div class="mgames">${list.map(m => `<button class="mgame ${m.meta.id === host.gameId ? 'on' : ''}" data-game="${m.meta.id}"><i>${ICONS[m.meta.id] || '🎲'}</i><b>${esc(m.meta.name)}</b>${m.meta.kids ? '<small>🧒</small>' : ''}${watching() && SAME_ROOM.includes(m.meta.id) ? '<small class="sameroom">🏠 same room</small>' : ''}</button>`).join('')}</div>
       <div class="mfoot"><button class="btn ghost small" data-host="settings">⚙ Settings</button><button class="btn ghost small" data-host="addbot">🤖 Add a bot</button>${host.tally?.games.length ? '<button class="btn ghost small" data-host="awards">🏆 Awards</button>' : ''}</div>
     </section>
     <section class="panel mprev">
@@ -694,6 +699,7 @@ function renderLobby() {
       <div class="code">${host.code}</div>
       <p class="muted">or scan</p>
       <div class="qr">${qr(url)}</div>
+      <p class="muted remoteline">Someone far away? They join the same way, then tap <b>📺 Show TV</b> on their phone, or open <b>${esc(watchUrl().replace(/\?.*/, '').replace(/^https?:\/\//, ''))}</b> on a laptop.${watching() && SAME_ROOM.includes(host.gameId) ? ' <b>🏠 This game needs everyone in the same room.</b>' : ''}</p>
     </section>
     <section class="panel">
       ${(() => {
@@ -718,6 +724,39 @@ function renderLobby() {
   host.players.forEach(p => seen.add(p.pid));
 }
 
+// Remote screens: anyone far away can open watch.html with the room code and see this TV. The picture travels as the
+// drawn page plus the sounds and effects, on its own channel so phones in the room never carry it.
+let screenRoom = null, lastScreen = '', screenTimer = null, screenSeq = 0;
+const watchers = {};
+const watching = () => { const now = Date.now(); return Object.values(watchers).filter(t => now - t < 25000).length; };
+tap.fn = (name, args) => { if (screenRoom && watching()) screenRoom.send({ t: 'fx', name, args }); };
+function shareScreen(force) {
+  if (!screenRoom || !watching()) return;
+  clearTimeout(screenTimer);
+  screenTimer = setTimeout(() => {
+    const clone = app.cloneNode(true);
+    clone.querySelectorAll('.pvstage').forEach(e => (e.innerHTML = ''));   // the lobby's moving preview stays on the TV
+    clone.querySelectorAll('.clock').forEach(c => (c.textContent = ''));     // each screen runs its own clock from the deadline
+    const b = document.body;
+    const meta = { cls: b.className, theme: b.dataset.theme || '', game: b.dataset.game || '', deadline: host.state?.deadline || 0, paused: !!host.paused, bar: !document.getElementById('tbar')?.hidden, status: statusEl.textContent };
+    const html = clone.innerHTML, key = html + JSON.stringify(meta);
+    if (!force && key === lastScreen) return;
+    lastScreen = key;
+    screenRoom.send({ t: 'screen', n: ++screenSeq, now: Date.now(), html, ...meta });
+  }, force ? 0 : host.state ? 120 : 900);
+}
+function onScreenMsg(m) {
+  if (!m || m.t !== 'watch' || typeof m.pid !== 'string') return;
+  const isNew = !watchers[m.pid] || Date.now() - watchers[m.pid] > 25000;
+  watchers[m.pid.slice(0, 40)] = Date.now();
+  if (isNew && !host.state) render();
+  if (isNew || m.need) shareScreen(true);
+}
+setInterval(() => shareScreen(), 1000);
+const watchUrl = () => { const u = new URL('watch.html', location.href); u.search = ''; u.searchParams.set('code', host.code); if (new URLSearchParams(location.search).has('local')) u.searchParams.set('local', '1'); return u.toString(); };
+// Games that only work when everyone is in the same room.
+const SAME_ROOM = ['charades', 'faker', 'freeze', 'hunt', 'dares'];
+
 function render() {
   if (!host.state) renderLobby();
   else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); if (fresh) wordsIn(); decorate(); pops(fresh); guideTip(); slideScores(); cardPops(fresh); }
@@ -732,8 +771,8 @@ function render() {
   document.body.classList.toggle('nohow', !host.settings.howto || (host.played?.[host.gameId] || 0) > 1);
   const badge = document.getElementById('aud') || Object.assign(document.createElement('div'), { id: 'aud' });
   if (!badge.isConnected) document.body.append(badge);
-  badge.hidden = !host.audience.length;
-  badge.textContent = `👥 ${host.audience.length} watching`;
+  badge.hidden = !host.audience.length && !watching();
+  badge.textContent = [host.audience.length ? `👥 ${host.audience.length} watching` : '', watching() ? `📺 ${watching()} remote screen${watching() === 1 ? '' : 's'}` : ''].filter(Boolean).join(' · ');
   let vb = document.getElementById('vetobar');
   if (!vb) { vb = Object.assign(document.createElement('div'), { id: 'vetobar' }); document.body.append(vb); }
   vb.hidden = !host.state;
@@ -748,12 +787,15 @@ function render() {
   app.querySelectorAll('[data-game]').forEach(b => (b.onclick = () => { host.gameId = b.dataset.game; host.screen = 'gather'; host.queue = []; host.night = null; if (sfx.on) play('lockin'); flash('wipe'); changed(); }));
   app.querySelectorAll('[data-shelf]').forEach(b => (b.onclick = () => { host.shelf = b.dataset.shelf; save(); render(); }));
   autofocus(app);
+  shareScreen();
 }
 
 async function connect() {
   room?.close();
   lastSent = {};
   render();
+  screenRoom?.close(); screenRoom = null;
+  openRoom(host.code + '-tv', onScreenMsg).then(r => (screenRoom = r)).catch(() => {});
   room = await openRoom(host.code, onMessage, s => {
     statusEl.textContent = s === 'live' ? `Room ${host.code} · connected` : s === 'connecting' ? 'Connecting…' : 'Connection lost, retrying…';
     statusEl.dataset.s = s;

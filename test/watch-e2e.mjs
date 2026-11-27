@@ -1,0 +1,38 @@
+// Remote screen: a far-away page mirrors the TV (picture, title cards, clock), and the phone page can embed it.
+import { chromium } from '/opt/npm-tools/node_modules/playwright/index.mjs';
+const out = process.env.SHOTS || 'test';
+const b = await chromium.launch({ executablePath: '/usr/bin/google-chrome' });
+const errors = []; const ok = (c, m) => { if (!c) errors.push(m); };
+const ctx = await b.newContext({ viewport: { width: 1280, height: 720 } });
+const tv = await ctx.newPage(); tv.on('pageerror', e => errors.push('tv ' + e.message));
+await tv.goto('http://localhost:8765/tv.html?local=1'); await tv.waitForSelector('.code');
+for (let i = 0; i < 4; i++) await tv.click('[data-host=addbot]');
+const code = await tv.evaluate(() => JSON.parse(localStorage.getItem('pg-host')).code);
+const w = await ctx.newPage(); w.on('pageerror', e => errors.push('watch ' + e.message));
+await w.goto(`http://localhost:8765/watch.html?local=1&code=${code}`); await w.click('#wf button');
+await w.waitForSelector('.mgame', { timeout: 8000 });
+ok(await w.evaluate(() => !!document.querySelector('.mgame')), 'watch shows the game menu');
+await tv.waitForTimeout(1200);
+ok((await tv.textContent('#aud')).includes('remote screen'), 'tv counts the remote screen');
+ok(await tv.evaluate(() => !!document.querySelector('.sameroom')), 'same-room tag shows once a remote screen is connected');
+await tv.click('[data-shelf=all]'); await tv.click('[data-game=quick]'); await tv.click('[data-host=start]');
+await w.waitForSelector('.tcard', { timeout: 5000 }).then(() => {}, () => errors.push('no title card on the remote screen'));
+await tv.waitForTimeout(6500);
+const a = await tv.evaluate(() => ({ h: document.querySelector('.panel')?.innerText.replace(/\d:\d\d/g, '').replace(/Reveal now/, '').trim().slice(0, 300), clock: document.querySelector('.clock')?.textContent, theme: document.body.dataset.theme }));
+const c = await w.evaluate(() => ({ h: document.querySelector('.panel')?.innerText.replace(/\d:\d\d/g, '').replace(/Reveal now/, '').trim().slice(0, 300), clock: document.querySelector('.clock')?.textContent, theme: document.body.dataset.theme, btn: getComputedStyle(document.querySelector('[data-host]') || document.body).display, bar: !document.getElementById('tbar').hidden }));
+ok(a.h && a.h === c.h, 'same panel text: ' + JSON.stringify([a.h, c.h]));
+ok(a.theme === c.theme, 'same theme'); ok(/^\d:\d\d$/.test(c.clock || ''), 'remote clock runs: ' + c.clock);
+ok(Math.abs((+a.clock?.slice(2) || 0) - (+c.clock?.slice(2) || 0)) <= 1, 'clocks agree ' + a.clock + ' ' + c.clock);
+await tv.screenshot({ path: `${out}/watch-tv.png` }); await w.screenshot({ path: `${out}/watch-remote.png` });
+// phone with the TV picture on top
+const pctx = await b.newContext({ viewport: { width: 390, height: 780 } });
+await pctx.close();
+const ph = await ctx.newPage(); await ph.setViewportSize({ width: 390, height: 780 }); ph.on('pageerror', e => errors.push('phone ' + e.message));
+await ph.goto(`http://localhost:8765/play.html?local=1&code=${code}`);
+await ph.fill('#name', 'Remy'); await ph.click('#join');
+await ph.waitForSelector('#tvbtn', { timeout: 8000 }); await ph.click('#tvbtn');
+await ph.waitForTimeout(3500);
+const fr = ph.frames().find(f => f.url().includes('watch.html'));
+ok(fr && await fr.evaluate(() => !!document.querySelector('.panel') && !document.querySelector('.wjoin')), 'phone embeds the TV picture');
+await ph.screenshot({ path: `${out}/watch-phone.png` });
+console.log(errors.length ? 'FAIL\n' + errors.join('\n') : 'ok watch-e2e'); await b.close(); process.exit(errors.length ? 1 : 0);
