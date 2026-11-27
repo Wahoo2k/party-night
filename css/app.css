@@ -1040,3 +1040,37 @@ body.phone .fxflash{display:none}
 @media (prefers-reduced-motion:reduce){.popin,.fxflash,.stage.enter *{animation:none!important}}
 body:not(.phone) #app{padding-bottom:calc(5vh + 60px)}
 body:not(.phone) #vetobar{left:auto;right:5vw;justify-content:flex-end}
+
+/* ---------- phone polish, final round, night awards ---------- */
+.yourturn{position:sticky;top:0;z-index:5;margin:-4px 0 8px;padding:8px 14px;border-radius:12px;background:var(--me,#ffcf6b);color:#0e1230;font:800 18px/1 Outfit,sans-serif;text-align:center;animation:ytin 1.6s both}
+@keyframes ytin{0%{opacity:0;transform:scale(.6)}15%{opacity:1;transform:scale(1.05)}25%{transform:none}80%{opacity:1}100%{opacity:0}}
+.watchtv{margin:14px 0 0;padding:10px;border-radius:12px;background:#0f1336;text-align:center;color:var(--dim);font-weight:600}
+.ptoast{position:fixed;left:50%;top:22%;z-index:60;transform:translateX(-50%);padding:14px 26px;border-radius:99px;font:900 44px/1 Outfit,sans-serif;pointer-events:none;animation:ptoast 1.9s both;box-shadow:0 10px 30px #0008}
+.ptoast.gain{background:#7fc8a9;color:#0e1230}.ptoast.gold{background:#ffcf6b;color:#3a2500;font-size:30px}
+@keyframes ptoast{0%{opacity:0;transform:translate(-50%,40px) scale(.5)}15%{opacity:1;transform:translate(-50%,0) scale(1.1)}25%{transform:translate(-50%,0)}75%{opacity:1}100%{opacity:0;transform:translate(-50%,-50px)}}
+.myplace{display:flex;align-items:baseline;justify-content:center;gap:8px;margin:0 0 12px;padding:14px;border-radius:16px;background:#232a5c;animation:pop .5s both}
+.myplace b{font:900 44px/1 Outfit,sans-serif}.myplace span{color:var(--dim)}
+.myplace.p1{background:linear-gradient(#ffd166,#c98a1a);color:#3a2500}.myplace.p1 span{color:#3a2500}
+body.finalround:not(.phone)::after{content:'FINAL ROUND';position:fixed;right:-70px;top:44px;z-index:16;transform:rotate(35deg);width:300px;padding:8px 0;text-align:center;background:#ffcf6b;color:#3a2500;font:900 clamp(14px,1.3vw,22px)/1 Outfit,sans-serif;letter-spacing:.12em;box-shadow:0 4px 14px #0008}
+.nightbar.tonight{margin-top:10px}
+.ceremony.nightawards{gap:2vh}
+.nawards{display:flex;gap:3vw;justify-content:center;align-items:stretch}
+.naward{display:grid;justify-items:center;gap:8px;padding:2vw;width:clamp(180px,24vw,360px);border-radius:20px;background:#1a2060;box-shadow:0 0 0 3px #ffd16655;opacity:0;animation:slam .6s forwards}
+.naward small{font:800 clamp(14px,1.5vw,24px)/1.2 Outfit,sans-serif;color:#ffd166}
+.naward i{font-style:normal;display:grid;place-items:center;width:clamp(70px,9vw,130px);aspect-ratio:1;border-radius:50%;background:var(--pc);font-size:clamp(40px,5vw,76px)}
+.naward b{font-size:clamp(20px,2.4vw,40px)}.naward span{color:#aab;font-size:clamp(13px,1.2vw,20px);text-align:center}
+.nlist{display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:center;max-width:80vw;color:#ccd;font-size:clamp(13px,1.2vw,19px)}
+.nlist b{color:#fff}
+.ceremony.nightawards p{animation-delay:3s}
+
+/* ---------- first-game coach, extra game moments ---------- */
+.guide{margin:16px 0 0;padding:12px 16px;border-radius:12px;background:#2a2466;border-left:6px solid #ffcf6b;font-size:clamp(16px,1.4vw,22px);line-height:1.35}
+.guide b{color:#ffcf6b;margin-right:8px;white-space:nowrap}
+.quip{display:grid;gap:6px;margin:14px 0;padding:16px 20px;border-radius:16px;background:#f4e9c1;color:#0e1230;max-width:720px;transform:rotate(-1deg)}
+.quip small{font-weight:700;opacity:.7}.quip b{font:800 clamp(22px,2.4vw,38px)/1.15 Outfit,sans-serif}.quip span{font-weight:700}
+.oneaway{color:#ffcf6b;font-weight:800}
+.splitroom{color:#ffcf6b;font-weight:800}.stage.enter .splitroom{animation:slam .5s 2.2s both}
+.mpin.avg b{background:#232a5c;color:#fff;border:2px dashed #fff8}.mpin.avg::before{border-bottom-color:#fff8}
+.mpin.avg{animation:none;transition:left .4s}
+.tally.ballots div{font-size:clamp(14px,1.3vw,20px);padding:6px 12px}
+.stage.enter .ballots div{animation:rise .4s 3.6s both}

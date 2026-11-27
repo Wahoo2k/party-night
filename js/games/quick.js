@@ -245,6 +245,7 @@ export function renderTV(v, el) {
     const max = Math.max(1, ...v.counts);
     h += `<div class="cq">${esc(v.kind === 'wyr' ? 'Would you rather…' : v.q)}</div><div class="bars">${v.options.map((o, i) => v.kind === 'mlt' && !v.counts[i] ? '' : `<div class="barrow ${v.winners.includes(i) ? 'top' : ''}"><span class="bl">${esc(o)}</span><div class="bt"><span style="width:${(100 * v.counts[i]) / max}%;background:${v.kind === 'mlt' ? '#ffcf6b' : COLORS[i % 4]}"></span></div><b>${v.counts[i]}</b>${v.kind === 'mlt' ? '' : `<small class="muted">${v.voters[i].map(esc).join(', ')}</small>`}</div>`).join('')}</div><button class="btn" data-host="next">Next</button>`;
   }
+  if (v.phase === 'reveal') { const top = [...v.counts].sort((a, b) => b - a); if (top[0] && top[0] === top[1]) h += '<p class="say splitroom">⚡ The room is split!</p>'; }
   if (v.phase === 'over') h = `<h2 class="win">${esc(v.scores[0]?.name || '')} read the room best!</h2><div class="podium">${v.scores.slice(0, 3).map((p, i) => `<div class="pod p${i + 1}"><b>${esc(p.name)}</b><span>${p.score}</span></div>`).join('')}</div>${v.titles.length ? `<div class="awards">${v.titles.map(t => `<div><small>Most likely ${esc(t.title.replace(/^most likely /, ''))}</small><b>${esc(t.name)}</b></div>`).join('')}</div>` : ''}<div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
   el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel">${h}</div>${scores}</div>`;
 }

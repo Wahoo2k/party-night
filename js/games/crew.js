@@ -36,7 +36,7 @@ export function setup(players, rnd = Math.random, prev = null, opts = {}) {
   const s = {
     game: 'crew', players: order,
     deck: shuffle([...POOL.keys()], rnd).slice(0, opts.short ? 6 : CARDS),
-    card: 0, played: 0, score: 0, lost: 0, round: 0,
+    card: 0, played: 0, score: 0, lost: 0, round: 0, best: Math.max(prev?.best || 0, prev?.phase === 'over' && prev.deck?.length === (opts.short ? 6 : CARDS) ? prev.score : 0),
     guesser: null, clues: {}, guess: null, result: null, phase: 'clue', deadline: 0, history: [],
   };
   start(s, Date.now());
@@ -146,6 +146,7 @@ export function tvView(s, now = Date.now()) {
   if (s.phase === 'clue') { v.cat = cur(s).cat; v.sent = Object.keys(s.clues).length; v.total = givers(s).length; }
   if (s.phase === 'guess') { v.cat = cur(s).cat; v.alive = aliveList(s); v.cancelled = Object.keys(s.clues).length - v.alive.length; }
   if (s.phase === 'reveal') { v.word = cur(s).word; v.guess = s.guess; v.result = s.result; v.clues = Object.entries(s.clues).map(([pid, text]) => ({ text, name: nameOf(s, pid), alive: s.alive[pid] })); }
+  v.best = s.best || 0;
   if (s.phase === 'over') v.rating = rating(s.score);
   return v;
 }
@@ -171,13 +172,13 @@ export function phoneView(s, pid) {
 const track = v => `<div class="crewtrack">${Array.from({ length: v.cards }, (_, i) => { const h = v.history[i]; return `<span class="${h ? h.result : ''}">${h ? (h.result === 'right' ? '✓' : h.result === 'wrong' ? '✕' : h.result === 'lost' ? '🗑' : '–') : ''}</span>`; }).join('')}</div>`;
 export function renderTV(v, el) {
   document.body.classList.toggle('day', v.phase === 'reveal' || v.phase === 'over');
-  const side = `<div class="scores"><h3>Team score</h3><div class="tscore">${v.score}<small> / ${v.cards}</small></div>${track(v)}${v.lost ? `<p class="muted small">${v.lost} card${v.lost === 1 ? '' : 's'} lost to wrong guesses</p>` : ''}</div>`;
+  const side = `<div class="scores"><h3>Team score</h3><div class="tscore">${v.score}<small> / ${v.cards}</small></div>${v.best ? `<p class="muted small">Score to beat: ${v.best}</p>` : ''}${track(v)}${v.lost ? `<p class="muted small">${v.lost} card${v.lost === 1 ? '' : 's'} lost to wrong guesses</p>` : ''}</div>`;
   let h = '';
   if (v.phase === 'clue') h = `<p class="cat">Card ${v.card} of ${v.cards} · ${esc(v.cat)}</p><h2><b>${esc(v.guesser)}</b>, look away from everyone's phones!</h2><p class="say">Everyone else: write a one-word clue for the secret word. If two of you write the same clue, both get cancelled. Be original!</p><p class="clock ${v.left <= 10 ? 'hurry' : ''}">${Math.floor(v.left / 60)}:${String(v.left % 60).padStart(2, '0')}</p><div class="meter"><span style="width:${v.total ? (100 * v.sent) / v.total : 0}%"></span></div><p class="muted center">${v.sent} of ${v.total} clues in</p><button class="btn ghost" data-host="next">Show the clues</button>
     <div class="how"><h3>How to play</h3><ol><li>We're all one team. One person guesses each card.</li><li>Everyone else secretly writes ONE word to help.</li><li>Matching clues cancel out, so try something different from what others might write.</li><li>A wrong guess costs an extra card, so pass if you're stuck.</li></ol></div>`;
   if (v.phase === 'guess') h = `<p class="cat">Card ${v.card} of ${v.cards} · ${esc(v.cat)}</p><h2>${esc(v.guesser)}, what's the word?</h2><div class="crewclues">${v.alive.map((c, i) => `<div class="cclue" style="animation-delay:${i * 0.12}s">${esc(c.text)}</div>`).join('') || '<p class="say">Every clue cancelled out!</p>'}</div>${v.cancelled ? `<p class="muted center">${v.cancelled} clue${v.cancelled === 1 ? '' : 's'} cancelled out</p>` : ''}<p class="clock ${v.left <= 10 ? 'hurry' : ''}">${Math.floor(v.left / 60)}:${String(v.left % 60).padStart(2, '0')}</p><button class="btn ghost" data-host="next">Pass</button>`;
   if (v.phase === 'reveal') h = `<p class="cat">The word was</p><div class="cq ${v.result === 'right' ? 'win' : ''}">${esc(v.word)}</div><h2 class="${v.result === 'right' ? 'win' : 'lose'}">${v.result === 'right' ? 'Got it!' : v.result === 'wrong' ? `“${esc(v.guess)}”: nope! −1 extra card` : 'Passed'}</h2><div class="crewclues">${v.clues.map(c => `<div class="cclue ${c.alive ? '' : 'dead'}">${esc(c.text)}<small>${esc(c.name)}</small></div>`).join('')}</div><button class="btn" data-host="next">Next card</button>`;
-  if (v.phase === 'over') h = `<h2 class="win">${v.score} out of ${v.cards}</h2><p class="say">${esc(v.rating)}</p>${track(v)}<div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
+  if (v.phase === 'over') h = `<h2 class="win">${v.score} out of ${v.cards}</h2><p class="say">${esc(v.rating)}</p>${v.best ? `<p class="say ${v.score > v.best ? 'win' : ''}">${v.score > v.best ? `New best! You beat ${v.best}.` : `Score to beat: ${v.best}`}</p>` : ''}${track(v)}<div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
   el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel">${h}</div>${side}</div>`;
 }
 

@@ -177,3 +177,8 @@ export function renderPhone(v, el, send) {
   if (f) f.onsubmit = e => { e.preventDefault(); const n = f.querySelector('#en').value; if (n === '') return; f.querySelector('button').disabled = true; send({ type: 'guess', n: Number(n) }); };
   el.querySelectorAll('[data-b]').forEach(b => (b.onclick = () => send({ type: 'bet', id: b.dataset.b })));
 }
+
+// First-game coach lines, one per step.
+export function guide(s) {
+  return { answer: 'Nobody is expected to know the number. Just type your best guess.', bet: 'All the guesses are lined up from low to high. Bet your chips on the guess you think is closest WITHOUT going over. You can bet on someone else\'s guess.', reveal: 'The closest guess without going over wins. Bets on it pay out; long shots at the edges pay more.' }[s.phase] || '';
+}

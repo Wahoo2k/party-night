@@ -119,6 +119,33 @@ function render(v) {
   wrap.className = 'panel';
   app.replaceChildren(wrap);
   (GAMES[v.game] || GAMES.werewolf).renderPhone(v, wrap, send);
+  polish(v, wrap, isNew);
+}
+
+// Phone polish shared by every game: a buzz and a banner when it becomes your turn to do something, a nudge to
+// watch the TV when there's nothing to tap, your points the moment you score, and your place at the end.
+let couldAct = false, lastGain = 0, lastPlace = '';
+function polish(v, wrap, isNew) {
+  const canAct = !!wrap.querySelector('button:not([disabled]):not(#leave), input:not([disabled]), textarea, canvas, [data-pad], svg.pad');
+  if (canAct && !couldAct && !v._paused) {
+    buzz([60, 40, 60]);
+    const b = Object.assign(document.createElement('div'), { className: 'yourturn', textContent: 'Your move!' });
+    wrap.prepend(b); setTimeout(() => b.remove(), 1600);
+  }
+  if (!canAct && v.phase !== 'over') wrap.insertAdjacentHTML('beforeend', '<p class="watchtv">📺 Eyes on the TV</p>');
+  couldAct = canAct;
+  if (v._final && isNew) toast('Final round!', 'gold');
+  if (v._gain && v._gain.id !== lastGain) { lastGain = v._gain.id; toast('+' + v._gain.n.toLocaleString(), 'gain'); buzz([30, 30, 30, 30, 120]); }
+  if (v._place && v.phase === 'over') {
+    const key = v._place.n + '/' + v._place.of;
+    const nth = ['', '1st', '2nd', '3rd'][v._place.n] || v._place.n + 'th';
+    wrap.insertAdjacentHTML('afterbegin', `<div class="myplace p${Math.min(v._place.n, 4)}"><b>${v._place.n === 1 ? '🏆 ' : ''}${nth}</b><span>of ${v._place.of}</span></div>`);
+    if (key !== lastPlace) { lastPlace = key; if (v._place.n === 1) buzz([80, 60, 80, 60, 200]); }
+  } else lastPlace = '';
+}
+function toast(text, cls) {
+  const t = Object.assign(document.createElement('div'), { className: 'ptoast ' + cls, textContent: text });
+  document.body.append(t); setTimeout(() => t.remove(), 1900);
 }
 
 function leave() {
@@ -134,7 +161,17 @@ function leave() {
 // Keep the phone awake during a game, where the browser allows it.
 let wake = null;
 async function stayAwake() { try { if (!wake && 'wakeLock' in navigator && document.visibilityState === 'visible') { wake = await navigator.wakeLock.request('screen'); wake.addEventListener('release', () => (wake = null)); } } catch { wake = null; } }
-document.addEventListener('visibilitychange', () => { if (room) stayAwake(); });
+document.addEventListener('visibilitychange', () => { if (room) stayAwake(); if (document.visibilityState === 'visible') comeBack(); });
+addEventListener('online', () => comeBack());
+// Unlocking the phone or getting signal back: say hello straight away, and reconnect from scratch if the TV doesn't answer.
+let backTimer = 0;
+function comeBack() {
+  if (!room || !code || !name) return;
+  const asked = Date.now();
+  room.send({ t: 'hello', pid, name, pub: keys?.pub });
+  clearTimeout(backTimer);
+  backTimer = setTimeout(() => { if (heard >= asked || !room) return; statusEl.textContent = 'Reconnecting…'; try { room.close(); } catch {} room = null; lastView = ''; join(); }, 4000);
+}
 
 async function join() {
   stayAwake();

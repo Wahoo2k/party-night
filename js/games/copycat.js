@@ -13,6 +13,8 @@ export const meta = {
 
 export const PADS = [{ e: '🍎', c: '#e2473b', f: 392 }, { e: '🍋', c: '#f2b21d', f: 494 }, { e: '🐸', c: '#3fa34d', f: 587 }, { e: '🐳', c: '#3f7fe0', f: 784 }];
 export const STEP = 750;
+// The pattern plays faster as it gets longer.
+export const stepFor = len => Math.max(380, STEP - Math.max(0, len - 3) * 45);
 export const MAX_ROUNDS = 12, HEARTS = 3;
 const rand4 = rnd => Math.floor(rnd() * 4);
 
@@ -22,7 +24,7 @@ export function setup(players, rnd = Math.random, prev = null, opts = {}) {
   show(s, Date.now());
   return s;
 }
-function show(s, now) { s.progress = {}; s.failed = {}; s.phase = 'show'; s.round++; s.deadline = now + 1500 + s.pattern.length * STEP; }
+function show(s, now) { s.progress = {}; s.failed = {}; s.phase = 'show'; s.round++; s.deadline = now + 1500 + s.pattern.length * stepFor(s.pattern.length); }
 const alive = s => s.players.filter(p => s.hearts[p.pid] > 0).map(p => p.pid);
 const nameOf = (s, pid) => (s.players.find(p => p.pid === pid) || {}).name || 'Someone';
 
@@ -105,8 +107,8 @@ export function renderTV(v, el) {
   el.innerHTML = `<div class="stage solo ${v.fresh ? 'enter' : ''}"><div class="panel">${h}${v.phase !== 'over' ? who : ''}</div></div>`;
   if (v.phase === 'show' && v.fresh !== false) {
     // Light up each pad in turn and play its note.
-    const btns = el.querySelectorAll('.ccpad');
-    import('../sfx.js').then(m => v.pattern.forEach((k, i) => { m.note(PADS[k].f, 0.45, 1 + (i * STEP) / 1000); setTimeout(() => { btns[k]?.classList.add('lit'); setTimeout(() => btns[k]?.classList.remove('lit'), STEP * 0.7); }, 1000 + i * STEP); })).catch(() => {});
+    const btns = el.querySelectorAll('.ccpad'), step = stepFor(v.pattern.length);
+    import('../sfx.js').then(m => v.pattern.forEach((k, i) => { m.note(PADS[k].f, 0.45, 1 + (i * step) / 1000); setTimeout(() => { btns[k]?.classList.add('lit'); setTimeout(() => btns[k]?.classList.remove('lit'), step * 0.7); }, 1000 + i * step); })).catch(() => {});
   }
 }
 export function renderPhone(v, el, send) {

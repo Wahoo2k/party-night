@@ -422,6 +422,7 @@ export function tvView(s, now = Date.now()) {
   if (s.phase === 'vote') { v.done = Object.keys(s.votes).length; v.total = s.players.length; }
   if (s.phase === 'guess') { v.imposterName = nameOf(s, s.imposter); v.tally = s.tally; }
   if (s.phase === 'over') Object.assign(v, { word: s.word, imposterName: nameOf(s, s.imposter), result: s.result, guess: s.guess, tally: s.tally || [], accusedName: s.accused ? nameOf(s, s.accused) : null });
+  if (s.phase === 'over' || s.phase === 'guess') v.ballots = s.order.filter(pid => s.votes?.[pid]).map(pid => ({ name: nameOf(s, pid), vote: nameOf(s, s.votes[pid]), right: s.votes[pid] === s.imposter }));
   return v;
 }
 
@@ -479,7 +480,7 @@ export function renderTV(v, el) {
     const head = v.result === 'caught' ? `<h2 class="win">Imposter caught!</h2><p class="say">${esc(v.imposterName)} was the imposter${v.guess ? ` and guessed "${esc(v.guess)}"` : ''}.</p>`
       : v.result === 'stole' ? `<h2 class="lose">Stolen!</h2><p class="say">${esc(v.imposterName)} was caught but guessed the word!</p>`
       : `<h2 class="lose">The imposter got away!</h2><p class="say">It was ${esc(v.imposterName)}. ${v.accusedName ? `You voted out ${esc(v.accusedName)} instead.` : 'The vote was tied.'}</p>`;
-    h = `${head}<div class="secret">The word was <b>${esc(v.word)}</b></div>${board}<div class="row"><button class="btn" data-host="again">Next round</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
+    h = `${head}<div class="secret">The word was <b>${esc(v.word)}</b></div>${v.ballots?.length ? `<div class="tally ballots">${v.ballots.map(b => `<div class="${b.right ? 'win' : ''}">${esc(b.name)} → ${esc(b.vote)} ${b.right ? '✓' : ''}</div>`).join('')}</div>` : ''}${board}<div class="row"><button class="btn" data-host="again">Next round</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
   }
   el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel">${h}</div>${scores}</div>`;
 }

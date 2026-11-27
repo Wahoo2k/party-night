@@ -223,3 +223,8 @@ export function renderPhone(v, el, send) {
   el.querySelector('[data-skip]')?.addEventListener('click', () => send({ type: 'night' }));
   el.querySelectorAll('[data-v]').forEach(b => (b.onclick = () => send({ type: 'vote', target: b.dataset.v })));
 }
+
+// First-game coach lines, one per step.
+export function guide(s) {
+  return { look: 'There is only ONE night. Remember your card, but it may get swapped before morning.', night: 'Powers happen in order: wolves see each other, the Seer peeks, the Robber steals a card, the Troublemaker swaps two other players. Everyone taps something so nobody stands out.', morning: 'Your phone says what you did or saw. It does not say if someone moved your card afterwards!', day: 'Say what you were and what you did. Stories that do not fit together are your clues. Wolves: claim to be someone else.', vote: 'Everyone votes at once. The village wins if a wolf gets the most votes. The wolves win if they all escape.' }[s.phase] || '';
+}

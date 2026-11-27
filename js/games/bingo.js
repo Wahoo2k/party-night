@@ -196,6 +196,10 @@ export function tvView(s, now = Date.now()) {
     standings: s.players.map(p => ({ name: p.name, wins: s.wins[p.pid] || 0 })).sort((a, b) => b.wins - a.wins),
     players: s.players.length,
   };
+  if (s.phase === 'calling') {
+    const called = new Set(s.called), pat = pattern(s).id;
+    v.close = s.players.filter(p => s.cards[p.pid] && !hasPattern(s.cards[p.pid], called, pat) && s.cards[p.pid].some(n => !called.has(n) && hasPattern(s.cards[p.pid], new Set([...called, n]), pat))).length;
+  }
   return v;
 }
 
@@ -235,7 +239,7 @@ export function renderTV(v, el) {
     const status = v.phase === 'bingo' ? `<p class="say win">BINGO! ${v.winners.map(esc).join(' & ')}</p><p class="muted">Anyone else who had it on this call, hit BINGO now!</p>`
       : v.phase === 'roundEnd' ? `<p class="say ${v.winners.length ? 'win' : ''}">${v.winners.length ? `Round ${v.round} goes to ${v.winners.map(esc).join(' & ')}!` : 'No winner this round.'}</p><button class="btn" data-host="next">${v.round >= v.rounds ? 'Finish' : 'Next round'}</button>`
       : v.phase === 'over' ? `<h2 class="win">${esc(v.standings[0]?.name || '')} leads with ${v.standings[0]?.wins || 0}!</h2><div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`
-      : v.falseName ? `<p class="say lose">False bingo from ${esc(v.falseName)}! Keep playing.</p>` : `<p class="muted">Call ${v.count} of ${v.total}${v.paused ? ' · paused' : ''}</p>`;
+      : v.falseName ? `<p class="say lose">False bingo from ${esc(v.falseName)}! Keep playing.</p>` : `<p class="muted">Call ${v.count} of ${v.total}${v.paused ? ' · paused' : ''}</p>${v.close ? `<p class="say oneaway" data-pop="close${v.round}-${v.close}" data-snd="gasp">😬 ${v.close === 1 ? 'Someone is' : `${v.close} players are`} one away!</p>` : ''}`;
     h = `<p class="cat">Round ${v.round} of ${v.rounds} · <b>${esc(v.pattern.name)}</b> · ${esc(v.pattern.hint)}</p><div class="bingotop">${ball}<div>${recent}${status}</div></div>${grid}${v.phase === 'calling' ? speed : ''}`;
   }
   el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel">${h}</div>${standings}</div>`;

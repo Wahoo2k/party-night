@@ -34,6 +34,8 @@ export const TIMES = { ready: 25000, turn: 50000, turnEnd: 6000 };
 
 const shuffle = (a, rnd) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
+// Passes allowed per turn.
+export const PASSES = 3;
 export function setup(players, rnd = Math.random, prev = null, opts = {}) {
   const order = shuffle(players.map(p => ({ pid: p.pid, name: p.name })), rnd);
   return {
@@ -67,7 +69,7 @@ export function act(s, pid, a, now = Date.now(), rnd = Math.random) {
       s.log.push({ word: CARDS[s.card][1], emoji: CARDS[s.card][0], by: nameOf(s, a.by) });
       s.eventId++; s.lastEvent = 'got';
       draw(s, rnd);
-    } else if (a.type === 'skip') {
+    } else if (a.type === 'skip' && s.log.filter(l => !l.by).length < PASSES) {
       s.log.push({ word: CARDS[s.card][1], emoji: CARDS[s.card][0], by: null });
       s.eventId++; s.lastEvent = 'skip';
       draw(s, rnd);

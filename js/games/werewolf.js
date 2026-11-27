@@ -358,3 +358,8 @@ export function renderPhone(v, el, send) {
   el.querySelectorAll('[data-pick]').forEach(b => (b.onclick = () => send({ type: 'pick', target: b.dataset.pick })));
   el.querySelectorAll('[data-vote]').forEach(b => (b.onclick = () => send({ type: 'vote', target: b.dataset.vote })));
 }
+
+// First-game coach lines, one per step.
+export function guide(s) {
+  return { roles: 'Look at your phone in secret. Wolves want to outnumber the village; everyone else wants to find the wolves.', night: 'Everyone keeps their eyes on their own phone. Wolves pick someone, the Seer checks someone, the Doctor protects someone. Everyone else taps too, so nobody can tell who has a power.', day: 'Talk it out! Who is acting odd? The Seer may want to hint at what they learned without painting a target on themselves.', vote: 'Vote on your phone for who to send away. The most votes goes. A tie means nobody goes.', verdict: 'Their role is revealed. Then night falls again. Keep going until one side wins.' }[s.phase] || '';
+}

@@ -75,11 +75,40 @@ function viewFor(pid) {
     const me = host.players.find(p => p.pid === pid) || {};
     return { phase: 'lobby', players: host.players.map(p => p.name), game: game().meta.name, me: me.name, fixed: !!me.fixed, byHost: !!me.locked, _me: me.face };
   }
-  return { ...maskView(game().phoneView(host.state, pid), host.hidden), game: host.gameId, _me: host.players.find(p => p.pid === pid)?.face, ...(host.paused ? { _paused: true } : {}) };
+  return { ...maskView(game().phoneView(host.state, pid), host.hidden), game: host.gameId, _me: host.players.find(p => p.pid === pid)?.face, ...(host.paused ? { _paused: true } : {}), ...(gains[pid] ? { _gain: gains[pid] } : {}), ...(places[pid] ? { _place: places[pid] } : {}), ...(finalRound ? { _final: true } : {}) };
+}
+
+// Each phone hears about its own points the moment they land, and its finishing place at the end.
+let gains = {}, places = {}, lastScore = {}, gainId = 0, finalRound = false, finalSaid = false;
+function scoreList() {
+  const v = game().tvView(host.state, Date.now());
+  return Array.isArray(v.scores) && v.scores[0]?.name && typeof v.scores[0].score === 'number' ? v.scores : null;
+}
+function trackScores() {
+  if (!host.state) return;
+  const list = scoreList();
+  if (!list) return;
+  const over = host.state.phase === 'over';
+  list.forEach((row, i) => {
+    const p = host.players.find(x => x.name === row.name);
+    if (!p) return;
+    if (lastScore[p.pid] !== undefined && row.score > lastScore[p.pid]) gains[p.pid] = { n: row.score - lastScore[p.pid], id: ++gainId };
+    lastScore[p.pid] = row.score;
+    if (over && host.gameId !== 'imposter') places[p.pid] = { n: list.filter(x => x.score > row.score).length + 1, of: list.length };
+  });
+}
+// Which round is the last one, for the games that count rounds on screen.
+const ROUNDS_OF = { quick: v => [v.n, v.total], potato: v => [v.r, v.of], hunt: v => [v.r, v.of], freeze: v => [v.r, v.of], meld: v => [v.turn, v.turns], charades: v => [v.turn, v.turns], taboo: v => [v.turn, v.turns], crew: v => [v.card, v.cards], doodle: v => [v.k, v.of], whosaid: v => [v.i + 1, v.total], bingo: v => [v.round, v.rounds], trivia: v => [v.n, v.total], copycat: () => null };
+function checkFinal() {
+  const f = host.state && ROUNDS_OF[host.gameId], r = f ? f(game().tvView(host.state, Date.now())) : null;
+  finalRound = !!(r && r[1] > 2 && r[0] === r[1] && host.state.phase !== 'over');
+  document.body.classList.toggle('finalround', finalRound);
+  if (finalRound && !finalSaid) { finalSaid = true; if (sfx.on) play('fanfare'); setTimeout(() => say('Final round!'), 300); flash('gold'); }
 }
 
 function sendViews(force) {
   if (!room) return;
+  trackScores();
   for (const p of [...host.players, ...host.audience]) {
     if (p.bot) continue;
     const v = JSON.stringify(viewFor(p.pid));
@@ -127,6 +156,8 @@ function changed() {
       setTimeout(() => { if (sfx.on) { play(ce.sound); if (ce.react) setTimeout(() => play(ce.react), 350); } if (ce.fx) flash(ce.fx); if (ce.say) say(maskLine(ce.say, host.hidden)); }, ce.delay || 0);
     }
   }
+  checkFinal();
+  countNight();
   render();
   fresh = false;
   sendViews();
@@ -276,13 +307,22 @@ function pops(isFresh) {
   });
 }
 
+// A first-game coach: the first time a room plays one of the trickier games, a tip sits on screen for each step.
+function guideTip() {
+  const g = game();
+  if (!g.guide || !host.settings.howto || (host.played?.[host.gameId] || 0) > 1) return;
+  const tip = g.guide(host.state);
+  if (tip) app.querySelector('.panel')?.insertAdjacentHTML('beforeend', `<div class="guide"><b>💡 First game</b> ${esc(tip)}</div>`);
+}
+
+let ceremonyOff = null;
 // The winners' ceremony, shared by every game that ends with a score table: third, second, then a drumroll and first.
 function ceremony() {
   const v = tvView();
   let list = Array.isArray(v.scores) && v.scores.length >= 2 && v.scores[0]?.name ? v.scores : null;
   if (!list && Array.isArray(v.teams) && typeof v.teams[0]?.score === 'number') list = [...v.teams].sort((a, b) => b.score - a.score);
   if (!list || matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
-  document.querySelector('.ceremony')?.remove();
+  ceremonyOff?.();
   const el = document.createElement('div');
   el.className = 'ceremony';
   const face = n => host.players.find(p => p.name === n)?.face;
@@ -291,12 +331,65 @@ function ceremony() {
   const top = list.slice(0, 3);
   el.innerHTML = `<h2>${tie ? "It's a tie!" : 'And the winner is…'}</h2><div class="cpods">${[1, 0, 2].filter(i => top[i]).map(i => { const f = face(top[i].name); return `<div class="cpod c${i + 1}"><i style="--pc:${f?.[1] || '#232a5c'}">${f?.[0] || '🏅'}</i><b>${esc(top[i].name)}</b><span>${val(top[i])}</span><em>${i + 1}</em></div>`; }).join('')}</div><p>Press any button to continue</p>`;
   document.body.append(el);
-  const close = () => { el.classList.add('out'); setTimeout(() => el.remove(), 500); removeEventListener('keydown', close); };
-  el.onclick = close; setTimeout(() => addEventListener('keydown', close), 4500);
+  // While the ceremony is up it swallows remote presses, so OK closes it instead of also pressing Play again underneath.
+  const t0 = Date.now();
+  const key = e => { e.preventDefault(); e.stopImmediatePropagation(); if (Date.now() - t0 > 4500) close(); };
+  const close = () => { el.classList.add('out'); setTimeout(() => el.remove(), 500); removeEventListener('keydown', key, true); };
+  el.onclick = close; addEventListener('keydown', key, true); ceremonyOff = () => { el.remove(); removeEventListener('keydown', key, true); ceremonyOff = null; };
   if (sfx.on) { setTimeout(() => play('pop'), 700); setTimeout(() => play('pop'), 1700); play('drumroll'); setTimeout(() => play('drumroll'), 1500); setTimeout(() => { play('fanfare'); play('cheer'); }, 3300); }
   setTimeout(() => { el.classList.add('first'); confetti(); }, 3300);
   setTimeout(close, 11000);
   return true;
+}
+
+// Tonight's tally: who won what, for the awards at the end of the night.
+function countNight() {
+  const s = host.state;
+  if (!s || s.phase !== 'over' || host.counted) return;
+  host.counted = true;
+  const v = game().tvView(s, Date.now());
+  const t = (host.tally = host.tally || { games: [], by: {} });
+  const row = n => (t.by[n] = t.by[n] || { wins: 0, podiums: 0, games: 0, last: 0 });
+  host.players.forEach(p => row(p.name).games++);
+  let winners = [];
+  const list = Array.isArray(v.scores) && v.scores[0]?.name ? v.scores : null;
+  if (list && host.gameId !== 'imposter') {
+    const key = ['score', 'chips', 'hearts', 'books', 'burns'].find(k => typeof list[0][k] === 'number');
+    winners = key ? list.filter(p => p[key] === list[0][key]).map(p => p.name) : [list[0].name];
+    list.slice(0, 3).forEach(p => row(p.name).podiums++);
+    row(list[list.length - 1].name).last++;
+  } else if (Array.isArray(v.teams) && typeof v.teams[0]?.score === 'number') {
+    const top = Math.max(...v.teams.map(x => x.score));
+    winners = v.teams.filter(x => x.score === top).flatMap(x => x.members || []);
+  } else if (typeof v.winner === 'string' && host.players.some(p => p.name === v.winner)) winners = [v.winner];
+  winners.forEach(n => row(n).wins++);
+  t.games.push({ game: game().meta.name, winners });
+  save();
+}
+function nightAwards() {
+  const t = host.tally;
+  if (!t?.games.length) return;
+  const names = Object.keys(t.by), top = k => names.slice().sort((a, b) => t.by[b][k] - t.by[a][k] || t.by[b].podiums - t.by[a].podiums)[0];
+  const face = n => host.players.find(p => p.name === n)?.face;
+  const awards = [];
+  const champ = top('wins');
+  if (t.by[champ].wins) awards.push(['🏆 Champion of the night', champ, `${t.by[champ].wins} win${t.by[champ].wins === 1 ? '' : 's'}`]);
+  const pod = names.filter(n => n !== champ).sort((a, b) => t.by[b].podiums - t.by[a].podiums)[0];
+  if (pod && t.by[pod].podiums) awards.push(['🥈 Always in the mix', pod, `${t.by[pod].podiums} top-three finish${t.by[pod].podiums === 1 ? "" : "es"}`]);
+  const sport = names.filter(n => n !== champ && n !== pod).sort((a, b) => t.by[b].last - t.by[a].last || t.by[b].games - t.by[a].games)[0];
+  if (sport) awards.push(['💛 Best sport', sport, `played ${t.by[sport].games} game${t.by[sport].games === 1 ? '' : 's'} and kept smiling`]);
+  ceremonyOff?.();
+  const el = document.createElement('div');
+  el.className = 'ceremony first nightawards';
+  el.innerHTML = `<h2>Tonight's awards</h2><div class="nawards">${awards.map(([title, n, note], i) => { const f = face(n); return `<div class="naward" style="animation-delay:${0.4 + i * 0.9}s"><small>${title}</small><i style="--pc:${f?.[1] || '#232a5c'}">${f?.[0] || '🏅'}</i><b>${esc(n)}</b><span>${esc(note)}</span></div>`; }).join('')}</div><div class="nlist">${t.games.map(g => `<span><b>${esc(g.game)}</b> ${g.winners.length ? esc(g.winners.join(' & ')) : '—'}</span>`).join('')}</div><p>Press any button to close</p>`;
+  document.body.append(el);
+  const t0 = Date.now();
+  const key = e => { e.preventDefault(); e.stopImmediatePropagation(); if (Date.now() - t0 > 1500) close(); };
+  const close = () => { el.remove(); removeEventListener('keydown', key, true); };
+  el.onclick = close; addEventListener('keydown', key, true); ceremonyOff = () => { el.remove(); removeEventListener('keydown', key, true); ceremonyOff = null; };
+  if (sfx.on) { play('fanfare'); setTimeout(() => play('cheer'), 600); }
+  setTimeout(confetti, 500);
+  say(awards.map(a => `${a[0].replace(/^\S+ /, '')}: ${a[1]}.`).join(' '));
 }
 
 function startGame() {
@@ -305,7 +398,8 @@ function startGame() {
   while (host.audience.length && host.players.length < game().meta.max) host.players.push(host.audience.shift());
   const prev = host.state && host.state.game === host.gameId ? host.state : host.lastByGame?.[host.gameId];
   host.state = game().setup(host.players, Math.random, prev, { short: !!host.settings.short });
-  lastEventId = 0; popped.clear();
+  lastEventId = 0; popped.clear(); gains = {}; places = {}; lastScore = {}; finalRound = false; finalSaid = false;
+  host.played = { ...(host.played || {}), [host.gameId]: (host.played?.[host.gameId] || 0) + 1 }; host.counted = false;
   lastPhase = '';
   changed();
 }
@@ -315,7 +409,7 @@ function hostAction(a) {
   if (a === 'again') return startGame();
   if (a.startsWith('night:')) { const nt = NIGHTS.find(x => x.id === a.slice(6)); if (nt) { host.queue = nt.games.slice(1); host.night = nt.id; host.gameId = nt.games[0]; host.shelf = 'all'; save(); } return changed(); }
   if (a === 'endnight') { host.queue = []; host.night = null; save(); return render(); }
-  if (a === 'lobby') { host.lastByGame = { ...(host.lastByGame || {}), [host.gameId]: host.state }; host.state = null; document.querySelector('.ceremony')?.remove(); if (host.queue?.length) host.gameId = host.queue.shift(); else host.night = null; stopAmbient(); document.body.classList.remove('day'); return changed(); }
+  if (a === 'lobby') { host.lastByGame = { ...(host.lastByGame || {}), [host.gameId]: host.state }; host.state = null; ceremonyOff?.(); if (host.queue?.length) host.gameId = host.queue.shift(); else host.night = null; stopAmbient(); document.body.classList.remove('day'); return changed(); }
   if (a === 'newcode') { host = { code: newCode(), players: [], gameId: host.gameId, state: null }; save(); return connect(); }
   if (a === 'voice') { voice.on = !voice.on; return render(); }
   if (a === 'testvoice') return say('Night falls on the village. Somewhere in the dark, the wolves are hungry.', true);
@@ -326,6 +420,8 @@ function hostAction(a) {
     else { const ms = Date.now() - host.paused; shiftTimes(host.state, ms); stretchedFor += ms; host.paused = 0; }
     save(); render(); return sendViews();
   }
+  if (a === 'awards') return nightAwards();
+  if (a === 'cleartally') { host.tally = null; save(); return render(); }
   if (a === 'music') { host.settings.music = !host.settings.music; if (!host.settings.music) stopBed(); save(); return render(); }
   if (a === 'short') { host.settings.short = !host.settings.short; save(); return render(); }
   if (a === 'kids') { host.settings.kids = !host.settings.kids; save(); return render(); }
@@ -420,6 +516,7 @@ function renderLobby() {
       ${host.audience.length ? `<p class="muted">Audience (${host.audience.length}): ${host.audience.map(a => esc(a.name)).join(', ')}. They join automatically when a seat opens.</p>` : ''}
       ${(() => { const p = host.players.find(x => x.pid === editing); return p ? `<div class="editbox"><label for="rename">Rename ${esc(p.name)}</label><div class="row"><input id="rename" maxlength="${MAX_NAME}" value="${esc(p.name)}" autocomplete="off"><button class="btn" data-host="rename">Save</button><button class="btn ghost" data-host="randomname">Random name</button><button class="btn ghost" data-host="kick">Remove player</button><button class="btn ghost" data-host="canceledit">Cancel</button></div></div>` : ''; })()}
       ${(() => { const nt = NIGHTS.find(x => x.id === host.night); return nt ? `<div class="nightbar"><b>${nt.icon} ${esc(nt.name)}</b><span>Now: <b>${esc(g.meta.name)}</b>${host.queue?.length ? ` · Then: ${host.queue.map(id => esc(GAMES[id].meta.name)).join(' → ')}` : ' · last game'}</span><button class="btn ghost small" data-host="endnight">Pick games myself</button></div>` : `<h3>Start a game night</h3><div class="nights">${NIGHTS.map(x => `<button class="night" data-host="night:${x.id}"><span>${x.icon}</span><b>${esc(x.name)}</b><small>${esc(x.blurb)}</small><small>${x.games.map(id => esc(GAMES[id].meta.name)).join(' → ')}</small></button>`).join('')}</div>`; })()}
+      ${host.tally?.games.length ? `<div class="nightbar tonight"><b>Tonight</b><span>${Object.entries(host.tally.by).filter(e => e[1].wins).sort((a, b) => b[1].wins - a[1].wins).slice(0, 5).map(([n, r]) => `${esc(n)} 🏆×${r.wins}`).join(' · ') || `${host.tally.games.length} game${host.tally.games.length === 1 ? '' : 's'} played`}</span><button class="btn ghost small" data-host="awards">Tonight's awards</button><button class="btn ghost small" data-host="cleartally">Reset</button></div>` : ''}
       <h3>${host.night ? 'Game' : 'Or pick a game'}</h3>
       <div class="games">
         <div class="shelves">${SHELVES.map(f => `<button class="shelf ${(host.shelf || 'featured') === f.id ? 'on' : ''}" data-shelf="${f.id}">${esc(f.name)}</button>`).join('')}</div>
@@ -434,7 +531,7 @@ function renderLobby() {
       </div>
       <div class="row">
         <button class="btn ghost" data-host="relaxed">Relaxed timers: ${host.settings.relaxed ? 'on' : 'off'}</button>
-        <button class="btn ghost" data-host="howto">How-to screens: ${host.settings.howto ? 'on' : 'off'}</button>
+        <button class="btn ghost" data-host="howto">How-to screens: ${host.settings.howto ? 'first time' : 'off'}</button>
         <button class="btn ghost" data-host="music">Music: ${host.settings.music ? 'on' : 'off'}</button>
         <button class="btn ghost" data-host="short">Game length: ${host.settings.short ? 'short' : 'full'}</button>
         <button class="btn ghost" data-host="kids">Kids mode: ${host.settings.kids ? 'on' : 'off'}</button>
@@ -457,9 +554,10 @@ function renderLobby() {
 
 function render() {
   if (!host.state) renderLobby();
-  else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); decorate(); pops(fresh); }
+  else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); decorate(); pops(fresh); guideTip(); }
   document.body.classList.toggle('night', host.state?.phase === 'night');
-  document.body.classList.toggle('nohow', !host.settings.howto);
+  // How-to screens show in full the first time a room plays a game, then get out of the way.
+  document.body.classList.toggle('nohow', !host.settings.howto || (host.played?.[host.gameId] || 0) > 1);
   const badge = document.getElementById('aud') || Object.assign(document.createElement('div'), { id: 'aud' });
   if (!badge.isConnected) document.body.append(badge);
   badge.hidden = !host.audience.length;

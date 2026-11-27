@@ -242,6 +242,12 @@ export function tvView(s, now = Date.now()) {
     if (s.phase !== 'finalWrite') v.list = Object.entries(s.final.answers).filter(([, t]) => t).map(([pid, text]) => ({ text, name: s.phase === 'finalResult' ? nameOf(s, pid) : null, votes: s.phase === 'finalResult' ? s.final.count[pid] || 0 : null }));
     if (s.phase === 'finalResult') v.list.sort((a, b) => b.votes - a.votes);
   }
+  if (s.phase === 'over') {
+    // The answer that won its matchup by the biggest share of votes.
+    let best = null;
+    for (const m of s.matchups) for (const pid of [m.a, m.b]) { const n = m.count?.[pid] || 0, tot = (m.count?.[m.a] || 0) + (m.count?.[m.b] || 0); if (m.answers[pid] && tot && (!best || n / tot > best.share || (n / tot === best.share && n > best.n))) best = { share: n / tot, n, text: m.answers[pid], name: nameOf(s, pid), prompt: PROMPTS[m.prompt] }; }
+    if (best && best.n) v.quip = best;
+  }
   return v;
 }
 
@@ -278,7 +284,7 @@ export function renderTV(v, el) {
   }
   if (v.phase === 'finalWrite') h = `<p class="cat">Final round · triple points</p><div class="cq">${esc(v.prompt)}</div><p class="say">Everyone answers on their phone.</p><div class="meter"><span style="width:${(100 * v.answersIn) / v.total}%"></span></div><button class="btn ghost" data-host="next">Stop writing</button>`;
   if (v.phase === 'finalVote' || v.phase === 'finalResult') h = `<p class="cat">Final round</p><div class="cq">${esc(v.prompt)}</div><div class="answers">${v.list.map((a, i) => `<div class="ans" style="animation-delay:${i * 0.08}s">${esc(a.text)}${a.name ? `<small class="muted"> · ${esc(a.name)} · <b class="win">${a.votes}</b></small>` : ''}</div>`).join('')}</div>${v.phase === 'finalVote' ? '<p class="say">Vote for your favorite (not your own!)</p><button class="btn ghost" data-host="next">Close voting</button>' : '<button class="btn" data-host="next">See the winner</button>'}`;
-  if (v.phase === 'over') h = `<h2 class="win">${esc(v.scores[0]?.name || '')} is the funniest!</h2><div class="podium">${v.scores.slice(0, 3).map((p, i) => `<div class="pod p${i + 1}"><b>${esc(p.name)}</b><span>${p.score.toLocaleString()}</span></div>`).join('')}</div><div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
+  if (v.phase === 'over') h = `<h2 class="win">${esc(v.scores[0]?.name || '')} is the funniest!</h2>${v.quip ? `<div class="quip"><small>Quip of the night · ${esc(v.quip.prompt)}</small><b>“${esc(v.quip.text)}”</b><span>${esc(v.quip.name)}</span></div>` : ''}<div class="podium">${v.scores.slice(0, 3).map((p, i) => `<div class="pod p${i + 1}"><b>${esc(p.name)}</b><span>${p.score.toLocaleString()}</span></div>`).join('')}</div><div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
   el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel">${h}</div>${scores}</div>`;
 }
 
