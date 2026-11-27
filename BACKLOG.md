@@ -57,3 +57,8 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Done: remote screen page (watch.html, mirrors the TV picture, sounds, title cards, clock), "📺 Show TV" on the phone page, same-room labels for Charades, Act Natural, Freeze Dance, Scavenger Hunt, Secret Missions once a remote screen is connected.
 - Not done: built-in voice chat (decided against for now; use a video call), per-game phone layouts, hiding same-room games (they are labelled, not hidden).
 - Not tested over the real network (only in local test mode); screen frames with drawings may be large. Move to a dedicated Supabase project before promoting it.
+
+## Recorded audio (plan, Nov 27)
+- Decision: one host voice for all games, a second "night narrator" for Werewolf, Midnight Wolves and Haunted Quiz. Generate once (ElevenLabs), ship files with the app, no live generation.
+- Script: audio/SCRIPT.md (readable) and audio/lines.json (data), rebuilt by `node test/narration-script.mjs`.
+- To do: re-word lines that need a player name; decide whether question banks get recorded; list of sound effects to replace; wire recorded files in with the browser voice as fallback.
