@@ -220,7 +220,10 @@ export function phoneView(s, pid, now = Date.now()) {
 // different way, like a real tossed game piece. The spot is drawn on top for the spotted flank.
 const ROT = { left: 90, right: -90, back: 180, stand: 0, nose: 62, horn: 138, pile: 24 };
 const LIFT = { left: 18, right: 18, back: 10, stand: 0, nose: 4, horn: 6, pile: 0 };   // how far the turned piece sinks to rest on the table (% of its size)
-const goatImg = (k) => `<span class="goatpic ${k === 'right' ? 'flip' : ''}" style="--rot:${ROT[k] || 0}deg;--lift:${LIFT[k] || 0}%"><img src="art/goat.png" alt="">${k === 'right' ? '' : '<u></u>'}</span>`;
+// Six painted landings of the same piece, seen from the table's camera (art/goats.png, 3 across and 2 down).
+const POSE_AT = { left: 0, right: 1, back: 2, stand: 3, nose: 4, horn: 5, pile: 0 };
+const posAt = n => `${(n % 3) * 50}% ${Math.floor(n / 3) * 100}%`;
+const goatImg = (k) => `<span class="gspr" style="background-position:${posAt(POSE_AT[k] ?? 3)}"></span>`;
 
 
 // ---------- the toss, in 3D ----------
@@ -238,7 +241,7 @@ function tossPlan(eid, a, b, pile) {
   const r = rng(eid * 7919 + 13);
   const goats = [0, 1].map(i => {
     const from = { x: CUP.x + 125, d: CUP.d - 10 - i * 30, h: 150 };
-    const to = pile ? { x: i ? 70 : -40, d: 150, h: i ? 78 : 0 } : { x: (i ? 190 : -150) + (r() - 0.5) * 110, d: 90 + r() * 150, h: 0 };
+    const to = pile ? { x: i ? 40 : -40, d: i ? 150 : 140, h: i ? 92 : 0 } : { x: (i ? 190 : -150) + (r() - 0.5) * 110, d: 90 + r() * 150, h: 0 };
     // Fall and bounce: heights over time, and how much ground is covered (slower after every bounce).
     const pts = []; let h = from.h, vh = 420 + r() * 160, t = 0, speed = 1, dist = 0, bounces = [];
     const dt = 1 / 120;
@@ -250,7 +253,7 @@ function tossPlan(eid, a, b, pile) {
     const slide = 0.16; for (let k = 1; k <= 12; k++) { const q = k / 12; dist += speed * (slide / 12) * (1 - q); pts.push([t + slide * q, 0, dist]); }
     const total = dist, end = t + slide;
     const key2 = i ? b : a, flip = !pile && key2 === 'right';
-    return { from, to, pts: pts.map(([tt, hh, dd]) => [tt, hh, dd / total]), end, bounces, rot: ROT[pile ? 'pile' : key2] || 0, lift: LIFT[pile ? 'pile' : key2] || 0, flip, spins: (2 + Math.floor(r() * 2)) * 360 + r() * 90, dir: i ? -1 : 1 };
+    return { from, to, pts: pts.map(([tt, hh, dd]) => [tt, hh, dd / total]), end, bounces, pose: pile ? (i ? 3 : 0) : POSE_AT[key2] ?? 3, first: Math.floor(r() * 6), flips: 7 + Math.floor(r() * 4), tilt: 150 + r() * 120, dir: i ? -1 : 1 };
   });
   planned = { key, plan: { goats } };
   return planned.plan;
@@ -268,11 +271,13 @@ function tossPlace(root, plan, ms) {
     const land = Math.min(1, Math.max(0, (p - 0.82) / 0.18));                    // the last stretch: settle onto its resting side
     const h = h0 + g.from.h * 0 + g.to.h * land;
     const wobble = rest < 0.5 && t >= g.end ? 9 * Math.exp(-7 * rest) * Math.sin(26 * rest) : 0;
-    const rot = g.rot + g.dir * g.spins * (1 - p) ** 1.25 + wobble;
+    // In the air the piece flips through its other faces and leans; on the last stretch it shows the side it lands on.
+    const rot = g.dir * g.tilt * (1 - p) ** 1.3 + wobble, face = land > 0 ? g.pose : (g.first + Math.floor(p / 0.82 * g.flips)) % 6;
     el.style.opacity = 1;
     el.style.transform = `translate3d(${x.toFixed(1)}px,${(-h).toFixed(1)}px,${(-d).toFixed(1)}px)`;
-    el.firstElementChild.style.transform = `translateY(${(g.lift * land).toFixed(1)}%) rotate(${rot.toFixed(1)}deg)${g.flip ? ' scaleX(-1)' : ''}`;
-    if (sh[i]) { const lift = Math.min(1, h / 260); sh[i].style.opacity = 0.5 - 0.3 * lift; sh[i].style.transform = `translate(${(850 + x - 115).toFixed(1)}px,${(900 - d - 43).toFixed(1)}px) scale(${(1 - 0.45 * lift).toFixed(2)})`; }
+    el.firstElementChild.style.transform = `rotate(${rot.toFixed(1)}deg)`;
+    el.firstElementChild.style.backgroundPosition = posAt(face);
+    if (sh[i]) { const lift = Math.min(1, h / 260); sh[i].style.opacity = 0.5 - 0.3 * lift; sh[i].style.transform = `translate(${(850 + x - 145).toFixed(1)}px,${(900 - d - 62).toFixed(1)}px) scale(${(1 - 0.45 * lift).toFixed(2)})`; }
   });
 }
 function tossRun(root, v) {
@@ -292,7 +297,7 @@ function tossScene(v) {
   const last = v.last, since = last && v.animating ? TIMES.anim - (v.animLeft ?? 0) : 0;
   return `<div class="gtable g3d ${last ? '' : 'empty'}"><div class="gtop"><i class="gsh"></i><i class="gsh"></i><i class="gsh cupsh"></i></div><div class="glip"></div><div class="gworld">
     <div class="gcup ${last && v.animating ? 'pour' : ''}" style="animation-delay:-${Math.round(since)}ms">${CUP_SVG}</div>
-    ${last ? [last.a, last.b].map(k => `<div class="g3"><span class="goatpic"><img src="art/goat.png" alt="">${!last.pile && k === 'right' ? '' : '<u></u>'}</span></div>`).join('') : ''}
+    ${last ? [0, 1].map(() => `<div class="g3"><span class="gspr"></span></div>`).join('') : ''}
   </div>${last ? '' : '<p class="say">Swipe up on your phone to toss!</p>'}</div>`;
 }
 

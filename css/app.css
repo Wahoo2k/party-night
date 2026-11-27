@@ -2233,3 +2233,16 @@ body.demo #backdrop{display:none!important}
 .g3d>.gtop{left:50%;top:calc(89% - 900px);bottom:auto;margin-left:-850px;transform:translateZ(-120px) rotateX(90deg)}
 .g3d>.glip{left:50%;top:89%;margin-left:-850px;transform:translateZ(-120px)}
 .g3d .g3 .goatpic{transform-origin:50% 50%}
+
+/* GOAT Toss: painted landings. One sheet, six pictures; the piece shows whichever face it has turned up. */
+.gspr{display:block;width:100%;aspect-ratio:1;background:url(../art/goats.png) 0 0/300% 200% no-repeat}
+.g3d .g3 .gspr{transform-origin:50% 60%;filter:drop-shadow(0 4px 3px #0006)}
+.gl .glpic .gspr{width:46px}
+body.phone .ducks-mini .gspr{width:84px}
+.ducks-mini{display:flex;justify-content:center;gap:8px}
+.gtable.g3d{perspective-origin:50% -85%}
+.g3d .gworld{top:95%}
+.g3d>.gtop{top:calc(95% - 900px)}.g3d>.glip{top:95%}
+.g3d .g3{left:-170px;width:340px;height:340px}
+.g3d .gsh{width:290px;height:104px}
+.g3d .gcup{left:-100px;width:200px;height:250px}
