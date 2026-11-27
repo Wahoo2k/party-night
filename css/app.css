@@ -2246,3 +2246,5 @@ body.phone .ducks-mini .gspr{width:84px}
 .g3d .g3{left:-170px;width:340px;height:340px}
 .g3d .gsh{width:290px;height:104px}
 .g3d .gcup{left:-100px;width:200px;height:250px}
+/* A goat mid-bounce may rise above the table's frame instead of being cut off by it. Sides and bottom still clip. */
+.gtable.g3d{overflow:visible;clip-path:inset(-260px 0 0 0 round 26px)}
