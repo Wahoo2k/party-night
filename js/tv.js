@@ -724,6 +724,7 @@ function render() {
   // How-to screens show in full the first time a room plays a game, then get out of the way.
   quiet.on = !host.state;
   document.body.dataset.theme = host.state ? THEME_OF[host.gameId] || '' : '';
+  document.body.dataset.game = host.state ? host.gameId : '';
   document.body.classList.toggle('inlobby', !host.state);
   document.body.classList.toggle('streamer', !!host.settings.streamer);
   document.body.classList.toggle('nodraw', !!host.blurDraw);
