@@ -2,7 +2,7 @@
 import { GAMES, COMING_SOON, SHELVES, NIGHTS } from './games/index.js';
 import { openRoom } from './net.js';
 import { esc, store, newCode, say, voice, voices, enableDpad, autofocus, drawScene, titleCard, confetti, clawMarks } from './ui.js';
-import { play, sfx, startAmbient, stopAmbient, startBed, stopBed } from './sfx.js';
+import { play, sfx, startAmbient, stopAmbient, startBed, stopBed, quiet } from './sfx.js';
 import { newKeys, cleanPub, samePub, sharedKey, seal, unseal } from './secure.js';
 import { cleanAct, textsIn, maskView, maskLine } from './content.js';
 import { settleName, cleanName, isRude, uniqueName, funName, MAX_NAME } from './names.js';
@@ -458,9 +458,9 @@ function startGame() {
 function hostAction(a) {
   if (a === 'start') return startGame();
   if (a === 'again') return startGame();
-  if (a.startsWith('night:')) { const nt = NIGHTS.find(x => x.id === a.slice(6)); if (nt) { host.queue = nt.games.slice(1); host.night = nt.id; host.gameId = nt.games[0]; host.shelf = 'all'; save(); } return changed(); }
+  if (a.startsWith('night:')) { const nt = NIGHTS.find(x => x.id === a.slice(6)); if (nt) { host.queue = nt.games.slice(1); host.night = nt.id; host.gameId = nt.games[0]; host.screen = 'gather'; save(); } return changed(); }
   if (a === 'endnight') { host.queue = []; host.night = null; save(); return render(); }
-  if (a === 'lobby') { host.lastByGame = { ...(host.lastByGame || {}), [host.gameId]: host.state }; host.state = null; ceremonyOff?.(); if (host.queue?.length) host.gameId = host.queue.shift(); else host.night = null; stopAmbient(); document.body.classList.remove('day'); return changed(); }
+  if (a === 'lobby') { host.lastByGame = { ...(host.lastByGame || {}), [host.gameId]: host.state }; host.state = null; ceremonyOff?.(); if (host.queue?.length) { host.gameId = host.queue.shift(); host.screen = 'gather'; } else { host.night = null; host.screen = 'menu'; } stopAmbient(); document.body.classList.remove('day'); return changed(); }
   if (a === 'newcode') {
     // Same players again: tell every phone the new code so nobody has to rejoin by hand.
     const next = newCode(), keep = { settings: host.settings, tally: host.tally, played: host.played, opts: host.opts, lastByGame: host.lastByGame, shelf: host.shelf };
@@ -483,6 +483,7 @@ function hostAction(a) {
   if (a === 'remote') { host.settings.remote = host.settings.remote === false; save(); return changed(); }
   if (a === 'streamer') { host.settings.streamer = !host.settings.streamer; save(); return render(); }
   if (a === 'clearprompts') { host.custom = []; save(); return changed(); }
+  if (a === 'menu' || a === 'settings') { host.screen = a; save(); return render(); }
   if (a === 'awards') return nightAwards();
   if (a === 'cleartally') { host.tally = null; save(); return render(); }
   if (a === 'music') { host.settings.music = !host.settings.music; if (!host.settings.music) stopBed(); save(); return render(); }
@@ -560,45 +561,79 @@ function qr(text) {
 const seen = new Set();
 const kicked = new Set();
 let editing = null;
+// A glyph for each game in the menu.
+const ICONS = { werewolf: '🐺', imposter: '🕵️', bluff: '🤥', whosaid: '💬', ducks: '🦆', trivia: '🧠', spin: '🎡', crowd: '📊', bingo: '🎱', quick: '⚡', ladder: '🪜', cases: '💼', funny: '😂', letters: '🔤', taboo: '🚫', agents: '🕶️', sketch: '✏️', meld: '🧿', bowl: '🥗', crew: '🤝', charades: '🎭', clash: '🃏', blackjack: '♠️', gofish: '🐟', bluffcards: '🎴', hearts: '♥️', shade: '🎨', estimate: '🎯', truths: '🤞', wordhunt: '🔎', midnight: '🌙', missions: '🗝️', dares: '😈', split: '✂️', doodle: '🖼️', memory: '🧩', copycat: '🐱', hunt: '🌈', freeze: '🧊', haunted: '👻', bomb: '💣', potato: '🥔', mystery: '💎' };
+
+// The menu's live preview: bots really play the highlighted game, sped up, on a small stage.
+let pv = null;
+function previewGame(id) {
+  if (!GAMES[id]) return;
+  if (pv?.id !== id) pv = { id, s: null, now: Date.now(), stuck: 0, last: '', over: 0, players: ['Ava', 'Ben', 'Cleo', 'Dax', 'Eli', 'Fay'].slice(0, Math.max(GAMES[id].meta.min, Math.min(5, GAMES[id].meta.max))).map((n, i) => ({ pid: 'bot-pv' + i, name: n })) };
+  const m = GAMES[id].meta, q = x => app.querySelector(x);
+  if (q('#pvname')) { q('#pvname').textContent = m.name; q('#pvicon').textContent = ICONS[id] || '🎲'; q('#pvblurb').textContent = m.blurb; q('#pvtags').innerHTML = `<span>👥 ${m.min}–${m.max} players</span>${m.kids ? '<span>🧒 Little kids</span>' : ''}${SHELVES.filter(f => f.games?.includes(id) && !['featured', 'kids'].includes(f.id)).slice(0, 2).map(f => `<span>${esc(f.name)}</span>`).join('')}`; }
+  app.querySelectorAll('.mgame').forEach(b => b.classList.toggle('on', b.dataset.game === id));
+  previewStep(true);
+}
+function previewStep(first) {
+  const el = app.querySelector('.pvstage');
+  if (!el || !pv || host.state) return;
+  const G = GAMES[pv.id];
+  try {
+    if (!pv.s || pv.over > 4) { pv.s = G.setup(pv.players, Math.random, null, { short: true }); pv.over = 0; pv.now = Math.max(pv.now, Date.now()); }
+    const s = pv.s;
+    if (!first) {
+      pv.now += 2600;
+      if (s.phase === 'over') pv.over++;
+      else {
+        for (const p of pv.players) { if (Math.random() < 0.6) { const a = G.botAct?.(G.phoneView(s, p.pid, pv.now), Math.random); if (a) G.act(s, p.pid, a, pv.now, Math.random); } }
+        G.tick?.(s, pv.now, Math.random);
+        const k = s.phase + s.round + (s.eventId || '');
+        pv.stuck = k === pv.last ? pv.stuck + 1 : 0; pv.last = k;
+        if (pv.stuck > 5 && G.hostAct) { G.hostAct(s, 'next', pv.now, Math.random); pv.stuck = 0; }
+      }
+    }
+    const was = ['day', 'night'].map(c => document.body.classList.contains(c));
+    G.renderTV({ ...G.tvView(s, pv.now), fresh: false }, el);
+    ['day', 'night'].forEach((c, i) => document.body.classList.toggle(c, was[i]));
+    el.querySelectorAll('.how').forEach(h => h.remove());
+  } catch (e) { el.innerHTML = `<div class="pvfall">${ICONS[pv.id] || '🎲'}</div>`; pv.s = null; }
+  const box = el.parentElement, k = box.clientHeight / 470; el.style.transform = `scale(${k})`; el.style.width = box.clientWidth / k + 'px';
+}
+setInterval(() => previewStep(false), 900);
+
 function renderLobby() {
   const g = game();
   const n = host.players.length;
   const need = Math.max(0, g.meta.min - n);
   const url = joinUrl();
-  app.innerHTML = `<div class="lobby">
-    <section class="panel join">
-      <h2>Join on your phone</h2>
-      <p class="muted">Go to <b class="url">${esc(url.replace(/\?.*/, '').replace(/^https?:\/\//, ''))}</b><br>and enter room code</p>
-      <div class="code">${host.code}</div>
-      <p class="muted">or scan</p>
-      <div class="qr">${qr(url)}</div>
+  const screen = host.screen || 'menu';
+  const nightbar = (() => { const nt = NIGHTS.find(x => x.id === host.night); return nt ? `<div class="nightbar"><b>${nt.icon} ${esc(nt.name)}</b><span>Now: <b>${esc(g.meta.name)}</b>${host.queue?.length ? ` · Then: ${host.queue.map(id => esc(GAMES[id].meta.name)).join(' → ')}` : ' · last game'}</span></div>` : ''; })();
+  if (screen === 'menu') {
+    const shelf = SHELVES.find(x => x.id === (host.shelf || 'featured'));
+    const list = Object.values(GAMES).filter(m => !shelf?.games || shelf.games.includes(m.meta.id));
+    if (!list.some(m => m.meta.id === host.gameId)) host.gameId = list[0].meta.id;
+    app.innerHTML = `<div class="menu">
+    <section class="panel mlist">
+      <div class="shelves">${SHELVES.map(f => `<button class="shelf ${(host.shelf || 'featured') === f.id ? 'on' : ''}" data-shelf="${f.id}">${esc(f.name)}</button>`).join('')}</div>
+      <div class="mgames">${list.map(m => `<button class="mgame ${m.meta.id === host.gameId ? 'on' : ''}" data-game="${m.meta.id}"><i>${ICONS[m.meta.id] || '🎲'}</i><b>${esc(m.meta.name)}</b>${m.meta.kids ? '<small>🧒</small>' : ''}</button>`).join('')}</div>
+      <div class="mfoot"><button class="btn ghost small" data-host="settings">⚙ Settings</button><button class="btn ghost small" data-host="addbot">🤖 Add a bot</button>${host.tally?.games.length ? '<button class="btn ghost small" data-host="awards">🏆 Awards</button>' : ''}</div>
     </section>
-    <section class="panel">
-      ${(() => {
-        // Seats around the campfire: everyone who has joined, plus open seats waiting to be filled.
-        const total = Math.max(n, Math.min(g.meta.max, 8));
-        const seat = (i, inner, cls, attrs = '') => { const a = ((i + 0.5) / total) * Math.PI * 2 - Math.PI / 2; return `<${attrs ? 'button' : 'div'} class="seat ${cls}" ${attrs} style="left:${(50 + 42 * Math.cos(a)).toFixed(1)}%;top:${(50 + 37 * Math.sin(a)).toFixed(1)}%;--d:${(i * 0.37) % 2}s">${inner}</${attrs ? 'button' : 'div'}>`; };
-        return `<div class="ring n${Math.min(total, 12)}"><div class="fireflies">${Array.from({ length: 14 }, (_, k) => `<i style="left:${(k * 37) % 100}%;top:${(k * 53) % 100}%;animation-delay:${-(k * 0.9)}s"></i>`).join('')}</div>
-          <div class="ringmid"><div class="fire">🔥</div><h2>${esc(g.meta.name)}</h2><p>${n ? `${n} player${n === 1 ? '' : 's'} in` : 'Grab a seat!'}${need ? ` · need ${need} more` : ''}</p><button class="btn" data-host="start" ${need ? 'disabled' : ''}>${need ? 'Waiting…' : "Everybody's in!"}</button></div>
-          ${Array.from({ length: total }, (_, i) => { const p = host.players[i]; return p
-            ? seat(i, `<i style="--pc:${p.face?.[1] || '#232a5c'}">${p.face?.[0] || '🙂'}</i><b>${esc(p.name)}</b>${i === 0 ? '<em>👑</em>' : ''}`, `taken ${p.bot ? 'bot' : ''} ${seen.has(p.pid) ? '' : 'pop'} ${editing === p.pid ? 'on' : ''}`, `data-host="edit:${esc(p.pid)}" title="Rename or remove"`)
-            : seat(i, '<i>Join!</i>', 'open'); }).join('')}</div>`;
-      })()}
-      ${g.meta.options?.length ? `<div class="row gameopts"><span class="muted">${esc(g.meta.name)} options</span>${g.meta.options.map(o => { const cur = host.opts?.[host.gameId]?.[o.id] ?? o.choices[0][0]; return `<button class="btn ghost" data-host="opt:${o.id}">${esc(o.name)}: ${esc((o.choices.find(c => c[0] === cur) || o.choices[0])[1])}</button>`; }).join('')}</div>` : ''}
-      ${host.gameId === 'funny' ? `<p class="muted">✍️ Players can add their own prompts from their phones: <b>${(host.custom || []).length}</b> added.${(host.custom || []).length ? ' <button class="btn ghost small" data-host="clearprompts">Clear</button>' : ''}</p>` : ''}
-      ${host.players.length ? '<p class="muted small">Select a name to rename or remove that player.</p>' : ''}
-      ${host.audience.length ? `<p class="muted">Audience (${host.audience.length}): ${host.audience.map(a => esc(a.name)).join(', ')}. They join automatically when a seat opens.</p>` : ''}
-      ${(() => { const p = host.players.find(x => x.pid === editing); return p ? `<div class="editbox"><label for="rename">Rename ${esc(p.name)}</label><div class="row"><input id="rename" maxlength="${MAX_NAME}" value="${esc(p.name)}" autocomplete="off"><button class="btn" data-host="rename">Save</button><button class="btn ghost" data-host="randomname">Random name</button><button class="btn ghost" data-host="kick">Remove player</button><button class="btn ghost" data-host="canceledit">Cancel</button></div></div>` : ''; })()}
-      ${(() => { const nt = NIGHTS.find(x => x.id === host.night); return nt ? `<div class="nightbar"><b>${nt.icon} ${esc(nt.name)}</b><span>Now: <b>${esc(g.meta.name)}</b>${host.queue?.length ? ` · Then: ${host.queue.map(id => esc(GAMES[id].meta.name)).join(' → ')}` : ' · last game'}</span><button class="btn ghost small" data-host="endnight">Pick games myself</button></div>` : `<h3>Start a game night</h3><div class="nights">${NIGHTS.map(x => `<button class="night" data-host="night:${x.id}"><span>${x.icon}</span><b>${esc(x.name)}</b><small>${esc(x.blurb)}</small><small>${x.games.map(id => esc(GAMES[id].meta.name)).join(' → ')}</small></button>`).join('')}</div>`; })()}
-      ${host.tally?.games.length ? `<div class="nightbar tonight"><b>Tonight</b><span>${Object.entries(host.tally.by).filter(e => e[1].pts).sort((a, b) => b[1].pts - a[1].pts).slice(0, 6).map(([n, r]) => `${esc(n)} <b>${r.pts}</b>`).join(' · ') || `${host.tally.games.length} game${host.tally.games.length === 1 ? '' : 's'} played`}</span><button class="btn ghost small" data-host="awards">Tonight's awards</button><button class="btn ghost small" data-host="cleartally">Reset</button></div>` : ''}
-      <h3>${host.night ? 'Game' : 'Or pick a game'}</h3>
-      <div class="games">
-        <div class="shelves">${SHELVES.map(f => `<button class="shelf ${(host.shelf || 'featured') === f.id ? 'on' : ''}" data-shelf="${f.id}">${esc(f.name)}</button>`).join('')}</div>
-        ${Object.values(GAMES).filter(m => { const f = SHELVES.find(x => x.id === (host.shelf || 'featured')); return !f?.games || f.games.includes(m.meta.id); }).map(m => `<button class="game ${m.meta.id === host.gameId ? 'on' : ''}" data-game="${m.meta.id}">${m.meta.kids ? '<span class="kidbadge">👶 Little kids</span>' : ''}<b>${esc(m.meta.name)}</b><span>${esc(m.meta.blurb)}</span><small>${m.meta.min}–${m.meta.max} players</small></button>`).join('')}
-        ${COMING_SOON.map(c => `<div class="game soon"><b>${esc(c.name)}</b><span>${esc(c.blurb)}</span><small>Coming soon</small></div>`).join('')}
-      </div>
+    <section class="panel mprev">
+      <div class="mhead"><span id="pvicon"></span><div><h2 id="pvname"></h2><p id="pvblurb"></p><div id="pvtags" class="pvtags"></div></div><div class="mroom">Room<b class="code mini">${host.code}</b><small>${n} in</small></div></div>
+      <div class="pvbox"><div class="pvstage" inert aria-hidden="true"></div><span class="pvlabel">Preview · press OK to play</span></div>
+      <div class="mnights"><span class="muted">Or a ready-made night:</span>${NIGHTS.map(x => `<button class="btn ghost small" data-host="night:${x.id}" title="${x.games.map(id => esc(GAMES[id].meta.name)).join(' → ')}">${x.icon} ${esc(x.name)}</button>`).join('')}</div>
+    </section>
+  </div>`;
+    app.querySelectorAll('.mgame').forEach(b => { const go = () => { if (pv?.id !== b.dataset.game || !app.querySelector('.pvstage').firstChild) { if (pv && pv.id !== b.dataset.game && sfx.on) play('pop'); host.gameId = b.dataset.game; previewGame(b.dataset.game); } }; b.onfocus = go; b.onmouseenter = go; });
+    previewGame(host.gameId);
+    if (!app.contains(document.activeElement)) app.querySelector('.mgame.on')?.focus({ preventScroll: true });
+    app.querySelector('.mgame.on')?.scrollIntoView({ block: 'nearest' });
+    host.players.forEach(p => seen.add(p.pid));
+    return;
+  }
+  if (screen === 'settings') {
+    app.innerHTML = `<div class="lobby one"><section class="panel settings"><h2>Settings</h2>
       <div class="row">
-        <button class="btn" data-host="start" ${need ? 'disabled' : ''}>${need ? `Need ${need} more player${need === 1 ? '' : 's'}` : `Start ${esc(g.meta.name)}`}</button>
         <button class="btn ghost" data-host="voice">Narrator: ${voice.on ? 'on' : 'off'}</button>
         <button class="btn ghost" data-host="sfx">Sound effects: ${sfx.on ? 'on' : 'off'}</button>
         <button class="btn ghost" data-host="newcode">New room</button>
@@ -623,6 +658,37 @@ function renderLobby() {
         ${host.players.some(p => p.bot) ? '<button class="btn ghost" data-host="clearbots">Remove bots</button>' : ''}
         <span class="muted">Bots fill empty seats for testing. They play at random.</span>
       </div>
+      <div class="row"><button class="btn" data-host="menu">← Back to games</button></div>
+    </section></div>`;
+    host.players.forEach(p => seen.add(p.pid));
+    return;
+  }
+  app.innerHTML = `<div class="lobby gather">
+    <section class="panel join">
+      <h2>Join on your phone</h2>
+      <p class="muted">Go to <b class="url">${esc(url.replace(/\?.*/, '').replace(/^https?:\/\//, ''))}</b><br>and enter room code</p>
+      <div class="code">${host.code}</div>
+      <p class="muted">or scan</p>
+      <div class="qr">${qr(url)}</div>
+    </section>
+    <section class="panel">
+      ${(() => {
+        // Seats around the campfire: everyone who has joined, plus open seats waiting to be filled.
+        const total = Math.max(n, Math.min(g.meta.max, 8));
+        const seat = (i, inner, cls, attrs = '') => { const a = ((i + 0.5) / total) * Math.PI * 2 - Math.PI / 2; return `<${attrs ? 'button' : 'div'} class="seat ${cls}" ${attrs} style="left:${(50 + 42 * Math.cos(a)).toFixed(1)}%;top:${(52 + 35 * Math.sin(a)).toFixed(1)}%;--d:${(i * 0.37) % 2}s">${inner}</${attrs ? 'button' : 'div'}>`; };
+        return `<div class="ring n${Math.min(total, 12)}"><div class="fireflies">${Array.from({ length: 14 }, (_, k) => `<i style="left:${(k * 37) % 100}%;top:${(k * 53) % 100}%;animation-delay:${-(k * 0.9)}s"></i>`).join('')}</div>
+          <div class="ringmid"><div class="fire">🔥</div><h2>${esc(g.meta.name)}</h2><p>${n ? `${n} player${n === 1 ? '' : 's'} in` : 'Grab a seat!'}${need ? ` · need ${need} more` : ''}</p><button class="btn" data-host="start" ${need ? 'disabled' : ''}>${need ? 'Waiting…' : "Everybody's in!"}</button></div>
+          ${Array.from({ length: total }, (_, i) => { const p = host.players[i]; return p
+            ? seat(i, `<i style="--pc:${p.face?.[1] || '#232a5c'}">${p.face?.[0] || '🙂'}</i><b>${esc(p.name)}</b>${i === 0 ? '<em>👑</em>' : ''}`, `taken ${p.bot ? 'bot' : ''} ${seen.has(p.pid) ? '' : 'pop'} ${editing === p.pid ? 'on' : ''}`, `data-host="edit:${esc(p.pid)}" title="Rename or remove"`)
+            : seat(i, '<i>Join!</i>', 'open'); }).join('')}</div>`;
+      })()}
+      <div class="row gfoot"><button class="btn ghost small" data-host="menu">← Games</button><button class="btn ghost small" data-host="addbot">🤖 Add a bot</button>${host.players.some(p => p.bot) ? '<button class="btn ghost small" data-host="clearbots">Remove bots</button>' : ''}<span class="muted small">Tap a seat to rename or remove.</span></div>
+      ${g.meta.options?.length ? `<div class="row gameopts"><span class="muted">${esc(g.meta.name)} options</span>${g.meta.options.map(o => { const cur = host.opts?.[host.gameId]?.[o.id] ?? o.choices[0][0]; return `<button class="btn ghost" data-host="opt:${o.id}">${esc(o.name)}: ${esc((o.choices.find(c => c[0] === cur) || o.choices[0])[1])}</button>`; }).join('')}</div>` : ''}
+      ${host.gameId === 'funny' ? `<p class="muted">✍️ Players can add their own prompts from their phones: <b>${(host.custom || []).length}</b> added.${(host.custom || []).length ? ' <button class="btn ghost small" data-host="clearprompts">Clear</button>' : ''}</p>` : ''}
+      ${host.audience.length ? `<p class="muted">Audience (${host.audience.length}): ${host.audience.map(a => esc(a.name)).join(', ')}. They join automatically when a seat opens.</p>` : ''}
+      ${(() => { const p = host.players.find(x => x.pid === editing); return p ? `<div class="editbox"><label for="rename">Rename ${esc(p.name)}</label><div class="row"><input id="rename" maxlength="${MAX_NAME}" value="${esc(p.name)}" autocomplete="off"><button class="btn" data-host="rename">Save</button><button class="btn ghost" data-host="randomname">Random name</button><button class="btn ghost" data-host="kick">Remove player</button><button class="btn ghost" data-host="canceledit">Cancel</button></div></div>` : ''; })()}
+      ${nightbar}
+      ${host.tally?.games.length ? `<div class="nightbar tonight"><b>Tonight</b><span>${Object.entries(host.tally.by).filter(e => e[1].pts).sort((a, b) => b[1].pts - a[1].pts).slice(0, 6).map(([n, r]) => `${esc(n)} <b>${r.pts}</b>`).join(' · ') || `${host.tally.games.length} game${host.tally.games.length === 1 ? '' : 's'} played`}</span><button class="btn ghost small" data-host="awards">Tonight's awards</button><button class="btn ghost small" data-host="cleartally">Reset</button></div>` : ''}
     </section>
   </div>`;
   host.players.forEach(p => seen.add(p.pid));
@@ -633,6 +699,8 @@ function render() {
   else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); decorate(); pops(fresh); guideTip(); slideScores(); cardPops(fresh); }
   document.body.classList.toggle('night', host.state?.phase === 'night');
   // How-to screens show in full the first time a room plays a game, then get out of the way.
+  quiet.on = !host.state;
+  document.body.classList.toggle('inlobby', !host.state);
   document.body.classList.toggle('streamer', !!host.settings.streamer);
   document.body.classList.toggle('nodraw', !!host.blurDraw);
   document.body.classList.toggle('nohow', !host.settings.howto || (host.played?.[host.gameId] || 0) > 1);
@@ -651,7 +719,7 @@ function render() {
   app.querySelectorAll('[data-host]').forEach(b => (b.onclick = () => hostAction(b.dataset.host)));
   const vsel = app.querySelector('#vsel');
   if (vsel) vsel.onchange = () => { voice.name = vsel.value; say('Good evening, villagers.', true); };
-  app.querySelectorAll('[data-game]').forEach(b => (b.onclick = () => { host.gameId = b.dataset.game; changed(); }));
+  app.querySelectorAll('[data-game]').forEach(b => (b.onclick = () => { host.gameId = b.dataset.game; host.screen = 'gather'; host.queue = []; host.night = null; if (sfx.on) play('lockin'); flash('wipe'); changed(); }));
   app.querySelectorAll('[data-shelf]').forEach(b => (b.onclick = () => { host.shelf = b.dataset.shelf; save(); render(); }));
   autofocus(app);
 }

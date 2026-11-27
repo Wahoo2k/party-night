@@ -139,12 +139,15 @@ export function stopAmbient() { clearInterval(ambient); ambient = null; }
 export const buzz = (p = 120) => { try { navigator.vibrate?.(p); } catch {} };
 
 // A single note, for games that play tunes or patterns.
-export function note(f, dur = 0.35, t = 0, type = 'triangle', vol = 0.35) { if (ready()) tone({ type, f0: f, dur, t, vol }); }
+// While the lobby's game preview is running, the games' own notes and music stay silent.
+export const quiet = { on: false };
+export function note(f, dur = 0.35, t = 0, type = 'triangle', vol = 0.35) { if (ready() && !quiet.on) tone({ type, f0: f, dur, t, vol }); }
 
 // A bouncy dance loop (Freeze Dance). Pentatonic melody over a simple bass and a click beat.
 let music = null;
 export function startMusic(seed = 0) {
   stopMusic();
+  if (quiet.on) return;
   // Four tunes at four speeds, picked by the round, so Freeze Dance isn't the same song every time (one is slow motion).
   const TUNES = [
     { ms: 200, mel: [523, 587, 659, 784, 880, 784, 659, 587, 523, 659, 784, 1047, 880, 784, 659, 523], bass: [131, 131, 165, 165, 196, 196, 175, 175] },

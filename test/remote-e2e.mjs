@@ -13,9 +13,9 @@ await me.goto(base + 'play.html?local=1'); await me.fill('#code', code); await m
 await me.waitForSelector("text=You're in");
 const H = () => tv.evaluate(() => JSON.parse(localStorage.getItem('pg-host')));
 const out = {};
-await tv.click('[data-host=newcode]'); await tv.waitForTimeout(4500);
+await tv.click('[data-host=settings]'); await tv.click('[data-host=newcode]'); await tv.waitForTimeout(4500);
 out.moved = (await H()).players.map(p => p.name).join(',') + ' in ' + (await H()).code + (code !== (await H()).code ? ' (new)' : ' (same!)');
-await tv.click('[data-host=streamer]'); out.streamer = await tv.evaluate(() => document.body.classList.contains('streamer')); await tv.click('[data-host=streamer]');
+await tv.click('[data-host=settings]'); await tv.click('[data-host=streamer]'); out.streamer = await tv.evaluate(() => document.body.classList.contains('streamer')); await tv.click('[data-host=streamer]'); await tv.click('[data-host=menu]');
 for (let i = 0; i < 3; i++) await tv.click('[data-host=addbot]');
 await tv.click('[data-shelf=all]'); await tv.click('[data-game=funny]'); await me.waitForSelector('#pt');
 await me.fill('#pt', 'The worst thing to say to a llama'); await me.click('#pf button'); await tv.waitForTimeout(1200);

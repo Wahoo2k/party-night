@@ -10,7 +10,7 @@ const code = (await tv.textContent('.code')).trim();
 for (let i = 0; i < 4; i++) await tv.click('[data-host=addbot]');
 await tv.click('[data-shelf=all]'); await tv.click('[data-game=charades]');
 const before = await tv.textContent('[data-host="opt:deck"]'); await tv.click('[data-host="opt:deck"]'); const after = await tv.textContent('[data-host="opt:deck"]');
-await tv.click('[data-game=quick]'); await tv.click('[data-host=start]');
+await tv.click('[data-host=menu]'); await tv.click('[data-shelf=all]'); await tv.click('[data-game=quick]'); await tv.click('[data-host=start]');
 await tv.waitForTimeout(4000);
 const me = await ctx.newPage(); me.on('pageerror', e => errors.push('me ' + e.message));
 await me.setViewportSize({ width: 390, height: 800 });
