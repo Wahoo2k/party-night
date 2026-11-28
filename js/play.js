@@ -27,9 +27,9 @@ let heard = 0;
 let hello = null;
 let myFace = null;
 
-function joinForm(err = '') {
-  app.innerHTML = `<form class="panel" id="f">
-    <h2>Join the game</h2>
+function joinForm(err = '', hosting = params.has('host') && !code) {
+  app.innerHTML = `<form class="panel ${hosting ? 'hosting' : ''}" id="f">
+    <h2>${hosting ? 'Host a game on this phone' : 'Join the game'}</h2>
     <label for="code">Room code from the TV</label>
     <input id="code" class="big" maxlength="4" autocomplete="off" autocapitalize="characters" value="${esc(code)}" required>
     <label for="name">Your name</label>
@@ -392,4 +392,5 @@ async function join() {
 
 // A phone that was hosting picks its game back up after a reload (the game itself is saved on this phone).
 if (store.get('pg-phonehost') && name) startHost(false);
+else if (params.has('host') && !code) joinForm('', true);   // came from "No shared screen": just a name is needed
 else code && name ? join() : joinForm();

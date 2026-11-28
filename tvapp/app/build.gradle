@@ -11,7 +11,22 @@ android {
         targetSdk 34
         versionCode((System.getenv('GITHUB_RUN_NUMBER') ?: '1') as int)
         versionName '0.1.' + (System.getenv('GITHUB_RUN_NUMBER') ?: '0')
-        buildConfigField 'String', 'START_URL', '"https://wahoo2k.github.io/party-night/tv.html?app=android"'
+    }
+    // Two apps from one project. "tv" is the Google TV / Fire TV app: the shared screen, sideways, driven by a remote.
+    // "phone" is for phones and tablets: it opens on a page offering "join a game" or "use this device as the screen".
+    flavorDimensions 'device'
+    productFlavors {
+        tv {
+            dimension 'device'
+            buildConfigField 'String', 'START_URL', '"https://wahoo2k.github.io/party-night/tv.html?app=android"'
+            manifestPlaceholders = [orientation: 'sensorLandscape', appName: 'Party Night']
+        }
+        phone {
+            dimension 'device'
+            applicationIdSuffix '.phone'
+            buildConfigField 'String', 'START_URL', '"https://wahoo2k.github.io/party-night/start.html?app=android-phone"'
+            manifestPlaceholders = [orientation: 'unspecified', appName: 'Party Night']
+        }
     }
     signingConfigs {
         // Test builds are all signed with the same key kept in this folder, so a new build installs over the old

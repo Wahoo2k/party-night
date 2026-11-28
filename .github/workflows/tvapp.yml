@@ -20,12 +20,13 @@ jobs:
         with: { gradle-version: '8.9' }
       - name: Build
         working-directory: tvapp
-        run: gradle --no-daemon assembleDebug
+        run: gradle --no-daemon assembleTvDebug assemblePhoneDebug
       - name: Publish the download
         env: { GH_TOKEN: '${{ github.token }}' }
         run: |
-          cp tvapp/app/build/outputs/apk/debug/app-debug.apk party-night-tv.apk
-          ls -la party-night-tv.apk
+          cp tvapp/app/build/outputs/apk/tv/debug/app-tv-debug.apk party-night-tv.apk
+          cp tvapp/app/build/outputs/apk/phone/debug/app-phone-debug.apk party-night-phone.apk
+          ls -la party-night-tv.apk party-night-phone.apk
           gh release view tv-test >/dev/null 2>&1 || gh release create tv-test --prerelease --title "Party Night TV: test build" --notes "Test build of the Google TV app. Install it on an Android TV or Google TV box. Rebuilt automatically; the newest file replaces the old one."
-          gh release upload tv-test party-night-tv.apk --clobber
+          gh release upload tv-test party-night-tv.apk party-night-phone.apk --clobber
           gh release edit tv-test --notes "Test build 0.1.${GITHUB_RUN_NUMBER} of the Google TV app, built $(date -u +'%Y-%m-%d %H:%M UTC'). Install it on an Android TV or Google TV box. Rebuilt automatically; the newest file replaces the old one."

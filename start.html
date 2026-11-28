@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Party Night</title>
+<meta name="theme-color" content="#0e1230">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{color-scheme:dark}
+  html,body{height:100%;margin:0}
+  body{display:grid;place-items:center;background:radial-gradient(circle at 70% 15%,#2b3a8f,#0e1230 60%);color:#f3f1ff;font:17px/1.4 Outfit,system-ui,sans-serif;padding:max(20px,env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left));box-sizing:border-box}
+  main{width:min(100%,560px);display:grid;gap:14px}
+  h1{margin:0 0 6px;font:400 clamp(44px,12vw,72px)/1 'Pirata One',serif;text-align:center;color:#ffe9b0}
+  p.lead{margin:0 0 8px;text-align:center;opacity:.85}
+  a.choice{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:center;padding:18px 20px;border-radius:20px;background:#1a2260;border:2px solid #4b56b0;color:inherit;text-decoration:none}
+  a.choice:active,a.choice:focus-visible{border-color:#ffcf6b;outline:0}
+  a.choice i{grid-row:span 2;font-style:normal;font-size:44px}
+  a.choice b{font-size:22px;font-weight:800}
+  a.choice span{opacity:.8;font-size:15px}
+  a.choice.main{background:#ff9f43;border-color:#ffcf6b;color:#1b1147}
+</style>
+</head>
+<body>
+<main>
+  <h1>Party Night</h1>
+  <p class="lead">Party games for everyone in the room. What is this device doing tonight?</p>
+  <a class="choice main" href="play.html"><i>🎮</i><b>Join a game</b><span>Someone has a room code on a TV, tablet or phone.</span></a>
+  <a class="choice" href="tv.html"><i>📺</i><b>Be the screen</b><span>Prop this device up where everyone can see it. Everyone plays on their own phone.</span></a>
+  <a class="choice" href="play.html?host=1"><i>📱</i><b>No shared screen</b><span>Host from this phone. Everyone sees the game on their own phone.</span></a>
+</main>
+</body>
+</html>
