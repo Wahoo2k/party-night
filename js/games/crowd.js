@@ -238,6 +238,13 @@ function boardOf(s, all) {
   return question(s).a.map((a, i) => (all || s.revealed.includes(i) ? { text: a[0], pts: a[1] * mult(s), i, shown: s.revealed.includes(i) } : { i, hidden: true }));
 }
 
+// What real players typed this round, for the survey counts (see party-survey.sql). Bots are left out.
+export function surveyLog(s) {
+  if (s.phase !== 'roundEnd') return null;
+  const q = question(s);
+  return { key: 'c' + s.r, q: q.q, answers: s.guessLog.filter(g => !String(g.pid).startsWith('bot-')).map(g => ({ t: g.text, i: match(g.text, q.a) })) };
+}
+
 export function tvView(s, now = Date.now()) {
   const v = {
     phase: s.phase, r: s.r + 1, rounds: s.qs.length, double: mult(s) === 2,

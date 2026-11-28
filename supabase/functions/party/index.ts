@@ -69,6 +69,24 @@ Deno.serve(async (req) => {
       if (!row) return json(req, { linked: false, packs: [], pass: false });
       return json(req, { linked: true, ...(await owned(row.user_id)) });
     }
+    // Survey games send what real players typed, so the boards can be rebuilt from real answers. Only counts are
+    // kept: the question, the answer as typed (lower case, 30 characters at most), which board answer it matched,
+    // and how many times it has been said. Nothing about who said it, which TV, or when beyond the day.
+    if (b.action === "survey") {
+      const q = String(b.q || "").slice(0, 140).trim();
+      const list = Array.isArray((b as Record<string, unknown>).answers) ? ((b as Record<string, unknown>).answers as unknown[]).slice(0, 40) : [];
+      if (q.length < 8 || !list.length) return json(req, { ok: false }, 400);
+      let n = 0;
+      for (const x of list) {
+        const t = String((x as Record<string, unknown>)?.t ?? "").toLowerCase().replace(/\s+/g, " ").trim().slice(0, 30);
+        const i = Number((x as Record<string, unknown>)?.i);
+        if (t.length < 2 || !/^[\p{L}\p{N} '&-]+$/u.test(t)) continue;
+        await sql`insert into party.survey_answers (q, answer, hit) values (${q}, ${t}, ${Number.isInteger(i) && i >= 0 && i < 20 ? i : -1})
+                  on conflict (q, answer) do update set n = party.survey_answers.n + 1, last_day = current_date, hit = excluded.hit`;
+        n++;
+      }
+      return json(req, { ok: true, n });
+    }
     const user = await userOf(req);
     if (!user) return json(req, { error: "Please sign in." }, 401);
     if (b.action === "me") {

@@ -1,7 +1,7 @@
 // TV / host page: owns the room, the player list and the game state.
 import { GAMES, COMING_SOON, SHELVES, NIGHTS } from './games/index.js';
 import { openRoom } from './net.js';
-import { SHOP, locked, refreshOwn, owned, accountUrl } from './own.js';
+import { SHOP, locked, refreshOwn, owned, accountUrl, PARTY_FN, PARTY_KEY } from './own.js';
 import { PACKS, PRICES, packOf } from './packs.js';
 import { esc, store, DEMO, newCode, say, sayLow, voiceContext, fitScreen, stageFit, keepFitted, voice, voices, enableDpad, autofocus, drawScene, titleCard, confetti, clawMarks } from './ui.js';
 import { art, thumb } from './art.js';
@@ -212,8 +212,23 @@ function turnBanner() {
   if (sfx.on) play(['whoosh', 'join', 'lockin'][turnSounds++ % 3]);
 }
 
+// Survey games: when a round ends, the answers real players typed are sent (as text only, no names, no room) so the
+// boards can be rebuilt from what people really say. Off in test mode, in the website demo, or when the host turns it off.
+let surveySent = '';
+function shareSurvey() {
+  const G = game(), s = host.state;
+  if (!s || !G.surveyLog || host.settings.share === false || tq.has('local') || DEMO) return;
+  let r = null; try { r = G.surveyLog(s); } catch { return; }
+  if (!r || !r.answers.length) return;
+  const key = [host.gameId, host.code, s.round, r.key].join('|');
+  if (key === surveySent) return;
+  surveySent = key;
+  const answers = r.answers.filter(a => a.t && !isRude(a.t)).slice(0, 40);
+  if (answers.length) fetch(PARTY_FN, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: PARTY_KEY }, body: JSON.stringify({ action: 'survey', q: r.q, answers }) }).catch(() => {});
+}
+
 function decorate() {
-  holdScores(); turnBanner();
+  holdScores(); turnBanner(); shareSurvey();
   const list = [...host.players].sort((a, b) => b.name.length - a.name.length);
   // A list of names that only says who has finished does not need the middle of the screen: on the stage, each
   // player's score chip at the bottom gets a tick (or a pencil while they are still busy) and the list is hidden.
@@ -794,6 +809,7 @@ function hostAction(a) {
   if (a === 'awards') return nightAwards();
   if (a === 'cleartally') { host.tally = null; save(); return render(); }
   if (a === 'autonext') { host.settings.auto = host.settings.auto === false; save(); return render(); }
+  if (a === 'share') { host.settings.share = host.settings.share === false; save(); return render(); }
   if (a === 'banter') { host.settings.banter = host.settings.banter === false; save(); return render(); }
   if (a === 'music') { host.settings.music = !host.settings.music; if (!host.settings.music) stopBed(); save(); return render(); }
   if (a === 'short') { host.settings.short = !host.settings.short; save(); return render(); }
@@ -1026,6 +1042,7 @@ function renderLobby() {
         <div class="setgroup"><h3>Room</h3>
           <button class="setrow ${host.settings.kids ? 'on' : ''}" data-host="kids"><span><b>Kids mode</b><small>Family-safe prompts only</small></span><em>${host.settings.kids ? 'On' : 'Off'}</em></button>
           <button class="setrow" data-host="remote"><span><b>Phone remote</b><small>Who can press Next and Pause from a phone</small></span><em>${remotePid() ? esc(host.players.find(p => p.pid === remotePid()).name) : host.settings.remote === false ? 'off' : 'first to join'}</em></button>
+          <button class="setrow ${host.settings.share !== false ? 'on' : ''}" data-host="share"><span><b>Improve the surveys</b><small>Send the answers typed in survey games, with no names, to make the boards real</small></span><em>${host.settings.share === false ? 'Off' : 'On'}</em></button>
           <button class="setrow" data-host="streamer"><span><b>Room code</b><small>Hide it when sharing your screen</small></span><em>${host.settings.streamer ? 'Hidden' : 'Shown'}</em></button>
           <button class="setrow" data-host="newcode"><span><b>New room</b><small>Everyone has to join again</small></span><em>Change</em></button>
         </div>

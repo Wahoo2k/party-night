@@ -6,7 +6,7 @@ import { store, DEMO } from './ui.js';
 
 const q = typeof location !== 'undefined' ? new URLSearchParams(location.search) : new URLSearchParams();
 export const SHOP = !DEMO && (SELLING || q.has('shop'));
-export const PARTY_FN = SUPABASE_URL + '/functions/v1/party';
+export const PARTY_FN = SUPABASE_URL + '/functions/v1/party', PARTY_KEY = SUPABASE_KEY;
 const WEEK = 7 * 864e5;
 
 export function tvId() {

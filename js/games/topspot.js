@@ -72,7 +72,7 @@ function reveal(s, now) {
 }
 function next(s, now) {
   if (s.i + 1 >= s.plan.length) { s.phase = 'over'; s.round++; s.deadline = 0; return; }
-  s.i++; s.guesses = {}; s.found = {}; s.tries = {}; s.result = null; s.settled = false; s.last = null;
+  s.i++; s.guesses = {}; s.found = {}; s.tries = {}; s.sweepLog = []; s.result = null; s.settled = false; s.last = null;
   if (mode(s) === 'sweep') { s.phase = 'sweep'; s.deadline = now + TIMES.sweep; } else { s.phase = 'guess'; s.deadline = now + TIMES.guess; }
   s.round++;
 }
@@ -88,6 +88,7 @@ export function act(s, pid, a, now = Date.now()) {
   } else if (s.phase === 'sweep' && (s.tries[pid] || 0) < 40) {
     s.tries[pid] = (s.tries[pid] || 0) + 1;
     const idx = match(r.text, q.a);
+    if ((s.sweepLog ||= []).length < 200) s.sweepLog.push({ pid, text: r.text, idx });
     s.eventId++;
     if (idx < 0) { s.last = { pid, hit: false, text: r.text }; return s; }
     const who = (s.found[idx] ||= []);
@@ -113,6 +114,13 @@ export function tick(s, now = Date.now()) {
 }
 
 const ranking = s => s.players.map(p => ({ pid: p.pid, name: p.name, score: s.scores[p.pid] })).sort((a, b) => b.score - a.score);
+// What real players typed this round, for the survey counts (see party-survey.sql). Bots are left out.
+export function surveyLog(s) {
+  const real = pid => !String(pid).startsWith('bot-');
+  if (s.phase === 'reveal') return { key: 'r' + s.i, q: Q(s).q, answers: s.result.rows.filter(r => r.text && real(r.pid)).map(r => ({ t: r.text, i: r.idx })) };
+  if (s.phase === 'sweepEnd') return { key: 's' + s.i, q: Q(s).q, answers: (s.sweepLog || []).filter(g => real(g.pid)).map(g => ({ t: g.text, i: g.idx })) };
+  return null;
+}
 export function narration(s) {
   if (s.phase === 'guess' && s.i === 0) return 'Welcome to Top Spot! One guess each. Aim for the most popular answer.';
   if (s.phase === 'over') return 'And that\'s the survey. Thanks for playing!';

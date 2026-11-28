@@ -243,3 +243,7 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Survey bank (js/games/crowd-bank.js): 16 to 60 questions; the 44 new ones have eight answers each. Still our own judgment, not poll data.
 - New game: Top Spot (js/games/topspot.js). Everyone answers a survey question at once. Rounds: Top Spot (one guess, popular pays), Deep Cut (one guess, obscure pays), Top Spot, Deep Cut, then Sweep (45-second race to find answers; first finder 150, later 50). Board of big colour tiles that flip. Not in the launch list until people have played it; narration not recorded; cover is rendered, not painted.
 - Trivia Board bank: 12 to 48 categories (192 clues), finals 5 to 15. Facts need a human skim before launch.
+
+## 28 Nov: real survey answers
+- Top Spot and Crowd Says send what real players typed at the end of each round (text only; no names, room or TV). Backend: party function action `survey`, table party.survey_answers (counts per question and answer; supabase/party-survey.sql). Off in test mode and the website demo; Settings, Room, "Improve the surveys" turns it off.
+- Still to do: a tool that rebuilds the boards from the counts once there are enough; a line in the privacy policy (attorney); two test rows ('ZZ TEST…') to delete.
