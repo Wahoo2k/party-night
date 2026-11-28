@@ -14,8 +14,8 @@ export const meta = {
 export const ROLES = {
   wolf: { name: 'Werewolf', icon: '🐺', team: 'wolf', how: 'You see the other wolves. If you are the only wolf, peek at one middle card.' },
   seer: { name: 'Seer', icon: '🔮', team: 'village', how: 'Look at one player\'s card, or two of the middle cards.' },
-  robber: { name: 'Robber', icon: '🦝', team: 'village', how: 'Swap your card with another player\'s and see your new card.' },
-  trouble: { name: 'Troublemaker', icon: '🃏', team: 'village', how: 'Swap two other players\' cards without looking.' },
+  robber: { name: 'Pickpocket', icon: '🦝', team: 'village', how: 'Swap your card with another player\'s and see your new card.' },
+  trouble: { name: 'Meddler', icon: '🃏', team: 'village', how: 'Swap two other players\' cards without looking.' },
   drunk: { name: 'Sleepwalker', icon: '😵', team: 'village', how: 'Swap your card with a middle card without looking. You won\'t know what you are!' },
   insomniac: { name: 'Night Owl', icon: '🦉', team: 'village', how: 'Wake up at the end of the night and see your card.' },
   villager: { name: 'Villager', icon: '🧑‍🌾', team: 'village', how: 'No night power. Use your wits!' },
@@ -60,7 +60,7 @@ function resolve(s) {
   if (robber) {
     const t = C[robber]?.target;
     if (t && isP(s, t) && t !== robber) { [card[robber], card[t]] = [card[t], card[robber]]; L[robber] = `You swapped with ${nameOf(s, t)}. You are now the ${ROLES[card[robber]].name} ${ROLES[card[robber]].icon}!`; }
-    else L[robber] = 'You decided not to rob anyone.';
+    else L[robber] = 'You kept your hands to yourself.';
   }
   const tm = by('trouble');
   if (tm) {
@@ -197,7 +197,7 @@ export function renderPhone(v, el, send) {
     const centers = (n, label) => `<p class="muted">${label}</p><div class="mwcenter">${[0, 1, 2].map(i => `<button class="mwback ${sel.list.includes('c' + i) ? 'on' : ''}" data-c="${i}" data-n="${n}">${i + 1}</button>`).join('')}</div>`;
     h = `${card(v.role)}<p class="muted">${esc(R.how)}</p>`;
     if (v.role === 'seer') h += players(1, 'Look at a player…') + centers(2, '…or two middle cards');
-    else if (v.role === 'robber') h += players(1, 'Rob who?') + '<button class="btn ghost" data-skip>Don\'t rob</button>';
+    else if (v.role === 'robber') h += players(1, 'Whose pocket?') + '<button class="btn ghost" data-skip>Leave it</button>';
     else if (v.role === 'trouble') h += players(2, 'Pick two players to swap');
     else if (v.role === 'drunk') h += centers(1, 'Pick a middle card');
     else if (v.role === 'wolf') h += centers(1, 'If you\'re the only wolf, you\'ll peek at this middle card:');
@@ -228,5 +228,5 @@ export function renderPhone(v, el, send) {
 
 // First-game coach lines, one per step.
 export function guide(s) {
-  return { look: 'There is only ONE night. Remember your card, but it may get swapped before morning.', night: 'Powers happen in order: wolves see each other, the Seer peeks, the Robber steals a card, the Troublemaker swaps two other players. Everyone taps something so nobody stands out.', morning: 'Your phone says what you did or saw. It does not say if someone moved your card afterwards!', day: 'Say what you were and what you did. Stories that do not fit together are your clues. Wolves: claim to be someone else.', vote: 'Everyone votes at once. The village wins if a wolf gets the most votes. The wolves win if they all escape.' }[s.phase] || '';
+  return { look: 'There is only ONE night. Remember your card, but it may get swapped before morning.', night: 'Powers happen in order: wolves see each other, the Seer peeks, the Pickpocket lifts a card, the Meddler swaps two other players. Everyone taps something so nobody stands out.', morning: 'Your phone says what you did or saw. It does not say if someone moved your card afterwards!', day: 'Say what you were and what you did. Stories that do not fit together are your clues. Wolves: claim to be someone else.', vote: 'Everyone votes at once. The village wins if a wolf gets the most votes. The wolves win if they all escape.' }[s.phase] || '';
 }
