@@ -226,3 +226,9 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Secret Agents: a real person is always the spymaster when a team has one; bots never choose for real guessers (they back the person's pick); phones and TV say in plain words what to do.
 - Team games (Taboo, Salad Bowl, Secret Agents): players choose their side on the join screen, can switch until Start, seats show team colours. test/teams-e2e.mjs.
 - Sound stops when the TV app is in the background (page hides: music, effects and narrator pause). Needs the new app build for Android TV.
+
+## 27 Nov, midnight: design rules
+- DESIGN.md: ten rules plus standard practice. Shared in js/tv.js: holdScores (scores and phones wait for a reveal; "+N" lands on the chip), turnBanner, rotating cue sounds.
+- Bracket Battle and Room Meter reveals staged in beats; Quick vote counts wait for the bars.
+- Bingo: board and ball letter enlarged on the TV. Letters and numbers re-recorded from spelled-out text (tools/eleven.mjs `spoken`): "B." was read as "bay", "45." as "four-dee".
+- All 53 browser tests passed after the shared changes.

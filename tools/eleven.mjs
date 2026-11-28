@@ -73,7 +73,13 @@ async function voiceId(nameOrId) {
   if (!v) throw new Error(`No voice called "${nameOrId}" on this account. Run "voices" to see the names, or add it to My Voices in ElevenLabs first.`);
   return v.voice_id;
 }
-const speak = (id, text, c) => api(`/v1/text-to-speech/${id}?output_format=${CFG.format || 'mp3_44100_128'}`, { text, model_id: c.model || CFG.model, ...(c.settings ? { voice_settings: c.settings } : {}) });
+// What is sent to the voice is not always what is written. A bare numeral or a single letter is read oddly
+// ("B." came out as "bay", "45." as "four-dee"), so those are spelled the way they should sound.
+const ONES = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'], TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+const numberWords = n => (n < 20 ? ONES[n] : TENS[Math.floor(n / 10)] + (n % 10 ? '-' + ONES[n % 10] : ''));
+const LETTER_SOUNDS = { B: 'Bee', I: 'Eye', N: 'En', G: 'Gee', O: 'Oh' };
+export const spoken = text => { const n = text.match(/^(\d{1,2})\.$/); if (n && +n[1] > 0) { const w = numberWords(+n[1]); return w[0].toUpperCase() + w.slice(1) + '.'; } const l = text.match(/^([BINGO])\.$/); return l ? LETTER_SOUNDS[l[1]] + '.' : text; };
+const speak = (id, text, c) => api(`/v1/text-to-speech/${id}?output_format=${CFG.format || 'mp3_44100_128'}`, { text: spoken(text), model_id: c.model || CFG.model, ...(c.settings ? { voice_settings: c.settings } : {}) });
 // Run jobs a few at a time; stop everything on an error that won't fix itself (bad key, out of credits).
 async function pool(jobs, n, fn) {
   let i = 0, done = 0, failed = 0, stop = null;

@@ -2460,3 +2460,22 @@ body.onstage .stage .panel .roster .chip{flex:0 0 auto;width:auto;border-radius:
 @keyframes turnflagin{0%{opacity:0;transform:translateX(-60vw) skewX(-12deg)}18%{opacity:1;transform:none}70%{opacity:1;transform:none}100%{opacity:0;transform:translateX(50vw) skewX(-12deg)}}
 .turnflag .gturn.in{animation:turnflagin 1.9s cubic-bezier(.2,.8,.3,1) both}
 .turnflag .gturn b{font-size:clamp(40px,7vw,110px)}.turnflag .gturn small{font-size:clamp(14px,2vw,28px)}
+/* Bracket Battle result: the "ADVANCES" stamp lands with the winner. */
+.fa-adv{margin-top:8px}.fa-adv.beat-in b{display:inline-block;animation:slam .55s both}
+/* Quick votes: the counts and names wait for the bars to finish growing, and the winning row lights up last. */
+.stage.enter .barrow b,.stage.enter .barrow small{animation:fadein .4s 2.8s both}
+
+.stage.enter .barrow.top .bt{animation:toprow .5s 2.8s both}
+@keyframes toprow{from{box-shadow:0 0 0 0 #0000}}
+/* Room Meter: the reveal no longer needs its own delay on the names. */
+.stage.enter .rmsaid{animation:none}
+/* Bingo on the TV: the board of called numbers is readable from the couch, and the ball shows its letter clearly. */
+body.onstage[data-game=bingo] .crow{grid-template-columns:44px repeat(15,minmax(0,1fr));gap:5px}
+body.onstage[data-game=bingo] .crow b{font-size:34px}
+body.onstage[data-game=bingo] .crow span{height:46px;font-size:25px;font-weight:800;color:#ffffff8c;border-radius:8px}
+body.onstage[data-game=bingo] .crow span.on{color:#1b1b2f}
+body.onstage[data-game=bingo] .calledgrid{gap:6px}
+body.onstage[data-game=bingo] .ball small{font-size:.5em;line-height:1}
+body.onstage[data-game=bingo] .recentballs span{min-width:66px;height:60px;font-size:24px}
+body.onstage[data-game=bracket] .fa-votes{display:inline-block;margin-top:8px;padding:5px 16px;border-radius:99px;background:#1b1147;color:#ffe66d;font:800 24px Outfit,sans-serif}
+body.onstage[data-game=bracket] .fa-adv b{display:inline-block;padding:3px 14px;border:4px solid #ff3b5c;border-radius:8px;color:#ff3b5c;background:#fff;font:800 28px Outfit,sans-serif;transform:rotate(-5deg)}
