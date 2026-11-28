@@ -111,7 +111,7 @@ export function renderTV(v, el) {
     const rev = v.phase === 'reveal', key = 'q' + v.n;
     if (rev && revKey !== key) {
       revKey = key; revAt = Date.now();
-      import('../sfx.js').then(m => { setTimeout(() => m.play('stamp'), 1900); const right = v.truth ? v.yes : v.no; setTimeout(() => m.play(right.length ? (right.some(p => p.streak >= 3) ? 'cheer' : 'points') : 'groan'), 2500); }).catch(() => {});
+      import('../sfx.js').then(m => { setTimeout(() => m.play('stamp'), 1900); const right = v.truth ? v.yes : v.no; setTimeout(() => m.play(right.length ? (right.some(p => p.streak >= 3) ? 'cheer' : 'points') : 'buzzer'), 2500); }).catch(() => {});
     }
     const el0 = rev ? Date.now() - revAt : 0;   // a redraw part-way through carries on where it was
     const names = (list, right) => list.map((p, i) => `<span class="${right ? 'ok' : 'bad'}" style="animation-delay:${300 + i * 180 - el0}ms">${esc(p.name)}${right && p.streak >= 2 ? ` <i>🔥${p.streak}</i>` : ''}${right ? `<b style="animation-delay:${2500 - el0}ms">+${p.got}</b>` : ''}</span>`).join('');
