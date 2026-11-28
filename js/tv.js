@@ -1,5 +1,5 @@
 // TV / host page: owns the room, the player list and the game state.
-import { GAMES, COMING_SOON, SHELVES, NIGHTS } from './games/index.js';
+import { GAMES, COMING_SOON, SHELVES, NIGHTS, NO_TV } from './games/index.js';
 import { openRoom } from './net.js';
 import { SHOP, locked, refreshOwn, owned, accountUrl, PARTY_FN, PARTY_KEY } from './own.js';
 import { PACKS, PRICES, packOf } from './packs.js';
@@ -22,6 +22,8 @@ enableDpad();
 
 // Saved so a TV refresh doesn't lose the game.
 let host = store.get('pg-host') || { code: newCode(), players: [], gameId: 'werewolf', state: null };
+// Hosting from a phone with no TV: a new game night always gets a new, empty room.
+if (/[?&]phonehost\b/.test(location.search) && /[?&]newroom\b/.test(location.search)) host = { code: newCode(), players: [], gameId: 'fib', state: null, settings: host.settings };
 // A room left over from another day starts fresh: new code, empty seats, same settings.
 if (host.at && Date.now() - host.at > 12 * 3600 * 1000) host = { ...host, code: newCode(), players: [], audience: [], state: null, queue: [], night: null, screen: 'menu', paused: 0 };
 host.audience = host.audience || [];
@@ -256,7 +258,9 @@ function decorate() {
 
 // Phones say hello every few seconds while their page is open. A player who goes quiet is marked away after half a
 // minute; in the lobby they lose their seat after two minutes (they get it back the moment their phone returns).
-const tq = new URLSearchParams(location.search);   // ?away= and ?gone= (seconds) shorten the waits for tests
+const tq = new URLSearchParams(location.search);
+// No-TV play: this page is running unseen inside a player's phone, which hosts the game for a small group.
+const PHONE_HOST = tq.has('phonehost') && parent !== window;   // ?away= and ?gone= (seconds) shorten the waits for tests
 const lastSeen = {}, AWAY_MS = (+tq.get('away') || 30) * 1000, GONE_MS = (+tq.get('gone') || 120) * 1000, bootAt = Date.now();
 const idleFor = p => Date.now() - (lastSeen[p.pid] || bootAt - GONE_MS + Math.min(20000, GONE_MS));   // after a TV restart, 20 seconds to check back in
 setInterval(() => {
@@ -320,7 +324,7 @@ function viewFor(pid) {
   }
   if (!host.state) {
     const me = host.players.find(p => p.pid === pid) || {};
-    return { phase: 'lobby', ...(game().meta.teams ? { _teams: TEAM_NAMES.map((name, k) => ({ name, members: host.players.filter(p => teamPick()[p.pid] === k).map(p => p.name) })), _team: teamPick()[pid], _teamName: teamName(teamPick()[pid]) } : {}), faces: FACES.map(f => f[0]), taken: host.players.filter(p => p.pid !== pid).map(p => p.face?.[0]), ...(host.tally?.games.length ? { _night: nightCard() } : {}), _reacts: REACTIONS, players: host.players.map(p => p.name), game: game().meta.name, me: me.name, fixed: !!me.fixed, byHost: !!me.locked, _me: me.face, ...(pid === remotePid() ? { _remote: true, canStart: host.players.length >= game().meta.min } : {}), ...(game().meta.id === 'funny' ? { canPrompt: true, myPrompts: (host.custom || []).filter(c => c.pid === pid).map(c => c.text) } : {}) };
+    return { phase: 'lobby', ...(game().meta.teams ? { _teams: TEAM_NAMES.map((name, k) => ({ name, members: host.players.filter(p => teamPick()[p.pid] === k).map(p => p.name) })), _team: teamPick()[pid], _teamName: teamName(teamPick()[pid]) } : {}), faces: FACES.map(f => f[0]), taken: host.players.filter(p => p.pid !== pid).map(p => p.face?.[0]), ...(host.tally?.games.length ? { _night: nightCard() } : {}), _reacts: REACTIONS, players: host.players.map(p => p.name), game: game().meta.name, me: me.name, fixed: !!me.fixed, byHost: !!me.locked, _me: me.face, ...(pid === remotePid() ? { _remote: true, canStart: host.players.length >= game().meta.min } : {}), ...(PHONE_HOST ? { _noTv: true, _code: host.code, _gameId: host.gameId, _need: game().meta.min } : {}), ...(game().meta.id === 'funny' ? { canPrompt: true, myPrompts: (host.custom || []).filter(c => c.pid === pid).map(c => c.text) } : {}) };
   }
   return { ...maskView(game().phoneView(host.state, pid), host.hidden), game: host.gameId, _name: game().meta.name, _how: howFor(), _as: host.players.find(p => p.pid === pid)?.name, _me: host.players.find(p => p.pid === pid)?.face, ...(host.paused ? { _paused: true } : {}), ...(gains[pid] ? { _gain: gains[pid] } : {}), ...(places[pid] ? { _place: places[pid] } : {}), ...(stands[pid] && !game().meta.secret ? { _stand: stands[pid] } : {}), _theme: THEME_OF[host.gameId] || '', _reacts: REACTIONS, ...(finalRound ? { _final: true } : {}), ...(host.blurDraw ? { _nodraw: true } : {}), ...(pid === remotePid() ? { _remote: true } : {}) };
 }
@@ -564,6 +568,7 @@ function onMessage(m) {
 function handleAct(pidFrom, rawAct) {
   const m = { pid: pidFrom, a: rawAct };
   if (rawAct?.type === '_ready') { if (host.intro && host.players.some(p => p.pid === pidFrom)) { host.intro.ready[pidFrom] = 1; if (introReady()) startGame(); else changed(); } return; }
+  if (rawAct?.type === '_host' && PHONE_HOST && String(rawAct.a).startsWith('pick:')) { const id = String(rawAct.a).slice(5); if (pidFrom === remotePid() && !host.state && !host.intro && NO_TV.includes(id) && GAMES[id]) { host.gameId = id; save(); changed(); } return; }
   if (rawAct?.type === '_host') { if (pidFrom === remotePid() && (['next', 'pause', 'start', 'again', 'lobby'].includes(rawAct.a) || (host.state && (game().meta.remoteActs || []).includes(rawAct.a)))) hostAction(rawAct.a); return; }
   if (!host.state || host.paused) return;
   if (isAudience(pidFrom)) { if (game().audienceAct) { game().audienceAct(host.state, pidFrom, rawAct); changed(); } return; }
@@ -1211,6 +1216,7 @@ async function connect() {
   render();
   screenRoom?.close(); screenRoom = null;
   openRoom(host.code + '-tv', onScreenMsg).then(r => (screenRoom = r)).catch(() => {});
+  if (PHONE_HOST) { try { parent.postMessage({ pg: 'host', code: host.code }, location.origin); } catch {} }
   room = await openRoom(host.code, onMessage, s => {
     statusEl.textContent = s === 'live' ? `Room ${host.code} · connected` : s === 'connecting' ? 'Connecting…' : 'Connection lost, retrying…';
     statusEl.dataset.s = s;

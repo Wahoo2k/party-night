@@ -78,6 +78,9 @@ for (const [id, G] of Object.entries(GAMES)) {
 // Lobby shelves. A game can sit on more than one.
 // The 24 games out front at launch. Everything else sits on the "More games" row at the bottom.
 export const LAUNCH = ['funny', 'bluff', 'whosaid', 'ducks', 'faker', 'sketch', 'doodle', 'werewolf', 'agents', 'taboo', 'trivia', 'spin', 'potato', 'quick', 'bracket', 'truths', 'meld', 'meter', 'crowd', 'rebus', 'clash', 'bowl', 'imposter', 'memory'];
+// Games that work with no TV at all: what you need to play is on your own phone, and the small picture of the
+// board above it is enough for the rest.
+export const NO_TV = ['fib', 'survive', 'gold', 'rps', 'auction', 'grid', 'story', 'oneword', 'funny', 'bluff', 'whosaid', 'truths', 'split', 'letters', 'quick', 'estimate', 'ladder', 'haunted', 'lineup', 'blackjack', 'hearts', 'gofish', 'clash', 'bluffcards', 'memory', 'werewolf', 'imposter', 'missions'];
 export const SHELVES = [
   { id: 'featured', name: '⭐ Start here', games: ['funny', 'ducks', 'bluff', 'whosaid', 'werewolf', 'sketch', 'trivia', 'faker', 'doodle', 'agents', 'taboo', 'spin'] },
   { id: 'all', name: 'All games' },

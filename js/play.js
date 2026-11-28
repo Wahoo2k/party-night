@@ -1,5 +1,5 @@
 // Phone controller page: joins a room, shows whatever the TV sends for this player.
-import { GAMES } from './games/index.js';
+import { GAMES, NO_TV } from './games/index.js';
 import { openRoom } from './net.js';
 import { esc, store as localStore, uid, cleanCode, drawScene } from './ui.js';
 import { buzz } from './sfx.js';
@@ -37,7 +37,15 @@ function joinForm(err = '') {
     <p class="muted small">Up to ${MAX_NAME} characters. Tap 🎲 for a random name.</p>
     ${err ? `<p class="lose">${esc(err)}</p>` : ''}
     <button class="btn" id="join" type="submit">Join</button>
+    <div class="notv"><p class="muted small">No TV handy?</p><button class="btn ghost" id="hosthere" type="button">📱 Host on this phone</button><p class="muted small">Everyone plays on their own phone. Keep this phone awake while you play.</p></div>
   </form>`;
+  app.querySelector('#hosthere').onclick = () => {
+    name = cleanName(app.querySelector('#name').value);
+    if (!name) return joinForm('Add your name first, then tap Host on this phone.');
+    if (isRude(name)) { name = ''; return joinForm('Let\'s keep it family-friendly. Try another name, or tap 🎲.'); }
+    store.set('pg-name', name);
+    startHost(true);
+  };
   app.querySelector('#dice').onclick = () => { const i = app.querySelector('#name'); i.value = funName(); i.focus(); };
   app.querySelector('#f').onsubmit = e => {
     e.preventDefault();
@@ -96,6 +104,7 @@ function render(v) {
   // In a game the header shrinks to one line with the game's name and art, and the phone takes the game's colors.
   const inGame = !!v.game && !['lobby', 'audience', 'kicked', 'full'].includes(v.phase) && !!GAMES[v.game];
   document.body.classList.toggle('ingame', inGame);
+  { const hold = v.phase === 'lobby' && !!v._noTv; if (hold !== tvHold) { tvHold = hold; tvBox(); } }   // with no TV, its picture is only worth the space once a game is on
   document.body.dataset.theme = inGame ? v._theme || '' : '';
   const titleEl = document.querySelector('.title');
   if (titleEl) { titleEl.textContent = inGame ? v._name || 'Party Night' : 'Party Night'; document.querySelector('.scene').style.setProperty('--cover', inGame ? `url(art/${v.game}.jpg)` : 'none'); }
@@ -128,7 +137,8 @@ function render(v) {
     return;
   }
   if (v.phase === 'lobby') {
-    app.innerHTML = `<div class="panel"><h2>You're in, ${esc(v.me || name)}</h2>${v.byHost ? '<p class="note">The host set your name.</p>' : v.fixed ? `<p class="note">${v.me && name && v.me.toLowerCase().startsWith(name.toLowerCase()) ? 'Someone already had that name, so you got a number.' : 'We tidied up your name.'}</p>` : ''}<p class="say">Watch the TV. The game starts when the host is ready.</p>
+    app.innerHTML = `<div class="panel"><h2>You're in, ${esc(v.me || name)}</h2>${v.byHost ? '<p class="note">The host set your name.</p>' : v.fixed ? `<p class="note">${v.me && name && v.me.toLowerCase().startsWith(name.toLowerCase()) ? 'Someone already had that name, so you got a number.' : 'We tidied up your name.'}</p>` : ''}${v._noTv ? `<div class="notvcode"><small>Friends join at <b>${esc(location.host + location.pathname.replace(/[^/]*$/, ''))}</b> with code</small><b class="code">${esc(v._code)}</b><button class="btn ghost small" id="sharecode" type="button">Share the link</button></div>
+      ${v._remote ? `<label for="pickgame">Game</label><select id="pickgame">${NO_TV.filter(id => GAMES[id]).map(id => `<option value="${id}" ${id === v._gameId ? 'selected' : ''}>${esc(GAMES[id].meta.name)} (${GAMES[id].meta.min}–${GAMES[id].meta.max} players)</option>`).join('')}</select>${v.canStart ? '' : `<p class="note">Needs at least ${v._need} players.</p>`}` : '<p class="say">The host picks the game and starts it.</p>'}` : '<p class="say">Watch the TV. The game starts when the host is ready.</p>'}
       <p class="muted">Game: ${esc(v.game)} · ${v.players.length} playing</p>
       <div class="roster">${v.players.map(n => `<div class="chip">${esc(n)}</div>`).join('')}</div>
       ${v._teams ? `<div class="teampick"><p class="muted">Pick your team. You can switch until the game starts.</p><div class="teams2">${v._teams.map((t, k) => `<button class="teambtn tb${k} ${v._team === k ? 'on' : ''}" data-team="${k}"><b>${esc(t.name)}</b><small>${t.members.map(esc).join(', ') || 'Nobody yet'}</small></button>`).join('')}</div><form id="tnf" class="row teamname"><input id="tn" maxlength="16" autocomplete="off" placeholder="Name your team" value=""><button class="btn ghost small" type="submit">Rename</button></form></div>` : ''}
@@ -138,6 +148,10 @@ function render(v) {
       ${v._remote ? `<div class="remote"><p class="muted">👑 You're the remote</p><button class="btn" data-rm="start" ${v.canStart ? '' : 'disabled'}>Start the game</button></div>` : ''}
       <button class="btn ghost" id="leave">Leave room</button></div>`;
     app.querySelector('#leave').onclick = leave;
+    const pg = app.querySelector('#pickgame'); if (pg) pg.onchange = () => send({ type: '_host', a: 'pick:' + pg.value });
+    const sc = app.querySelector('#sharecode'); if (sc) sc.onclick = async () => { const url = location.origin + location.pathname + '?code=' + v._code; try { if (navigator.share) await navigator.share({ title: 'Party Night', text: 'Join my game: code ' + v._code, url }); else { await navigator.clipboard.writeText(url); sc.textContent = 'Link copied'; } } catch {} };
+    if (v._noTv && !noTvSeen) { noTvSeen = true; tvOn = true; }
+   // no TV in the room: show its picture on every phone
     app.querySelectorAll('[data-face]').forEach(b => (b.onclick = () => room?.send({ t: 'face', pid, i: +b.dataset.face })));
     app.querySelectorAll('[data-team]').forEach(b => (b.onclick = () => room?.send({ t: 'team', pid, team: +b.dataset.team })));
     const tnf = app.querySelector('#tnf'); if (tnf) tnf.onsubmit = e => { e.preventDefault(); const n = tnf.querySelector('#tn').value.trim(); if (n.length >= 2) room?.send({ t: 'teamname', pid, name: n }); };
@@ -290,7 +304,24 @@ function toast(text, cls) {
   document.body.append(t); setTimeout(() => t.remove(), 1900);
 }
 
+// No-TV play: this phone runs the game itself. The TV page is loaded unseen in a tiny frame, makes a room, and tells
+// us the code; then this phone joins that room like any other player.
+function startHost(fresh) {
+  document.getElementById('pghost')?.remove();
+  const f = Object.assign(document.createElement('iframe'), { id: 'pghost', title: 'Game host', allow: 'autoplay' });
+  f.src = `tv.html?phonehost=1${fresh ? '&newroom=1' : ''}${params.has('local') ? '&local=1' : ''}`;
+  if (fresh) app.innerHTML = '<div class="panel"><h2>Setting up your game…</h2></div>';
+  document.body.append(f);
+  store.set('pg-phonehost', 1);
+}
+addEventListener('message', e => {
+  if (e.origin !== location.origin || e.data?.pg !== 'host' || !/^[A-Z]{4}$/.test(e.data.code || '') || !document.getElementById('pghost')) return;
+  if (room && code === e.data.code) return;
+  try { room?.close(); } catch {} room = null; lastView = ''; heard = 0; clearInterval(hello);
+  code = e.data.code; store.set('pg-code', code); join();
+});
 function leave() {
+  document.getElementById('pghost')?.remove(); store.del('pg-phonehost');
   room?.send({ t: 'bye', pid });
   room?.close();
   clearInterval(hello);
@@ -316,7 +347,7 @@ function comeBack() {
 }
 
 // One-phone remote play: a player who can't see the TV can put its picture above their controls.
-let tvOn = !!store.get('pg-showtv') || params.has('remote');
+let tvOn = !!store.get('pg-showtv') || params.has('remote'), noTvSeen = false, tvHold = false;
 function tvBox() {
   let btn = document.getElementById('tvbtn');
   if (!room || !code) { btn?.remove(); document.getElementById('tvbox')?.remove(); return; }
@@ -324,7 +355,7 @@ function tvBox() {
   btn.textContent = tvOn ? '📺 Hide TV' : '📺 Show TV';
   let box = document.getElementById('tvbox');
   const want = `watch.html?code=${code}&embed=1${params.has('local') ? '&local=1' : ''}`;
-  if (!tvOn) { box?.remove(); return; }
+  if (!tvOn || tvHold) { box?.remove(); return; }   // with no TV, the picture only matters once a game is on
   if (box && box.dataset.src !== want) { box.remove(); box = null; }
   if (!box) {
     box = Object.assign(document.createElement('div'), { id: 'tvbox' }); box.dataset.src = want;
@@ -359,4 +390,6 @@ async function join() {
   }, 12000);
 }
 
-code && name ? join() : joinForm();
+// A phone that was hosting picks its game back up after a reload (the game itself is saved on this phone).
+if (store.get('pg-phonehost') && name) startHost(false);
+else code && name ? join() : joinForm();

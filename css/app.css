@@ -2744,3 +2744,8 @@ body:not(.hubmode) #nightline,body.phone #nightline{display:none}
 .gname{position:absolute;left:6%;right:5%;bottom:6%;font:400 clamp(20px,calc(2.5*var(--vw,1vw)),50px)/.95 Anton,Impact,'Arial Narrow Bold',sans-serif;font-style:normal;text-transform:uppercase;letter-spacing:.01em;color:#fff;text-shadow:.06em .06em 0 #0009;transform:rotate(-3deg);transform-origin:left bottom;white-space:normal;overflow-wrap:break-word;pointer-events:none}
 .gname.mid{font-size:clamp(17px,calc(2.1*var(--vw,1vw)),42px)}.gname.long{font-size:clamp(15px,calc(1.75*var(--vw,1vw)),35px)}
 .gcard .gunder{display:none}
+/* No-TV play */
+#pghost{position:fixed;left:-10px;top:-10px;width:2px;height:2px;border:0;opacity:0;pointer-events:none}
+.notv{margin-top:18px;padding-top:14px;border-top:1px solid #fff2;display:grid;gap:6px;text-align:center}
+.notvcode{display:grid;gap:4px;justify-items:center;margin:8px 0 12px;padding:12px;border-radius:14px;background:#0008}.notvcode .code{font-size:44px;letter-spacing:.2em;color:#ffcf6b}
+#pickgame{width:100%;padding:12px;font-size:17px;border-radius:12px;margin-bottom:8px}
