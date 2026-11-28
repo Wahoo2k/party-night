@@ -120,11 +120,19 @@ const SOUNDS = {
   lose() { howl(0, 1.1, 0.35); [392, 370, 349, 330].forEach((f, i) => tone({ type: 'triangle', f0: f, t: 0.6 + i * 0.35, dur: 0.6, vol: 0.2 })); },
 };
 
+const lastTake = {};
 export function play(name) {
   if (!quiet.on) tap.fn?.('play', [name]);
   if (!ready()) return;
   // A recorded effect, when one has been made for this name; the synthesized one otherwise.
-  if (rec.sfx.has(name)) { try { const a = new Audio(`audio/sfx/${name}.mp3`); a.volume = 0.8; a.play().catch(() => {}); return; } catch {} }
+  if (rec.sfx.has(name)) {
+    // A sound can have extra takes on file (fanfare-2, fanfare-3…). One is picked at random, never the same twice running.
+    const takes = [name]; for (let i = 2; rec.sfx.has(`${name}-${i}`); i++) takes.push(`${name}-${i}`);
+    let pick = takes[Math.floor(Math.random() * takes.length)];
+    if (takes.length > 1 && pick === lastTake[name]) pick = takes[(takes.indexOf(pick) + 1) % takes.length];
+    lastTake[name] = pick;
+    try { const a = new Audio(`audio/sfx/${pick}.mp3`); a.volume = 0.8; a.play().catch(() => {}); return; } catch {}
+  }
   if (!SOUNDS[name]) return;
   try { SOUNDS[name](); } catch {}
 }

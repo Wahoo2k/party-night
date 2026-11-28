@@ -644,7 +644,7 @@ function nightAwards() {
 function startGame(again) {
   if (locked(host.gameId)) { host.screen = 'gather'; return changed(); }   // not bought: the join screen shows how to unlock it
   // First time this room plays the game: explain it and wait for everyone before anything starts.
-  if (!host.intro && !again && wantsIntro()) { host.intro = { id: host.gameId, ready: {}, at: Date.now() }; if (sfx.on) play('fanfare'); return changed(); }
+  if (!host.intro && !again && wantsIntro()) { host.intro = { id: host.gameId, ready: {}, at: Date.now() }; if (sfx.on) play('whoosh'); return changed(); }   // the game's own theme sting plays when it actually starts
   host.intro = null;
   host.paused = 0;
   // The audience gets promoted into open seats for the next game.

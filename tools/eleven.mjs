@@ -151,7 +151,16 @@ if (cmd === 'estimate') {
   if (r.stopped) process.exitCode = 2;
 } else if (cmd === 'sfx' || cmd === 'music') {
   const only = flag('only') ? String(flag('only')).split(',') : null;
-  const jobs = sounds().filter(s => (cmd === 'music') === !!s.long && (!only || only.includes(s.name)) && (flag('redo') || !have('sfx', s.name)));
+  let jobs = sounds().filter(s => (cmd === 'music') === !!s.long && (!only || only.includes(s.name)) && (flag('redo') || !have('sfx', s.name)));
+  // Extra takes of a sound, so it isn't the same every time: --takes fanfare:3,win:3 makes fanfare-2, fanfare-3, win-2, win-3.
+  if (flag('takes') && cmd === 'sfx') {
+    jobs = [];
+    for (const spec of String(flag('takes')).split(',')) {
+      const [name, n] = spec.split(':'), base = sounds().find(x => x.name === name);
+      if (!base) { console.log('no such sound: ' + name); continue; }
+      for (let i = 2; i <= (+n || 3); i++) if (flag('redo') || !have('sfx', `${name}-${i}`)) jobs.push({ ...base, name: `${name}-${i}`, prompt: base.prompt + ' A different take from the usual one: change the melody, rhythm and instruments while keeping the same mood and length.' });
+    }
+  }
   console.log(`Making ${jobs.length}: ${jobs.map(j => j.name).join(', ')}`);
   fs.mkdirSync('audio/sfx', { recursive: true });
   const r = await pool(jobs, 2, async s => {
