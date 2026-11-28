@@ -233,3 +233,7 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Bingo: board and ball letter enlarged on the TV. Letters and numbers re-recorded from spelled-out text (tools/eleven.mjs `spoken`): "B." was read as "bay", "45." as "four-dee".
 - All 53 browser tests passed after the shared changes.
 - GOAT Toss: a "butt heads" toss now always lands head to head (it could land tail to tail and look like two goats napping the same way).
+
+## 28 Nov: team names, Pin Drop
+- Teams can name themselves on the join screen (family filter applies); the name carries into Taboo, Salad Bowl and Secret Agents. Narration lines that say a team's name are silent for custom names.
+- New game: Pin Drop (js/games/pindrop.js). The TV names a place, everyone drops a pin on a world map on their phone (tap, drag, zoom), pins land on the TV farthest first, then the real spot; up to 1,000 points by distance, shown in miles. 80 places. Map from Natural Earth (public domain) via tools/worldmap.mjs. Not in the launch list until people have played it. Narration lines not recorded yet. Cover picture is a rendered map, not painted art.
