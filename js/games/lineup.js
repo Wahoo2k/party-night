@@ -53,6 +53,10 @@ export const SETS = [
   ['Fewest in a group to most', [['Pair', '2'], ['Dozen', '12'], ['Baker\'s dozen', '13'], ['Score', '20'], ['Gross', '144']]],
   ['Smallest to biggest', [['Atom', ''], ['Grain of sand', ''], ['Marble', ''], ['The Moon', ''], ['The Sun', '']]],
   ['Youngest to oldest', [['Toddler', '2'], ['Kindergartner', '5'], ['Teenager', '15'], ['Grandparent', '65'], ['Giant sequoia tree', '2,000 years']]],
+  ['Smallest country to largest', [['Vatican City', '0.2 square miles'], ['Singapore', 'about 280'], ['Ireland', 'about 27,000'], ['France', 'about 213,000'], ['Canada', '3.9 million']]],
+  ['Fewest sides to most', [['Triangle', '3'], ['Square', '4'], ['Pentagon', '5'], ['Hexagon', '6'], ['Octagon', '8']]],
+  ['Oldest building to newest', [['The Great Pyramid', 'about 2560 BC'], ['The Colosseum', 'AD 80'], ['The Taj Mahal', '1653'], ['The Eiffel Tower', '1889'], ['The Burj Khalifa', '2010']]],
+  ['Smallest coin value to largest', [['Penny', '1 cent'], ['Nickel', '5 cents'], ['Dime', '10 cents'], ['Quarter', '25 cents'], ['Half dollar', '50 cents']]],
 ];
 
 export const TIMES = { order: 40000, after: 7000 };
