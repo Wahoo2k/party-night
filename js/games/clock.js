@@ -57,7 +57,9 @@ function result(s, now) {
 }
 export function act(s, pid, a, now = Date.now()) {
   if (!a || s.phase !== 'run' || a.type !== 'stop' || !s.players.some(p => p.pid === pid) || s.stops[pid] !== undefined) return s;
-  s.stops[pid] = Math.max(0, now - s.goAt);
+  // A bot's stop lands on the host's once-a-second check, which gave several bots the very same perfect time. A bot's
+  // time is nudged by up to 0.7 seconds either way so it reads like a person's.
+  s.stops[pid] = Math.max(0, now - s.goAt + (String(pid).startsWith('bot-') && typeof a.jit !== 'number' ? Math.round((Math.random() - 0.5) * 1400) : 0));
   if (s.players.every(p => s.stops[p.pid] !== undefined)) result(s, now);
   return s;
 }
