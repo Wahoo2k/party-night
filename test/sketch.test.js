@@ -37,4 +37,24 @@ ps.forEach(p => G.act(s2, p.pid, { type: 'draw', strokes: [{ c: 1, w: 1, p: [1, 
 assert.equal(s2.phase, 'guess');
 ps.forEach(p => assert.ok(!JSON.stringify(G.phoneView(s2, p.pid)).includes('Secret phrase')));
 console.log('fails', fails);
+// The twists: "from memory" is pick, draw, then drawings copied from a look, then one final guess.
+{
+  const G = await import('../js/games/sketch.js');
+  for (const mode of ['memory', 'ink', 'squiggle']) for (let n = 3; n <= 8; n++) {
+    const ps = Array.from({ length: n }, (_, i) => ({ pid: 'bot-' + i, name: 'B' + i })), s = G.setup(ps, Math.random, null, { mode }); let t = Date.now(), guard = 0;
+    while (!['reveal', 'over'].includes(s.phase) && guard++ < 500) {
+      for (const p of ps) { const v = G.phoneView(s, p.pid);
+        if (mode === 'memory' && v.phase === 'draw' && !v.done) { if (s.step === 1) { if (!v.task || v.look) throw new Error('first drawing is from words'); } else if (!v.look || v.task) throw new Error('later drawings are from a look'); }
+        if (mode === 'squiggle' && v.phase === 'draw' && !v.done && !(v.start?.length >= 2)) throw new Error('no squiggle');
+        if (mode === 'ink' && v.phase === 'draw' && !v.done && !v.ink) throw new Error('no ink flag');
+        const a = G.botAct(v); if (a) G.act(s, p.pid, a, t); }
+      t += 1000; G.tick(s, t);
+    }
+    if (s.phase !== 'reveal') throw new Error(mode + ' did not reach the reveal');
+    if (mode === 'memory') { const kinds = s.chains[0].map(e => e.kind).join(); if (kinds !== ['text', ...Array(s.steps - 2).fill('draw'), 'text'].join()) throw new Error('memory chain was ' + kinds); }
+  }
+  if (JSON.stringify(G.squiggle(5)) !== JSON.stringify(G.squiggle(5))) throw new Error('squiggle should repeat for a seed');
+  console.log('twists ok');
+}
+
 process.exit(fails ? 1 : 0);

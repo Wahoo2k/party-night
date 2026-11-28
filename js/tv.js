@@ -360,7 +360,7 @@ function vetoExtras() {
   const vbar = document.getElementById('vetobar');
   if (!vbar || !host.state) return;
   if (!vbar.querySelector('[data-host=endgame]')) vbar.insertAdjacentHTML('afterbegin', `<button class="btn ghost small" data-host="endgame">${Date.now() - endArmed < 4000 ? 'Press Back or OK again to end' : '✕ End game'}</button>`);
-  if (['sketch', 'doodle'].includes(host.gameId) && !vbar.querySelector('[data-host=blurdraw]')) vbar.insertAdjacentHTML('afterbegin', `<button class="btn ghost small" data-host="blurdraw">🙈 ${host.blurDraw ? 'Show' : 'Hide'} drawing</button>`);
+  if (['sketch', 'doodle', 'dash'].includes(host.gameId) && !vbar.querySelector('[data-host=blurdraw]')) vbar.insertAdjacentHTML('afterbegin', `<button class="btn ghost small" data-host="blurdraw">🙈 ${host.blurDraw ? 'Show' : 'Hide'} drawing</button>`);
 }
 // The phone remote: one player's phone (the first to join, unless turned off) can press Next, Pause and Start for the TV.
 const remotePid = () => (host.settings.remote === false ? null : host.players.find(p => !p.bot)?.pid || null);
@@ -889,13 +889,15 @@ const seen = new Set();
 const kicked = new Set();
 let editing = null;
 // A glyph for each game in the menu.
-const ICONS = { fib: '🤔', clock: '⏱️', shake: '📳', survive: '❤️', story: '📖', oneword: '🤝', pindrop: '📍', topspot: '🥇', lineup: '🔢', werewolf: '🐺', imposter: '🕵️', bluff: '🤥', whosaid: '💬', ducks: '🐐', trivia: '🧠', spin: '🎡', crowd: '📊', bingo: '🎱', quick: '⚡', ladder: '🪜', cases: '💼', funny: '😂', letters: '🔤', taboo: '🚫', agents: '🕶️', sketch: '✏️', meld: '🧿', bowl: '🥗', crew: '🤝', charades: '🎭', clash: '🃏', blackjack: '♠️', gofish: '🐟', bluffcards: '🎴', hearts: '♥️', shade: '🎨', estimate: '🎯', truths: '🤞', wordhunt: '🔎', midnight: '🌙', missions: '🗝️', dares: '😈', split: '✂️', doodle: '🖼️', memory: '🧩', copycat: '🐱', hunt: '🌈', freeze: '🧊', haunted: '👻', bomb: '💣', potato: '🥔', mystery: '💎', bracket: '🏆', faker: '🤫', meter: '📈', rebus: '🧩' };
+// A touch screen with no mouse or remote: an iPad or phone used as the shared screen.
+const TOUCH = typeof matchMedia === 'function' && navigator.maxTouchPoints > 0 && matchMedia('(pointer: coarse)').matches && matchMedia('(hover: none)').matches;
+const ICONS = { dash: '✏️', gold: '💰', rps: '✊', auction: '🔨', grid: '🔠', fib: '🤔', clock: '⏱️', shake: '📳', survive: '❤️', story: '📖', oneword: '🤝', pindrop: '📍', topspot: '🥇', lineup: '🔢', werewolf: '🐺', imposter: '🕵️', bluff: '🤥', whosaid: '💬', ducks: '🐐', trivia: '🧠', spin: '🎡', crowd: '📊', bingo: '🎱', quick: '⚡', ladder: '🪜', cases: '💼', funny: '😂', letters: '🔤', taboo: '🚫', agents: '🕶️', sketch: '✏️', meld: '🧿', bowl: '🥗', crew: '🤝', charades: '🎭', clash: '🃏', blackjack: '♠️', gofish: '🐟', bluffcards: '🎴', hearts: '♥️', shade: '🎨', estimate: '🎯', truths: '🤞', wordhunt: '🔎', midnight: '🌙', missions: '🗝️', dares: '😈', split: '✂️', doodle: '🖼️', memory: '🧩', copycat: '🐱', hunt: '🌈', freeze: '🧊', haunted: '👻', bomb: '💣', potato: '🥔', mystery: '💎', bracket: '🏆', faker: '🤫', meter: '📈', rebus: '🧩' };
 
 // Each game lives in its own visual world: a color scheme, a background and a headline typeface. Games not listed keep the night village.
 const THEME_OF = {};
 Object.entries({
-  comic: ['funny', 'bracket', 'split', 'dares', 'bluffcards', 'topspot', 'lineup', 'story'], paper: ['bluff', 'truths', 'whosaid', 'meter', 'letters', 'pindrop'], sketch: ['sketch', 'doodle', 'shade'],
-  kids: ['hunt', 'freeze', 'copycat', 'memory', 'ducks', 'potato', 'bingo', 'charades', 'gofish', 'shake'], show: ['trivia', 'spin', 'crowd', 'ladder', 'cases', 'quick', 'estimate', 'rebus', 'survive', 'fib', 'clock'],
+  comic: ['funny', 'bracket', 'split', 'dares', 'bluffcards', 'topspot', 'lineup', 'story', 'grid'], paper: ['bluff', 'truths', 'whosaid', 'meter', 'letters', 'pindrop'], sketch: ['sketch', 'doodle', 'shade', 'dash'],
+  kids: ['hunt', 'freeze', 'copycat', 'memory', 'ducks', 'potato', 'bingo', 'charades', 'gofish', 'shake', 'rps'], show: ['trivia', 'spin', 'crowd', 'ladder', 'cases', 'quick', 'estimate', 'rebus', 'survive', 'fib', 'clock', 'gold', 'auction'],
   noir: ['imposter', 'faker', 'wordhunt', 'agents', 'missions', 'mystery', 'bomb'], teams: ['taboo', 'bowl', 'crew', 'meld', 'oneword'], felt: ['clash', 'blackjack', 'hearts'],
 }).forEach(([t, ids]) => ids.forEach(id => (THEME_OF[id] = t)));
 // Headlines arrive a word at a time.
@@ -991,7 +993,7 @@ function renderLobby() {
         <div id="pvtags" class="pvtags"></div>
         <h2 id="pvname"></h2>
         <p id="pvblurb"></p>
-        <div class="heroact"><span class="playhint">▶ Press OK to play</span><span id="pvicon" hidden></span></div>
+        <div class="heroact"><span class="playhint">▶ ${TOUCH ? 'Tap a game to play' : 'Press OK to play'}</span><span id="pvicon" hidden></span></div>
       </div>
       <div class="pvbox"><div class="pvstage" inert aria-hidden="true"></div><span class="pvlabel">Live preview</span></div>
       <div class="herobar">
@@ -1011,10 +1013,11 @@ function renderLobby() {
     const pickNow = id => { hero.style.setProperty('--art', `url("${new URL(`art/${id}.jpg`, location.href).href}")`); if (pv?.id !== id || !app.querySelector('.pvstage').firstChild) { host.gameId = id; previewGame(id); } };
     // Moving along a row: the highlight and a click sound answer at once; the big picture and the live preview wait
     // until the highlight rests, so holding an arrow key never queues up a dozen picture loads.
-    const pick = (id, now) => { clearTimeout(pickTimer); if (now) return pickNow(id); if (pv && pv.id !== id && sfx.on) play('pop'); pickTimer = setTimeout(() => { if (app.contains(hero)) pickNow(id); }, 240); };
+    const pick = (id, now, quiet) => { clearTimeout(pickTimer); if (now) return pickNow(id); if (!quiet && pv && pv.id !== id && sfx.on) play('pop');   // a mouse gliding over the cards stays silent; the remote still ticks
+       pickTimer = setTimeout(() => { if (app.contains(hero)) pickNow(id); }, 240); };
     app.querySelectorAll('.gcard[data-game]').forEach(c => {
       c.onfocus = () => { menuAt = { row: c.dataset.row, game: c.dataset.game }; try { sessionStorage.setItem('pg-menu-at', JSON.stringify(menuAt)); } catch {} app.querySelectorAll('.gcard.on').forEach(x => x.classList.remove('on')); c.classList.add('on'); show(c, true); pick(c.dataset.game); };
-      c.onmousemove = () => { if (pv?.id !== c.dataset.game) pick(c.dataset.game); };   // a real mouse move only: a row scrolling under a resting pointer must not change the game shown
+      c.onmousemove = () => { if (pv?.id !== c.dataset.game) pick(c.dataset.game, false, true); };   // a real mouse move only: a row scrolling under a resting pointer must not change the game shown
     });
     app.querySelectorAll('.gcard.night').forEach(c => (c.onfocus = () => show(c, true)));
     pick(menuAt.game, true);
@@ -1152,6 +1155,7 @@ function render() {
   else if (!host.state) renderLobby();
   else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); if (fresh) wordsIn(); if (v.phase === 'over') afterParty(); decorate(); pops(fresh); guideTip(); slideScores(); cardPops(fresh); standings(v); }
   document.body.classList.toggle('night', host.state?.phase === 'night');
+  nightLine();
   // How-to screens show in full the first time a room plays a game, then get out of the way.
   quiet.on = !host.state;
   const onStage = host.state || host.intro;
@@ -1330,3 +1334,24 @@ setInterval(() => { const now = Date.now(); if (!host.state && host.players.leng
 
 // The intro never holds a room hostage: after 75 seconds the game starts anyway.
 setInterval(() => { if (host.intro && !host.state && Date.now() - host.intro.at > 75000) startGame(); }, 3000);
+
+// A tablet or phone standing in for the TV: keep its screen on, where the browser allows it (TVs never sleep mid-app).
+let wake = null;
+async function stayAwake() { try { if (!wake && 'wakeLock' in navigator && document.visibilityState === 'visible') { wake = await navigator.wakeLock.request('screen'); wake.addEventListener('release', () => (wake = null)); } } catch { wake = null; } }
+stayAwake(); document.addEventListener('visibilitychange', stayAwake); addEventListener('pointerdown', stayAwake);
+
+// Tonight's standings across games, in the bar at the top of the menu: 3 points for a win, 2 for second, 1 for third.
+// It scrolls like a ticker only when it is too long to fit.
+function nightLine() {
+  const el = document.getElementById('nightline'); if (!el) return;
+  const t = host.tally, rows = t?.games.length ? Object.entries(t.by).filter(e => e[1].pts).sort((a, b) => b[1].pts - a[1].pts || b[1].wins - a[1].wins) : [];
+  if (host.state || host.intro || !rows.length) { el.hidden = true; el.dataset.key = ''; return; }
+  const last = t.games[t.games.length - 1], medals = ['🥇', '🥈', '🥉'];
+  const html = `<b>Tonight</b>${rows.map(([n, r], i) => `<span>${medals[i] || ''} ${esc(n)} <em>${r.pts}</em>${r.wins ? `<small>${r.wins} win${r.wins === 1 ? '' : 's'}</small>` : ''}</span>`).join('')}<span class="nlast">${t.games.length} game${t.games.length === 1 ? '' : 's'} · last: ${esc(last.game)}${last.winners.length ? `, won by ${esc(last.winners.join(' & '))}` : ''}</span>`;
+  el.hidden = false;
+  if (el.dataset.key === html) return;
+  el.dataset.key = html; el.classList.remove('roll'); el.innerHTML = `<div class="nlrun">${html}</div>`;
+  const run = el.firstChild;
+  // measured a frame later, once the menu's layout is in place
+  requestAnimationFrame(() => { if (el.dataset.key === html && el.clientWidth && run.offsetWidth > el.clientWidth + 4) { run.innerHTML = html + html; el.classList.add('roll'); run.style.animationDuration = Math.max(18, run.offsetWidth / 90) + 's'; } });
+}

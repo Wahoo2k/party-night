@@ -63,7 +63,7 @@ export function setup(players, rnd = Math.random, prev = null, opts = {}) {
   const steps = Math.max(4, Math.min(n + 1, opts.short ? 4 : 8));
   return {
     game: 'sketch',
-    players: order, steps,
+    players: order, steps, mode: ['memory', 'ink', 'squiggle'].includes(opts.mode) ? opts.mode : 'normal',
     chains: order.map(() => []),   // chains[c][k] = {kind: 'text'|'draw', by, text | strokes}
     drafts: {},
     step: 0, phase: 'write', round: 0,
@@ -81,14 +81,16 @@ const nameOf = (s, pid) => (s.players.find(p => p.pid === pid) || {}).name || 'S
 const hop = k => Math.max(0, k - 1);
 const handler = (s, c, k) => s.players[(c + hop(k)) % n(s)].pid;
 const chainFor = (s, pid, k) => { const i = s.players.findIndex(p => p.pid === pid); return ((i - hop(k)) % n(s) + n(s)) % n(s); };
-const kindAt = k => (k % 2 === 1 ? 'draw' : 'text');
-const phaseAt = k => (k === 0 ? 'write' : k % 2 === 1 ? 'draw' : 'guess');
+// Usually it alternates: pick, draw, describe, draw… In "From memory" everything between the first drawing and the
+// final guess is another drawing, copied from a few seconds' look at the one before.
+const kindAt = (s, k) => (s.mode === 'memory' ? (k === 0 || k === s.steps - 1 ? 'text' : 'draw') : k % 2 === 1 ? 'draw' : 'text');
+const phaseAt = (s, k) => (k === 0 ? 'write' : kindAt(s, k) === 'draw' ? 'draw' : 'guess');
 const done = (s, pid) => !!s.chains[chainFor(s, pid, s.step)][s.step];
 
 function submit(s, pid, entry) {
   const c = chainFor(s, pid, s.step);
   if (s.chains[c][s.step]) return;
-  s.chains[c][s.step] = { kind: kindAt(s.step), by: pid, ...entry };
+  s.chains[c][s.step] = { kind: kindAt(s, s.step), by: pid, ...entry };
   delete s.drafts[pid];
 }
 
@@ -96,7 +98,7 @@ function fillMissing(s, rnd) {
   s.players.forEach(p => {
     if (done(s, p.pid)) return;
     const d = s.drafts[p.pid];
-    if (kindAt(s.step) === 'draw') submit(s, p.pid, { strokes: d?.strokes || [], late: !d });
+    if (kindAt(s, s.step) === 'draw') submit(s, p.pid, { strokes: d?.strokes || [], late: !d });
     else submit(s, p.pid, { text: d?.text || (s.step === 0 ? PROMPTS[Math.floor(rnd() * PROMPTS.length)] : '(no idea!)'), late: !d });
   });
 }
@@ -114,7 +116,7 @@ function advance(s, now, rnd = Math.random) {
     s.eventId++;
     return;
   }
-  s.phase = phaseAt(s.step);
+  s.phase = phaseAt(s, s.step);
   s.deadline = now + TIMES[s.phase];
 }
 
@@ -202,6 +204,11 @@ export function cueEvent(s) {
 }
 
 // ---------- bots ----------
+// A starter squiggle for "Start from a squiggle": two or three loose lines, the same for everyone who gets that seed.
+export function squiggle(seed) {
+  let x = (seed * 9301 + 49297) % 233280; const r = () => (x = (x * 9301 + 49297) % 233280) / 233280;
+  return cleanStrokes(Array.from({ length: 2 + Math.floor(r() * 2) }, () => { const p = []; let px = 40 + r() * 176, py = 40 + r() * 176; for (let j = 0; j < 7; j++) { p.push(px, py); px = Math.max(12, Math.min(244, px + (r() - 0.5) * 90)); py = Math.max(12, Math.min(244, py + (r() - 0.5) * 90)); } return { c: 1, w: 1, p }; }));
+}
 export function botDoodle(rnd) {
   const strokes = [];
   const cx = 70 + rnd() * 110, cy = 70 + rnd() * 110, r = 30 + rnd() * 40;
@@ -259,8 +266,12 @@ export function phoneView(s, pid) {
     if (v.done) return v;   // keep the view still while others finish
     const c = chainFor(s, pid, s.step);
     const prev = s.chains[c][s.step - 1];
-    if (s.phase === 'draw') v.task = prev.text;
-    if (s.phase === 'guess') { v.strokes = prev.strokes; if (bot) v._a = s.chains[c][s.step - 2]?.text; }
+    if (s.phase === 'draw') {
+      if (prev.kind === 'draw') v.look = prev.strokes; else v.task = prev.text;   // from memory: a short look at the last drawing instead of words
+      if (s.mode === 'ink') v.ink = true;
+      if (s.mode === 'squiggle') v.start = squiggle(c * 31 + s.step);
+    }
+    if (s.phase === 'guess') { v.strokes = prev.strokes; if (bot) v._a = s.chains[c].find(e => e?.kind === 'text')?.text; }
   }
   if (s.phase === 'reveal') {
     v.c = s.show.c;
@@ -314,6 +325,8 @@ export function renderTV(v, el) {
   el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''} ${side ? '' : 'solo'}"><div class="panel">${h}</div>${side}</div>`;
 }
 
+const LOOK_MS = 7000;
+let look = { key: '', until: 0, timer: 0 };
 // The canvas keeps its strokes across redraws, keyed to the step.
 let pad = { key: '', strokes: [], c: 1, w: 1 };
 let words = { key: '', text: '' };
@@ -339,7 +352,14 @@ export function renderPhone(v, el, send) {
     return;
   }
   if (v.phase === 'draw') {
-    mountPad(el, key, `<p class="muted">Step ${v.step + 1} of ${v.steps} · draw this:</p><p class="tq small skwhat">${esc(v.task)}</p>`, send);
+    // From memory: a few seconds to study the last drawing, then it is gone.
+    if (v.look) {
+      if (look.key !== key) look = { key, until: Date.now() + LOOK_MS };
+      const left = look.until - Date.now();
+      if (left > 0) { el.innerHTML = `<p class="muted">Step ${v.step + 1} of ${v.steps}</p><h2>Study this. It disappears in a moment.</h2><div class="mydraw">${svgFor(v.look)}</div>`; clearTimeout(look.timer); look.timer = setTimeout(() => renderPhone(v, el, send), left + 30); return; }
+    }
+    const what = v.look ? '<p class="tq small skwhat">Draw what you just saw, from memory</p>' : `<p class="tq small skwhat">${esc(v.task)}</p>`;
+    mountPad(el, key, `<p class="muted">Step ${v.step + 1} of ${v.steps} · ${v.look ? 'no peeking' : 'draw this'}${v.ink ? ' · invisible ink: your lines vanish!' : ''}${v.start ? ' · use the squiggle in your drawing' : ''}:</p>${what}`, send, { ink: v.ink, start: v.start });
     return;
   }
   if (v.phase === 'reveal') {
@@ -354,18 +374,22 @@ export function renderPhone(v, el, send) {
 
 // A drawing pad on the phone: colors, eraser, sizes, undo, clear. Sends 'draft' while drawing and 'draw' on Done.
 // Strokes survive redraws as long as the key stays the same.
-export function mountPad(el, key, header, send) {
-  if (pad.key !== key) pad = { key, strokes: [], c: pad.c || 1, w: pad.w ?? 1 };
+// opts: live (ms: send the drawing this often while drawing, and no Done button), ink (lines vanish once drawn),
+// start (strokes already on the page).
+export function mountPad(el, key, header, send, opts = {}) {
+  if (pad.key !== key) pad = { key, strokes: (opts.start || []).map(st => ({ ...st, p: [...st.p] })), c: pad.c || 1, w: pad.w ?? 1 };
   el.innerHTML = `${header}
     <canvas id="skc" width="512" height="512"></canvas>
     <div class="sktools"><div class="skcolors">${COLORS.slice(1).map((c, i) => `<button class="skc ${pad.c === i + 1 ? 'on' : ''}" data-c="${i + 1}" style="--c:${c}" aria-label="color ${i + 1}"></button>`).join('')}<button class="skc eraser ${pad.c === 0 ? 'on' : ''}" data-c="0" aria-label="eraser">⌫</button></div>
     <div class="skwidths">${WIDTHS.map((w, i) => `<button class="skw ${pad.w === i ? 'on' : ''}" data-w="${i}" aria-label="size ${i + 1}"><span style="width:${w + 3}px;height:${w + 3}px"></span></button>`).join('')}<button class="btn ghost small" id="undo">↶ Undo</button><button class="btn ghost small" id="clear">Clear</button></div></div>
-    <button class="btn" id="skdone">Done</button>`;
+    ${opts.live ? '' : '<button class="btn" id="skdone">Done</button>'}`;
   const cv = el.querySelector('#skc'), ctx = cv.getContext('2d');
   const paint = () => {
     ctx.fillStyle = COLORS[0]; ctx.fillRect(0, 0, 512, 512);
     ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    for (const st of pad.strokes) {
+    const fixed = opts.start?.length || 0;
+    for (const [i, st] of pad.strokes.entries()) {
+      if (opts.ink && i >= fixed && st !== cur) continue;   // invisible ink: only the line under your finger shows
       ctx.strokeStyle = COLORS[st.c]; ctx.lineWidth = WIDTHS[st.w] * 2;
       ctx.beginPath(); ctx.moveTo(st.p[0] * 2, st.p[1] * 2);
       for (let i = 2; i < st.p.length; i += 2) ctx.lineTo(st.p[i] * 2, st.p[i + 1] * 2);
@@ -373,10 +397,11 @@ export function mountPad(el, key, header, send) {
       ctx.stroke();
     }
   };
-  paint();
-  const draft = () => { clearTimeout(draftTimer); draftTimer = setTimeout(() => send({ type: 'draft', strokes: pad.strokes }), 1500); };
-  const pt = e => { const r = cv.getBoundingClientRect(); return [Math.max(0, Math.min(255, Math.round((e.clientX - r.left) / r.width * 256))), Math.max(0, Math.min(255, Math.round((e.clientY - r.top) / r.height * 256)))]; };
   let cur = null;
+  paint();
+  let lastLive = 0;
+  const draft = () => { clearTimeout(draftTimer); draftTimer = setTimeout(() => send({ type: 'draft', strokes: pad.strokes }), opts.live ? 60 : 1500); };
+  const pt = e => { const r = cv.getBoundingClientRect(); return [Math.max(0, Math.min(255, Math.round((e.clientX - r.left) / r.width * 256))), Math.max(0, Math.min(255, Math.round((e.clientY - r.top) / r.height * 256)))]; };
   cv.onpointerdown = e => { e.preventDefault(); cv.setPointerCapture(e.pointerId); cur = { c: pad.c, w: pad.c === 0 ? 2 : pad.w, p: pt(e) }; pad.strokes.push(cur); paint(); };
   cv.onpointermove = e => {
     if (!cur) return;
@@ -385,14 +410,15 @@ export function mountPad(el, key, header, send) {
     cur.p.push(x, y);
     ctx.strokeStyle = COLORS[cur.c]; ctx.lineWidth = WIDTHS[cur.w] * 2;
     ctx.beginPath(); ctx.moveTo(cur.p[n2 - 2] * 2, cur.p[n2 - 1] * 2); ctx.lineTo(x * 2, y * 2); ctx.stroke();
+    if (opts.live && Date.now() - lastLive > opts.live) { lastLive = Date.now(); send({ type: 'draft', strokes: pad.strokes }); }
   };
-  cv.onpointerup = cv.onpointercancel = () => { if (cur) { cur = null; draft(); } };
+  cv.onpointerup = cv.onpointercancel = () => { if (cur) { cur = null; if (opts.ink) paint(); draft(); } };
   el.querySelectorAll('[data-c]').forEach(b => (b.onclick = () => { pad.c = Number(b.dataset.c); el.querySelectorAll('[data-c]').forEach(x => x.classList.toggle('on', x === b)); }));
   el.querySelectorAll('[data-w]').forEach(b => (b.onclick = () => { pad.w = Number(b.dataset.w); if (pad.c === 0) pad.c = 1; el.querySelectorAll('[data-w]').forEach(x => x.classList.toggle('on', x === b)); el.querySelectorAll('[data-c]').forEach(x => x.classList.toggle('on', Number(x.dataset.c) === pad.c)); }));
-  el.querySelector('#undo').onclick = () => { pad.strokes.pop(); paint(); draft(); };
+  el.querySelector('#undo').onclick = () => { if (pad.strokes.length > (opts.start?.length || 0)) pad.strokes.pop(); paint(); draft(); };
   const clr = el.querySelector('#clear');
-  clr.onclick = () => { if (clr.dataset.sure) { pad.strokes = []; paint(); draft(); clr.textContent = 'Clear'; delete clr.dataset.sure; } else { clr.dataset.sure = 1; clr.textContent = 'Sure?'; setTimeout(() => { clr.textContent = 'Clear'; delete clr.dataset.sure; }, 2500); } };
-  el.querySelector('#skdone').onclick = e => { clearTimeout(draftTimer); e.target.disabled = true; send({ type: 'draw', strokes: pad.strokes }); };
+  clr.onclick = () => { if (clr.dataset.sure) { pad.strokes = pad.strokes.slice(0, opts.start?.length || 0); paint(); draft(); clr.textContent = 'Clear'; delete clr.dataset.sure; } else { clr.dataset.sure = 1; clr.textContent = 'Sure?'; setTimeout(() => { clr.textContent = 'Clear'; delete clr.dataset.sure; }, 2500); } };
+  if (!opts.live) el.querySelector('#skdone').onclick = e => { clearTimeout(draftTimer); e.target.disabled = true; send({ type: 'draw', strokes: pad.strokes }); };
 }
 
 // Turn a drawing into a PNG the player can keep.
@@ -426,3 +452,5 @@ async function saveChain(chain) {
   }
   const a = document.createElement('a'); a.download = 'party-night-chain.png'; a.href = c.toDataURL('image/png'); document.body.append(a); a.click(); a.remove();
 }
+
+meta.options = [{ id: 'mode', name: 'Twist', choices: [['normal', 'none'], ['memory', 'redraw from memory'], ['ink', 'invisible ink'], ['squiggle', 'start from a squiggle']] }];
