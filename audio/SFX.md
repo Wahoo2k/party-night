@@ -41,6 +41,25 @@ Every sound today is synthesized in `js/sfx.js`. Each row is one recorded file t
 | swoosh-steal | 1 | Gold Rush: someone is robbed | A quick cartoon swipe whoosh followed by a cheeky cash-register ding, 1 second |
 | splat | 1 | Rock Paper Showdown: throws land | Three quick hand slaps on a table in a row, 1 second |
 
+## Crowd, leaders and characters
+| Name | Uses | What it is for | Prompt to generate |
+|---|---|---|---|
+| lead | 1 | First place changes hands | A quick rising brass and timpani sting that says a new leader has taken over, bright and short, 1.5 seconds |
+| crowd-aww | 1 | Points were only lost | A small studio audience saying a sympathetic aww, 2 seconds |
+| crowd-ooh | 1 | One player alone scored | A small studio audience going ooh, impressed, 2 seconds |
+| char-devil | 1 | The devil character is picked or has a big moment | A cartoon devil's short mischievous chuckle, playful not scary, 2 seconds |
+| char-werewolf | 1 | The werewolf character | A short cartoon wolf howl, comic, 2 seconds |
+| char-alien | 1 | The alien character | A friendly cartoon alien warble with a theremin wobble, 2 seconds |
+| char-vampire | 1 | The vampire character | A hammy cartoon vampire laugh, blah-ha-ha, with a tiny organ note, 2 seconds |
+| char-robot | 1 | The robot character | Cute robot beeps and a servo whirr, 1.5 seconds |
+| char-skull | 1 | The skull character | Rattling cartoon bones like a xylophone run, 1.5 seconds |
+| char-ghost | 1 | The ghost character | A silly cartoon ghost going ooo, wobbly and friendly, 2 seconds |
+| char-pumpkin | 1 | The pumpkin character | A hollow cartoon pumpkin thunk followed by a cheeky giggle, 1.5 seconds |
+| char-zombie | 1 | The zombie character | A dopey cartoon zombie groan, funny not scary, 2 seconds |
+| char-pirate | 1 | The pirate character | A hearty cartoon pirate arr with a ship's bell ding, 2 seconds |
+| char-ninja | 1 | The ninja character | A fast sword swish and a short hi-ya, cartoon style, 1.5 seconds |
+| char-cyclops | 1 | The cyclops character | A big goofy cartoon monster saying duh-huh with a low rumble, 2 seconds |
+
 ## Name That Sound
 Everyday sounds the players have to recognize. Plain, dry recordings with no music.
 

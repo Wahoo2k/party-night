@@ -10,7 +10,7 @@ import { newKeys, cleanPub, samePub, sharedKey, seal, unseal } from './secure.js
 import { cleanAct, textsIn, maskView, maskLine } from './content.js';
 import { settleName, cleanName, isRude, uniqueName, funName, MAX_NAME } from './names.js';
 import { tap } from './tap.js';
-import { avatarUrl, colorOf, SPECIAL_COUNT } from './avatars.js';
+import { avatarUrl, colorOf, nameOf, SPECIAL_COUNT } from './avatars.js';
 import { quip } from './quips.js';
 
 const app = document.getElementById('app');
@@ -72,6 +72,7 @@ const moods = {}, feelT = {};
 function feel(name, m, ms = 2000, how = 'avhop') {
   const now = Date.now(), f = [...host.players, ...host.audience].find(p => p.name === name)?.face;
   moods[name] = { m, until: now + ms, at: now, how };
+  if (how === 'avpop' && host.state) charSound(name, 300);
   if (avNum(f) === null) return;
   const paint = () => document.querySelectorAll('[data-who]').forEach(i => {
     if (i.dataset.who !== name) return;
@@ -110,6 +111,14 @@ function moments(v) {
     momentSeen.rows.add(id);
     setTimeout(() => feel(name, mood, big ? 3000 : 1800, big ? 'avpop' : 'avhop'), 250);
   }
+}
+// The odd characters each have a short sound of their own: when picked, when they swell for a big moment (not more
+// than once in 40 seconds each), and for the leader on the standings screen.
+const charSaid = {};
+function charSound(name, delay = 0, force = false) {
+  const f = [...host.players, ...host.audience].find(p => p.name === name)?.face, n = avNum(f), kind = n === null ? '' : nameOf(n);
+  if (!kind || !sfx.on || (!force && Date.now() - (charSaid[name] || 0) < 40000)) return;
+  charSaid[name] = Date.now(); setTimeout(() => play('char-' + kind), delay);
 }
 const REACT_MOOD = { '👏': 'happy', '😂': 'happy', '🔥': 'happy', '❤️': 'happy', '👋': 'happy', '😱': 'wow', '👎': 'sad' };
 const moodOf = name => (moods[name] && moods[name].until > Date.now() ? moods[name].m : 'neutral');
@@ -152,8 +161,8 @@ function standings(list, then) {
   el.innerHTML = `<h2>The standings</h2><div class="strows" style="--n:${now.length}">${before.map(row).join('')}</div>`;
   document.body.append(el);
   tap.fn?.('ceremony', ['standings', el.dataset.theme, `<h2>The standings</h2><div class="strows" style="--n:${now.length}">${now.map(row).join('')}</div>`, 0, STAND_MS]);
-  if (sfx.on) play('whoosh');
-  setTimeout(() => { now.forEach((p, i) => el.querySelector(`[data-n="${CSS.escape(p.name)}"]`)?.style.setProperty('--i', i)); if (sfx.on && el.isConnected) play('pop'); }, 1300);
+  if (sfx.on) play('drumroll');
+  setTimeout(() => { now.forEach((p, i) => el.querySelector(`[data-n="${CSS.escape(p.name)}"]`)?.style.setProperty('--i', i)); if (sfx.on && el.isConnected) { play(before[0].name !== now[0].name ? 'lead' : 'pop'); charSound(now[0].name, 600); } }, 1300);
   const done = () => { if (stand.el !== el) return; clearTimeout(stand.timer); stand.el = null; el.classList.add('out'); setTimeout(() => el.remove(), 450); then(); };
   stand.el = el; stand.timer = setTimeout(done, STAND_MS); stand.skip = done;
   el.onclick = done;
@@ -246,10 +255,16 @@ function holdScores() {
   }
   ss.key = key;
   if (ss.until && now >= ss.until) {
-    let any = false;
-    for (const c of cur) { const was = ss.vals[c.name]; if (was !== undefined && was !== c.v) { ss.gains[c.name] = { d: c.v - was, at: now }; any = true; } ss.vals[c.name] = c.v; }
+    let any = false, up = 0, down = 0;
+    const top = get => { const l = [...cur].sort((x, y) => get(y) - get(x)); return l.length > 1 && get(l[0]) > get(l[1]) ? l[0].name : ''; }, led = top(c => ss.vals[c.name] ?? 0), hadPoints = cur.some(c => ss.vals[c.name]);
+    for (const c of cur) { const was = ss.vals[c.name]; if (was !== undefined && was !== c.v) { ss.gains[c.name] = { d: c.v - was, at: now }; any = true; if (c.v > was) up++; else down++; } ss.vals[c.name] = c.v; }
     ss.until = 0;
     if (any && sfx.on) play('points');
+    // The room reacts: a new leader gets a sting and a moment in the light; otherwise the crowd cheers when everyone
+    // scored, sighs when points were only lost, and is impressed when one player alone scored.
+    const leads = top(c => c.v), n = cur.length;
+    if (any && hadPoints && leads && led !== leads && n >= 3 && !game().meta.teams && game().meta.standings !== false) setTimeout(() => { if (sfx.on) play('lead'); feel(leads, 'wow', 3000, 'avpop'); flashLead(leads); }, 900);
+    else if (any && sfx.on && n >= 3) { const snd = up === n ? 'cheer' : !up && down ? 'crowd-aww' : up === 1 && n >= 4 ? 'crowd-ooh' : ''; if (snd && Math.random() < 0.6) setTimeout(() => play(snd), 500); }
   }
   for (const c of cur) {
     const held = ss.vals[c.name];
@@ -263,6 +278,12 @@ function holdScores() {
   }
 }
 const gainSeen = {};
+// "Ana takes the lead!" slides in over the score chips for a moment.
+function flashLead(name) {
+  document.querySelector('.leadflag')?.remove();
+  const el = document.createElement('div'); el.className = 'leadflag'; el.innerHTML = '<b></b> takes the lead!'; el.querySelector('b').textContent = name;
+  document.body.append(el); setTimeout(() => el.remove(), 2600);
+}
 let phoneHold = 0; window.__ss = () => ({ ...scoreShow, now: Date.now(), phoneHold });
 
 // Design rule 6: when play passes to someone else, say so. Any game whose heading reads "Name's turn" gets a banner
@@ -621,7 +642,7 @@ function onMessage(m) {
   } else if (m.t === 'face') {
     // A player picks their own animal in the lobby (first come, first served).
     const p = host.players.find(x => x.pid === m.pid), f = FACES[m.i | 0];
-    if (p && f && !host.state && !host.players.some(x => x !== p && x.face?.[0] === f[0])) { p.face = f; lastSent[m.pid] = null; if (sfx.on) play('pop'); changed(); }
+    if (p && f && !host.state && !host.players.some(x => x !== p && x.face?.[0] === f[0])) { p.face = f; lastSent[m.pid] = null; if (sfx.on) play('pop'); charSound(p.name, 200, true); feel(p.name, 'happy', 1500); changed(); }
   } else if (m.t === 'react' && (REACTIONS.includes(m.e) || m.e === '👋')) {
     const who = [...host.players, ...host.audience].find(x => x.pid === m.pid);
     const now = Date.now();

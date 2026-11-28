@@ -2791,3 +2791,7 @@ i:has(> img.av){background:none!important;overflow:visible}
 
 /* A game that can be played once before buying */
 .gcard .gtry{position:absolute;right:8px;top:8px;padding:.2em .6em;border-radius:99px;background:#ffd166;color:#221a3a;font:800 clamp(10px,calc(.9*var(--vw,1vw)),15px)/1.3 'DM Sans',sans-serif;box-shadow:0 2px 8px #0006}
+
+/* A new leader */
+.leadflag{position:fixed;left:50%;bottom:22vh;transform:translateX(-50%);z-index:40;padding:.5em 1.2em;border-radius:99px;background:linear-gradient(90deg,#ffd166,#ff9f43);color:#221a3a;font:800 clamp(18px,calc(2.2*var(--vw,1vw)),40px)/1.2 Outfit,'DM Sans',sans-serif;box-shadow:0 8px 30px #000a;animation:leadflag 2.6s cubic-bezier(.2,1.4,.4,1) both;pointer-events:none;white-space:nowrap}
+@keyframes leadflag{0%{opacity:0;transform:translate(-50%,2em) scale(.7)}12%{opacity:1;transform:translate(-50%,0) scale(1.08)}20%{transform:translate(-50%,0) scale(1)}85%{opacity:1}100%{opacity:0;transform:translate(-50%,-1em)}}
