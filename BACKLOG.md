@@ -232,3 +232,4 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Bracket Battle and Room Meter reveals staged in beats; Quick vote counts wait for the bars.
 - Bingo: board and ball letter enlarged on the TV. Letters and numbers re-recorded from spelled-out text (tools/eleven.mjs `spoken`): "B." was read as "bay", "45." as "four-dee".
 - All 53 browser tests passed after the shared changes.
+- GOAT Toss: a "butt heads" toss now always lands head to head (it could land tail to tail and look like two goats napping the same way).

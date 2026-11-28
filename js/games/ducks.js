@@ -242,7 +242,13 @@ function tossPlan(eid, a, b, pile) {
   const r = rng(eid * 7919 + 13);
   const goats = [0, 1].map(i => {
     const from = { x: CUP.x + 125, d: CUP.d - 10 - i * 30, h: 150 };
-    const to = pile ? { x: i ? 40 : -40, d: i ? 150 : 140, h: i ? 92 : 0 } : { x: (i ? 190 : -150) + (r() - 0.5) * 110, d: 90 + r() * 150, h: 0 };
+    // "Butt heads" (one goat on each side) has to look like it: the two end up level, close together and head to
+    // head. The goat lying with its head to the right stops on the left, the other on the right. Without this they
+    // could land tail to tail and look like two goats napping the same way.
+    const me = i ? b : a, butt = !pile && a !== b && ['left', 'right'].includes(a) && ['left', 'right'].includes(b);
+    const to = pile ? { x: i ? 40 : -40, d: i ? 150 : 140, h: i ? 92 : 0 }
+      : butt ? { x: (me === 'right' ? -134 : 134) + (r() - 0.5) * 12, d: 150 + (r() - 0.5) * 10, h: 0 }
+      : { x: (i ? 190 : -150) + (r() - 0.5) * 110, d: 90 + r() * 150, h: 0 };
     // Fall and bounce: heights over time, and how much ground is covered (slower after every bounce).
     const pts = []; let h = from.h, vh = 420 + r() * 160, t = 0, speed = 1, dist = 0, bounces = [];
     const dt = 1 / 120;
@@ -317,7 +323,7 @@ export function renderTV(v, el) {
     const table = tossScene(v);
     const result = last && !v.animating ? `<div class="toss-name ${last.bust || last.pile ? 'lose' : last.double ? 'win' : ''}">${esc(last.name)} ${last.pts ? `<b>+${last.pts}</b>` : ''}</div>` : '<div class="toss-name blank"></div>';
     const status = v.ending && !v.animating
-      ? v.endReason === 'bank' ? `<p class="say win">Banked ${v.banked} points!</p>` : v.endReason === 'bust' ? `<p class="say lose">They butt heads! Lost ${v.lost} points this turn.</p>` : v.endReason === 'pile' ? `<p class="say lose">Goat pile! Back to zero.</p>` : '<p class="say">Turn skipped.</p>'
+      ? v.endReason === 'bank' ? `<p class="say win">Banked ${v.banked} points!</p>` : v.endReason === 'bust' ? `<p class="say lose">They butt heads! ${v.lost ? `Lost ${v.lost} points this turn.` : 'Turn over.'}</p>` : v.endReason === 'pile' ? `<p class="say lose">Goat pile! Back to zero.</p>` : '<p class="say">Turn skipped.</p>'
       : `<p class="say">This turn: <b class="turnpts">${v.turnPts}</b></p>${(() => { const c = v.board.find(p => p.now); if (!c) return ''; const need = v.target - c.score - v.turnPts; return need <= 0 ? '<p class="say win" data-pop="bankwin" data-snd="gasp">Bank it to be the G.O.A.T.!</p>' : need <= 15 ? `<p class="say" data-pop="near${c.name}" data-snd="gasp">🔥 ${need} away from winning!</p>` : ''; })()}`;
     const legend = `<div class="glegend">${[['left', 'right', 'Different sides', 'lose turn', 'lose'], ['left', 'left', 'Same side', '1'], ['back', '', 'Hooves up', '5'], ['stand', '', 'On all fours', '5'], ['nose', '', 'Nose dive', '10'], ['horn', '', 'Horn stand', '15'], ['back', 'back', 'Two alike', '×4']].map(([a, b, n, p, c]) => `<div class="gl ${c || ''}"><span class="glpic">${goatImg(a)}${b ? goatImg(b) : ''}</span><small>${n}</small><b>${p}</b></div>`).join('')}</div>`;
     h = `<div class="ghead"><h2>${esc(v.who)}'s turn</h2>${result}</div>${table}<div class="gfoot">${status}<div class="history">${v.tosses.map(t => `<span class="${t.bust || t.pile ? 'lose' : ''}">${esc(t.name)}${t.pts ? ' +' + t.pts : ''}</span>`).join('')}</div></div>${legend}<button class="btn ghost" data-host="next" ${v.animating ? 'style="visibility:hidden"' : ''}>${v.ending ? 'Next player' : 'Skip / bank for them'}</button>`;
