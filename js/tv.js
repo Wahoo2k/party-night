@@ -82,6 +82,35 @@ function feel(name, m, ms = 2000, how = 'avhop') {
   });
   paint(); clearTimeout(feelT[name]); feelT[name] = setTimeout(paint, ms + 20);
 }
+// Moments that belong to one game: robbed in Gold Rush, a life lost in Last One Standing, voted out in Werewolf…
+// Each entry reads the game's TV view and returns [name, mood, big?] rows; a row plays once, just after the result
+// has landed (so it wins over the plain "gained points" smile).
+const MOMENTS = {
+  gold: v => v.phase === 'reveal' && v.settled && v.events.flatMap(e => (e.kind === 'jackpot' ? [[e.name, 'wow', 1]] : e.kind === 'hole' ? [[e.name, 'sad', 1]] : e.kind === 'steal' ? [[e.name, 'happy', 1], [e.target, 'sad', 1]] : e.kind === 'swap' ? [[e.name, 'happy', 1], [e.target, 'wow', 1]] : [])),
+  survive: v => v.phase === 'reveal' && v.settled && v.players.filter(p => p.lost || p.out).map(p => [p.name, 'sad', p.out ? 1 : 0]),
+  auction: v => v.phase === 'result' && v.settled && v.winner && [[v.winner, v.paid > v.value ? 'sad' : 'wow', 1]],
+  fib: v => v.phase === 'reveal' && v.settled && [...v.yes, ...v.no].filter(p => p.got && p.streak >= 3).map(p => [p.name, 'wow', 1]),
+  clock: v => v.phase === 'result' && v.settled && v.rows.flatMap(r => (r.spot ? [[r.name, 'wow', 1]] : r.off === null ? [[r.name, 'sad', 0]] : [])),
+  dash: v => v.phase === 'result' && v.settled && [...v.rows.slice(0, 1).map(r => [r.name, 'wow', 1]), ...v.missed.map(n => [n, 'sad', 0])],
+  ladder: v => v.phase === 'result' && v.right === false && [[v.hotName, 'sad', 1]],
+  potato: v => v.phase === 'boom' && v.burned && [[v.burned, 'sad', 1]],
+  werewolf: v => (v.phase === 'day' || v.phase === 'verdict') && v.reveal?.name && [[v.reveal.name, 'sad', 1]],
+  midnight: v => v.phase === 'over' && v.result?.out?.map(n => [n, 'sad', 1]),
+  imposter: v => v.phase === 'guess' && v.imposterName && [[v.imposterName, 'wow', 1]],
+  bluffcards: v => v.reveal && [[v.reveal.loser, 'sad', 1], ...[v.reveal.by, v.reveal.liar].filter(n => n !== v.reveal.loser).map(n => [n, 'happy', 0])],
+  blackjack: v => v.seats.flatMap(x => (x.done === 'bust' ? [[x.name, 'sad', 1]] : x.done === 'bj' ? [[x.name, 'wow', 1]] : [])),
+};
+let momentSeen = { key: '', rows: new Set() };
+function moments(v) {
+  let rows; try { rows = MOMENTS[host.gameId]?.(v); } catch { rows = null; }
+  const key = scoreKeyOf(host.state);
+  if (momentSeen.key !== key) momentSeen = { key, rows: new Set() };
+  for (const [name, mood, big] of rows || []) {
+    const id = name + '|' + mood; if (!name || momentSeen.rows.has(id)) continue;
+    momentSeen.rows.add(id);
+    setTimeout(() => feel(name, mood, big ? 3000 : 1800, big ? 'avpop' : 'avhop'), 250);
+  }
+}
 const REACT_MOOD = { '👏': 'happy', '😂': 'happy', '🔥': 'happy', '❤️': 'happy', '👋': 'happy', '😱': 'wow', '👎': 'sad' };
 const moodOf = name => (moods[name] && moods[name].until > Date.now() ? moods[name].m : 'neutral');
 const faceHtml = (f, fallback = '🙂', mood = 'neutral') => { const n = avNum(f); return n === null ? f?.[0] || fallback : `<img class="av" alt="" src="${avatarUrl(n, mood)}">`; };
@@ -1222,7 +1251,7 @@ function render() {
   if (host.intro && host.state) host.intro = null;
   if (!host.state && host.intro) renderIntro();
   else if (!host.state) renderLobby();
-  else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); if (fresh) wordsIn(); if (v.phase === 'over') afterParty(); decorate(); pops(fresh); guideTip(); slideScores(); cardPops(fresh); }
+  else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); if (fresh) wordsIn(); if (v.phase === 'over') afterParty(); decorate(); pops(fresh); guideTip(); slideScores(); cardPops(fresh); moments(v); }
   document.body.classList.toggle('night', host.state?.phase === 'night');
   nightLine();
   // How-to screens show in full the first time a room plays a game, then get out of the way.

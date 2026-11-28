@@ -274,3 +274,7 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Now: when a result has been shown and the game is about to move on (the Next press, the auto-advance or the phone remote), the standings come up first for 5 seconds. Rules: at most about once every 70 seconds, only if scores changed, never just before the podium, a second press skips. Scores come from the game's score list or the score chips.
 - Not covered: turn games with no result screen (GOAT Toss, Go Fish, Memory Match, Color Clash…), team games, hidden-role games, Hearts (lowest wins; opted out with `meta.standings: false`). They keep the score strip only.
 - `?standgap=<seconds>` sets the wait; `?local=1` shows none unless it is given. Test: test/standings-e2e.mjs.
+
+## Character moments per game (28 Nov)
+- `MOMENTS` in js/tv.js: Gold Rush (jackpot, hole, robbed, swapped), Last One Standing (life lost, out), Going Once (bargain or overpaid), Fact or Fib (streak of 3+), Inner Clock (spot on, never stopped), Doodle Dash (fastest, missed), Million Ladder (wrong answer), Hot Potato (burned), Werewolf and Midnight Wolves (killed or voted out), Imposter (unmasked), Liar's Deck (caught), Blackjack (bust, blackjack). Only the Last One Standing one has a browser test (test/moments-e2e.mjs); the others were written from each game's TV view and not watched.
+- Music now asks for ElevenLabs `music_v2_5` (was the retiring default `music_v1`); lobby, win and night music re-recorded with it.
