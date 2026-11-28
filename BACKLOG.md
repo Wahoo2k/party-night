@@ -173,3 +173,9 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - App: js/own.js. Each TV has a private id; a locked game's join screen becomes an unlock screen with a QR to the account page carrying that id, and the TV checks every 4 s until it unlocks. A TV offline keeps what it last knew for 7 days. `SELLING` in js/packs.js is false, so nothing is locked for anyone; `tv.html?shop=1` turns the locks on for a try.
 - Not yet tested end to end: sign-in email, checkout, the Stripe listener, TV unlock. The sandbox can't reach the database or Stripe.
 - Before real sales: Stripe account activation (Tom), live keys, custom email sender for sign-in mail (the built-in one is limited to a few emails an hour), Stripe Tax settings, privacy and terms, then set SELLING to true.
+
+## Google TV app, first test build (Nov 27)
+- tvapp/: a small Android app (package com.toolshedapps.partynight) with one full-screen web view on tv.html?app=android. Shows on the TV home row with its own banner; keeps the screen awake; sound starts without a click; the remote's arrows and OK reach the page as arrow keys and Enter; Back asks the page first (`window.partyBack` in js/tv.js) and needs a second press to leave; an offline screen retries every 6 s. The user agent ends with "PartyNightTV/<version>".
+- Built by the "TV app" job on GitHub on every change under tvapp/, and published as a download: release "tv-test", file party-night-tv.apk. Short address: wahoo2k.github.io/party-night/get
+- Test builds are signed with tvapp/test-signing.jks, which is in the repository on purpose so each build installs over the last. It must never be used for a store release.
+- Not tested on any device. The same file should install on Fire TV. No store billing yet; with the shop off, nothing is locked.
