@@ -305,7 +305,7 @@ function viewFor(pid) {
   }
   if (!host.state) {
     const me = host.players.find(p => p.pid === pid) || {};
-    return { phase: 'lobby', ...(game().meta.teams ? { _teams: TEAM_NAMES.map((name, k) => ({ name, members: host.players.filter(p => teamPick()[p.pid] === k).map(p => p.name) })), _team: teamPick()[pid] } : {}), faces: FACES.map(f => f[0]), taken: host.players.filter(p => p.pid !== pid).map(p => p.face?.[0]), ...(host.tally?.games.length ? { _night: nightCard() } : {}), _reacts: REACTIONS, players: host.players.map(p => p.name), game: game().meta.name, me: me.name, fixed: !!me.fixed, byHost: !!me.locked, _me: me.face, ...(pid === remotePid() ? { _remote: true, canStart: host.players.length >= game().meta.min } : {}), ...(game().meta.id === 'funny' ? { canPrompt: true, myPrompts: (host.custom || []).filter(c => c.pid === pid).map(c => c.text) } : {}) };
+    return { phase: 'lobby', ...(game().meta.teams ? { _teams: TEAM_NAMES.map((name, k) => ({ name, members: host.players.filter(p => teamPick()[p.pid] === k).map(p => p.name) })), _team: teamPick()[pid], _teamName: teamName(teamPick()[pid]) } : {}), faces: FACES.map(f => f[0]), taken: host.players.filter(p => p.pid !== pid).map(p => p.face?.[0]), ...(host.tally?.games.length ? { _night: nightCard() } : {}), _reacts: REACTIONS, players: host.players.map(p => p.name), game: game().meta.name, me: me.name, fixed: !!me.fixed, byHost: !!me.locked, _me: me.face, ...(pid === remotePid() ? { _remote: true, canStart: host.players.length >= game().meta.min } : {}), ...(game().meta.id === 'funny' ? { canPrompt: true, myPrompts: (host.custom || []).filter(c => c.pid === pid).map(c => c.text) } : {}) };
   }
   return { ...maskView(game().phoneView(host.state, pid), host.hidden), game: host.gameId, _name: game().meta.name, _how: howFor(), _as: host.players.find(p => p.pid === pid)?.name, _me: host.players.find(p => p.pid === pid)?.face, ...(host.paused ? { _paused: true } : {}), ...(gains[pid] ? { _gain: gains[pid] } : {}), ...(places[pid] ? { _place: places[pid] } : {}), ...(stands[pid] && !game().meta.secret ? { _stand: stands[pid] } : {}), _theme: THEME_OF[host.gameId] || '', _reacts: REACTIONS, ...(finalRound ? { _final: true } : {}), ...(host.blurDraw ? { _nodraw: true } : {}), ...(pid === remotePid() ? { _remote: true } : {}) };
 }
@@ -512,6 +512,10 @@ function onMessage(m) {
     host.audience = host.audience.filter(x => x.pid !== m.pid);
     if (!host.state) host.players = host.players.filter(x => x.pid !== m.pid);
     changed();
+  } else if (m.t === 'teamname') {
+    // A player names their own team (join screen only). Same family filter as player names.
+    const k = teamPick()[m.pid], name = String(m.name || '').replace(/\s+/g, ' ').trim().slice(0, 16);
+    if (!host.state && game().meta.teams && (k === 0 || k === 1) && name.length >= 2 && !isRude(name) && teamName(k) !== name) { (host.teamNames ||= [null, null])[k] = name; lastSent = {}; if (sfx.on) play('lockin'); changed(); }
   } else if (m.t === 'team') {
     // A player picks a side for a team game. They can switch freely until the game starts.
     if (!host.state && game().meta.teams && host.players.some(x => x.pid === m.pid) && (m.team === 0 || m.team === 1) && teamPick()[m.pid] !== m.team) { host.teamPick[m.pid] = m.team; lastSent = {}; if (sfx.on) play('pop'); changed(); }
@@ -727,7 +731,10 @@ function nightAwards() {
 
 // Team games: everyone has a side from the moment they sit down (alternating, so the sides start even) and can
 // change it on their phone until the game starts.
-const TEAM_NAMES = ['☀️ Team Sun', '🌙 Team Moon'];
+const TEAM_DEFAULT = ['Team Sun', 'Team Moon'], TEAM_ICON = ['☀️', '🌙'];
+// A team can give itself a name on the join screen; until it does it is Team Sun or Team Moon.
+const teamName = k => host.teamNames?.[k] || TEAM_DEFAULT[k];
+const TEAM_NAMES = { map: fn => [0, 1].map(k => fn(`${TEAM_ICON[k]} ${teamName(k)}`, k)) };
 function teamPick() {
   const t = (host.teamPick ||= {});
   for (const pid of Object.keys(t)) if (!host.players.some(p => p.pid === pid)) delete t[pid];
@@ -743,7 +750,7 @@ function startGame(again) {
   // The audience gets promoted into open seats for the next game.
   while (host.audience.length && host.players.length < game().meta.max) host.players.push(host.audience.shift());
   const prev = host.state && host.state.game === host.gameId ? host.state : host.lastByGame?.[host.gameId];
-  host.state = game().setup(host.players, Math.random, prev, { short: !!host.settings.short, ...(host.opts?.[host.gameId] || {}), ...(game().meta.teams ? { teams: { ...teamPick() } } : {}), custom: (host.custom || []).map(c => c.text) });
+  host.state = game().setup(host.players, Math.random, prev, { short: !!host.settings.short, ...(host.opts?.[host.gameId] || {}), ...(game().meta.teams ? { teams: { ...teamPick() }, teamNames: [teamName(0), teamName(1)] } : {}), custom: (host.custom || []).map(c => c.text) });
   if (host.gameId === 'funny') host.custom = [];
   introArt = true;
   lastEventId = 0; popped.clear(); gains = {}; places = {}; stands = {}; lastScore = {}; finalRound = false; finalSaid = false;
@@ -1071,7 +1078,7 @@ function renderLobby() {
         const total = Math.max(n, Math.min(g.meta.max, 8));
         const seat = (i, inner, cls, attrs = '') => { const a = ((i + 0.5) / total) * Math.PI * 2 - Math.PI / 2; return `<${attrs ? 'button' : 'div'} class="seat ${cls}" ${attrs} style="left:${(50 + 42 * Math.cos(a)).toFixed(1)}%;top:${(52 + 35 * Math.sin(a)).toFixed(1)}%;--d:${(i * 0.37) % 2}s">${inner}</${attrs ? 'button' : 'div'}>`; };
         return `<div class="ring n${Math.min(total, 12)}"><div class="fireflies">${Array.from({ length: 14 }, (_, k) => `<i style="left:${(k * 37) % 100}%;top:${(k * 53) % 100}%;animation-delay:${-(k * 0.9)}s"></i>`).join('')}</div>
-          <div class="ringmid">${art(host.gameId, ICONS[host.gameId])}<h2>${esc(g.meta.name)}</h2><p>${n ? `${n} player${n === 1 ? '' : 's'} in` : 'Grab a seat!'}${need ? ` · need ${need} more` : ''}</p><button class="btn" data-host="start" ${need ? 'disabled' : ''}>${need ? 'Waiting…' : g.meta.teams ? 'Lock teams and start' : "Everybody's in!"}</button>${g.meta.teams && n ? `<div class="teamline">${TEAM_NAMES.map((nm, k) => `<span class="tl${k}">${nm} <b>${host.players.filter(p => teamPick()[p.pid] === k).length}</b></span>`).join('')}<small>Pick your team on your phone</small></div>` : ''}</div>
+          <div class="ringmid">${art(host.gameId, ICONS[host.gameId])}<h2>${esc(g.meta.name)}</h2><p>${n ? `${n} player${n === 1 ? '' : 's'} in` : 'Grab a seat!'}${need ? ` · need ${need} more` : ''}</p><button class="btn" data-host="start" ${need ? 'disabled' : ''}>${need ? 'Waiting…' : g.meta.teams ? 'Lock teams and start' : "Everybody's in!"}</button>${g.meta.teams && n ? `<div class="teamline">${TEAM_NAMES.map((nm, k) => `<span class="tl${k}">${esc(nm)} <b>${host.players.filter(p => teamPick()[p.pid] === k).length}</b></span>`).join('')}<small>Pick your team on your phone</small></div>` : ''}</div>
           ${Array.from({ length: total }, (_, i) => { const p = host.players[i]; return p
             ? seat(i, `<i style="--pc:${p.face?.[1] || '#232a5c'}">${p.face?.[0] || '🙂'}</i><b>${esc(p.name)}</b>${i === 0 ? '<em>👑</em>' : ''}`, `taken ${g.meta.teams ? 'tm' + teamPick()[p.pid] : ''} ${p.bot ? 'bot' : ''} ${p.away ? 'away' : ''} ${seen.has(p.pid) ? '' : 'pop'} ${editing === p.pid ? 'on' : ''}`, `data-host="edit:${esc(p.pid)}" title="Rename or remove"`)
             : seat(i, '<i>Join!</i>', 'open'); }).join('')}</div>`;

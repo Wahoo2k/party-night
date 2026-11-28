@@ -51,6 +51,7 @@ export const CARDS = [
   ["Window", "glass", "open", "look", "house"],
 ];
 export const TEAMS = ['Team Sun', 'Team Moon'];
+const T = s => s.teamNames || TEAMS;   // the names the players gave their teams on the join screen, if they did
 const TURNS_PER_TEAM = 3;
 export const TIMES = { ready: 20000, turn: 60000, turnEnd: 7000 };
 
@@ -65,7 +66,8 @@ export function setup(players, rnd = Math.random, prev = null, opts = {}) {
   else if (sameCrowd) players.forEach(p => (teamOf[p.pid] = prev.teamOf[p.pid]));
   else shuffle(players.map(p => p.pid), rnd).forEach((pid, i) => (teamOf[pid] = i % 2));
   return {
-    game: 'taboo', perTeam: opts.short ? 2 : TURNS_PER_TEAM,
+    game: 'taboo',
+    teamNames: Array.isArray(opts?.teamNames) && opts.teamNames.length === 2 ? opts.teamNames.map((n, i) => String(n || TEAMS[i]).slice(0, 18)) : null, perTeam: opts.short ? 2 : TURNS_PER_TEAM,
     players: players.map(p => ({ pid: p.pid, name: p.name })),
     teamOf, teamScore: [0, 0],
     deck: shuffle(CARDS.map((_, i) => i), rnd),
@@ -139,17 +141,17 @@ export function tick(s, now = Date.now(), rnd = Math.random) {
 }
 
 export function narration(s) {
-  if (s.phase === 'ready') return `${s.turn === 0 ? 'Welcome to Taboo Talk! ' : ''}${TEAMS[playing(s)]}, you're up. ${nameOf(s, giver(s))}, you're giving clues. Press start on your phone when your team is ready.`;
-  if (s.phase === 'turnEnd') return `Time! ${TEAMS[s.lastTurn.team]} got ${s.lastTurn.log.filter(l => l.result === 'got').length}.`;
-  if (s.phase === 'over') return s.teamScore[0] === s.teamScore[1] ? 'It\'s a tie!' : `${TEAMS[s.teamScore[0] > s.teamScore[1] ? 0 : 1]} wins Taboo Talk!`;
+  if (s.phase === 'ready') return `${s.turn === 0 ? 'Welcome to Taboo Talk! ' : ''}${T(s)[playing(s)]}, you're up. ${nameOf(s, giver(s))}, you're giving clues. Press start on your phone when your team is ready.`;
+  if (s.phase === 'turnEnd') return `Time! ${T(s)[s.lastTurn.team]} got ${s.lastTurn.log.filter(l => l.result === 'got').length}.`;
+  if (s.phase === 'over') return s.teamScore[0] === s.teamScore[1] ? 'It\'s a tie!' : `${T(s)[s.teamScore[0] > s.teamScore[1] ? 0 : 1]} wins Taboo Talk!`;
   return '';
 }
 
 export function cue(s) {
-  if (s.phase === 'ready') return { sound: 'join', wait: 800, title: TEAMS[playing(s)], sub: `${nameOf(s, giver(s))} gives the clues` };
+  if (s.phase === 'ready') return { sound: 'join', wait: 800, title: T(s)[playing(s)], sub: `${nameOf(s, giver(s))} gives the clues` };
   if (s.phase === 'turn') return { sound: 'vote', wait: 200 };
   if (s.phase === 'turnEnd') return { sound: 'drumroll', wait: 300 };
-  if (s.phase === 'over') return { sound: 'win', wait: 1600, title: 'Game Over', sub: s.teamScore[0] === s.teamScore[1] ? 'It\'s a tie!' : `${TEAMS[s.teamScore[0] > s.teamScore[1] ? 0 : 1]} wins!`, tone: 'dawn', fx: 'confetti' };
+  if (s.phase === 'over') return { sound: 'win', wait: 1600, title: 'Game Over', sub: s.teamScore[0] === s.teamScore[1] ? 'It\'s a tie!' : `${T(s)[s.teamScore[0] > s.teamScore[1] ? 0 : 1]} wins!`, tone: 'dawn', fx: 'confetti' };
   return null;
 }
 
@@ -171,7 +173,7 @@ export function botAct(v, rnd = Math.random) {
 export function tvView(s, now = Date.now()) {
   const v = {
     phase: s.phase, turn: s.turn + 1, turns: s.perTeam * 2, playing: playing(s),
-    teams: TEAMS.map((name, t) => ({ name, score: s.teamScore[t], members: team(s, t).map(p => nameOf(s, p)) })),
+    teams: T(s).map((name, t) => ({ name, score: s.teamScore[t], members: team(s, t).map(p => nameOf(s, p)) })),
     giver: nameOf(s, giver(s)), left: Math.max(0, Math.ceil((s.deadline - now) / 1000)),
     got: s.log.filter(l => l.result === 'got').length, eventId: s.eventId, lastEvent: s.lastEvent,
   };
@@ -183,7 +185,7 @@ export function tvView(s, now = Date.now()) {
 export function phoneView(s, pid) {
   if (!P(s, pid)) return { phase: 'spectate' };
   const t = s.teamOf[pid];
-  const v = { phase: s.phase, team: TEAMS[t], teamIdx: t, playing: playing(s), isGiver: pid === giver(s), giver: nameOf(s, giver(s)), scores: [...s.teamScore], got: s.log.filter(l => l.result === 'got').length };
+  const v = { phase: s.phase, team: T(s)[t], teamIdx: t, playing: playing(s), isGiver: pid === giver(s), giver: nameOf(s, giver(s)), scores: [...s.teamScore], got: s.log.filter(l => l.result === 'got').length };
   // The card goes to the clue-giver and to the other team (who watch for slips), never to the guessers.
   if (s.phase === 'turn' && (v.isGiver || t !== playing(s)) && s.card !== null) { v.card = CARDS[s.card]; v.cardId = s.card; }
   if (s.phase === 'over') v.won = s.teamScore[t] > s.teamScore[1 - t];

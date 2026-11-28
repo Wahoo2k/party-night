@@ -20,6 +20,7 @@ export const BANK = [
   'Jack and the Beanstalk', 'A chef', 'A mummy', 'Romeo', 'A superhero', 'A gorilla', 'A penguin', 'A kangaroo', 'A yeti', 'Mother Goose',
 ];
 export const TEAMS = ['Team Sun', 'Team Moon'];
+const T = s => s.teamNames || TEAMS;   // the names the players gave their teams on the join screen, if they did
 export const ROUNDS = [
   { name: 'Describe it', rule: 'Say anything except the name itself.', short: 'Describe' },
   { name: 'One word', rule: 'Just ONE word per name. Choose wisely!', short: 'One word' },
@@ -48,6 +49,7 @@ export function setup(players, rnd = Math.random, prev = null, opts = {}) {
   else shuffle(players.map(p => p.pid), rnd).forEach((pid, i) => (teamOf[pid] = i % 2));
   return {
     game: 'bowl',
+    teamNames: Array.isArray(opts?.teamNames) && opts.teamNames.length === 2 ? opts.teamNames.map((n, i) => String(n || TEAMS[i]).slice(0, 18)) : null,
     players: players.map(p => ({ pid: p.pid, name: p.name })),
     teamOf, teamScore: [0, 0], subs: {}, names: [], bowl: [],
     round: 0, roundNo: 0, turn: 0, giverIdx: [0, 0], first: Math.floor(rnd() * 2),
@@ -143,11 +145,11 @@ export function tick(s, now = Date.now(), rnd = Math.random) {
   return hostAct(s, 'next', now, rnd);
 }
 
-const winnerLine = s => (s.teamScore[0] === s.teamScore[1] ? 'It\'s a tie!' : `${TEAMS[s.teamScore[0] > s.teamScore[1] ? 0 : 1]} wins!`);
+const winnerLine = s => (s.teamScore[0] === s.teamScore[1] ? 'It\'s a tie!' : `${T(s)[s.teamScore[0] > s.teamScore[1] ? 0 : 1]} wins!`);
 export function narration(s) {
   if (s.phase === 'submit') return 'Welcome to Salad Bowl! Everyone, secretly add three names to the bowl. Famous people, characters, anyone your group would know.';
-  if (s.phase === 'ready') return `${s.newRound ? `Round ${s.round + 1}: ${ROUNDS[s.round].name}. ${ROUNDS[s.round].rule} ` : ''}${TEAMS[playing(s)]}, ${nameOf(s, giver(s))} is up.`;
-  if (s.phase === 'turnEnd') return `Time! ${s.lastTurn.log.filter(l => l.result === 'got').length} for ${TEAMS[s.lastTurn.team]}.`;
+  if (s.phase === 'ready') return `${s.newRound ? `Round ${s.round + 1}: ${ROUNDS[s.round].name}. ${ROUNDS[s.round].rule} ` : ''}${T(s)[playing(s)]}, ${nameOf(s, giver(s))} is up.`;
+  if (s.phase === 'turnEnd') return `Time! ${s.lastTurn.log.filter(l => l.result === 'got').length} for ${T(s)[s.lastTurn.team]}.`;
   if (s.phase === 'roundEnd') return s.round + 1 < ROUNDS.length ? `The bowl is empty! Same names again, but now: ${ROUNDS[s.round + 1].name}.` : 'The bowl is empty!';
   if (s.phase === 'over') return winnerLine(s);
   return '';
@@ -180,7 +182,7 @@ export function botAct(v, rnd = Math.random) {
 export function tvView(s, now = Date.now()) {
   const v = {
     phase: s.phase, round: s.round, rounds: ROUNDS, playing: playing(s),
-    teams: TEAMS.map((name, t) => ({ name, score: s.teamScore[t], members: team(s, t).map(p => nameOf(s, p)) })),
+    teams: T(s).map((name, t) => ({ name, score: s.teamScore[t], members: team(s, t).map(p => nameOf(s, p)) })),
     giver: nameOf(s, giver(s)), left: Math.max(0, Math.ceil((s.deadline - now) / 1000)),
     inBowl: s.bowl.length + (s.card !== null ? 1 : 0), total: s.names.length,
     got: s.log.filter(l => l.result === 'got').length,
@@ -193,7 +195,7 @@ export function tvView(s, now = Date.now()) {
 export function phoneView(s, pid) {
   if (!P(s, pid)) return { phase: 'spectate' };
   const t = s.teamOf[pid];
-  const v = { phase: s.phase, round: s.round, team: TEAMS[t], teamIdx: t, playing: playing(s), isGiver: pid === giver(s), giver: nameOf(s, giver(s)), scores: [...s.teamScore] };
+  const v = { phase: s.phase, round: s.round, team: T(s)[t], teamIdx: t, playing: playing(s), isGiver: pid === giver(s), giver: nameOf(s, giver(s)), scores: [...s.teamScore] };
   if (s.phase === 'submit') { v.submitted = !!s.subs[pid]; v.mine = s.subs[pid] || null; return v; }
   if (s.phase === 'turn' && v.isGiver && s.card !== null) { v.card = s.names[s.card]; v.cardId = s.card; v.got = s.log.filter(l => l.result === 'got').length; v.canSkip = s.bowl.length > 0; }
   if (s.phase === 'over') v.won = s.teamScore[t] > s.teamScore[1 - t];

@@ -29,6 +29,7 @@ export const WORDS = [
   'Track', 'Train', 'Tree', 'Trunk', 'Turtle', 'Wall', 'Watch', 'Wave', 'Web', 'Whale', 'Wheel', 'Whistle', 'Wind', 'Wing', 'Witch', 'Yard',
 ];
 export const TEAMS = ['Team Sun', 'Team Moon'];
+const T = s => s.teamNames || TEAMS;   // the names the players gave their teams on the join screen, if they did
 export const TIMES = { clue: 120000, guess: 150000, flash: 1500 };
 
 const shuffle = (a, rnd) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -53,6 +54,7 @@ export function setup(players, rnd = Math.random, prev = null, opts = {}) {
   const key = shuffle([...Array(first === 0 ? 9 : 8).fill(0), ...Array(first === 1 ? 9 : 8).fill(1), ...Array(7).fill('n'), 'x'], rnd);
   return {
     game: 'agents',
+    teamNames: Array.isArray(opts?.teamNames) && opts.teamNames.length === 2 ? opts.teamNames.map((n, i) => String(n || TEAMS[i]).slice(0, 18)) : null,
     players: players.map(p => ({ pid: p.pid, name: p.name })),
     teamOf, spy, words, key, revealed: Array(25).fill(false),
     turn: first, phase: 'clue', clue: null, guessesLeft: 0,
@@ -146,16 +148,16 @@ export function tick(s, now = Date.now()) {
 }
 
 export function narration(s) {
-  if (s.phase === 'clue') return s.history.length === 0 && !s.clue ? `Welcome to Secret Agents! ${TEAMS[s.turn]} goes first. Spymasters, check your phones for the secret key.` : `${TEAMS[s.turn]}, your spymaster is thinking.`;
+  if (s.phase === 'clue') return s.history.length === 0 && !s.clue ? `Welcome to Secret Agents! ${T(s)[s.turn]} goes first. Spymasters, check your phones for the secret key.` : `${T(s)[s.turn]}, your spymaster is thinking.`;
   if (s.phase === 'guess' && s.lastEvent === 'clue') return `${s.clue.word}, ${s.clue.n}.`;
-  if (s.phase === 'over') return s.why === 'trap' ? `Oh no, the trap! ${TEAMS[s.winner]} wins!` : `${TEAMS[s.winner]} found all their agents and wins!`;
+  if (s.phase === 'over') return s.why === 'trap' ? `Oh no, the trap! ${T(s)[s.winner]} wins!` : `${T(s)[s.winner]} found all their agents and wins!`;
   return '';
 }
 
 export function cue(s) {
-  if (s.phase === 'clue') return { sound: 'join', wait: 700, title: TEAMS[s.turn], sub: 'Spymaster, give a clue' };
+  if (s.phase === 'clue') return { sound: 'join', wait: 700, title: T(s)[s.turn], sub: 'Spymaster, give a clue' };
   if (s.phase === 'guess') return { sound: 'vote', wait: 300 };
-  if (s.phase === 'over') return { sound: s.why === 'trap' ? 'lose' : 'win', wait: 1500, title: `${TEAMS[s.winner]} Wins!`, sub: s.why === 'trap' ? 'The other team hit the trap' : 'All agents found', tone: s.why === 'trap' ? 'blood' : 'dawn', fx: s.why === 'trap' ? 'claws' : 'confetti' };
+  if (s.phase === 'over') return { sound: s.why === 'trap' ? 'lose' : 'win', wait: 1500, title: `${T(s)[s.winner]} Wins!`, sub: s.why === 'trap' ? 'The other team hit the trap' : 'All agents found', tone: s.why === 'trap' ? 'blood' : 'dawn', fx: s.why === 'trap' ? 'claws' : 'confetti' };
   return null;
 }
 
@@ -201,7 +203,7 @@ export function tvView(s, now = Date.now()) {
   return {
     phase: s.phase, turn: s.turn, clue: s.clue, guessesLeft: s.guessesLeft,
     board: boardFor(s, s.phase === 'over', true),
-    teams: TEAMS.map((name, t) => ({ name, left: left(s, t), spy: nameOf(s, s.spy[t]), members: s.players.filter(p => s.teamOf[p.pid] === t && p.pid !== s.spy[t]).map(p => p.name) })),
+    teams: T(s).map((name, t) => ({ name, left: left(s, t), spy: nameOf(s, s.spy[t]), members: s.players.filter(p => s.teamOf[p.pid] === t && p.pid !== s.spy[t]).map(p => p.name) })),
     endVotes: Object.values(s.votes).filter(v => v === 'end').length,
     left: Math.max(0, Math.ceil((s.deadline - now) / 1000)),
     winner: s.winner, why: s.why, last: s.last,
@@ -214,14 +216,14 @@ export function phoneView(s, pid) {
   const isSpy = s.spy[t] === pid;
   const bot = String(pid).startsWith('bot-');
   return {
-    phase: s.phase, team: t, teamName: TEAMS[t], isSpy, myTurn: s.turn === t, turnName: TEAMS[s.turn],
+    phase: s.phase, team: t, teamName: T(s)[t], isSpy, myTurn: s.turn === t, turnName: T(s)[s.turn],
     clue: s.clue, guessesLeft: s.guessesLeft, myVote: s.votes[pid] ?? null,
     board: boardFor(s, isSpy || bot || s.phase === 'over', true),
     need: Math.ceil(guessers(s, s.turn).length / 2), spyName: nameOf(s, s.spy[s.turn]),
     // Bots on a team with real guessers never choose for them: they wait and then back whatever a person picked.
     humans: guessers(s, t).filter(g => !String(g).startsWith('bot-')).length,
     humanLead: (() => { const g = guessers(s, t).find(g => !String(g).startsWith('bot-') && s.votes[g] !== undefined); return g ? s.votes[g] : null; })(),
-    left: [left(s, 0), left(s, 1)], winner: s.winner,
+    left: [left(s, 0), left(s, 1)], winner: s.winner, names: T(s),
   };
 }
 
@@ -242,7 +244,7 @@ export function renderTV(v, el) {
 export function renderPhone(v, el, send) {
   let h = '';
   const grid = clickable => `<div class="agrid small">${v.board.map(b => `<button class="acard ${b.revealed ? 'rev ' + KEY_CLASS(b.k) : v.isSpy || v.phase === 'over' ? 'peek ' + KEY_CLASS(b.k) : ''} ${v.myVote === b.i ? 'mine' : ''}" ${clickable && !b.revealed ? `data-v="${b.i}"` : 'disabled'}><span>${esc(b.w)}</span>${b.votes.length ? `<small>${b.votes.length}</small>` : ''}</button>`).join('')}</div>`;
-  const head = `<p class="muted"><b class="tc${v.team}">${esc(v.teamName || '')}</b>${v.isSpy ? ' · <b>Spymaster</b>' : ''} · agents left: Sun ${v.left?.[0]} · Moon ${v.left?.[1]}</p>`;
+  const head = `<p class="muted"><b class="tc${v.team}">${esc(v.teamName || '')}</b>${v.isSpy ? ' · <b>Spymaster</b>' : ''} · agents left: ${esc(v.names?.[0] || 'Sun')} ${v.left?.[0]} · ${esc(v.names?.[1] || 'Moon')} ${v.left?.[1]}</p>`;
   if (v.phase === 'spectate') h = '<h2>Game in progress</h2>';
   else if (v.phase === 'over') h = `${head}<h2 class="${v.winner === v.team ? 'win' : 'lose'}">${v.winner === v.team ? 'Your team won!' : 'Your team lost'}</h2>${grid(false)}`;
   else if (v.isSpy && v.phase === 'clue' && v.myTurn) h = `${head}<h2>You give the clue</h2><div class="ahelp"><p>Only you can see the colors. Your team must find the words in <b class="tc${v.team}">your color</b>.</p><p>Type <b>one word</b> that links some of them, and <b>how many</b> it links. Example: <i>ocean 2</i> for WAVE and SHIP.</p><p>Don't lead them to the <b>black trap</b>: picking it loses the game.</p></div>${grid(false)}<form id="af2"><div class="row"><input id="cw" maxlength="20" placeholder="One word" autocomplete="off" required><input id="cn" type="number" inputmode="numeric" min="1" max="9" value="2" class="num" required></div><p class="lose" id="err"></p><button class="btn" type="submit">Send clue</button></form>`;
