@@ -93,6 +93,22 @@ Everyday sounds the players have to recognize. Plain, dry recordings with no mus
 | guess-duck | 1 | Name That Sound: a duck | A duck quacking four times, 2 seconds |
 | guess-kettle | 1 | Name That Sound: a kettle whistling | A stovetop kettle whistling as it boils, rising, 3 seconds |
 | guess-snore | 1 | Name That Sound: someone snoring | A person snoring loudly in their sleep, two snores, 3 seconds |
+| guess-typewriter | 1 | Name That Sound: a typewriter | An old mechanical typewriter, a few keys clacking then the carriage return ding, 3 seconds |
+| guess-tape | 1 | Name That Sound: tape pulled off a roll | A long strip of packing tape being pulled off its roll, close up, 2 seconds |
+| guess-heartbeat | 1 | Name That Sound: a heartbeat | A steady human heartbeat through a stethoscope, four beats, 3 seconds |
+| guess-skateboard | 1 | Name That Sound: a skateboard | A skateboard rolling along a pavement and over cracks, 3 seconds |
+| guess-icecubes | 1 | Name That Sound: ice cubes in a glass | Ice cubes dropping into a glass and clinking, 2 seconds |
+| guess-pingpong | 1 | Name That Sound: a ping-pong rally | A table tennis ball bouncing back and forth in a fast rally, 3 seconds |
+| guess-fireworks | 1 | Name That Sound: fireworks | A firework whistling up and bursting with crackles, 3 seconds |
+| guess-toothbrush | 1 | Name That Sound: an electric toothbrush | An electric toothbrush buzzing, switched on then off, 2 seconds |
+| guess-swing | 1 | Name That Sound: a playground swing | A squeaky playground swing going back and forth, 3 seconds |
+| guess-scissors | 1 | Name That Sound: scissors cutting paper | Scissors snipping through paper several times, close up, 2 seconds |
+| guess-lawnmower | 1 | Name That Sound: a lawn mower | A petrol lawn mower being started and running, 3 seconds |
+| guess-churchbell | 1 | Name That Sound: a church bell | A single large church bell tolling twice, 3 seconds |
+| guess-camera | 1 | Name That Sound: a camera shutter | An old film camera shutter clicking and the film winding on, 2 seconds |
+| guess-whistle | 1 | Name That Sound: a referee's whistle | A sports referee blowing a sharp whistle once, 1.5 seconds |
+| guess-bubbles | 1 | Name That Sound: blowing bubbles through a straw | Someone blowing bubbles into a drink through a straw, 2 seconds |
+| guess-coins | 1 | Name That Sound: coins dropped into a jar | A handful of coins dropped one by one into a glass jar, 2 seconds |
 
 ## Music and stings
 Nothing here is synthesized except the two thinking beds and the night ambience; the others are silent until a file exists. Loops must be seamless. The game already plays each one at the right moment and lowers music under the narrator.

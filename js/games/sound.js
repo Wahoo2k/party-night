@@ -62,14 +62,16 @@ export function tick(s, now = Date.now(), rnd = Math.random) {
   return s.deadline && now >= s.deadline ? hostAct(s, 'next', now, rnd) : s;
 }
 const ranking = (s, sc = s.scores) => s.players.map(p => ({ pid: p.pid, name: p.name, score: sc[p.pid] })).sort((a, b) => b.score - a.score);
+
 export function narration(s) {
-  if (s.phase === 'listen' && s.n === 1) return 'Welcome to Name That Sound! Listen closely, then pick what made the noise.';
+  if (s.phase === 'listen') return s.n === 1 ? 'Welcome to Name That Sound! Listen closely, then pick what made the noise.' : '';   // the host stays quiet while the sound plays
+  if (s.phase === 'reveal') { const a = s.q.options[s.q.answer]; return `It was ${a[0].toLowerCase()}${a.slice(1)}.`; }
   if (s.phase === 'over') return 'And that is the game. Thanks for playing!';
   return '';
 }
 export function cue(s) {
   if (s.phase === 'listen') return s.n === 1 ? { sound: 'fanfare', wait: 2600, title: 'Name That Sound', sub: 'Shh. Listen.' } : null;
-  if (s.phase === 'reveal') return s.settled ? null : { sound: 'stamp', wait: 0 };
+  if (s.phase === 'reveal') return s.settled ? null : { sound: 'stamp', wait: TIMES.settle - 400 };
   if (s.phase === 'over') return { sound: 'win', wait: 1500, title: 'Game Over', sub: `${ranking(s)[0].name} wins!`, tone: 'dawn', fx: 'confetti' };
   return null;
 }

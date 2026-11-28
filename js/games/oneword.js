@@ -96,15 +96,19 @@ export function tick(s, now = Date.now()) {
 
 const ranking = s => s.players.map(p => ({ pid: p.pid, name: p.name, score: s.scores[p.pid] })).sort((a, b) => b.score - a.score);
 export const verdict = (hits, of) => { const f = hits / of; return f >= 0.9 ? 'Mind readers!' : f >= 0.7 ? 'Great teamwork!' : f >= 0.5 ? 'Not bad at all.' : f >= 0.3 ? 'A bit rusty.' : 'Well… you had fun.'; };
+const say = (lines, k) => lines[((k % lines.length) + lines.length) % lines.length];   // the host does not say the same thing every round
+
 export function narration(s) {
-  if (s.phase === 'clue' && s.i === 0) return 'Welcome to One Word! Everyone is on the same team. Give one-word clues, but matching clues cancel out.';
+  if (s.phase === 'clue') return s.i === 0 ? 'Welcome to One Word! Everyone is on the same team. Give one-word clues, but matching clues cancel out.' : say(['Next word.', 'New word, same team.', 'Clues, please.', 'One word each. Make it count.'], s.i);
+  if (s.phase === 'guess') return s.kept && !s.kept.length ? 'Every clue cancelled out! Take a wild guess.' : say(['Here are your clues. What is the word?', 'Your team has spoken. One guess.', 'The clues are in. What is it?'], s.i);
+  if (s.phase === 'result') { const r = s.result; return `${r.right ? say(['Got it!', 'Yes! Nice work, team.', 'Correct!'], s.i) : r.guess ? say(['Not quite.', 'So close.', 'Not this time.'], s.i) : 'A pass.'} The word was ${s.words[s.i]}.`; }
   if (s.phase === 'over') return 'That\'s the game. Nice work, team!';
   return '';
 }
 export function cue(s) {
   if (s.phase === 'clue') return { sound: 'join', wait: 700, title: s.i === 0 ? 'One Word' : `Word ${s.i + 1}`, sub: s.i === 0 ? 'All on one team' : `of ${s.words.length}` };
   if (s.phase === 'guess') return { sound: 'vote', wait: 300 };
-  if (s.phase === 'result') return s.settled ? null : { sound: 'drumroll', wait: 0 };
+  if (s.phase === 'result') return s.settled ? null : { sound: 'drumroll', wait: Math.max(0, s.settleAt - Date.now() - 400) };
   if (s.phase === 'over') return { sound: 'win', wait: 1500, title: `${s.hits} of ${s.words.length}`, sub: verdict(s.hits, s.words.length), tone: 'dawn', fx: s.hits / s.words.length >= 0.5 ? 'confetti' : null };
   return null;
 }

@@ -88,8 +88,18 @@ export function tick(s, now = Date.now(), rnd = Math.random) {
 
 const nameOf = (s, pid) => (s.players.find(p => p.pid === pid) || {}).name || 'Someone';
 const ranking = s => s.players.map(p => ({ pid: p.pid, name: p.name, score: s.scores[p.pid] })).sort((a, b) => b.score - a.score);
+const say = (lines, k) => lines[((k % lines.length) + lines.length) % lines.length];   // the host does not say the same thing every round
+
 export function narration(s) {
-  if (s.phase === 'question' && s.n === 1) return 'Welcome to Last One Standing! Three lives each. Miss a question and you lose one.';
+  if (s.phase === 'question') {
+    const lead = s.n === 1 ? 'Welcome to Last One Standing! Three lives each. Miss a question and you lose one.' : say(['Next question.', 'Stay sharp.', 'Here it comes.', 'Lives on the line.', 'Ready?'], s.n);
+    return `${lead} ${s.q.q}`;
+  }
+  if (s.phase === 'reveal') {
+    const r = s.result, ans = s.q.options[s.q.answer];
+    const what = r.mercy ? 'Nobody got it, so nobody is hurt.' : r.out.length ? say(['And we have lost someone.', 'That is a knockout.', 'Somebody is out of lives.'], s.n) : r.lost.length ? say(['That cost a life.', 'Ouch. Lives lost.', 'Not everyone made it through.'], s.n) : say(['Everyone survives.', 'No lives lost.', 'A clean round.'], s.n);
+    return `The answer is ${ans}. ${what}`;
+  }
   if (s.phase === 'over') return 'And that is the game. Thanks for playing!';
   return '';
 }
@@ -99,7 +109,7 @@ export function cue(s) {
     if (s.n === 4 || s.n === 7) return { sound: 'sting-show', wait: 1300, title: LEVELS[levelOf(s.n)], sub: 'The questions just got harder' };
     return { sound: 'vote', wait: 300 };
   }
-  if (s.phase === 'reveal') return s.settled ? null : { sound: 'drumroll', wait: 0 };
+  if (s.phase === 'reveal') return s.settled ? null : { sound: 'drumroll', wait: TIMES.settle - 400 };
   if (s.phase === 'over') { const w = s.bonus?.winners || []; return { sound: 'win', wait: 1500, title: w.length === 1 ? 'Last One Standing' : 'Survivors', sub: w.map(p => nameOf(s, p)).join(' & '), tone: 'dawn', fx: 'confetti' }; }
   return null;
 }

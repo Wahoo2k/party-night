@@ -20,7 +20,13 @@ export const LOTS = [
   ['A guitar that "belonged to a legend"', '🎸', 40, 900], ['A meteorite, or possibly a rock', '☄️', 0, 900], ['A golden trophy for something', '🏆', 60, 500], ['A chest of pirate costume jewelry', '💍', 20, 800],
   ['A first-edition comic, slightly chewed', '📚', 30, 700], ['A robot butler that mostly works', '🤖', 100, 900], ['A racehorse named Probably Fine', '🐎', 0, 1000], ['A crystal ball with a crack', '🔮', 20, 600],
   ['A stamp collection, 3 stamps', '✉️', 10, 600], ['A grand piano, delivery not included', '🎹', 150, 900], ['A dinosaur egg. Certificate lost.', '🥚', 0, 1000], ['A crown from a school play, or a real king', '👑', 10, 900],
-  ['A telescope pointed at the neighbors', '🔭', 50, 500], ['A very fancy cheese, aged 40 years', '🧀', 20, 600], ['A magic lamp, lightly rubbed', '🪔', 0, 900], ['A vintage arcade machine', '🕹️', 100, 800],
+  ['A weather vane shaped like a pig', '🐖', 20, 400], ['A very fancy cheese, aged 40 years', '🧀', 20, 600], ['A magic lamp, lightly rubbed', '🪔', 0, 900], ['A vintage arcade machine', '🕹️', 100, 800],
+  ['A lamp that may contain a genie', '🪔', 0, 1000], ['A box of mismatched socks, some famous', '🧦', 0, 400], ['A telescope pointed at the neighbors', '🔭', 50, 500], ['A grandfather clock that runs backwards', '🕰️', 30, 700],
+  ['A sword in a stone, stone included', '🗡️', 100, 1000], ['A hot air balloon with a small hole', '🎈', 50, 900], ["A trunk of magician's props", '🎩', 20, 600], ['An ice cream truck, jingle stuck on', '🚚', 100, 900],
+  ['A chess set missing one king', '♟️', 10, 400], ['A dinosaur bone, or a big stick', '🦴', 0, 900], ['A crown from a school play', '👑', 0, 500], ['A submarine for one, slightly damp', '🚤', 100, 1000],
+  ['A parrot that knows secrets', '🦜', 50, 800], ['A typewriter with one sticky key', '⌨️', 20, 500], ['A bag of magic beans, unverified', '🫘', 0, 700], ['A rocking horse with a wild look', '🎠', 10, 400],
+  ['A jukebox that plays one song', '🎶', 30, 600], ['A stamp collection in a shoebox', '📮', 10, 900], ['A fossilized sandwich', '🥪', 0, 300], ['A canoe signed by the whole team', '🛶', 20, 500],
+  ["A wizard's hat, wizard not included", '🧙', 10, 500], ['A vintage camera with film still inside', '📷', 40, 800], ['A snow globe of a town that does not exist', '🔮', 10, 600], ['A unicycle, barely ridden', '🚲', 10, 300],
 ];
 export const TIMES = { bid: 22000, settle: 4200, after: 6000 };
 const shuffle = (a, rnd) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -71,14 +77,18 @@ export function tick(s, now = Date.now()) {
 }
 const nameOf = (s, pid) => (s.players.find(p => p.pid === pid) || {}).name || 'Someone';
 const ranking = (s, sc = s.scores) => s.players.map(p => ({ pid: p.pid, name: p.name, score: sc[p.pid] })).sort((a, b) => b.score - a.score);
+const say = (lines, k) => lines[((k % lines.length) + lines.length) % lines.length];   // the host does not say the same thing every round
+
+const NTH = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
 export function narration(s) {
-  if (s.phase === 'bid' && s.n === 0) return 'Welcome to Going Once! Bid on each lot from your phone. One of you secretly knows what it is really worth.';
+  if (s.phase === 'bid') { const name = LOTS[lot(s).i][0]; return `${s.n === 0 ? 'Welcome to Going Once! Bid on each lot from your phone. One of you secretly knows what it is really worth. ' : ''}Lot ${NTH[s.n] || s.n + 1}. ${name.replace(/"/g, '')}.`; }
+  if (s.phase === 'result') { const r = s.result; return !r.winner ? 'No bids. Back in the van it goes.' : lot(s).value >= r.paid ? say(['Sold! And a bargain.', 'Sold! Nicely done.', 'Sold! Worth every coin.'], s.n) : say(['Sold! Ouch. That cost too much.', 'Sold! Somebody overpaid.', 'Sold! That one will sting.'], s.n); }
   if (s.phase === 'over') return 'And that is the game. Thanks for playing!';
   return '';
 }
 export function cue(s) {
   if (s.phase === 'bid') return s.n === 0 ? { sound: 'fanfare', wait: 1500, title: 'Going Once', sub: 'Everyone starts with $1,000' } : { sound: 'join', wait: 500 };
-  if (s.phase === 'result') return s.settled ? null : { sound: 'drumroll', wait: 0 };
+  if (s.phase === 'result') return s.settled ? null : { sound: 'drumroll', wait: TIMES.settle - 400 };
   if (s.phase === 'over') return { sound: 'win', wait: 1500, title: 'Sold!', sub: `${ranking(s)[0].name} is worth the most`, tone: 'dawn', fx: 'confetti' };
   return null;
 }

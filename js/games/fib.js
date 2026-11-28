@@ -59,14 +59,24 @@ export function tick(s, now = Date.now()) {
 }
 
 const ranking = s => s.players.map(p => ({ pid: p.pid, name: p.name, score: s.scores[p.pid] })).sort((a, b) => b.score - a.score);
+const say = (lines, k) => lines[((k % lines.length) + lines.length) % lines.length];   // the host does not say the same thing every round
+
 export function narration(s) {
-  if (s.phase === 'ask' && s.n === 1) return 'Welcome to Fact or Fib! True or false? Keep getting them right to build a streak.';
+  if (s.phase === 'ask') {
+    const lead = s.n === 1 ? 'Welcome to Fact or Fib! True or false? Keep getting them right to build a streak.' : s.n === s.max ? 'Last one. Streaks still count.' : say(['Next one.', 'Try this.', 'How about this one?', 'Here we go.', 'True or false?'], s.n);
+    return `${lead} ${STATEMENTS[s.q][0]}`;
+  }
+  if (s.phase === 'reveal') {
+    const [, truth, note] = STATEMENTS[s.q], got = Object.values(s.result.got), right = got.filter(x => x > 0).length;
+    const verdict = truth ? say(['Fact!', 'True!', 'That is a fact.'], s.n) : say(['Fib!', 'False!', 'Nope. A fib.'], s.n);
+    return `${verdict} ${note}${got.length > 2 && !right ? ' Nobody got that one.' : got.length > 2 && right === got.length ? ' Too easy.' : ''}`;
+  }
   if (s.phase === 'over') return 'And that is the game. Thanks for playing!';
   return '';
 }
 export function cue(s) {
   if (s.phase === 'ask') return s.n === 1 ? { sound: 'fanfare', wait: 1500, title: 'Fact or Fib', sub: 'True or false?' } : s.n === s.max ? { sound: 'sting-show', wait: 1200, title: 'Last One', sub: 'Streaks still count' } : { sound: 'vote', wait: 300 };
-  if (s.phase === 'reveal') return s.settled ? null : { sound: 'drumroll', wait: 0 };
+  if (s.phase === 'reveal') return s.settled ? null : { sound: 'drumroll', wait: TIMES.settle - 400 };   // the host gives the verdict as the answer lights up
   if (s.phase === 'over') return { sound: 'win', wait: 1500, title: 'Game Over', sub: `${ranking(s)[0].name} wins!`, tone: 'dawn', fx: 'confetti' };
   return null;
 }

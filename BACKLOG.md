@@ -295,3 +295,10 @@ How: tools/review.mjs opens each game on a 1280x720 TV page with five bots, lets
 - Fixed from it: answer tiles sat half-faded during any vote with a countdown (the entrance animation restarted every second; Show of Hands was the worst); the drifting background shapes read as grey smudges over painted scenes (now much fainter); Mystery Manor never reached its ending (no podium choices, not counted in tonight's tally) and showed werewolf claw marks; bots never stopped the clock in Inner Clock and scored nothing in Copy Cat (timing moves now skip the bots' thinking pause, `_now` on a bot action).
 - Still open: tiny text in Pin Drop map labels (5 px), Estimate & Bet and Spot the Shade (10 px), Mind Meld (11 px); Gold Rush shrinks the question to small print once the chests appear; Word Storm bots find one word each; talking games (Secret Word Hunt, Taboo Talk, Picture Charades, Salad Bowl) cannot be judged with bots.
 - Not judged at all: whether each game is fun, and all audio.
+
+## Polishing the next games: batch one (28 Nov)
+The bar for "launch worthy" and the batch order are in the road-to-launch doc. Batch one is the twelve proposed promotions.
+- **Host voice** for eight games that only had a welcome and a goodbye: Fact or Fib (reads every statement, gives the verdict and the note), Last One Standing (reads the question, the answer and what it cost), Name That Sound (names the sound after the reveal; silent while it plays), Rock Paper Showdown, Doodle Dash, One Word, Caption This, Going Once (announces each lot, reacts to bargains and overpaying). Lines rotate so the host doesn't repeat; none carry a player's name. Result lines are spoken as the reveal lands (the reveal cue's wait is the settle time).
+- **Banks**: Fact or Fib 152 statements (was 96), Going Once 48 lots (was 24), Name That Sound 44 sounds (was 28; 16 new recordings).
+- New host lines record on eleven_v4 (Tom's choice); existing clips stay.
+- Still to do for batch one: Picture Charades, Midnight Wolves, Inside Job, Mystery Manor (already have full host lines; need a content check), tiny-text fixes, one game night each.

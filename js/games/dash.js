@@ -103,15 +103,19 @@ export function tick(s, now = Date.now(), rnd = Math.random) {
 }
 
 const ranking = s => s.players.map(p => ({ pid: p.pid, name: p.name, score: s.scores[p.pid] })).sort((a, b) => b.score - a.score);
+const say = (lines, k) => lines[((k % lines.length) + lines.length) % lines.length];   // the host does not say the same thing every round
+
 export function narration(s) {
-  if (s.phase === 'pick' && s.i === 0) return 'Welcome to Doodle Dash! One of you draws, and everyone else races to guess the word.';
+  if (s.phase === 'pick') return s.i === 0 ? 'Welcome to Doodle Dash! One of you draws, and everyone else races to guess the word.' : say(['New artist!', 'Next up.', 'Pencils ready.', 'Someone new at the easel.'], s.i);
+  if (s.phase === 'draw') return say(['Go!', 'Draw!', 'What is it? Start guessing!', 'Off you go!'], s.i);
+  if (s.phase === 'result') { const n = Object.keys(s.got).length, all = s.players.length - 1; return `The word was ${s.word}.${!n ? ' Nobody got it!' : n === all ? ' Everyone got it!' : ''}`; }
   if (s.phase === 'over') return 'And that is the game. Thanks for playing!';
   return '';
 }
 export function cue(s) {
   if (s.phase === 'pick') return s.i === 0 ? { sound: 'fanfare', wait: 1500, title: 'Doodle Dash', sub: 'Draw it. Guess it. Fast.' } : { sound: 'join', wait: 600 };
   if (s.phase === 'draw') return { sound: 'scribble', wait: 0 };
-  if (s.phase === 'result') return s.settled ? null : { sound: 'stamp', wait: 0 };
+  if (s.phase === 'result') return s.settled ? null : { sound: 'stamp', wait: TIMES.settle - 400 };
   if (s.phase === 'over') return { sound: 'win', wait: 1500, title: 'Game Over', sub: `${ranking(s)[0].name} wins!`, tone: 'dawn', fx: 'confetti' };
   return null;
 }

@@ -76,15 +76,19 @@ export function tick(s, now = Date.now(), rnd = Math.random) {
 }
 const nameOf = (s, pid) => (s.players.find(p => p.pid === pid) || {}).name || 'Someone';
 const ranking = (s, sc = s.scores) => s.players.map(p => ({ pid: p.pid, name: p.name, score: sc[p.pid] })).sort((a, b) => b.score - a.score);
+const say = (lines, k) => lines[((k % lines.length) + lines.length) % lines.length];   // the host does not say the same thing every round
+
 export function narration(s) {
-  if (s.phase === 'write' && s.n === 0) return 'Welcome to Caption This! Here is a picture. Write the funniest caption you can.';
+  if (s.phase === 'write') return s.n === 0 ? 'Welcome to Caption This! Here is a picture. Write the funniest caption you can.' : say(['Next picture. Caption it!', 'Another one. Make it funny.', 'New picture, new captions.', 'What is going on here? You tell us.'], s.n);
+  if (s.phase === 'vote') return say(['The captions are in. Vote for the best one!', 'Read them all, then pick your favorite.', 'Which one made you laugh? Vote now.'], s.n);
+  if (s.phase === 'result') { const f = s.result.fav.length; return !f ? 'No votes at all? Tough crowd.' : f > 1 ? 'A tie for favorite!' : say(['We have a favorite!', 'The room has spoken.', 'And that one wins the round.'], s.n); }
   if (s.phase === 'over') return 'And that is the game. Thanks for playing!';
   return '';
 }
 export function cue(s) {
   if (s.phase === 'write') return s.n === 0 ? { sound: 'fanfare', wait: 1500, title: 'Caption This', sub: 'Write the funniest caption' } : { sound: 'join', wait: 500 };
   if (s.phase === 'vote') return { sound: 'vote', wait: 300 };
-  if (s.phase === 'result') return s.settled ? null : { sound: 'drumroll', wait: 0 };
+  if (s.phase === 'result') return s.settled ? null : { sound: 'drumroll', wait: TIMES.settle - 400 };
   if (s.phase === 'over') return { sound: 'win', wait: 1500, title: 'Game Over', sub: `${ranking(s)[0].name} wins!`, tone: 'dawn', fx: 'confetti' };
   return null;
 }

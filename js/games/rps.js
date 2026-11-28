@@ -50,14 +50,23 @@ export function tick(s, now = Date.now()) {
   return s.deadline && now >= s.deadline ? hostAct(s, 'next', now) : s;
 }
 const ranking = (s, sc = s.scores) => s.players.map(p => ({ pid: p.pid, name: p.name, score: sc[p.pid] })).sort((a, b) => b.score - a.score);
+const say = (lines, k) => lines[((k % lines.length) + lines.length) % lines.length];   // the host does not say the same thing every round
+
 export function narration(s) {
-  if (s.phase === 'throw' && s.n === 1) return 'Welcome to Rock Paper Showdown! Everyone throws at once. You score for every player you beat.';
+  if (s.phase === 'throw') return s.n === 1 ? 'Welcome to Rock Paper Showdown! Everyone throws at once. You score for every player you beat.' : last(s) ? 'Final throw. Double points!' : say(['Throw!', 'Again!', 'Rock, paper, scissors!', 'Ready? Throw!'], s.n);
+  if (s.phase === 'result') {
+    const c = s.result.count, kinds = Object.keys(THROWS).filter(t => c[t] > 0);
+    if (kinds.length <= 1) return 'Everybody threw the same. No points!';
+    if (kinds.length === 3) return say(['A bit of everything. Points all round!', 'Rock, paper and scissors. Everybody beats somebody.'], s.n);
+    const win = kinds.find(t => kinds.includes(THROWS[t][2]));
+    return { rock: 'Rock crushes scissors!', paper: 'Paper covers rock!', scissors: 'Scissors cut paper!' }[win];
+  }
   if (s.phase === 'over') return 'And that is the game. Thanks for playing!';
   return '';
 }
 export function cue(s) {
   if (s.phase === 'throw') return s.n === 1 ? { sound: 'fanfare', wait: 1500, title: 'Rock Paper Showdown', sub: 'Everyone throws at once' } : last(s) ? { sound: 'sting-kids', wait: 1100, title: 'Last Throw', sub: 'Double points' } : { sound: 'join', wait: 300 };
-  if (s.phase === 'result') return s.settled ? null : { sound: 'drumroll', wait: 0 };
+  if (s.phase === 'result') return s.settled ? null : { sound: 'drumroll', wait: TIMES.settle - 400 };
   if (s.phase === 'over') return { sound: 'win', wait: 1500, title: 'Game Over', sub: `${ranking(s)[0].name} wins!`, tone: 'dawn', fx: 'confetti' };
   return null;
 }
