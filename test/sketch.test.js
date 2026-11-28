@@ -20,8 +20,8 @@ for (let g = 0; g < 600; g++) {
   assert.equal(s.chains.length, nP);
   for (const ch of s.chains) { assert.equal(ch.length, s.steps); ch.forEach((e, k) => assert.equal(e.kind, k % 2 ? 'draw' : 'text')); }
   for (let k = 0; k < s.steps; k++) assert.equal(new Set(s.chains.map(ch => ch[k].by)).size, nP);
-  // nobody draws or guesses their own chain's previous entry
-  for (const ch of s.chains) for (let k = 1; k < s.steps; k++) assert.notEqual(ch[k].by, ch[k - 1].by);
+  // the owner picks the idea and draws it; after that nobody draws or guesses the entry they made just before
+  for (const ch of s.chains) { assert.equal(ch[1].by, ch[0].by); for (let k = 2; k < s.steps; k++) assert.notEqual(ch[k].by, ch[k - 1].by); assert.equal(new Set(ch.slice(1).map(e => e.by)).size, ch.length - 1); }
   G.tvView(s); players.forEach(p => G.phoneView(s, p.pid));
 }
 // timeouts: nobody acts -> drafts or fallbacks fill everything

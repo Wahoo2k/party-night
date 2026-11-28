@@ -2434,3 +2434,6 @@ body.onstage[data-game=whosaid] .qlist li::before{content:counter(q);flex:0 0 au
 /* Name lists inside a game panel are a row of small chips, not a stack of full-width bars: the room goes to the question. */
 body.onstage .stage .panel .roster{flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px}
 body.onstage .stage .panel .roster .chip{flex:0 0 auto;width:auto;border-radius:99px}
+/* Secret Agents: a short plain-words box on the phone saying exactly what to do now. */
+.ahelp{margin:8px 0 10px;padding:10px 14px;border-radius:14px;background:#ffffff14;text-align:left}
+.ahelp p{margin:0 0 6px;font-size:15px;line-height:1.35}.ahelp p:last-child{margin:0}

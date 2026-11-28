@@ -59,7 +59,8 @@ export function cleanStrokes(list) {
 export function setup(players, rnd = Math.random, prev = null, opts = {}) {
   const order = shuffle(players.map(p => ({ pid: p.pid, name: p.name })), rnd);
   const n = order.length;
-  const steps = Math.max(3, Math.min(n, opts.short ? 4 : 8));
+  // Each player picks something and draws it themselves (two steps), then it passes along: guess, draw, guess…
+  const steps = Math.max(4, Math.min(n + 1, opts.short ? 4 : 8));
   return {
     game: 'sketch',
     players: order, steps,
@@ -76,8 +77,10 @@ export function setup(players, rnd = Math.random, prev = null, opts = {}) {
 const n = s => s.players.length;
 const nameOf = (s, pid) => (s.players.find(p => p.pid === pid) || {}).name || 'Someone';
 // Who handles chain c at step k, and which chain a player has at step k.
-const handler = (s, c, k) => s.players[(c + k) % n(s)].pid;
-const chainFor = (s, pid, k) => { const i = s.players.findIndex(p => p.pid === pid); return ((i - k) % n(s) + n(s)) % n(s); };
+// The first two steps of a chain (pick it, draw it) belong to its owner; from the third step it moves one player along each step.
+const hop = k => Math.max(0, k - 1);
+const handler = (s, c, k) => s.players[(c + hop(k)) % n(s)].pid;
+const chainFor = (s, pid, k) => { const i = s.players.findIndex(p => p.pid === pid); return ((i - hop(k)) % n(s) + n(s)) % n(s); };
 const kindAt = k => (k % 2 === 1 ? 'draw' : 'text');
 const phaseAt = k => (k === 0 ? 'write' : k % 2 === 1 ? 'draw' : 'guess');
 const done = (s, pid) => !!s.chains[chainFor(s, pid, s.step)][s.step];
@@ -173,8 +176,8 @@ function scores(s) {
 }
 
 export function narration(s) {
-  if (s.phase === 'write') return 'Welcome to Sketch Telephone! Write something weird for the next person to draw.';
-  if (s.phase === 'draw') return s.step === 1 ? 'Now draw what you were given. No letters or numbers!' : 'Draw it!';
+  if (s.phase === 'write') return 'Welcome to Sketch Telephone! Pick something to draw.';
+  if (s.phase === 'draw') return s.step === 1 ? 'Now draw what you picked. No letters or numbers!' : 'Draw it!';
   if (s.phase === 'guess') return s.step === 2 ? 'What is that drawing? Describe it in a few words.' : 'Guess the drawing!';
   if (s.phase === 'reveal' && s.show.c === 0 && s.show.k === 0) return `Time for the big reveal! ${nameOf(s, s.chains[0][0].by)} started with: ${s.chains[0][0].text}`;
   if (s.phase === 'over') { const top = scores(s)[0]; return top.hearts ? `${top.name} got the most hearts!` : 'What a mess. Great job, everyone!'; }
@@ -182,7 +185,7 @@ export function narration(s) {
 }
 
 export function cue(s) {
-  if (s.phase === 'write') return { sound: 'join', wait: 800, title: 'Sketch Telephone', sub: 'Write something weird' };
+  if (s.phase === 'write') return { sound: 'join', wait: 800, title: 'Sketch Telephone', sub: 'Pick something to draw' };
   if (s.phase === 'draw') return { sound: 'vote', wait: 500, title: 'Draw it!', sub: s.step === 1 ? 'No letters, no numbers' : '' };
   if (s.phase === 'guess') return { sound: 'vote', wait: 500, title: 'What is it?', sub: 'Describe the drawing' };
   if (s.phase === 'reveal') return s.show.k === 0 && s.show.c === 0 ? { sound: 'drumroll', wait: 1800, title: 'The Big Reveal', tone: 'night' } : null;
@@ -285,7 +288,10 @@ export function svgFor(strokes, cls = '', animate = false) {
 
 // ---------- renderers ----------
 const clock = left => `<p class="clock ${left <= 10 ? 'hurry' : ''}">${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}</p>`;
-const TV_TITLES = { write: 'Write something weird', draw: 'Draw what you were given', guess: 'What is that drawing?' };
+// The ideas offered on a phone stay the same while that screen is up (a redraw must not reshuffle them).
+let ideas = { key: '', list: [] };
+function ideasFor(key) { if (ideas.key !== key || !ideas.list.length) { const pool = [...PROMPTS]; ideas = { key, list: Array.from({ length: 3 }, () => pool.splice(Math.floor(Math.random() * pool.length), 1)[0]) }; } return ideas.list; }
+const TV_TITLES = { write: 'Pick something to draw', draw: 'Draw it!', guess: 'What is that drawing?' };
 let drawnKey = '';   // which drawing has already had its stroke-by-stroke replay
 export function renderTV(v, el) {
   document.body.classList.toggle('day', v.phase === 'over');
@@ -294,12 +300,12 @@ export function renderTV(v, el) {
   drawnKey = nowKey;
   let h = '';
   if (['write', 'draw', 'guess'].includes(v.phase)) {
-    h = `<p class="cat">Step ${v.step + 1} of ${v.steps}</p><h2>${TV_TITLES[v.phase]}</h2><p class="say">${v.phase === 'write' ? 'A thing, a scene, a silly idea. Stuck? Tap "Help me" for one.' : v.phase === 'draw' ? 'Check your phone. No letters or numbers in the picture!' : 'Describe the drawing on your phone in a few words.'}</p>${clock(v.left)}
+    h = `<p class="cat">Step ${v.step + 1} of ${v.steps}</p><h2>${TV_TITLES[v.phase]}</h2><p class="say">${v.phase === 'write' ? 'Choose one of the ideas on your phone, or write your own. You draw it next.' : v.phase === 'draw' ? 'Check your phone. No letters or numbers in the picture!' : 'Describe the drawing on your phone in a few words.'}</p>${clock(v.left)}
       <div class="roster">${v.players.map(p => `<div class="chip ${p.done ? 'skdone' : ''}">${p.done ? '✓ ' : '✏️ '}${esc(p.name)}</div>`).join('')}</div><button class="btn ghost" data-host="next">Move on</button>`;
-    h += `<div class="how"><h3>How it works</h3><ol><li>Everyone writes something.</li><li>The next person draws it.</li><li>The next person guesses the drawing.</li><li>Then it's drawn again… and again.</li><li>At the end, the TV replays how each one fell apart. Tap ❤️ for your favorites.</li></ol></div>`;
+    h += `<div class="how"><h3>How it works</h3><ol><li>Everyone picks something and draws it.</li><li>The next person guesses what the drawing is.</li><li>The next person draws that guess… and so on.</li><li>At the end, the TV replays how each one fell apart. Tap ❤️ for your favorites.</li></ol></div>`;
   }
   if (v.phase === 'reveal') {
-    h = `<p class="cat">Chain ${v.c + 1} of ${v.chains} · started by ${esc(v.owner)}</p><div class="chainrow">${v.entries.map((e, i) => `<div class="link ${i === v.entries.length - 1 ? 'newest' : ''} ${e.kind}">${e.kind === 'draw' ? svgFor(e.strokes, '', replay && i === v.entries.length - 1) : `<div class="sktext">${esc(e.text)}</div>`}<small>${e.kind === 'draw' ? 'drawn' : i === 0 ? 'written' : 'guessed'} by <b>${esc(e.name)}</b>${e.late ? ' (ran out of time)' : ''}${e.hearts ? ` · ❤️ ${e.hearts}` : ''}</small></div>`).concat(Array.from({ length: Math.max(0, (v.len || 0) - v.entries.length) }, () => '<div class="link slot"><div class="sktext">&nbsp;</div><small>&nbsp;</small></div>')).join('<span class="arrow">→</span>')}</div><p class="muted center">Tap ❤️ on your phone for your favorites</p><button class="btn ghost" data-host="next">Next</button>`;
+    h = `<p class="cat">Chain ${v.c + 1} of ${v.chains} · started by ${esc(v.owner)}</p><div class="chainrow">${v.entries.map((e, i) => `<div class="link ${i === v.entries.length - 1 ? 'newest' : ''} ${e.kind}">${e.kind === 'draw' ? svgFor(e.strokes, '', replay && i === v.entries.length - 1) : `<div class="sktext">${esc(e.text)}</div>`}<small>${e.kind === 'draw' ? 'drawn' : i === 0 ? 'picked' : 'guessed'} by <b>${esc(e.name)}</b>${e.late ? ' (ran out of time)' : ''}${e.hearts ? ` · ❤️ ${e.hearts}` : ''}</small></div>`).concat(Array.from({ length: Math.max(0, (v.len || 0) - v.entries.length) }, () => '<div class="link slot"><div class="sktext">&nbsp;</div><small>&nbsp;</small></div>')).join('<span class="arrow">→</span>')}</div><p class="muted center">Tap ❤️ on your phone for your favorites</p><button class="btn ghost" data-host="next">Next</button>`;
   }
   if (v.phase === 'over') {
     h = `<h2 class="win">${v.scores[0].hearts ? `${esc(v.scores[0].name)} is the most loved artist!` : 'What a masterpiece of chaos!'}</h2>${v.best ? `<div class="skbest">${svgFor(v.best.strokes)}<div><p class="cat">Most loved drawing</p><p class="say">${v.best.from ? `“${esc(v.best.from)}”` : ''}</p><p>by <b>${esc(v.best.name)}</b> · ❤️ ${v.best.hearts}</p></div></div>` : ''}<div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
@@ -319,13 +325,16 @@ export function renderPhone(v, el, send) {
   const key = v.step + ':' + (v.task || '') + (v.strokes ? v.strokes.length : '');
   if (v.phase === 'write' || v.phase === 'guess') {
     if (words.key !== key) words = { key, text: '' };
-    el.innerHTML = `<p class="muted">Step ${v.step + 1} of ${v.steps}</p>${v.phase === 'write' ? '<h2>Write something weird</h2><p class="muted">Someone will have to draw it!</p>' : `<h2>What is this?</h2>${svgFor(v.strokes, 'phone')}`}
-      <form id="skf"><input id="skt" maxlength="50" autocomplete="off" placeholder="${v.phase === 'write' ? 'A cat in a tuxedo…' : 'Describe it in a few words'}" value="${esc(words.text)}"><p class="lose" id="err"></p><div class="row">${v.phase === 'write' ? '<button class="btn ghost" type="button" id="help">🎲 Help me</button>' : ''}<button class="btn" type="submit">Send</button></div></form>`;
+    el.innerHTML = `<p class="muted">Step ${v.step + 1} of ${v.steps}</p>${v.phase === 'write' ? `<h2>Pick something to draw</h2><p class="muted">You draw it next. Then it gets passed along.</p><div class="opts" id="ideas">${ideasFor(key).map(t => `<button class="opt" type="button" data-idea="${esc(t)}">${esc(t)}</button>`).join('')}</div><p class="muted small">Or write your own:</p>` : `<h2>What is this?</h2>${svgFor(v.strokes, 'phone')}`}
+      <form id="skf"><input id="skt" maxlength="50" autocomplete="off" placeholder="${v.phase === 'write' ? 'A cat in a tuxedo…' : 'Describe it in a few words'}" value="${esc(words.text)}"><p class="lose" id="err"></p><div class="row">${v.phase === 'write' ? '<button class="btn ghost" type="button" id="help">🎲 Other ideas</button>' : ''}<button class="btn" type="submit">Send</button></div></form>`;
     const f = el.querySelector('#skf'), inp = f.querySelector('#skt');
     const keep = () => { words.text = inp.value; clearTimeout(draftTimer); draftTimer = setTimeout(() => { if (inp.value.trim().length > 1) send({ type: 'draft', text: inp.value }); }, 1200); };
     inp.oninput = keep;
     const help = f.querySelector('#help');
-    if (help) help.onclick = () => { inp.value = PROMPTS[Math.floor(Math.random() * PROMPTS.length)]; keep(); };
+    // Three ideas to tap; "Other ideas" deals three more. Tapping one sends it straight away.
+    const wire = () => el.querySelectorAll('[data-idea]').forEach(b => (b.onclick = () => { clearTimeout(draftTimer); el.querySelectorAll('[data-idea]').forEach(x => (x.disabled = true)); send({ type: 'text', text: b.dataset.idea }); }));
+    wire();
+    if (help) help.onclick = () => { ideas = { key: '', list: [] }; const box = el.querySelector('#ideas'); if (box) { box.innerHTML = ideasFor(key).map(t => `<button class="opt" type="button" data-idea="${esc(t)}">${esc(t)}</button>`).join(''); wire(); } };
     f.onsubmit = e => { e.preventDefault(); const r = cleanText(inp.value); if (!r.ok) { f.querySelector('#err').textContent = r.why; return; } clearTimeout(draftTimer); f.querySelector('[type=submit]').disabled = true; send({ type: 'text', text: r.text }); };
     return;
   }

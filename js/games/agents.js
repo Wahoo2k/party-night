@@ -41,7 +41,9 @@ export function setup(players, rnd = Math.random, prev = null) {
   const team = t => players.filter(p => teamOf[p.pid] === t).map(p => p.pid);
   // Spymasters rotate each game.
   const k = (prev?.round || 0);
-  const spy = [0, 1].map(t => team(t)[k % team(t).length]);
+  // A real person gives the clues whenever a team has one: a bot can't think of a clue, and can't follow one either.
+  const isBot = pid => String(pid).startsWith('bot-');
+  const spy = [0, 1].map(t => { const real = team(t).filter(pid => !isBot(pid)), pool = real.length ? real : team(t); return pool[k % pool.length]; });
   const first = Math.floor(rnd() * 2);
   const words = shuffle([...WORDS], rnd).slice(0, 25);
   const key = shuffle([...Array(first === 0 ? 9 : 8).fill(0), ...Array(first === 1 ? 9 : 8).fill(1), ...Array(7).fill('n'), 'x'], rnd);
@@ -168,6 +170,7 @@ export function botAct(v, rnd = Math.random) {
     return { type: 'clue', word, n: 1 + Math.floor(rnd() * 2) };
   }
   if (v.phase === 'guess' && v.myTurn && !v.isSpy) {
+    if (v.humans) return v.humanLead !== null && v.myVote !== v.humanLead ? { type: 'vote', i: v.humanLead } : null;
     const open = v.board.filter(b => !b.revealed);
     // Go along with the card teammates already picked.
     const lead = [...open].sort((a, b) => b.votes.length - a.votes.length)[0];
@@ -211,6 +214,9 @@ export function phoneView(s, pid) {
     clue: s.clue, guessesLeft: s.guessesLeft, myVote: s.votes[pid] ?? null,
     board: boardFor(s, isSpy || bot || s.phase === 'over', true),
     need: Math.ceil(guessers(s, s.turn).length / 2), spyName: nameOf(s, s.spy[s.turn]),
+    // Bots on a team with real guessers never choose for them: they wait and then back whatever a person picked.
+    humans: guessers(s, t).filter(g => !String(g).startsWith('bot-')).length,
+    humanLead: (() => { const g = guessers(s, t).find(g => !String(g).startsWith('bot-') && s.votes[g] !== undefined); return g ? s.votes[g] : null; })(),
     left: [left(s, 0), left(s, 1)], winner: s.winner,
   };
 }
@@ -222,8 +228,8 @@ export function renderTV(v, el) {
   const side = `<div class="side">${v.teams.map((t, i) => `<div class="scores team t${i} ${v.turn === i && v.phase !== 'over' ? 'ctl' : ''}"><h3>${esc(t.name)}</h3><div class="tscore">${t.left}</div><p class="muted small">agents left</p><p class="small">Spymaster: <b>${esc(t.spy)}</b></p><p class="muted small">${t.members.map(esc).join(', ')}</p></div>`).join('')}</div>`;
   const grid = `<div class="agrid">${v.board.map(b => `<div class="acard ${b.revealed ? 'rev ' + KEY_CLASS(b.k) : ''} ${v.phase === 'over' && !b.revealed ? 'peek ' + KEY_CLASS(b.k) : ''} ${v.last && v.last.i === b.i ? 'flipnow' : ''}"><span>${esc(b.w)}</span>${b.votes.length ? `<small>${b.votes.map(esc).join(', ')}</small>` : ''}</div>`).join('')}</div>`;
   let status = '';
-  if (v.phase === 'clue') status = `<p class="say"><b class="tc${v.turn}">${esc(v.teams[v.turn].name)}</b>: ${esc(v.teams[v.turn].spy)} is thinking of a clue…</p>`;
-  if (v.phase === 'guess') status = `<div class="clueline"><span class="tc${v.turn}">${esc(v.teams[v.turn].name)}</span><b>${esc(v.clue.word)}</b><i>${v.clue.n}</i><small>${v.guessesLeft} guess${v.guessesLeft === 1 ? '' : 'es'} left${v.endVotes ? ` · ${v.endVotes} want to stop` : ''}</small></div>`;
+  if (v.phase === 'clue') status = `<p class="say"><b class="tc${v.turn}">${esc(v.teams[v.turn].name)}</b>: ${esc(v.teams[v.turn].spy)} is thinking of a clue…</p><p class="muted center">The spymaster sees which words belong to the team and types one word that links some of them.</p>`;
+  if (v.phase === 'guess') status = `<div class="clueline"><span class="tc${v.turn}">${esc(v.teams[v.turn].name)}</span><b>${esc(v.clue.word)}</b><i>${v.clue.n}</i><small>${v.guessesLeft} guess${v.guessesLeft === 1 ? '' : 'es'} left${v.endVotes ? ` · ${v.endVotes} want to stop` : ''}</small></div><p class="muted center">${esc(v.teams[v.turn].name)}: on your phones, tap the ${v.clue.n} word${v.clue.n === 1 ? '' : 's'} you think go${v.clue.n === 1 ? 'es' : ''} with “${esc(v.clue.word)}”.</p>`;
   if (v.phase === 'over') status = `<h2 class="${v.why === 'trap' ? 'lose' : 'win'}">${v.why === 'trap' ? 'The trap!' : 'All agents found!'} <span class="tc${v.winner}">${esc(v.teams[v.winner].name)}</span> wins</h2><div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
   const ctl = v.phase === 'over' ? '' : `<button class="btn ghost" data-host="next">End ${esc(v.teams[v.turn].name)}'s turn</button>`;
   el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel">${status}${grid}${ctl}</div>${side}</div>`;
@@ -235,10 +241,10 @@ export function renderPhone(v, el, send) {
   const head = `<p class="muted"><b class="tc${v.team}">${esc(v.teamName || '')}</b>${v.isSpy ? ' · <b>Spymaster</b>' : ''} · agents left: Sun ${v.left?.[0]} · Moon ${v.left?.[1]}</p>`;
   if (v.phase === 'spectate') h = '<h2>Game in progress</h2>';
   else if (v.phase === 'over') h = `${head}<h2 class="${v.winner === v.team ? 'win' : 'lose'}">${v.winner === v.team ? 'Your team won!' : 'Your team lost'}</h2>${grid(false)}`;
-  else if (v.isSpy && v.phase === 'clue' && v.myTurn) h = `${head}<h2>Give a clue</h2><p class="muted">Your agents are in <b class="tc${v.team}">your color</b>. Avoid the black trap!</p>${grid(false)}<form id="af2"><div class="row"><input id="cw" maxlength="20" placeholder="One word" autocomplete="off" required><input id="cn" type="number" inputmode="numeric" min="1" max="9" value="2" class="num" required></div><p class="lose" id="err"></p><button class="btn" type="submit">Send clue</button></form>`;
+  else if (v.isSpy && v.phase === 'clue' && v.myTurn) h = `${head}<h2>You give the clue</h2><div class="ahelp"><p>Only you can see the colors. Your team must find the words in <b class="tc${v.team}">your color</b>.</p><p>Type <b>one word</b> that links some of them, and <b>how many</b> it links. Example: <i>ocean 2</i> for WAVE and SHIP.</p><p>Don't lead them to the <b>black trap</b>: picking it loses the game.</p></div>${grid(false)}<form id="af2"><div class="row"><input id="cw" maxlength="20" placeholder="One word" autocomplete="off" required><input id="cn" type="number" inputmode="numeric" min="1" max="9" value="2" class="num" required></div><p class="lose" id="err"></p><button class="btn" type="submit">Send clue</button></form>`;
   else if (v.isSpy) h = `${head}<h2>${v.myTurn ? 'Your team is guessing' : `${esc(v.turnName)}'s turn`}</h2>${v.clue ? `<p class="say">Clue: <b>${esc(v.clue.word)} ${v.clue.n}</b></p>` : ''}<p class="muted">No hints, no faces!</p>${grid(false)}`;
-  else if (v.phase === 'guess' && v.myTurn) h = `${head}<div class="clueline small"><b>${esc(v.clue.word)}</b><i>${v.clue.n}</i></div><p class="muted">Tap a word to vote. ${v.need > 1 ? `${v.need} matching votes picks it.` : 'Your tap picks it.'} ${v.guessesLeft} guess${v.guessesLeft === 1 ? '' : 'es'} left.</p>${grid(true)}<button class="btn ghost ${v.myVote === 'end' ? 'on' : ''}" data-v="end">Stop guessing</button>`;
-  else h = `${head}<h2>${v.myTurn ? `${esc(v.spyName)} is thinking…` : `${esc(v.turnName)}'s turn`}</h2>${v.clue && !v.myTurn ? `<p class="say">Their clue: <b>${esc(v.clue.word)} ${v.clue.n}</b></p>` : ''}${grid(false)}`;
+  else if (v.phase === 'guess' && v.myTurn) h = `${head}<div class="clueline small"><b>${esc(v.clue.word)}</b><i>${v.clue.n}</i></div><div class="ahelp"><p>${esc(v.spyName)} says <b>${v.clue.n}</b> word${v.clue.n === 1 ? '' : 's'} on the board go${v.clue.n === 1 ? 'es' : ''} with “<b>${esc(v.clue.word)}</b>”. <b>Tap the one you think it is.</b></p><p>${v.need > 1 ? `It is picked when ${v.need} teammates tap the same word.` : 'Your tap picks it.'} Right: keep going (${v.guessesLeft} guess${v.guessesLeft === 1 ? '' : 'es'} left). Wrong: your turn ends.</p></div>${grid(true)}<button class="btn ghost ${v.myVote === 'end' ? 'on' : ''}" data-v="end">Stop guessing</button>`;
+  else h = `${head}<h2>${v.myTurn ? `${esc(v.spyName)} is thinking of a clue…` : `${esc(v.turnName)}'s turn`}</h2><p class="muted">${v.myTurn ? 'Next you will get a one-word clue and tap the words that match it.' : 'Nothing to do until it is your team\'s turn.'}</p>${v.clue && !v.myTurn ? `<p class="say">Their clue: <b>${esc(v.clue.word)} ${v.clue.n}</b></p>` : ''}${grid(false)}`;
   el.innerHTML = h;
   el.querySelectorAll('[data-v]').forEach(b => (b.onclick = () => send({ type: 'vote', i: b.dataset.v === 'end' ? 'end' : Number(b.dataset.v) })));
   const f = el.querySelector('#af2');
