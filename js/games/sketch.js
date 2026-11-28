@@ -178,10 +178,11 @@ function scores(s) {
   return s.players.map(p => ({ pid: p.pid, name: p.name, hearts: pts[p.pid] })).sort((a, b) => b.hearts - a.hearts);
 }
 
+const rot = (lines, k) => lines[((k % lines.length) + lines.length) % lines.length];   // the host does not say the same thing every time
 export function narration(s) {
   if (s.phase === 'write') return 'Welcome to Sketch Telephone! Pick something to draw.';
-  if (s.phase === 'draw') return s.step === 1 ? 'Now draw what you picked. No letters or numbers!' : 'Draw it!';
-  if (s.phase === 'guess') return s.step === 2 ? 'What is that drawing? Describe it in a few words.' : 'Guess the drawing!';
+  if (s.phase === 'draw') return s.step === 1 ? 'Now draw what you picked. No letters or numbers!' : rot(['Draw it!', 'New words. Draw what they say!', 'Draw what you see on your phone!'], s.step);
+  if (s.phase === 'guess') return s.step === 2 ? 'What is that drawing? Describe it in a few words.' : rot(['Guess the drawing!', 'What is that supposed to be? Describe it.', 'Another drawing. What is it?'], s.step);
   if (s.phase === 'reveal' && s.show.c === 0 && s.show.k === 0) return `Time for the big reveal! ${nameOf(s, s.chains[0][0].by)} started with: ${s.chains[0][0].text}`;
   if (s.phase === 'over') { const top = scores(s)[0]; return top.hearts ? `${top.name} got the most hearts!` : 'What a mess. Great job, everyone!'; }
   return '';
@@ -199,8 +200,8 @@ export function cue(s) {
 export function cueEvent(s) {
   if (s.phase !== 'reveal' || !s.show || (s.show.c === 0 && s.show.k === 0)) return null;
   const e = s.chains[s.show.c][s.show.k];
-  if (s.show.k === 0) return { id: s.eventId, sound: 'join', say: `${nameOf(s, e.by)} started with: ${e.text}`, delay: 400 };
-  if (e.kind === 'text') return { id: s.eventId, sound: 'safe', say: `${nameOf(s, e.by)} guessed: ${e.text}`, delay: 300 };
+  if (s.show.k === 0) return { id: s.eventId, sound: 'join', say: `${rot(['Next one! It started like this.', 'Here is another chain.', 'On to the next. It began like this.'], s.show.c)} ${nameOf(s, e.by)} started with: ${e.text}`, delay: 400 };
+  if (e.kind === 'text') return { id: s.eventId, sound: 'safe', say: `${rot(['And somebody saw this in it.', 'Which turned into this.', 'And the guess was this.', 'Close? You decide.'], s.show.c + s.show.k)} ${nameOf(s, e.by)} guessed: ${e.text}`, delay: 300 };
   return { id: s.eventId, sound: 'tick', say: '' };
 }
 

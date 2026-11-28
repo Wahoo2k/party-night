@@ -94,10 +94,10 @@ export function tick(s, now = Date.now(), rnd = Math.random) {
 const ranking = s => s.players.map(p => ({ pid: p.pid, name: p.name, score: s.scores[p.pid] })).sort((a, b) => b.score - a.score);
 export function narration(s) {
   if (s.phase === 'write') return 'Welcome to Two Truths and a Lie! Write three things about yourself. Two true, one made up. Make the lie believable!';
-  if (s.phase === 'vote') return `${nameOf(s, cur(s))}'s turn. Which one is the lie?`;
+  if (s.phase === 'vote') return `${['Which one is the lie?', 'Two of these are true. Which one is the lie?', 'Spot the lie!', 'One of these never happened. Which one?'][s.k % 4]} ${nameOf(s, cur(s))} is in the spotlight.`;
   if (s.phase === 'reveal' && !s.settled) return '';
-  if (s.phase === 'reveal') return `The lie was: ${s.sets[cur(s)].lines[s.result.lie]}. ${nameOf(s, cur(s))}, tell us the stories!`;
-  if (s.phase === 'over') return `${ranking(s)[0].name} wins!`;
+  if (s.phase === 'reveal') return `${['There is the lie!', 'The lie is revealed!', 'That one never happened!'][s.result.lie % 3]} Tell us the real stories! ${nameOf(s, cur(s))}.`;
+  if (s.phase === 'over') return `Nobody can fool this one! ${ranking(s)[0].name} wins!`;
   return '';
 }
 export function cue(s) {

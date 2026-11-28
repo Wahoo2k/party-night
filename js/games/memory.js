@@ -69,7 +69,7 @@ export function tick(s, now = Date.now(), rnd = Math.random) {
 
 const ranking = s => s.players.map(p => ({ pid: p.pid, name: p.name, score: score(s, p.pid) })).sort((a, b) => b.score - a.score);
 export function narration(s) {
-  if (s.phase === 'over') { const r = ranking(s); return r[1] && r[0].score === r[1].score ? "It's a tie! Great memory, everyone!" : `${r[0].name} found the most pairs!`; }
+  if (s.phase === 'over') { const r = ranking(s); return r[1] && r[0].score === r[1].score ? "It's a tie! Great memory, everyone!" : `Every pair is found! What a memory! ${r[0].name} found the most pairs!`; }
   if (s.moves === 0 && !s.open.length) return `Let's play Memory Match! Find two animals that are the same. ${nameOf(s, cur(s))}, you go first. Tap two cards on your phone.`;
   return '';
 }

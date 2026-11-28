@@ -197,7 +197,7 @@ export function tick(s, now = Date.now()) {
 export function narration(s) {
   if (s.phase === 'turn' && s.guessed.length === 0 && !s.spinId) return `Welcome to Spin and Solve! The category is ${puzzle(s).cat}. ${nameOf(s, current(s))}, spin the wheel on your phone.`;
   if (s.phase === 'turn' && s.guessed.length === 0 && s.r > 0) return `Round ${s.r + 1}. The category is ${puzzle(s).cat}.`;
-  if (s.phase === 'roundEnd') return `${nameOf(s, s.solvedBy)} solved it!`;
+  if (s.phase === 'roundEnd') return `${['Solved!', 'That is it! Solved!', 'Puzzle solved!'][s.r % 3]} ${nameOf(s, s.solvedBy)} got it!`;
   if (s.phase === 'over') return `${nameOf(s, winner(s))} wins Spin and Solve!`;
   return '';
 }

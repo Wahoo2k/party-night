@@ -111,10 +111,13 @@ export function tick(s, now = Date.now(), rnd = Math.random) {
 
 const ranking = s => s.players.map(p => ({ pid: p.pid, name: p.name, chips: s.chips[p.pid] })).sort((a, b) => b.chips - a.chips);
 
+const rot = (lines, k) => lines[((k % lines.length) + lines.length) % lines.length];   // the host does not say the same thing every time
 export function narration(s) {
   if (s.phase === 'bet') return s.hand === 0 ? `Welcome to the Party Night blackjack table! Everyone starts with ${START} chips. These are points, not real money. Place your bets.` : `Hand ${s.hand + 1}. Place your bets.`;
-  if (s.phase === 'results') { const d = total(s.dealer).t; return d > 21 ? 'Dealer busts!' : `Dealer has ${d}.`; }
-  if (s.phase === 'over') return `${ranking(s)[0].name} leaves the table with the most chips!`;
+  if (s.phase === 'play') return rot(['The cards are out. Hit or stand?', 'Hit or stand?', 'Your move. Hit or stand?', 'Check your cards. Hit or stand?'], s.hand);
+  if (s.phase === 'dealer') return rot(["Dealer's turn.", 'Now the dealer plays.', 'The dealer turns over the hidden card.'], s.hand);
+  if (s.phase === 'results') { const d = total(s.dealer).t; return d > 21 ? rot(['Dealer busts! Everyone still in gets paid.', 'Dealer busts!', 'Too many! The dealer busts.'], s.hand) : `Dealer has ${d}.`; }
+  if (s.phase === 'over') return `The table is closed! ${ranking(s)[0].name} leaves with the most chips!`;
   return '';
 }
 

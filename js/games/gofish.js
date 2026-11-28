@@ -90,7 +90,7 @@ export function tick(s, now = Date.now(), rnd = Math.random) {
 
 const ranking = s => s.players.map(p => ({ pid: p.pid, name: p.name, books: s.books[p.pid].length })).sort((a, b) => b.books - a.books);
 export function narration(s) {
-  if (s.phase === 'over') { const r = ranking(s); return r[0].books === r[1]?.books ? "It's a tie!" : `${r[0].name} wins with ${r[0].books} sets!`; }
+  if (s.phase === 'over') { const r = ranking(s); return r[0].books === r[1]?.books ? "It's a tie!" : `All the sets are made! ${r[0].name} wins with ${r[0].books} sets!`; }
   if (s.moves === 0) return `Let's play Go Fish! Ask someone for an animal you have. Get all four to make a set. ${nameOf(s, cur(s))} goes first.`;
   return '';
 }

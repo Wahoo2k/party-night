@@ -67,10 +67,12 @@ export function hostAct(s, a, now = Date.now(), rnd = Math.random) {
 export function tick(s, now = Date.now(), rnd = Math.random) { return s.deadline && now >= s.deadline ? hostAct(s, 'next', now, rnd) : s; }
 
 const ranking = s => s.players.map(p => ({ pid: p.pid, name: p.name, score: s.best[p.pid], hearts: s.hearts[p.pid] })).sort((a, b) => b.score - a.score || b.hearts - a.hearts);
+const rot = (lines, k) => lines[((k % lines.length) + lines.length) % lines.length];   // the host does not say the same thing every time
 export function narration(s) {
-  if (s.phase === 'show') return s.r === 1 ? 'Welcome to Copy Cat! Watch the TV and listen. Then copy the pattern on your phone!' : `Round ${s.r}. Watch carefully!`;
-  if (s.phase === 'input') return 'Your turn! Copy the pattern.';
-  if (s.phase === 'over') return `${ranking(s)[0].name} has the best memory! ${ranking(s)[0].score} in a row!`;
+  if (s.phase === 'show') return s.r === 1 ? 'Welcome to Copy Cat! Watch the TV and listen. Then copy the pattern on your phone!' : rot(['Watch carefully!', 'One longer. Watch!', 'Here it comes again, plus one.', 'Eyes on the TV!', 'It keeps growing. Watch closely.'], s.r);
+  if (s.phase === 'input') return rot(['Your turn! Copy the pattern.', 'Now you. Copy it!', 'Go! Tap it back.', 'Your turn.'], s.r);
+  if (s.phase === 'result') { const n = Object.keys(s.failed || {}).length; return !n ? rot(['Everybody got it!', 'A clean round. Nobody slipped!', 'All correct!'], s.r) : n >= s.players.length ? rot(['Oh no. Nobody got that one!', 'That one fooled everybody.'], s.r) : rot(['Not everyone made it.', 'A few slips that time.', 'Somebody lost a heart.'], s.r); }
+  if (s.phase === 'over') return `That is the game! ${ranking(s)[0].name} has the best memory! ${ranking(s)[0].score} in a row!`;
   return '';
 }
 export function cue(s) {

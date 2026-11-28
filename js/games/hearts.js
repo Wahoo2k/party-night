@@ -163,7 +163,7 @@ export function narration(s) {
   if (s.phase === 'trick' && s.lastTrick.cards.some(t => t.card.s === SPADE && t.card.r === 11)) return `Ouch! The Queen of Spades is taken! Thirteen points for ${nameOf(s, s.lastTrick.winner)}.`;
   if (s.phase === 'handEnd' || s.phase === 'over') {
     const moon = s.moon ? `Somebody shot the moon! It was ${nameOf(s, s.moon)}. ` : '';
-    return s.phase === 'over' ? `${moon}${ranking(s)[0].name} wins with the lowest score!` : `${moon}End of the hand.`;
+    return s.phase === 'over' ? `${moon}${ranking(s)[0].name} wins with the lowest score!` : `${moon}${['End of the hand.', 'That is the hand. Check the scores.', 'Hand over. Who took the hearts?'][s.handNo % 3]}`;
   }
   return '';
 }

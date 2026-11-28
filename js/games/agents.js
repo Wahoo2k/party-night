@@ -147,6 +147,7 @@ export function tick(s, now = Date.now()) {
   return s;
 }
 
+const rot = (lines, k) => lines[((k % lines.length) + lines.length) % lines.length];   // the host does not say the same thing every time
 export function narration(s) {
   if (s.phase === 'clue') return s.history.length === 0 && !s.clue ? `Welcome to Secret Agents! ${T(s)[s.turn]} goes first. Spymasters, check your phones for the secret key.` : `${T(s)[s.turn]}, your spymaster is thinking.`;
   if (s.phase === 'guess' && s.lastEvent === 'clue') return `${s.clue.word}, ${s.clue.n}.`;
@@ -163,7 +164,7 @@ export function cue(s) {
 
 export function cueEvent(s) {
   if (!s.eventId || !s.last) return null;
-  if (s.lastEvent === 'hit') return { id: s.eventId, sound: 'safe', say: '' };
+  if (s.lastEvent === 'hit') return { id: s.eventId, sound: 'safe', say: rot(['An agent!', 'Good find.', 'That is one of yours.', 'Another agent found.'], s.eventId) };
   if (s.lastEvent === 'miss') return { id: s.eventId, sound: 'death', say: s.last.key === 'n' ? 'A bystander.' : 'That one belongs to the other team!' };
   return null;
 }

@@ -83,11 +83,12 @@ export function tick(s, now = Date.now(), rnd = Math.random) {
 }
 
 const claimText = (s, c) => `${nameOf(s, c.pid)} played ${c.n} ${c.n === 1 ? WORDS[c.rank].replace(/es$|s$/, '').replace(/Sixe/, 'Six') : WORDS[c.rank]}`;
+const rot = (lines, k) => lines[((k % lines.length) + lines.length) % lines.length];   // the host does not say the same thing every time
 export function narration(s) {
   if (s.phase === 'play' && s.moves === 0) return `Welcome to Liar's Deck! Play cards face down and say they're ${WORDS[s.rank]}. Lie if you have to. Anyone can call bluff!`;
-  if (s.phase === 'window') return claimText(s, s.claim) + '.';
+  if (s.phase === 'window') return `${claimText(s, s.claim)}. ${rot(['Is that the truth?', 'Anyone calling bluff?', 'Do you believe it?', 'Honest, or a bluff?', 'Call it, or let it go.'], s.moves)}`;
   if (s.phase === 'reveal') return s.reveal.lied ? `Bluff! Caught lying. ${nameOf(s, s.reveal.liar)} takes the pile.` : `Nope, that was the truth! ${nameOf(s, s.reveal.by)} takes the pile.`;
-  if (s.phase === 'over') return `${nameOf(s, s.winner)} is out of cards and wins!`;
+  if (s.phase === 'over') return `Out of cards! That is the game! ${nameOf(s, s.winner)} wins!`;
   return '';
 }
 export function cue(s) {

@@ -122,11 +122,12 @@ export function tick(s, now = Date.now(), rnd = Math.random) {
 }
 
 const ranking = s => s.players.map(p => ({ pid: p.pid, name: p.name, score: s.scores[p.pid] })).sort((a, b) => b.score - a.score);
+const rot = (lines, k) => lines[((k % lines.length) + lines.length) % lines.length];   // the host does not say the same thing every time
 export function narration(s) {
   if (s.phase === 'draw') return 'Welcome to Doodle Bluff! Draw the title on your phone. Keep it secret!';
-  if (s.phase === 'fake') return `${s.k === 0 ? 'Here is the first masterpiece. ' : ''}What's this drawing called? Write a fake title to fool everyone.`;
-  if (s.phase === 'pick') return 'Which one is the real title?';
-  if (s.phase === 'reveal') return '';   // the reveal plays out on screen; saying the title here would give it away
+  if (s.phase === 'fake') return `${s.k === 0 ? 'Here is the first masterpiece. ' : ''}${rot(["What's this drawing called? Write a fake title to fool everyone.", 'Next drawing. Give it a fake title.', 'What on earth is this one? Write a title that could be real.', 'Another masterpiece. Make up a title for it.'], s.k)}`;
+  if (s.phase === 'pick') return rot(['Which one is the real title?', 'One of these is the real title. Which one?', 'Find the real title.', 'Pick the real one. Do not get fooled.'], s.k);
+  if (s.phase === 'reveal') return rot(["Let's see who got fooled.", 'Here come the votes.', 'Who fell for a fake?', 'And the real title is coming up.'], s.k);   // no title here: the reveal plays out on screen; saying the title here would give it away
   if (s.phase === 'over') return `${ranking(s)[0].name} wins Doodle Bluff!`;
   return '';
 }

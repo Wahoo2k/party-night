@@ -97,7 +97,7 @@ export function cue(s) {
 }
 export function cueEvent(s) {
   if (!s.eventId) return null;
-  if (s.lastOk === null) { const c = s.claims[s.claims.length - 1]; return c ? { id: s.eventId, sound: 'drumroll', say: `${nameOf(s, c.pid)} says they completed a mission!` } : null; }
+  if (s.lastOk === null) { const c = s.claims[s.claims.length - 1]; return c ? { id: s.eventId, sound: 'drumroll', say: `Mission claimed! Did anybody catch it? ${nameOf(s, c.pid)} says it is done.` } : null; }
   return { id: s.eventId, sound: s.lastOk ? 'win' : 'lose', say: s.lastOk ? 'Mission accepted!' : 'Foul! That one doesn\'t count.' };
 }
 

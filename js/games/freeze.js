@@ -45,9 +45,9 @@ export function tick(s, now = Date.now(), rnd = Math.random) { return s.deadline
 
 const ranking = s => s.players.map(p => ({ pid: p.pid, name: p.name, score: s.scores[p.pid] })).sort((a, b) => b.score - a.score);
 export function narration(s) {
-  if (s.phase === 'ready') return s.r === 0 ? 'Freeze Dance! Dance while the music plays. When it stops, freeze like a statue and tap your phone! Don\'t tap too early!' : 'Get ready to dance!';
-  if (s.phase === 'freeze') return 'FREEZE!';
-  if (s.phase === 'over') return `${ranking(s)[0].name} is the freeze champion!`;
+  if (s.phase === 'ready') return s.r === 0 ? 'Freeze Dance! Dance while the music plays. When it stops, freeze like a statue and tap your phone! Don\'t tap too early!' : ['Get ready to dance!', 'Here comes the music again!', 'Shake it out. Here we go!', 'Round we go again. Get ready!'][s.r % 4];
+  if (s.phase === 'freeze') return ['FREEZE!', 'Freeze! Nobody move!', 'And freeze!'][s.r % 3];
+  if (s.phase === 'over') return `We have a freeze champion! ${ranking(s)[0].name}!`;
   return '';
 }
 export function cue(s) {
@@ -56,7 +56,7 @@ export function cue(s) {
   if (s.phase === 'over') return { sound: 'win', wait: 1200, title: 'Dance over!', sub: `${ranking(s)[0].name} wins`, tone: 'dawn', fx: 'confetti' };
   return null;
 }
-export function cueEvent(s) { return s.eventId && s.phase === 'dance' ? { id: s.eventId, sound: 'tick', say: `Oops, ${nameOf(s, s.early[s.early.length - 1])} tapped too early!` } : null; }
+export function cueEvent(s) { return s.eventId && s.phase === 'dance' ? { id: s.eventId, sound: 'tick', say: `${['Oops! Too early!', 'Not yet! The music is still playing!', 'Too soon!'][s.early.length % 3]} ${nameOf(s, s.early[s.early.length - 1])}!` } : null; }
 export function botAct(v, rnd = Math.random) { if (v.phase === 'freeze' && !v.tapped && !v.early && rnd() < 0.4) return { type: 'tap' }; if (v.phase === 'dance' && !v.early && rnd() < 0.01) return { type: 'tap' }; return null; }
 
 export function tvView(s) {

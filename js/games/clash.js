@@ -81,7 +81,7 @@ function nextTurn(s, now, skip = 0) {
   s.deadline = now + TIMES.turn;
 }
 
-function note(s, text, kind) { s.last = { text, kind }; s.eventId++; }
+function note(s, text, kind, v) { s.last = { text, kind, v }; s.eventId++; }
 
 function play(s, pid, card, a, now, rnd) {
   const hand = s.hands[pid];
@@ -93,7 +93,7 @@ function play(s, pid, card, a, now, rnd) {
     const other = s.players.some(p => p.pid === a.target && p.pid !== pid) ? a.target : s.players[step(s)].pid;
     [s.hands[pid], s.hands[other]] = [s.hands[other], s.hands[pid]];
     note(s, `${who} swapped hands with ${nameOf(s, other)}!`, 'swap');
-  } else note(s, `${who} played ${isWild(card) || ACTIONS.includes(card.v) ? NAMES[card.v] : `${COLORS[card.c].name} ${card.v}`}${isWild(card) ? ` and picked ${COLORS[s.color].name}` : ''}`, ACTIONS.includes(card.v) || card.v === 'w4' ? 'action' : 'play');
+  } else note(s, `${who} played ${isWild(card) || ACTIONS.includes(card.v) ? NAMES[card.v] : `${COLORS[card.c].name} ${card.v}`}${isWild(card) ? ` and picked ${COLORS[s.color].name}` : ''}`, ACTIONS.includes(card.v) || card.v === 'w4' ? 'action' : 'play', card.v);
   if (!s.hands[pid].length) { s.winner = pid; s.phase = 'over'; s.round++; s.deadline = 0; note(s, `${who} is out of cards!`, 'win'); return; }
   let skip = 0;
   if (card.v === 'skip') skip = 1;
@@ -138,7 +138,7 @@ export function tick(s, now = Date.now(), rnd = Math.random) {
 }
 
 export function narration(s) {
-  if (s.phase === 'over') return `${nameOf(s, s.winner)} wins Color Clash!`;
+  if (s.phase === 'over') return `Out of cards! We have a Color Clash champion! ${nameOf(s, s.winner)}!`;
   if (s.moves === 0) return `Welcome to Color Clash! Match the color or the symbol. ${nameOf(s, cur(s))} goes first.`;
   return '';
 }
@@ -152,8 +152,9 @@ export function cue(s) {
 export function cueEvent(s) {
   if (!s.last || s.phase === 'over') return null;
   const one = s.players.find(p => s.hands[p.pid].length === 1);
-  const say = s.last.kind === 'swap' ? s.last.text : one && s.last.kind !== 'draw' && s.last.text.startsWith(one.name) ? `${one.name} has one card left!` : '';
-  return { id: s.eventId, sound: s.last.kind === 'action' || s.last.kind === 'swap' ? 'death' : s.last.kind === 'draw' ? 'tick' : 'whoosh', fx: s.last.kind === 'action' || s.last.kind === 'swap' ? 'shake' : say ? 'gold' : null, react: say && s.last.kind !== 'swap' ? 'gasp' : null, say };
+  const lastCard = one && s.last.kind !== 'draw' && s.last.text.startsWith(one.name);
+  const say = s.last.kind === 'swap' ? 'Hands swapped!' : lastCard ? `One card left! ${one.name}!` : s.last.kind === 'action' && NAMES[s.last.v] ? `${NAMES[s.last.v]}!` : '';
+  return { id: s.eventId, sound: s.last.kind === 'action' || s.last.kind === 'swap' ? 'death' : s.last.kind === 'draw' ? 'tick' : 'whoosh', fx: s.last.kind === 'action' || s.last.kind === 'swap' ? 'shake' : lastCard ? 'gold' : null, react: lastCard ? 'gasp' : null, say };
 }
 
 export function botAct(v, rnd = Math.random) {
