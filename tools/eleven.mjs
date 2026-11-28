@@ -174,7 +174,7 @@ if (cmd === 'estimate') {
   fs.mkdirSync('audio/sfx', { recursive: true });
   const r = await pool(jobs, 2, async s => {
     const buf = s.long
-      ? await api('/v1/music?output_format=mp3_44100_128', { prompt: s.prompt + ' Instrumental only, no vocals.', music_length_ms: Math.round(Math.max(10, s.sec) * 1000) })
+      ? await api('/v1/music?output_format=mp3_44100_128', { model_id: process.env.ELEVEN_MUSIC_MODEL || 'music_v2_5', prompt: s.prompt + ' Instrumental only, no vocals.', music_length_ms: Math.round(Math.max(10, s.sec) * 1000) })
       : await api('/v1/sound-generation?output_format=mp3_44100_128', { text: s.prompt, duration_seconds: Math.min(30, Math.max(0.5, s.sec)), prompt_influence: 0.5, ...(s.loop ? { loop: true } : {}) });
     fs.writeFileSync(`audio/sfx/${s.name}.mp3`, buf);
   });
