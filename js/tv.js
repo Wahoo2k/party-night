@@ -550,6 +550,7 @@ function slideScores() {
   rowAt = next;
 }
 let menuAt = null;   // the card in focus on the hub: { row, game }
+try { menuAt = JSON.parse(sessionStorage.getItem('pg-menu-at')); } catch {}   // survives the page reloading itself for a new version
 let introArt = false;   // the first title card of each game carries its cover art
 let ceremonyOff = null;
 // The winners' ceremony, shared by every game that ends with a score table: third, second, then a drumroll and first.
@@ -833,6 +834,12 @@ function previewStep(first) {
 }
 setInterval(() => previewStep(false), 900);
 
+// Players in the menu's top bar: only whole names are shown; the rest become a "+3" count, so a name is never cut off by the buttons.
+let hubRowsKey = '';
+function fitJoined() {
+  const jd = app.querySelector('.joined');
+  if (jd) { const edge = jd.getBoundingClientRect().right, faces = [...jd.querySelectorAll('.jface')]; let hid = 0; faces.forEach(f => { if (f.getBoundingClientRect().right > edge - 1) { f.hidden = true; hid++; } }); if (hid) { let k = faces.length - hid; const more = document.createElement('span'); more.className = 'jmore'; jd.append(more); const fit = () => { more.textContent = `+${faces.length - k}`; return more.getBoundingClientRect().right <= edge; }; while (!fit() && k > 0) faces[--k].hidden = true; } }
+}
 function renderLobby() {
   const g = game();
   const n = host.players.length;
@@ -847,6 +854,23 @@ function renderLobby() {
     const rows = SHELVES.filter(f => f.games).map(f => ({ id: f.id, name: f.name, games: f.games.filter(id => GAMES[id]) }));
     if (!menuAt || !rows.some(r => r.id === menuAt.row && r.games.includes(menuAt.game))) { const r = rows.find(x => x.games.includes(host.gameId)) || rows[0]; menuAt = { row: r.id, game: r.games.includes(host.gameId) ? host.gameId : r.games[0] }; }
     const card = (id, row) => { const m = GAMES[id].meta; return `<button class="gcard ${menuAt.row === row && menuAt.game === id ? 'on' : ''}" data-game="${id}" data-row="${row}"><span class="gimg">${thumb(id, ICONS[id])}</span><b>${esc(m.name)}</b><small class="gfacts">${m.min}–${m.max} · ${m.mins} min</small>${locked(id) ? '<small class="glock" title="Locked">🔒</small>' : ''}${m.kids ? '<small class="gbadge">🧒</small>' : ''}${watching() && SAME_ROOM.includes(id) ? '<small class="sameroom">🏠 same room</small>' : ''}</button>`; };
+    const barHtml = `<div class="joinbox">${host.settings.streamer ? '' : `<div class="qr">${qr(joinUrl())}</div>`}<div class="jtext"><small>${n ? 'Join on your phone' : 'Scan to join, or go to'}</small><span class="jurl">${esc(joinHost())}</span><b class="code mini">${host.settings.streamer ? '••••' : host.code}</b></div></div>
+        <div class="joined">${host.players.length ? host.players.map(p => `<span class="jface ${p.away ? 'away' : ''}" style="--pc:${p.face?.[1] || '#232a5c'}"><i>${p.face?.[0] || '🙂'}</i><em>${esc(p.name)}</em></span>`).join('') : '<span class="jwait">Waiting for the first player…</span>'}</div>
+        <div class="herobtns"><button class="btn ghost small" data-host="settings">⚙ Settings</button>${tq.has('local') || host.players.some(p => p.bot) ? '<button class="btn ghost small" data-host="addbot">🤖 Add a bot</button>' : ''}${host.tally?.games.length ? '<button class="btn ghost small" data-host="awards">🏆 Awards</button>' : ''}</div>`;
+    const rowsHtml = `${rows.map(r => `<div class="grow" data-row="${r.id}"><h3>${esc(r.name)}</h3><div class="rail">${r.games.map(id => card(id, r.id)).join('')}</div></div>`).join('')}
+      <div class="grow" data-row="nights"><h3>🌙 Ready-made nights</h3><div class="rail">${NIGHTS.map(x => `<button class="gcard night" data-host="night:${x.id}"><span class="gimg nightimg"><i>${x.icon}</i></span><b>${esc(x.name)}</b><small class="nightsub">${esc(x.blurb)}</small></button>`).join('')}</div></div>`;
+    // Someone joining, leaving or dozing off only changes the top bar. If the game rows are the same as what is on
+    // screen, just the bar is swapped: the rows keep their place, their pictures and the highlight (no jump to the top).
+    const rowsKey = rowsHtml.replace(/class="gcard on"/g, 'class="gcard "');
+    const oldBar = app.querySelector('.hub .herobar');
+    if (oldBar && hubRowsKey === rowsKey) {
+      const had = document.activeElement?.closest?.('.herobar') ? document.activeElement.dataset.host : null;
+      oldBar.innerHTML = barHtml; fitJoined();
+      if (had) (oldBar.querySelector(`[data-host="${had}"]`) || app.querySelector('.gcard.on'))?.focus({ preventScroll: true });
+      host.players.forEach(p => seen.add(p.pid));
+      return;
+    }
+    hubRowsKey = rowsKey;
     app.innerHTML = `<div class="hub">
     <section class="hero" id="hero">
       <div class="heroinfo">
@@ -857,19 +881,16 @@ function renderLobby() {
       </div>
       <div class="pvbox"><div class="pvstage" inert aria-hidden="true"></div><span class="pvlabel">Live preview</span></div>
       <div class="herobar">
-        <div class="joinbox">${host.settings.streamer ? '' : `<div class="qr">${qr(joinUrl())}</div>`}<div class="jtext"><small>${n ? 'Join on your phone' : 'Scan to join, or go to'}</small><span class="jurl">${esc(joinHost())}</span><b class="code mini">${host.settings.streamer ? '••••' : host.code}</b></div></div>
-        <div class="joined">${host.players.length ? host.players.map(p => `<span class="jface ${p.away ? 'away' : ''}" style="--pc:${p.face?.[1] || '#232a5c'}"><i>${p.face?.[0] || '🙂'}</i><em>${esc(p.name)}</em></span>`).join('') : '<span class="jwait">Waiting for the first player…</span>'}</div>
-        <div class="herobtns"><button class="btn ghost small" data-host="settings">⚙ Settings</button>${tq.has('local') || host.players.some(p => p.bot) ? '<button class="btn ghost small" data-host="addbot">🤖 Add a bot</button>' : ''}${host.tally?.games.length ? '<button class="btn ghost small" data-host="awards">🏆 Awards</button>' : ''}</div></div>
+      ${barHtml}</div>
     </section>
     <section class="grows" id="grows">
-      ${rows.map(r => `<div class="grow" data-row="${r.id}"><h3>${esc(r.name)}</h3><div class="rail">${r.games.map(id => card(id, r.id)).join('')}</div></div>`).join('')}
-      <div class="grow" data-row="nights"><h3>🌙 Ready-made nights</h3><div class="rail">${NIGHTS.map(x => `<button class="gcard night" data-host="night:${x.id}"><span class="gimg nightimg"><i>${x.icon}</i></span><b>${esc(x.name)}</b><small class="nightsub">${esc(x.blurb)}</small></button>`).join('')}</div></div>
+      ${rowsHtml}
     </section>
   </div>`;
     const hero = app.querySelector('#hero');
     // Bring a card's row to the top of the rows area and the card itself toward the middle of its row.
     const show = (c, smooth) => {
-      const row = c.closest('.grow'), rail = c.closest('.rail'), box = app.querySelector('#grows'), behavior = smooth && !document.body.classList.contains('lite') ? 'smooth' : 'auto';
+      const row = c.closest('.grow'), rail = c.closest('.rail'), box = app.querySelector('#grows'), behavior = smooth && !document.body.classList.contains('lite') ? 'smooth' : 'instant';
       box.scrollTo({ top: Math.max(0, row.offsetTop - 2), behavior });
       rail.scrollTo({ left: Math.max(0, c.offsetLeft - (rail.clientWidth - c.offsetWidth) / 2), behavior });
     };
@@ -878,16 +899,14 @@ function renderLobby() {
     // until the highlight rests, so holding an arrow key never queues up a dozen picture loads.
     const pick = (id, now) => { clearTimeout(pickTimer); if (now) return pickNow(id); if (pv && pv.id !== id && sfx.on) play('pop'); pickTimer = setTimeout(() => { if (app.contains(hero)) pickNow(id); }, 240); };
     app.querySelectorAll('.gcard[data-game]').forEach(c => {
-      c.onfocus = () => { menuAt = { row: c.dataset.row, game: c.dataset.game }; app.querySelectorAll('.gcard.on').forEach(x => x.classList.remove('on')); c.classList.add('on'); show(c, true); pick(c.dataset.game); };
+      c.onfocus = () => { menuAt = { row: c.dataset.row, game: c.dataset.game }; try { sessionStorage.setItem('pg-menu-at', JSON.stringify(menuAt)); } catch {} app.querySelectorAll('.gcard.on').forEach(x => x.classList.remove('on')); c.classList.add('on'); show(c, true); pick(c.dataset.game); };
       c.onmousemove = () => { if (pv?.id !== c.dataset.game) pick(c.dataset.game); };   // a real mouse move only: a row scrolling under a resting pointer must not change the game shown
     });
     app.querySelectorAll('.gcard.night').forEach(c => (c.onfocus = () => show(c, true)));
     pick(menuAt.game, true);
     const cur = app.querySelector('.gcard.on');
     if (cur) { show(cur, false); const ae = document.activeElement; if (!ae?.closest?.('.hub') || !ae.offsetParent) cur.focus({ preventScroll: true }); }   // back from a game: land on the game's card, not on whatever was last pressed
-    // Players in the top bar: only whole names are shown; the rest become a "+3" count, so a name is never cut off by the buttons.
-    const jd = app.querySelector('.joined');
-    if (jd) { const edge = jd.getBoundingClientRect().right, faces = [...jd.querySelectorAll('.jface')]; let hid = 0; faces.forEach(f => { if (f.getBoundingClientRect().right > edge - 1) { f.hidden = true; hid++; } }); if (hid) { let k = faces.length - hid; const more = document.createElement('span'); more.className = 'jmore'; jd.append(more); const fit = () => { more.textContent = `+${faces.length - k}`; return more.getBoundingClientRect().right <= edge; }; while (!fit() && k > 0) faces[--k].hidden = true; } }
+    fitJoined();
     host.players.forEach(p => seen.add(p.pid));
     return;
   }

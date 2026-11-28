@@ -210,3 +210,4 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Intro title readable in the sketch theme; join screen shows the short address; returning to the menu always lands on the game just played.
 - Tall Tales reveal resumes mid-card on a redraw.
 - Seen, not fixed: menu top panel clips in a wide, short desktop window (about 1900×870); hidden browser tabs show as "away" (expected).
+- Menu no longer jumps to the top: a player joining, leaving or going "away" now swaps only the top bar (rows, pictures and highlight stay put); non-animated scrolls are instant; the highlighted game survives the page reloading itself.
