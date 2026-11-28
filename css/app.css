@@ -2518,3 +2518,9 @@ body.onstage[data-game=pindrop] .stage .pdmap{max-height:calc(52*var(--vh,1vh))}
 .pdmiss{margin:0;padding:8px 14px;border-radius:14px;background:#12203cb8;color:#fff;font-size:15px;animation:fadein .4s both}
 .pdpad{aspect-ratio:4/3;background:#8fd0f2;border-radius:12px;overflow:hidden}
 .pdpad .pdmap.phone{width:100%;height:100%;box-shadow:none}
+/* Brain Teasers on the TV: the puzzle itself is the biggest thing on screen (it was drawn at a fifth of this size). */
+body.onstage[data-game=rebus] .rbbox{font-size:74px;min-height:350px;padding:18px 26px}
+body.onstage[data-game=rebus] .rbbox .rb-say{font-size:.9em}
+body.onstage[data-game=rebus] .rbask{font-size:34px}
+body.onstage[data-game=rebus] .rbhint{font-size:40px}
+body.onstage[data-game=rebus] .rbbox~p.center .clock,body.onstage[data-game=rebus] .rbhint+p .clock{font-size:46px;padding:6px 22px}

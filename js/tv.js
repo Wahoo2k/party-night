@@ -1219,13 +1219,16 @@ function timerBar() {
   // Only timers the game itself shows on screen: a hidden fuse (Hot Potato, Freeze Dance) must stay hidden.
   const live = s && !host.paused && s.phase !== 'over' && s.deadline > now && !SECRET.includes(host.gameId) && !!app.querySelector('.clock');
   tbar.hidden = !live;
-  if (!live) { barFor = 0; stopBed(); return; }
+  // Music runs under the whole game, not only while a clock is counting: a turn-based game (GOAT Toss) or a screen
+  // without a timer used to fall silent. Night scenes keep their own sounds; a few games make their own music.
+  const wantsBed = s && !host.paused && s.phase !== 'over' && host.settings.music && sfx.on && !OWN_AUDIO.includes(host.gameId) && !document.body.classList.contains('night');
+  if (!live) { barFor = 0; if (wantsBed) startBed('think'); else stopBed(); return; }
   if (s.deadline !== barFor) { barFor = s.deadline; barTotal = Math.max(1000, s.deadline - now); tbar.firstChild.style.transition = 'none'; tbar.firstChild.style.width = '100%'; void tbar.offsetWidth; }
   const left = s.deadline - now;
   tbar.firstChild.style.transition = 'width 1s linear';
   tbar.firstChild.style.width = Math.max(0, (100 * (left - 1000)) / barTotal) + '%';
   tbar.classList.toggle('hurry', left <= 10000);
-  if (host.settings.music && sfx.on && !OWN_AUDIO.includes(host.gameId) && barTotal >= 12000) startBed(left <= 10000 ? 'hurry' : 'think'); else stopBed();
+  if (wantsBed) startBed(barTotal >= 12000 && left <= 10000 ? 'hurry' : 'think'); else stopBed();
 }
 setInterval(timerBar, 1000);
 

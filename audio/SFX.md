@@ -22,6 +22,9 @@ Every sound today is synthesized in `js/sfx.js`. Each row is one recorded file t
 | dawn | 3 | Morning comes (night games) | A rooster crow with gentle morning birdsong, 2.5 seconds |
 | whoosh | 3 | Something flies across the screen | Quick airy whoosh, left to right, under half a second |
 | pop | 3 | Items pop onto the screen | Soft cartoon bubble pop, very short |
+| cup-shake | 1 | GOAT Toss: the cup is shaken before a toss | Small wooden game pieces rattling in a leather dice cup, quick shake, under 1 second |
+| thud | 1 | GOAT Toss: a goat bounces on the table | Small wooden toy knocking once on a wooden table, dry single hit, very short |
+| bleat | 1 | GOAT Toss: a goat lands | Single short goat bleat, friendly cartoonish baa, under 1 second |
 | fanfare | 3 | Final round, the winner revealed | Short royal trumpet fanfare, bright, 2 seconds |
 | points | 2 | Points landing on a phone | Quick ascending coin-collect sparkle, under 1 second |
 | lockin | 2 | An answer locked in | Soft satisfying click with a tiny chime, very short |

@@ -287,11 +287,22 @@ function tossPlace(root, plan, ms) {
     if (sh[i]) { const lift = Math.min(1, h / 260); sh[i].style.opacity = 0.5 - 0.3 * lift; sh[i].style.transform = `translate(${(850 + x - 145).toFixed(1)}px,${(900 - d - 62).toFixed(1)}px) scale(${(1 - 0.45 * lift).toFixed(2)})`; }
   });
 }
+let tossHeard = null, tossTimers = [];
 function tossRun(root, v) {
   const last = v.last;
   if (!last) return;
   const plan = tossPlan(v.eventId, last.a, last.b, !!last.pile);
   const start = v.animating && typeof performance !== 'undefined' ? performance.now() - (TIMES.anim - (v.animLeft ?? 0)) : null;
+  // The toss is heard as well as seen: the cup rattles, each goat knocks on the table as it bounces (softer taps are
+  // skipped), and a goat or two has something to say when it lands. Scheduled once per toss, from wherever it is now.
+  if (start !== null && tossHeard !== v.eventId) {
+    tossHeard = v.eventId; tossTimers.forEach(clearTimeout); tossTimers = [];
+    const since = performance.now() - start, at = (ms, name) => { if (ms >= since - 40) tossTimers.push(setTimeout(() => import('../sfx.js').then(m => m.play(name)).catch(() => {}), Math.max(0, ms - since))); };
+    at(0, 'cup-shake'); at(T_REL - 60, 'whoosh');
+    plan.goats.forEach((g, i) => { g.bounces.slice(0, 3).forEach((t, k) => at(T_REL + t * 1000 + i * 35, 'thud')); });
+    const land = T_REL + Math.max(...plan.goats.map(g => g.end)) * 1000;
+    if (last.bust || last.pile) { at(land - 150, 'bleat'); at(land + 180, 'bleat'); } else if ((v.eventId * 7) % 10 < 6) at(land - 80, 'bleat');
+  }
   const step = () => {
     const ms = start === null ? 1e6 : performance.now() - start;
     tossPlace(root, plan, ms);

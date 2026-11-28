@@ -121,7 +121,7 @@ const SOUNDS = {
 };
 
 const lastTake = {};
-const VARY = new Set(['pop', 'stamp', 'tick', 'lockin', 'points', 'vote', 'join', 'safe', 'whoosh', 'lose', 'death']);
+const VARY = new Set(['pop', 'stamp', 'tick', 'lockin', 'points', 'vote', 'join', 'safe', 'whoosh', 'lose', 'death', 'thud', 'bleat', 'cup-shake']);
 export function play(name) {
   if (!quiet.on) tap.fn?.('play', [name]);
   if (!ready()) return;
