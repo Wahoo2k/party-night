@@ -2738,3 +2738,9 @@ body:not(.hubmode) #nightline,body.phone #nightline{display:none}
 .wsrows{display:grid;gap:6px}.wsrows .pdrow span{white-space:normal}u.only{text-decoration:none;color:#ffd60a;font-weight:800}
 .wsgrid.phone{width:100%;max-width:360px;margin:8px auto;gap:7px;touch-action:none}.wsgrid.phone i{font-size:34px;border-radius:12px}.wsgrid.phone i.on{background:#ffd60a;transform:scale(.94)}
 .wsword{min-height:44px;text-align:center;font:800 32px/44px Outfit,sans-serif;letter-spacing:.08em}
+/* Game covers carry their own name: a wash of the game's color along the bottom, the name set big over it */
+.gcard .gimg{position:relative}
+.gwash{position:absolute;inset:0;background:linear-gradient(to top,var(--t) 6%,color-mix(in srgb,var(--t) 80%,transparent) 36%,transparent 76%);pointer-events:none}
+.gname{position:absolute;left:6%;right:5%;bottom:6%;font:400 clamp(20px,calc(2.5*var(--vw,1vw)),50px)/.95 Anton,Impact,'Arial Narrow Bold',sans-serif;font-style:normal;text-transform:uppercase;letter-spacing:.01em;color:#fff;text-shadow:.06em .06em 0 #0009;transform:rotate(-3deg);transform-origin:left bottom;white-space:normal;overflow-wrap:break-word;pointer-events:none}
+.gname.mid{font-size:clamp(17px,calc(2.1*var(--vw,1vw)),42px)}.gname.long{font-size:clamp(15px,calc(1.75*var(--vw,1vw)),35px)}
+.gcard .gunder{display:none}
