@@ -23,7 +23,7 @@ async function games() {
 }
 const facts = g => `<span class="tag">${g.min} to ${g.max} players</span>${g.mins ? `<span class="tag">About ${g.mins} min</span>` : ''}${g.mood ? `<span class="tag">${esc(g.mood)}</span>` : ''}${g.kids ? '<span class="tag">All ages</span>' : ''}`;
 const card = g => `<article class="game" data-id="${g.id}" data-pack="${g.pack?.id || ''}" tabindex="0" role="button" aria-label="${esc(g.name)}: watch it play">
-  <span class="gshot"><img src="../art/${g.id}.jpg" alt="" loading="lazy" width="400" height="300"><em>▶ Watch it play</em></span>
+  <span class="gshot"><img src="../art/thumb/${g.id}.jpg" alt="" loading="lazy" decoding="async" width="400" height="300"><em>▶ Watch it play</em></span>
   <div class="gbody"><h3>${esc(g.name)}</h3><p>${esc(g.blurb)}</p>
   <div class="tags">${facts(g)}<span class="tag ${g.pack?.id === 'free' ? 'free' : 'inpack'}">${esc(g.pack?.name || '')}</span></div></div></article>`;
 
@@ -60,7 +60,7 @@ if (page === 'pricing') {
     document.querySelectorAll('[data-p=count]').forEach(el => (el.textContent = list.length));
     document.querySelector('#freelist').textContent = FREE.map(name).join(', ');
     document.querySelector('#packs').innerHTML = PACKS.map(p => `<div class="pack"><div><h3>${esc(p.name)}</h3><p class="lead" style="font-size:16px">${esc(p.blurb)}</p></div>
-      <div class="thumbs">${p.games.slice(0, 3).map(id => `<img src="../art/${id}.jpg" alt="" loading="lazy">`).join('')}</div>
+      <div class="thumbs">${p.games.slice(0, 3).map(id => `<img src="../art/thumb/${id}.jpg" alt="" loading="lazy" decoding="async">`).join('')}</div>
       <ul>${p.games.map(id => `<li>${esc(name(id))}</li>`).join('')}</ul>
       <div class="cta"><b class="price" style="font-size:30px">${money(PRICES.pack)}</b><a class="btn ghost small" href="games.html?pack=${p.id}">See the ${p.games.length} games</a></div></div>`).join('');
   }).catch(() => {});

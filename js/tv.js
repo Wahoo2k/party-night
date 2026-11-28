@@ -4,7 +4,7 @@ import { openRoom } from './net.js';
 import { SHOP, locked, refreshOwn, owned, accountUrl } from './own.js';
 import { PACKS, PRICES, packOf } from './packs.js';
 import { esc, store, DEMO, newCode, say, sayLow, voiceContext, fitScreen, stageFit, keepFitted, voice, voices, enableDpad, autofocus, drawScene, titleCard, confetti, clawMarks } from './ui.js';
-import { art } from './art.js';
+import { art, thumb } from './art.js';
 import { play, sfx, startAmbient, stopAmbient, startBed, stopBed, startLoop, stopLoop, quiet } from './sfx.js';
 import { newKeys, cleanPub, samePub, sharedKey, seal, unseal } from './secure.js';
 import { cleanAct, textsIn, maskView, maskLine } from './content.js';
@@ -103,8 +103,8 @@ function afterParty() {
   const nx = suggestNext(), G = nx && GAMES[nx];
   const t = host.tally, night = t?.games.length > 1 ? Object.entries(t.by).filter(e => e[1].pts).sort((a, b) => b[1].pts - a[1].pts).slice(0, 5) : [];
   app.insertAdjacentHTML('beforeend', `<div class="after">
-    <button class="endcard" data-host="again"><span class="aart">${art(host.gameId, ICONS[host.gameId])}</span><span class="atext"><small>Same game</small><b>Play again</b></span></button>
-    ${G ? `<button class="endcard next" data-host="playnext:${nx}"><span class="aart">${art(nx, ICONS[nx])}</span><span class="atext"><small>Up next</small><b>${esc(G.meta.name)}</b></span></button>` : ''}
+    <button class="endcard" data-host="again"><span class="aart">${thumb(host.gameId, ICONS[host.gameId])}</span><span class="atext"><small>Same game</small><b>Play again</b></span></button>
+    ${G ? `<button class="endcard next" data-host="playnext:${nx}"><span class="aart">${thumb(nx, ICONS[nx])}</span><span class="atext"><small>Up next</small><b>${esc(G.meta.name)}</b></span></button>` : ''}
     <button class="endcard" data-host="lobby"><span class="aart all">🎲</span><span class="atext"><small>Something else</small><b>All games</b></span></button>
     ${night.length ? `<p class="anight"><b>Tonight</b> ${night.map(([n, r], i) => `${i ? '· ' : '👑 '}${esc(n)} <b>${r.pts}</b>`).join(' ')}</p>` : ''}</div>`);
 }
@@ -742,6 +742,7 @@ const BOT_NAMES = ['Bot Ava', 'Bot Ben', 'Bot Cleo', 'Bot Dax', 'Bot Eli', 'Bot 
 
 // Bots act a few seconds after a phase starts, at a human-ish pace.
 let botWait = {};
+let pickTimer = 0;
 function runBots() {
   const g = game();
   if (!host.state || !g.botAct) return;
@@ -796,12 +797,13 @@ function previewGame(id) {
   if (pv?.id !== id) pv = { id, s: null, now: Date.now(), stuck: 0, last: '', over: 0, players: ['Ava', 'Ben', 'Cleo', 'Dax', 'Eli', 'Fay'].slice(0, Math.max(GAMES[id].meta.min, Math.min(5, GAMES[id].meta.max))).map((n, i) => ({ pid: 'bot-pv' + i, name: n })) };
   const m = GAMES[id].meta, q = x => app.querySelector(x);
   const stageEl = q('.pvstage'); if (stageEl) { stageEl.dataset.theme = THEME_OF[id] || ''; stageEl.parentElement.dataset.theme = THEME_OF[id] || ''; }
-  if (q('#pvname')) { q('#pvname').textContent = m.name; q('#pvicon').innerHTML = art(id, ICONS[id]); q('#pvblurb').textContent = m.blurb; q('#pvtags').innerHTML = `<span>👥 ${m.min}–${m.max} players</span>${m.best ? `<span>⭐ Best with ${m.best}</span>` : ''}${m.mins ? `<span>⏱ About ${m.mins} min</span>` : ''}${m.mood ? `<span>${esc(m.mood)}</span>` : ''}${m.kids ? '<span>🧒 Little kids</span>' : ''}`; }
+  if (q('#pvname')) { q('#pvname').textContent = m.name; q('#pvicon').innerHTML = thumb(id, ICONS[id]); q('#pvblurb').textContent = m.blurb; q('#pvtags').innerHTML = `<span>👥 ${m.min}–${m.max} players</span>${m.best ? `<span>⭐ Best with ${m.best}</span>` : ''}${m.mins ? `<span>⏱ About ${m.mins} min</span>` : ''}${m.mood ? `<span>${esc(m.mood)}</span>` : ''}${m.kids ? '<span>🧒 Little kids</span>' : ''}`; }
   previewStep(true);
 }
 function previewStep(first) {
   const el = app.querySelector('.pvstage');
   if (!el || !pv || host.state) return;
+  if (!el.offsetParent) return;   // the preview box isn't shown on this screen size: don't play a game nobody can see
   const G = GAMES[pv.id];
   try {
     if (!pv.s || pv.over > 4) { pv.s = G.setup(pv.players, Math.random, null, { short: true }); pv.over = 0; pv.now = Math.max(pv.now, Date.now()); }
@@ -843,7 +845,7 @@ function renderLobby() {
     if (!GAMES[host.gameId]) host.gameId = 'werewolf';
     const rows = SHELVES.filter(f => f.games).map(f => ({ id: f.id, name: f.name, games: f.games.filter(id => GAMES[id]) }));
     if (!menuAt || !rows.some(r => r.id === menuAt.row && r.games.includes(menuAt.game))) { const r = rows.find(x => x.games.includes(host.gameId)) || rows[0]; menuAt = { row: r.id, game: r.games.includes(host.gameId) ? host.gameId : r.games[0] }; }
-    const card = (id, row) => { const m = GAMES[id].meta; return `<button class="gcard ${menuAt.row === row && menuAt.game === id ? 'on' : ''}" data-game="${id}" data-row="${row}"><span class="gimg">${art(id, ICONS[id])}</span><b>${esc(m.name)}</b><small class="gfacts">${m.min}–${m.max} · ${m.mins} min</small>${locked(id) ? '<small class="glock" title="Locked">🔒</small>' : ''}${m.kids ? '<small class="gbadge">🧒</small>' : ''}${watching() && SAME_ROOM.includes(id) ? '<small class="sameroom">🏠 same room</small>' : ''}</button>`; };
+    const card = (id, row) => { const m = GAMES[id].meta; return `<button class="gcard ${menuAt.row === row && menuAt.game === id ? 'on' : ''}" data-game="${id}" data-row="${row}"><span class="gimg">${thumb(id, ICONS[id])}</span><b>${esc(m.name)}</b><small class="gfacts">${m.min}–${m.max} · ${m.mins} min</small>${locked(id) ? '<small class="glock" title="Locked">🔒</small>' : ''}${m.kids ? '<small class="gbadge">🧒</small>' : ''}${watching() && SAME_ROOM.includes(id) ? '<small class="sameroom">🏠 same room</small>' : ''}</button>`; };
     app.innerHTML = `<div class="hub">
     <section class="hero" id="hero">
       <div class="heroinfo">
@@ -866,17 +868,20 @@ function renderLobby() {
     const hero = app.querySelector('#hero');
     // Bring a card's row to the top of the rows area and the card itself toward the middle of its row.
     const show = (c, smooth) => {
-      const row = c.closest('.grow'), rail = c.closest('.rail'), box = app.querySelector('#grows'), behavior = smooth ? 'smooth' : 'auto';
+      const row = c.closest('.grow'), rail = c.closest('.rail'), box = app.querySelector('#grows'), behavior = smooth && !document.body.classList.contains('lite') ? 'smooth' : 'auto';
       box.scrollTo({ top: Math.max(0, row.offsetTop - 2), behavior });
       rail.scrollTo({ left: Math.max(0, c.offsetLeft - (rail.clientWidth - c.offsetWidth) / 2), behavior });
     };
-    const pick = id => { hero.style.setProperty('--art', `url("${new URL(`art/${id}.jpg`, location.href).href}")`); if (pv?.id !== id || !app.querySelector('.pvstage').firstChild) { if (pv && pv.id !== id && sfx.on) play('pop'); host.gameId = id; previewGame(id); } };
+    const pickNow = id => { hero.style.setProperty('--art', `url("${new URL(`art/${id}.jpg`, location.href).href}")`); if (pv?.id !== id || !app.querySelector('.pvstage').firstChild) { host.gameId = id; previewGame(id); } };
+    // Moving along a row: the highlight and a click sound answer at once; the big picture and the live preview wait
+    // until the highlight rests, so holding an arrow key never queues up a dozen picture loads.
+    const pick = (id, now) => { clearTimeout(pickTimer); if (now) return pickNow(id); if (pv && pv.id !== id && sfx.on) play('pop'); pickTimer = setTimeout(() => { if (app.contains(hero)) pickNow(id); }, 240); };
     app.querySelectorAll('.gcard[data-game]').forEach(c => {
       c.onfocus = () => { menuAt = { row: c.dataset.row, game: c.dataset.game }; app.querySelectorAll('.gcard.on').forEach(x => x.classList.remove('on')); c.classList.add('on'); show(c, true); pick(c.dataset.game); };
       c.onmouseenter = () => pick(c.dataset.game);
     });
     app.querySelectorAll('.gcard.night').forEach(c => (c.onfocus = () => show(c, true)));
-    pick(menuAt.game);
+    pick(menuAt.game, true);
     const cur = app.querySelector('.gcard.on');
     if (cur) { show(cur, false); if (!app.contains(document.activeElement)) cur.focus({ preventScroll: true }); }
     host.players.forEach(p => seen.add(p.pid));

@@ -2285,3 +2285,9 @@ body.phone{-webkit-touch-callout:none}
 
 /* Phone, keyboard up: only the question, the box and the send button. */
 body.phone.typing #hostfab,body.phone.typing #helpbtn,body.phone.typing .actbar,body.phone.typing #tvbtn{display:none!important}
+
+/* Lite mode, menu: no cross-fade on the big picture, no hover lift animation on cards. */
+body.lite .hero::before{transition:none}
+body.lite .gcard{transition:none}
+body.lite .gcard .gimg img{transition:none}
+.gcard .gimg img{content-visibility:auto}
