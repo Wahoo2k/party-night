@@ -88,7 +88,7 @@ export function hostAct(s, a, now = Date.now(), rnd = Math.random) {
 export function tick(s, now = Date.now(), rnd = Math.random) { return s.deadline && now >= s.deadline ? hostAct(s, 'next', now, rnd) : s; }
 
 export function narration(s) {
-  if (s.phase === 'brief') return s.b === 0 ? `Bomb Squad! You are all one team. The bomb is on the TV. Each of your phones has some of the rules. Read them out loud. The first rule that applies is the one to follow. ${nameOf(s, s.cutter)} is the only one who can cut.` : `Bomb ${s.b + 1}. ${nameOf(s, s.cutter)} has the cutters.`;
+  if (s.phase === 'brief') return s.b === 0 ? `Bomb Squad! You are all one team. The bomb is on the TV. Each of your phones has some of the rules. Read them out loud. The first rule that applies is the one to follow. Only one of you can cut. ${nameOf(s, s.cutter)} has the cutters.` : `Bomb ${s.b + 1}. A new pair of hands on the cutters. ${nameOf(s, s.cutter)} has them.`;
   if (s.phase === 'defuse') return 'The timer is running. Talk it out!';
   if (s.phase === 'result') return s.last.ok ? 'Defused! Nice work, team.' : s.last.why === 'time' ? 'Out of time! Boom.' : 'Wrong wire! Boom!';
   if (s.phase === 'over') return s.strikes >= STRIKES ? `Three strikes. The squad defused ${s.defused} bombs.` : `All done! The squad defused ${s.defused} of ${BOMBS} bombs!`;

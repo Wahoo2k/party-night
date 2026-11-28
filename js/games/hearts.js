@@ -159,10 +159,10 @@ export function botAct(v) {
 const ranking = s => s.players.map(p => ({ pid: p.pid, name: p.name, score: s.scores[p.pid] })).sort((a, b) => a.score - b.score);
 export function narration(s) {
   if (s.phase === 'pass') return s.handNo === 0 ? `Welcome to Hearts! Each heart you take is a point, and the Queen of Spades is thirteen. Lowest score wins. First, pick three cards to pass ${s.passDir}.` : `Pass three cards ${s.passDir}.`;
-  if (s.phase === 'play' && s.tricks === 0 && !s.trick.length) return `${nameOf(s, cur(s))} has the two of clubs and leads.`;
-  if (s.phase === 'trick' && s.lastTrick.cards.some(t => t.card.s === SPADE && t.card.r === 11)) return `Ouch! ${nameOf(s, s.lastTrick.winner)} takes the Queen of Spades!`;
+  if (s.phase === 'play' && s.tricks === 0 && !s.trick.length) return `The two of clubs leads. ${nameOf(s, cur(s))} has it.`;
+  if (s.phase === 'trick' && s.lastTrick.cards.some(t => t.card.s === SPADE && t.card.r === 11)) return `Ouch! The Queen of Spades is taken! Thirteen points for ${nameOf(s, s.lastTrick.winner)}.`;
   if (s.phase === 'handEnd' || s.phase === 'over') {
-    const moon = s.moon ? `${nameOf(s, s.moon)} shot the moon! ` : '';
+    const moon = s.moon ? `Somebody shot the moon! It was ${nameOf(s, s.moon)}. ` : '';
     return s.phase === 'over' ? `${moon}${ranking(s)[0].name} wins with the lowest score!` : `${moon}End of the hand.`;
   }
   return '';

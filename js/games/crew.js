@@ -119,7 +119,7 @@ const rating = n => RATING.find(([k]) => n >= k)[1];
 const aliveList = s => Object.entries(s.clues).filter(([pid]) => s.alive?.[pid]).map(([pid, text]) => ({ text, name: nameOf(s, pid) }));
 
 export function narration(s) {
-  if (s.phase === 'clue') return s.played === 0 ? `Welcome to Clue Crew! We're all on the same team. ${nameOf(s, s.guesser)}, don't look at the TV or anyone's phone! Everyone else, write a one-word clue. Matching clues cancel out.` : `${nameOf(s, s.guesser)} is guessing. Write your clues!`;
+  if (s.phase === 'clue') return s.played === 0 ? `Welcome to Clue Crew! We're all on the same team. The guesser must not look at the TV or anyone's phone! Everyone else, write a one-word clue. Matching clues cancel out. ${nameOf(s, s.guesser)} is guessing first.` : `${['New card. Write your clues!', 'Next word. Clues, please.', 'A new guesser. Everyone else, write a clue.'][s.played % 3]} ${nameOf(s, s.guesser)} is guessing.`;
   if (s.phase === 'guess') { const n = aliveList(s).length; return n ? `${n} clue${n === 1 ? '' : 's'} made it. ${nameOf(s, s.guesser)}, what's the word?` : `Oh no, every clue cancelled out! ${nameOf(s, s.guesser)}, take a wild guess.`; }
   if (s.phase === 'reveal') return s.result === 'right' ? `Yes! It was ${cur(s).word}!` : s.result === 'wrong' ? `Nope, it was ${cur(s).word}. That costs us an extra card.` : `Passed. It was ${cur(s).word}.`;
   if (s.phase === 'over') return `You got ${s.score} out of ${s.deck.length}. ${rating(s.score)}`;

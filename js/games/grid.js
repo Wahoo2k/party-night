@@ -107,7 +107,7 @@ export function cue(s) {
   if (s.phase === 'over') return { sound: 'win', wait: 1500, title: 'Game Over', sub: `${ranking(s)[0].name} wins!`, tone: 'dawn', fx: 'confetti' };
   return null;
 }
-export function botAct(v, rnd = Math.random) { return v.phase === 'play' && v._words?.length && rnd() < 0.25 ? { type: 'word', w: v._words[Math.floor(rnd() * v._words.length)] } : null; }
+export function botAct(v, rnd = Math.random) { return v.phase === 'play' && v._words?.length && rnd() < 0.6 ? { type: 'word', w: v._words[Math.floor(rnd() * v._words.length)] } : null; }
 
 export function tvView(s, now = Date.now()) {
   const held = s.phase === 'result' && !s.settled;

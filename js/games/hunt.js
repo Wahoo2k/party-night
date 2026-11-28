@@ -62,7 +62,7 @@ const ranking = s => s.players.map(p => ({ pid: p.pid, name: p.name, score: s.sc
 export function narration(s) {
   if (s.phase === 'get') return s.r === 0 ? 'Color Hunt! When I say go, run and touch it, then tap your phone. Ready?' : 'Get ready!';
   if (s.phase === 'go') return `${H(s).say} Go go go!`;
-  if (s.phase === 'done') return s.found.length ? `${nameOf(s, s.found[0])} was first! Great hunting!` : 'Time\'s up!';
+  if (s.phase === 'done') return s.found.length ? `Found it! Great hunting! ${nameOf(s, s.found[0])} was first.` : 'Time\'s up!';
   if (s.phase === 'over') return `${ranking(s)[0].name} is the hunt champion!`;
   return '';
 }
