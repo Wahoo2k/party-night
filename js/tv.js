@@ -983,6 +983,7 @@ function runBots() {
     const key = host.state.phase + host.state.round;
     // Some bots only act on a coin flip. A 'no' before their wait is up must not restart the wait, or they'd never act.
     if (!a) { if (!botWait[p.pid] || botWait[p.pid].key !== key || now >= botWait[p.pid].at) delete botWait[p.pid]; continue; }
+    if (a._now) { const { _now, ...act } = a; g.act(host.state, p.pid, act, now); delete botWait[p.pid]; acted = true; continue; }   // a move that is all about timing (stop the clock, copy the pattern) can't wait for a bot's thinking pause
     if (!botWait[p.pid] || botWait[p.pid].key !== key) botWait[p.pid] = { key, at: now + (DEMO ? 1200 + Math.random() * 2600 : 2000 + Math.random() * 6000) };
     if (now >= botWait[p.pid].at) { g.act(host.state, p.pid, a, now); delete botWait[p.pid]; acted = true; }
   }

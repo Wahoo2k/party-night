@@ -83,7 +83,7 @@ export function cue(s) {
 export function botAct(v, rnd = Math.random) {
   if (v.phase !== 'input' || !v.alive || v.done) return null;
   const right = v._p[v.progress];
-  return { type: 'tap', k: rnd() < 0.96 - v._p.length * 0.02 ? right : (right + 1) % 4 };
+  return { type: 'tap', k: rnd() < 0.96 - v._p.length * 0.02 ? right : (right + 1) % 4, _now: true };
 }
 
 export function tvView(s, now = Date.now()) {

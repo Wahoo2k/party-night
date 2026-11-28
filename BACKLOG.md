@@ -288,3 +288,10 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Website says one purchase works on any screen; the FAQ covers screens and gift codes.
 - Still off: `SELLING` in js/packs.js. Stripe secrets are still to be pasted by Tom.
 - Sounds (28 Nov): 15 new effects in audio/SFX.md ("Crowd, leaders and characters"): `lead` (first place changes hands, with a "takes the lead!" banner and the new leader's character swelling), `crowd-aww`, `crowd-ooh`, and a `char-<name>` sound for each of the twelve odd characters (on picking it, on a big moment at most every 40 s, and for the leader on the standings screen). The standings screen now opens with the drum roll. Nobody has listened yet.
+
+## Review of all 63 games with bots (28 Nov)
+How: tools/review.mjs opens each game on a 1280x720 TV page with five bots, lets it run for up to 5.5 minutes and saves a picture of each new screen (4 seconds in, after the title card). Run it with the test server up: `node tools/review.mjs <folder> <game ids>`.
+- No page errors in any of the 63. 41 reached the podium inside 5.5 minutes; the rest are simply longer or need a human (Bingo waits for the host to pick number or picture bingo).
+- Fixed from it: answer tiles sat half-faded during any vote with a countdown (the entrance animation restarted every second; Show of Hands was the worst); the drifting background shapes read as grey smudges over painted scenes (now much fainter); Mystery Manor never reached its ending (no podium choices, not counted in tonight's tally) and showed werewolf claw marks; bots never stopped the clock in Inner Clock and scored nothing in Copy Cat (timing moves now skip the bots' thinking pause, `_now` on a bot action).
+- Still open: tiny text in Pin Drop map labels (5 px), Estimate & Bet and Spot the Shade (10 px), Mind Meld (11 px); Gold Rush shrinks the question to small print once the chests appear; Word Storm bots find one word each; talking games (Secret Word Hunt, Taboo Talk, Picture Charades, Salad Bowl) cannot be judged with bots.
+- Not judged at all: whether each game is fun, and all audio.

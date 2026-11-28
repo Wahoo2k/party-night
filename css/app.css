@@ -2223,7 +2223,7 @@ body.onstage[data-game=imposter] .stage .panel>.btn{display:flex;margin:10px aut
 /* The drifting shapes now float over every game's painted background too, as soft light. Night games get fireflies. */
 body[data-theme]:not([data-theme='']):not(.phone) #backdrop{display:block}
 body[data-theme]:not([data-theme='']):not(.phone) #backdrop i{background:#fff;mix-blend-mode:soft-light;animation-name:drift3}
-@keyframes drift3{0%{transform:translateY(0) rotate(0);opacity:0}10%,90%{opacity:.3}100%{transform:translateY(-130vh) rotate(300deg);opacity:0}}
+@keyframes drift3{0%{transform:translateY(0) rotate(0);opacity:0}10%,90%{opacity:.12}100%{transform:translateY(-130vh) rotate(300deg);opacity:0}}   /* was .3: in the 28 Nov review the shapes read as grey smudges over the scenes */
 body:is([data-game=werewolf],[data-game=midnight],[data-game=haunted]):not(.phone) #backdrop{display:block}
 body:is([data-game=werewolf],[data-game=midnight],[data-game=haunted]):not(.phone) #backdrop i{width:7px;height:7px;border-radius:50%;clip-path:none;background:#fff1b8;box-shadow:0 0 14px 5px #ffd16688;mix-blend-mode:normal;animation-name:firefly}
 @keyframes firefly{0%{transform:translate(0,0);opacity:0}12%{opacity:.9}35%{opacity:.25}50%{transform:translate(46px,-52vh);opacity:.9}70%{opacity:.2}85%{opacity:.8}100%{transform:translate(-34px,-108vh);opacity:0}}
@@ -2795,3 +2795,8 @@ i:has(> img.av){background:none!important;overflow:visible}
 /* A new leader */
 .leadflag{position:fixed;left:50%;bottom:22vh;transform:translateX(-50%);z-index:40;padding:.5em 1.2em;border-radius:99px;background:linear-gradient(90deg,#ffd166,#ff9f43);color:#221a3a;font:800 clamp(18px,calc(2.2*var(--vw,1vw)),40px)/1.2 Outfit,'DM Sans',sans-serif;box-shadow:0 8px 30px #000a;animation:leadflag 2.6s cubic-bezier(.2,1.4,.4,1) both;pointer-events:none;white-space:nowrap}
 @keyframes leadflag{0%{opacity:0;transform:translate(-50%,2em) scale(.7)}12%{opacity:1;transform:translate(-50%,0) scale(1.08)}20%{transform:translate(-50%,0) scale(1)}85%{opacity:1}100%{opacity:0;transform:translate(-50%,-1em)}}
+
+/* Review fixes (28 Nov) */
+/* A screen that redraws every second (a countdown) restarted these entrance animations each time, so answer tiles
+   sat half-faded for the whole vote. They animate only when the screen first arrives. */
+.stage:not(.enter) .ans,.stage:not(.enter) .dbopt{animation:none}

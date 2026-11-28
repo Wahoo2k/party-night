@@ -90,7 +90,7 @@ export function cue(s) {
 // Bots stop somewhere near the target. They are sent how long the clock has been running, which real phones are not.
 export function botAct(v, rnd = Math.random) {
   if (v.phase !== 'run' || v.stopped || v.since === undefined) return null;
-  return v.since >= v.target * 1000 - 900 && rnd() < 0.45 ? { type: 'stop' } : null;
+  return v.since >= v.target * 1000 - 900 && rnd() < 0.45 ? { type: 'stop', _now: true } : null;
 }
 
 export function tvView(s, now = Date.now()) {

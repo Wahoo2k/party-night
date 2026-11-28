@@ -89,7 +89,7 @@ function reveal(s, now) {
     s.points[p.pid] = pts;
   });
   s.caught = caught; s.count = count;
-  s.phase = 'reveal'; s.round++; s.deadline = 0;
+  s.phase = 'reveal'; s.round++; s.deadline = now + 12000;   // the answer holds for a moment, then the game ends like every other (podium choices, tonight's tally)
 }
 
 export function hostAct(s, a, now = Date.now(), rnd = Math.random) {
@@ -115,7 +115,7 @@ export function cue(s) {
   if (s.phase === 'roles') return { sound: 'night', wait: 1800, title: 'Mystery Manor', sub: 'The Moon Diamond is missing', tone: 'night', ambient: 'crickets' };
   if (s.phase === 'act') return { sound: 'drumroll', wait: 1200, title: `Act ${s.act + 1}`, sub: ACTS[s.act], tone: 'night' };
   if (s.phase === 'accuse') return { sound: 'vote', wait: 500, title: 'Accuse!', tone: 'blood' };
-  if (s.phase === 'reveal') return { sound: s.caught ? 'win' : 'death', wait: 1500, title: s.caught ? 'Case closed!' : 'The thief escaped!', sub: nameOf(s, s.thief), tone: s.caught ? 'dawn' : 'blood', fx: s.caught ? 'confetti' : 'claws' };
+  if (s.phase === 'reveal') return { sound: s.caught ? 'win' : 'death', wait: 1500, title: s.caught ? 'Case closed!' : 'The thief escaped!', sub: nameOf(s, s.thief), tone: s.caught ? 'dawn' : 'blood', fx: s.caught ? 'confetti' : '' };   // claw marks belong to the werewolf games
   return null;
 }
 
@@ -155,7 +155,7 @@ export function renderTV(v, el) {
   if (v.phase === 'roles') h = `<h2>💎 The Moon Diamond is missing!</h2><p class="say">During dinner the lights went out. When they came back on, the diamond was gone. One of you is the thief. Check your phone to meet your character.</p>${cast}<button class="btn" data-host="next">Begin Act 1</button><div class="how"><h3>How to play</h3><ol><li>Everyone plays a character. One of you is secretly the thief.</li><li>Each act, the TV shows clues for everyone, and your phone shows clues only you know.</li><li>Share what you know. The thief will lie!</li><li>At the end, accuse: who, where, and how. The thief wins if the group gets it wrong.</li></ol></div>`;
   if (v.phase === 'act') h = `<p class="cat">Act ${v.act} of 3</p><h2>${esc(v.actName)}</h2><div class="mmclues">${v.pub.map((c, i) => `<p style="animation-delay:${i * 0.1}s">${esc(c)}</p>`).join('')}</div>${grid(v)}<p class="clock ${v.left <= 20 ? 'hurry' : ''}">${Math.floor(v.left / 60)}:${String(v.left % 60).padStart(2, '0')}</p>${cast}<button class="btn ghost" data-host="next">${v.act < 3 ? 'Next act' : 'Time to accuse'}</button>`;
   if (v.phase === 'accuse') h = `<h2>🔍 Accuse!</h2><p class="say">Who did it, where, and how? Vote on your phone.</p>${grid(v)}<div class="meter"><span style="width:${(100 * v.n) / v.total}%"></span></div><p class="muted center">${v.n} of ${v.total} <span class="clock">${v.left}</span></p><button class="btn ghost" data-host="next">Reveal the truth</button>`;
-  if (v.phase === 'reveal' || v.phase === 'over') h = `<h2 class="${v.truth.caught ? 'win' : 'lose'}">${v.truth.caught ? 'Case closed!' : 'The thief got away!'}</h2><div class="mmtruth"><span>${v.truth.char[1]}</span><p><b>${esc(v.truth.thief)}</b>, ${esc(v.truth.char[0])},<br>in the <b>${esc(v.truth.room)}</b> with the <b>${esc(v.truth.item)}</b>.</p></div><div class="scores">${v.truth.votes.sort((a, b) => b.pts - a.pts).map(x => `<div class="srow"><span>${esc(x.name)} <small class="muted">${x.n} vote${x.n === 1 ? '' : 's'}</small></span><b>+${x.pts}</b></div>`).join('')}</div><div class="row"><button class="btn" data-host="again">New mystery</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
+  if (v.phase === 'reveal' || v.phase === 'over') h = `<h2 class="${v.truth.caught ? 'win' : 'lose'}">${v.truth.caught ? 'Case closed!' : 'The thief got away!'}</h2><div class="mmtruth"><span>${v.truth.char[1]}</span><p><b>${esc(v.truth.thief)}</b>, ${esc(v.truth.char[0])},<br>in the <b>${esc(v.truth.room)}</b> with the <b>${esc(v.truth.item)}</b>.</p></div><div class="scores">${v.truth.votes.sort((a, b) => b.pts - a.pts).map(x => `<div class="srow"><span>${esc(x.name)} <small class="muted">${x.n} vote${x.n === 1 ? '' : 's'}</small></span><b>+${x.pts}</b></div>`).join('')}</div>${v.phase === 'reveal' ? '<div class="row"><button class="btn ghost" data-host="next">Finish</button></div>' : ''}`;
   el.innerHTML = `<div class="stage solo ${v.fresh ? 'enter' : ''}"><div class="panel mmpanel">${h}</div></div>`;
 }
 
