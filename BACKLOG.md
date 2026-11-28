@@ -247,3 +247,5 @@ Things decided to do later, in rough priority order within each group. Updated 2
 ## 28 Nov: real survey answers
 - Top Spot and Crowd Says send what real players typed at the end of each round (text only; no names, room or TV). Backend: party function action `survey`, table party.survey_answers (counts per question and answer; supabase/party-survey.sql). Off in test mode and the website demo; Settings, Room, "Improve the surveys" turns it off.
 - Still to do: a tool that rebuilds the boards from the counts once there are enough; a line in the privacy policy (attorney); two test rows ('ZZ TEST…') to delete.
+- New game: Line Up (js/games/lineup.js). Five things and a rule; order them on the phone with arrows; 100 per pair the right way round, 250 bonus for a perfect line. 40 sets. Phones are sent the cards by seat, never by true place. Not in the launch list; narration not recorded; cover rendered.
+- Still to build from the "missing types" list: caption-this, co-operative clue game, trivia survival, motion mini-games, sound guessing, fill-in-the-blank story.
