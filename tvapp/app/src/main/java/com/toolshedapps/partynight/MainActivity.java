@@ -104,7 +104,9 @@ public class MainActivity extends Activity {
     }
 
     @Override protected void onSaveInstanceState(Bundle out) { super.onSaveInstanceState(out); web.saveState(out); }
-    @Override protected void onPause() { super.onPause(); web.onPause(); }
-    @Override protected void onResume() { super.onResume(); web.onResume(); immersive(); }
+    // Another app in front (or the TV's home screen): silence the page first, then stop its timers, so no music or
+    // narration keeps playing behind whatever the person switched to. Coming back undoes both.
+    @Override protected void onPause() { web.evaluateJavascript("window.partyHush&&window.partyHush(true)", null); web.onPause(); web.pauseTimers(); super.onPause(); }
+    @Override protected void onResume() { super.onResume(); web.resumeTimers(); web.onResume(); web.evaluateJavascript("window.partyHush&&window.partyHush(false)", null); immersive(); }
     @Override protected void onDestroy() { main.removeCallbacksAndMessages(null); web.destroy(); super.onDestroy(); }
 }

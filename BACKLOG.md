@@ -220,3 +220,9 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - "Who has finished" is a tick or pencil on each score chip instead of a list of names mid-screen (any game with a score row); other name lists are a row of small chips. Who Said That shows its questions large.
 - Back on the remote during a game: first press arms ("Press Back or OK again to end"), second ends. Back on the how-to-play screen returns to the join screen.
 - Short sound effects vary a little in pitch and speed each time they play.
+
+## 27 Nov, late night
+- Sketch Telephone: each player picks one of three ideas (or writes one) and draws it; the next player guesses, the next draws that, and so on. Narration lines for the old first step need re-recording.
+- Secret Agents: a real person is always the spymaster when a team has one; bots never choose for real guessers (they back the person's pick); phones and TV say in plain words what to do.
+- Team games (Taboo, Salad Bowl, Secret Agents): players choose their side on the join screen, can switch until Start, seats show team colours. test/teams-e2e.mjs.
+- Sound stops when the TV app is in the background (page hides: music, effects and narrator pause). Needs the new app build for Android TV.

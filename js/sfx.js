@@ -224,3 +224,17 @@ export function stopLoop(name) { const a = loops[name]; if (a) { try { a.pause()
 // Music drops under the narrator while a line is spoken.
 export function duck(on) { ducked = !!on; for (const [n, a] of Object.entries(loops)) a.volume = level(n); }
 tap.duck = duck;
+
+// When the TV app goes to the background (another app is opened) or the page is hidden, everything goes silent:
+// music and beds pause, effects and the narrator stop. It all picks up again when the page is back in front.
+let hushed = false;
+export function hush(on) {
+  if (!!on === hushed) return; hushed = !!on;
+  try { if (ctx) on ? ctx.suspend() : ctx.resume(); } catch {}
+  for (const a of Object.values(loops)) { try { on ? a.pause() : a.play().catch(() => {}); } catch {} }
+  const v = window.__voiceNow; try { if (v && !v.ended) on ? v.pause() : v.play().catch(() => {}); } catch {}
+}
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => hush(document.hidden));
+  window.partyHush = hush;   // the TV app calls this from its own pause and resume
+}

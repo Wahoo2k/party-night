@@ -5,6 +5,7 @@ import { isRude } from '../names.js';
 
 export const meta = {
   id: 'bowl',
+  teams: true,   // players choose their side on the join screen
   name: 'Salad Bowl',
   min: 4,
   max: 20,
@@ -37,10 +38,13 @@ export function cleanName(t) {
   return { ok: true, text: x };
 }
 
-export function setup(players, rnd = Math.random, prev = null) {
+export function setup(players, rnd = Math.random, prev = null, opts = {}) {
   const sameCrowd = prev?.teamOf && players.every(p => prev.teamOf[p.pid] !== undefined) && Math.abs(players.filter(p => prev.teamOf[p.pid] === 0).length * 2 - players.length) <= 1;
   const teamOf = {};
-  if (sameCrowd) players.forEach(p => (teamOf[p.pid] = prev.teamOf[p.pid]));
+  // Teams the players chose on the join screen win, as long as each side has at least two people.
+  const chosen = opts?.teams && players.every(p => opts.teams[p.pid] === 0 || opts.teams[p.pid] === 1) && [0, 1].every(t => players.filter(p => opts.teams[p.pid] === t).length >= 2);
+  if (chosen) players.forEach(p => (teamOf[p.pid] = opts.teams[p.pid]));
+  else if (sameCrowd) players.forEach(p => (teamOf[p.pid] = prev.teamOf[p.pid]));
   else shuffle(players.map(p => p.pid), rnd).forEach((pid, i) => (teamOf[pid] = i % 2));
   return {
     game: 'bowl',

@@ -6,6 +6,7 @@ import { isRude } from '../names.js';
 
 export const meta = {
   id: 'agents',
+  teams: true,   // players choose their side on the join screen
   name: 'Secret Agents',
   min: 4,
   max: 16,
@@ -33,10 +34,13 @@ export const TIMES = { clue: 120000, guess: 150000, flash: 1500 };
 const shuffle = (a, rnd) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const norm = t => String(t || '').toLowerCase().replace(/[^a-z]/g, '');
 
-export function setup(players, rnd = Math.random, prev = null) {
+export function setup(players, rnd = Math.random, prev = null, opts = {}) {
   const sameCrowd = prev?.teamOf && players.every(p => prev.teamOf[p.pid] !== undefined) && Math.abs(players.filter(p => prev.teamOf[p.pid] === 0).length * 2 - players.length) <= 1;
   const teamOf = {};
-  if (sameCrowd) players.forEach(p => (teamOf[p.pid] = prev.teamOf[p.pid]));
+  // Teams the players chose on the join screen win, as long as each side has at least two people.
+  const chosen = opts?.teams && players.every(p => opts.teams[p.pid] === 0 || opts.teams[p.pid] === 1) && [0, 1].every(t => players.filter(p => opts.teams[p.pid] === t).length >= 2);
+  if (chosen) players.forEach(p => (teamOf[p.pid] = opts.teams[p.pid]));
+  else if (sameCrowd) players.forEach(p => (teamOf[p.pid] = prev.teamOf[p.pid]));
   else shuffle(players.map(p => p.pid), rnd).forEach((pid, i) => (teamOf[pid] = i % 2));
   const team = t => players.filter(p => teamOf[p.pid] === t).map(p => p.pid);
   // Spymasters rotate each game.

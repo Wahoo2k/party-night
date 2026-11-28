@@ -81,6 +81,7 @@ function pump() {
       if (current !== item) return;
       if (i >= item.clips.length) return done();
       const a = (item.audio = new Audio(item.clips[i++]));
+      window.__voiceNow = a;   // so the page can pause the narrator when it is hidden (see hush in sfx.js)
       a.onended = next; a.onerror = next;
       a.play().catch(next);
     };
