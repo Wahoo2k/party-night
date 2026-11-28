@@ -1,8 +1,8 @@
 // What is sold. One place for the free games, the packs and the prices, used by the website now and by the
 // in-app unlock later. Game ids are the file names in js/games. Prices agreed with Tom on 27 Nov 2026.
-export const FREE = ['ducks', 'quick', 'potato'];
+export const FREE = ['funny', 'ducks', 'quick', 'potato'];   // one headline game (Funny Answers) and three light ones
 export const PACKS = [
-  { id: 'party', name: 'Party Pack', blurb: 'Write it, vote on it, laugh at it. The loud ones.', games: ['funny', 'bluff', 'whosaid', 'truths', 'bracket', 'split', 'faker', 'meter', 'dares', 'auction', 'caption'] },
+  { id: 'party', name: 'Party Pack', blurb: 'Write it, vote on it, laugh at it. The loud ones.', games: ['bluff', 'whosaid', 'truths', 'bracket', 'split', 'faker', 'meter', 'dares', 'auction', 'caption'] },
   { id: 'family', name: 'Family Pack', blurb: 'No reading needed for most. Grandparents to grade-schoolers.', games: ['charades', 'bingo', 'memory', 'gofish', 'copycat', 'hunt', 'freeze', 'clash', 'bowl', 'shake', 'rps', 'sound'] },
   { id: 'show', name: 'Game Show Pack', blurb: 'Buzzers, wheels, boards and big-money ladders.', games: ['trivia', 'spin', 'crowd', 'ladder', 'cases', 'estimate', 'rebus', 'letters', 'haunted', 'pindrop', 'topspot', 'lineup', 'survive', 'fib', 'clock', 'gold', 'grid'] },
   { id: 'secret', name: 'Secret Roles Pack', blurb: 'Someone at the table is lying. Find out who.', games: ['werewolf', 'midnight', 'imposter', 'missions', 'wordhunt', 'agents', 'mystery', 'bomb'] },

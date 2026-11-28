@@ -91,7 +91,8 @@ Deno.serve(async (req) => {
     if (!user) return json(req, { error: "Please sign in." }, 401);
     if (b.action === "me") {
       const tvs = await sql`select tv_id, label, linked_at from party.tvs where user_id = ${user.id} order by linked_at desc`;
-      return json(req, { email: user.email, ...(await owned(user.id)), tvs: tvs.map((t) => ({ id: t.tv_id.slice(0, 6), label: t.label, linked_at: t.linked_at })), selling: !!STRIPE, test: STRIPE.startsWith("sk_test_") || STRIPE.startsWith("rk_test_") });
+      const [adm] = await sql`select 1 from party.admins where email = ${user.email.toLowerCase()}`;
+      return json(req, { email: user.email, admin: !!adm, ...(await owned(user.id)), tvs: tvs.map((t) => ({ id: t.tv_id.slice(0, 6), label: t.label, linked_at: t.linked_at })), selling: !!STRIPE, test: STRIPE.startsWith("sk_test_") || STRIPE.startsWith("rk_test_") });
     }
     if (b.action === "link") {
       if (!tv) return json(req, { error: "bad tv id" }, 400);
@@ -132,6 +133,61 @@ Deno.serve(async (req) => {
       if (Deno.env.get("PARTY_STRIPE_TAX") === "on") { form["automatic_tax[enabled]"] = "true"; }
       const s = await stripe("checkout/sessions", form);
       return json(req, { url: s.url });
+    }
+    // A gift code: the Party Pass for a set number of days, or a pack (or everything) to keep. No card needed.
+    if (b.action === "redeem") {
+      const code = String(b.code || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+      if (code.length < 8 || code.length > 24) return json(req, { error: "That code does not look right. Check it and try again." }, 400);
+      const msg = await sql.begin(async (tx) => {
+        const [g] = await tx`select * from party.gift_codes where code = ${code} for update`;
+        if (!g) return "We could not find that code. Check it and try again.";
+        if (g.expires_at && new Date(g.expires_at).getTime() < Date.now()) return "That code has expired.";
+        const [used] = await tx`select 1 from party.gift_redemptions where code = ${code} and user_id = ${user.id}`;
+        if (used) return "You have already used that code.";
+        if (g.uses >= g.max_uses) return "That code has already been used.";
+        if (g.grants === "pass") {
+          const [sub] = await tx`select 1 from party.purchases where user_id = ${user.id} and item in ('pass_month','pass_year') and status in ('active','past_due')`;
+          if (sub) return "You already have a Party Pass. Keep this code for when it ends.";
+          const [old] = await tx`select id, period_end from party.purchases where user_id = ${user.id} and item = 'pass_gift' and status = 'active' order by period_end desc limit 1`;
+          const from = old && new Date(old.period_end).getTime() > Date.now() ? new Date(old.period_end).getTime() : Date.now();
+          const end = new Date(from + g.days * 864e5);
+          if (old) await tx`update party.purchases set period_end = ${end}, gift_code = ${code}, updated_at = now() where id = ${old.id}`;
+          else await tx`insert into party.purchases (user_id, item, status, livemode, period_end, gift_code) values (${user.id}, 'pass_gift', 'active', true, ${end}, ${code})`;
+        } else {
+          const have = await owned(user.id);
+          if (g.grants === "everything" ? have.packs.length === PACKS.length : have.packs.includes(g.grants)) return "You already own what this code gives.";
+          await tx`insert into party.purchases (user_id, item, status, livemode, gift_code) values (${user.id}, ${g.grants}, 'paid', true, ${code})`;
+        }
+        await tx`insert into party.gift_redemptions (code, user_id) values (${code}, ${user.id})`;
+        await tx`update party.gift_codes set uses = uses + 1 where code = ${code}`;
+        return "";
+      });
+      if (msg) return json(req, { error: msg }, 400);
+      return json(req, { ok: true, ...(await owned(user.id)) });
+    }
+    // Making and listing gift codes: only for the people in party.admins.
+    if (b.action === "gifts" || b.action === "mint") {
+      const [adm] = await sql`select 1 from party.admins where email = ${user.email.toLowerCase()}`;
+      if (!adm) return json(req, { error: "Not allowed." }, 403);
+      if (b.action === "mint") {
+        const x = b as Record<string, unknown>;
+        const grants = String(x.grants || ""), n = Math.min(200, Math.max(1, Number(x.count) || 1));
+        if (!["pass", ...PACKS, "everything"].includes(grants)) return json(req, { error: "Unknown gift." }, 400);
+        const days = grants === "pass" ? Math.min(3660, Math.max(1, Number(x.days) || 365)) : null;
+        const maxUses = Math.min(100000, Math.max(1, Number(x.uses) || 1));
+        const exp = x.expires ? new Date(String(x.expires)) : null;
+        if (exp && isNaN(exp.getTime())) return json(req, { error: "Bad expiry date." }, 400);
+        const A = "ABCDEFGHJKMNPQRSTUVWXYZ23456789", made: string[] = [];
+        for (let i = 0; i < n; i++) {
+          const r = new Uint8Array(8); crypto.getRandomValues(r);
+          const code = "PARTY" + [...r].map((v) => A[v % A.length]).join("");
+          await sql`insert into party.gift_codes (code, grants, days, max_uses, expires_at, note, created_by) values (${code}, ${grants}, ${days}, ${maxUses}, ${exp}, ${String(x.note || "").slice(0, 80) || null}, ${user.email})`;
+          made.push(code);
+        }
+        return json(req, { made });
+      }
+      const rows = await sql`select code, grants, days, max_uses, uses, expires_at, note, created_at from party.gift_codes order by created_at desc limit 500`;
+      return json(req, { codes: rows });
     }
     if (b.action === "portal") {
       const [row] = await sql`select stripe_customer from party.purchases where user_id = ${user.id} and stripe_customer is not null order by created_at desc limit 1`;

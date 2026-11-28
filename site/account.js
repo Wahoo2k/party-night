@@ -60,7 +60,7 @@ async function signedIn() {
   const buy = (item, label, disabled, why) => `<button class="btn ${disabled ? 'ghost' : ''}" data-buy="${item}" ${disabled ? 'disabled' : ''}>${esc(disabled ? why : label)}</button>`;
   const closed = !me.selling;
   box.innerHTML = `${note}
-    <div class="card row"><div><b>${esc(me.email)}</b><p class="fine">${me.pass ? 'Party Pass active' + (me.passEnds ? ', renews or ends ' + new Date(me.passEnds).toLocaleDateString() : '') : all ? 'You own every pack.' : me.packs.length ? `You own ${me.packs.length} of ${PACKS.length} packs.` : 'Nothing bought yet. Three games are free.'}</p></div>
+    <div class="card row"><div><b>${esc(me.email)}</b><p class="fine">${me.pass ? 'Party Pass active' + (me.passItem === 'pass_gift' ? ' (gift)' : '') + (me.passEnds ? (me.passItem === 'pass_gift' ? ', until ' : ', renews or ends ') + new Date(me.passEnds).toLocaleDateString() : '') : all ? 'You own every pack.' : me.packs.length ? `You own ${me.packs.length} of ${PACKS.length} packs.` : 'Nothing bought yet. Three games are free.'}</p></div>
       <div class="cta">${me.pass || me.packs.length ? '<button class="btn ghost small" id="manage">Receipts & subscription</button>' : ''}<button class="btn ghost small" id="out">Sign out</button></div></div>
     ${me.test ? '<p class="note">Test mode: no real money moves. Use card 4242 4242 4242 4242 with any future date and any CVC.</p>' : ''}
     ${closed ? '<p class="note">Buying opens soon. Your account is ready for when it does.</p>' : ''}
@@ -73,12 +73,45 @@ async function signedIn() {
     <h2 class="h">Or one pack at a time</h2>
     <div class="packs">${PACKS.map(p => `<div class="pack ${want === p.id ? 'want' : ''}"><div><h3>${esc(p.name)}</h3><p class="fine">${esc(p.blurb)} ${p.games.length} games.</p></div>
       <div class="cta"><b class="price" style="font-size:28px">${money(PRICES.pack)}</b>${buy(p.id, 'Buy', has(p.id) || closed, has(p.id) ? 'Owned' : 'Coming soon')}<a class="btn ghost small" href="games.html?pack=${p.id}">See games</a></div></div>`).join('')}</div>
+    <h2 class="h">Have a gift code?</h2>
+    <form class="card" id="gift"><label for="gc">Type the code you were given. No card needed.</label>
+      <input id="gc" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="30" placeholder="PARTY-XXXX-XXXX" required>
+      <button class="btn ghost" type="submit">Use the code</button></form>
+    ${me.admin ? `<h2 class="h">Gift codes (only you see this)</h2>
+    <form class="card" id="mint"><label>Make codes</label>
+      <div class="row" style="flex-wrap:wrap;gap:8px">
+        <select id="mg">${[['pass', 'Party Pass for…'], ['everything', 'Everything, to keep'], ...PACKS.map(p => [p.id, p.name + ', to keep'])].map(([v, t]) => `<option value="${v}">${esc(t)}</option>`).join('')}</select>
+        <label class="fine">days <input id="md" type="number" min="1" max="3660" value="365" style="width:5.5em"></label>
+        <label class="fine">how many <input id="mc" type="number" min="1" max="200" value="1" style="width:4.5em"></label>
+        <label class="fine">uses each <input id="mu" type="number" min="1" max="100000" value="1" style="width:5.5em"></label>
+        <label class="fine">expires <input id="me" type="date"></label>
+      </div>
+      <input id="mn" maxlength="80" placeholder="Note for yourself (who it is for)">
+      <button class="btn" type="submit">Make codes</button>
+      <div id="made"></div><div id="codes" class="fine">Loading codes…</div></form>` : ''}
     <h2 class="h">Your TVs</h2>
     <div class="card">${me.tvs.length ? me.tvs.map(t => `<div class="row tvrow"><span>📺 Linked ${new Date(t.linked_at).toLocaleDateString()}</span><button class="btn ghost small" data-unlink="${esc(t.id)}">Remove</button></div>`).join('') : '<p class="fine">No TV linked yet. On the TV, pick a locked game and scan the code it shows.</p>'}
       <p class="fine">Linking a TV lets it play what you own. Remove one to stop it.</p></div>`;
   box.querySelector('#out').onclick = () => sb.auth.signOut();
   const mg = box.querySelector('#manage'); if (mg) mg.onclick = async () => { try { location.href = (await call('portal', { back: here })).url; } catch (e) { say(e.message, true); signedIn(); } };
   box.querySelectorAll('[data-buy]').forEach(b => (b.onclick = async () => { b.disabled = true; b.textContent = 'Opening checkout…'; try { location.href = (await call('checkout', { item: b.dataset.buy, back: here })).url; } catch (e) { say(e.message, true); signedIn(); } }));
+  box.querySelector('#gift').onsubmit = async e => {
+    e.preventDefault(); const b = e.target.querySelector('button'); b.disabled = true;
+    try { const r = await call('redeem', { code: box.querySelector('#gc').value }); say(r.pass ? 'Code accepted. Your Party Pass is on' + (r.passEnds ? ' until ' + new Date(r.passEnds).toLocaleDateString() : '') + '.' : 'Code accepted. Your games are unlocked.'); }
+    catch (err) { say(err.message, true); }
+    signedIn();
+  };
+  if (me.admin) {
+    const pretty = c => c.replace(/^PARTY(....)(....)$/, 'PARTY-$1-$2'), list = box.querySelector('#codes');
+    const what = c => (c.grants === 'pass' ? `Pass, ${c.days} days` : c.grants === 'everything' ? 'Everything' : (PACKS.find(p => p.id === c.grants)?.name || c.grants));
+    const load = async () => { try { const r = await call('gifts'); list.innerHTML = r.codes.length ? `<table style="width:100%;border-collapse:collapse"><tr><th align="left">Code</th><th align="left">Gives</th><th align="left">Used</th><th align="left">Expires</th><th align="left">Note</th></tr>${r.codes.map(c => `<tr><td><code>${esc(pretty(c.code))}</code></td><td>${esc(what(c))}</td><td>${c.uses} of ${c.max_uses}</td><td>${c.expires_at ? new Date(c.expires_at).toLocaleDateString() : 'never'}</td><td>${esc(c.note || '')}</td></tr>`).join('')}</table>` : 'No codes made yet.'; } catch (err) { list.textContent = err.message; } };
+    load();
+    box.querySelector('#mint').onsubmit = async e => {
+      e.preventDefault(); const v = id => box.querySelector(id).value, made = box.querySelector('#made');
+      try { const r = await call('mint', { grants: v('#mg'), days: +v('#md'), count: +v('#mc'), uses: +v('#mu'), expires: v('#me') ? v('#me') + 'T23:59:59' : '', note: v('#mn') }); made.innerHTML = `<p class="note">Made ${r.made.length}:<br><code style="user-select:all">${r.made.map(pretty).map(esc).join('<br>')}</code></p>`; load(); }
+      catch (err) { made.innerHTML = `<p class="note bad">${esc(err.message)}</p>`; }
+    };
+  }
   box.querySelectorAll('[data-unlink]').forEach(b => (b.onclick = async () => { await call('unlink', { id: b.dataset.unlink }).catch(() => {}); say('TV removed.'); signedIn(); }));
   if (want) box.querySelector('.pack.want')?.scrollIntoView({ block: 'center' });
   // Just paid: the confirmation from Stripe can take a few seconds to land.

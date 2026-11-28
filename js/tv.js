@@ -1,7 +1,7 @@
 // TV / host page: owns the room, the player list and the game state.
 import { GAMES, COMING_SOON, SHELVES, NIGHTS, NO_TV } from './games/index.js';
 import { openRoom } from './net.js';
-import { SHOP, locked, refreshOwn, owned, accountUrl, PARTY_FN, PARTY_KEY } from './own.js';
+import { SHOP, locked, canTry, markTried, ownedGames, refreshOwn, owned, accountUrl, PARTY_FN, PARTY_KEY } from './own.js';
 import { PACKS, PRICES, packOf } from './packs.js';
 import { esc, store, DEMO, newCode, say, sayLow, voiceContext, fitScreen, stageFit, keepFitted, voice, voices, enableDpad, autofocus, drawScene, titleCard, confetti, clawMarks } from './ui.js';
 import { art, thumb } from './art.js';
@@ -849,6 +849,7 @@ function startGame(again) {
   if (!host.intro && !again && wantsIntro()) { host.intro = { id: host.gameId, ready: {}, at: Date.now() }; if (sfx.on) play('whoosh'); return changed(); }   // the game's own theme sting plays when it actually starts
   host.intro = null;
   host.paused = 0;
+  markTried(host.gameId);   // a game that isn't bought gets one free play on this TV
   // The audience gets promoted into open seats for the next game.
   while (host.audience.length && host.players.length < game().meta.max) host.players.push(host.audience.shift());
   const prev = host.state && host.state.game === host.gameId ? host.state : host.lastByGame?.[host.gameId];
@@ -1065,9 +1066,10 @@ function renderLobby() {
     if (!GAMES[host.gameId]) host.gameId = 'werewolf';
     const rows = SHELVES.filter(f => f.games).map(f => ({ id: f.id, name: f.name, games: f.games.filter(id => GAMES[id]) }));
     // The games this TV has played most, first in line, so favorites are never a hunt. Shown once two games have been played.
+    { const mine = ownedGames().filter(id => GAMES[id]); if (mine.length) rows.unshift({ id: 'yours', name: '✅ Yours', games: mine }); }
     { const most = Object.entries(host.played || {}).filter(([id, n]) => GAMES[id] && n > 0).sort((x, y) => y[1] - x[1]).slice(0, 8).map(e => e[0]); if (most.length >= 2) rows.unshift({ id: 'most', name: '🔁 Played most here', games: most }); }
     if (!menuAt || !rows.some(r => r.id === menuAt.row && r.games.includes(menuAt.game))) { const r = rows.find(x => x.games.includes(host.gameId)) || rows[0]; menuAt = { row: r.id, game: r.games.includes(host.gameId) ? host.gameId : r.games[0] }; }
-    const card = (id, row) => { const m = GAMES[id].meta; return `<button class="gcard ${menuAt.row === row && menuAt.game === id ? 'on' : ''}" data-game="${id}" data-row="${row}"><span class="gimg">${thumb(id, ICONS[id])}<i class="gwash" style="--t:${TINT[THEME_OF[id]] || TINT.night}"></i><em class="gname ${m.name.length > 15 ? 'long' : m.name.length > 10 ? 'mid' : ''}">${esc(m.name)}</em></span><b class="gunder">${esc(m.name)}</b><small class="gfacts">${m.min}–${m.max} · ${m.mins} min</small>${locked(id) ? '<small class="glock" title="Locked">🔒</small>' : ''}${m.kids ? '<small class="gbadge">🧒</small>' : ''}${watching() && SAME_ROOM.includes(id) ? '<small class="sameroom">🏠 same room</small>' : ''}</button>`; };
+    const card = (id, row) => { const m = GAMES[id].meta; return `<button class="gcard ${menuAt.row === row && menuAt.game === id ? 'on' : ''}" data-game="${id}" data-row="${row}"><span class="gimg">${thumb(id, ICONS[id])}<i class="gwash" style="--t:${TINT[THEME_OF[id]] || TINT.night}"></i><em class="gname ${m.name.length > 15 ? 'long' : m.name.length > 10 ? 'mid' : ''}">${esc(m.name)}</em></span><b class="gunder">${esc(m.name)}</b><small class="gfacts">${m.min}–${m.max} · ${m.mins} min</small>${locked(id) ? '<small class="glock" title="Locked">🔒</small>' : canTry(id) ? '<small class="gtry">Free try</small>' : ''}${m.kids ? '<small class="gbadge">🧒</small>' : ''}${watching() && SAME_ROOM.includes(id) ? '<small class="sameroom">🏠 same room</small>' : ''}</button>`; };
     const barHtml = `<div class="joinbox">${host.settings.streamer ? '' : `<div class="qr">${qr(joinUrl())}</div>`}<div class="jtext"><small>${n ? 'Join on your phone' : 'Scan to join, or go to'}</small><span class="jurl">${esc(joinHost())}</span><b class="code mini">${host.settings.streamer ? '••••' : host.code}</b></div></div>
         <div class="joined">${host.players.length ? host.players.map(p => `<span class="jface ${p.away ? 'away' : ''}" style="--pc:${p.face?.[1] || '#232a5c'}"><i data-who="${esc(p.name)}" class="${moods[p.name]?.until > Date.now() ? moods[p.name].how : ''}">${faceHtml(p.face, '🙂', moodOf(p.name))}</i><em>${esc(p.name)}</em></span>`).join('') : '<span class="jwait">Waiting for the first player…</span>'}</div>
         <div class="herobtns"><button class="btn ghost small" data-host="settings">⚙ Settings</button>${tq.has('local') || host.players.some(p => p.bot) ? '<button class="btn ghost small" data-host="addbot">🤖 Add a bot</button>' : ''}${host.tally?.games.length ? '<button class="btn ghost small" data-host="awards">🏆 Awards</button>' : ''}</div>`;
@@ -1165,7 +1167,7 @@ function renderLobby() {
     const m = game().meta, pack = packOf(host.gameId), money = n => '$' + n.toFixed(2), own = owned();
     app.innerHTML = `<div class="lobby gather unlock"><section class="panel join">
         <h2>Unlock on your phone</h2><div class="qr">${qr(accountUrl(pack?.id))}</div>
-        <p class="muted">Scan to sign in and buy.<br>This TV unlocks by itself a few seconds later.</p>
+        <p class="muted">Scan to sign in and buy, or to use a gift code.<br>This TV unlocks by itself a few seconds later.</p><p class="muted small">You have had your free play of this game.</p>
         ${own.linked ? '<p class="muted small">This TV is linked to an account that doesn\'t have this game yet.</p>' : ''}
       </section>
       <section class="panel unlockinfo"><div class="unlockhead"><span class="unlockart">${art(host.gameId, ICONS[host.gameId])}</span>

@@ -18,7 +18,14 @@ let own = store.get('pg-own') || { linked: false, packs: [], pass: false, at: 0 
 export const owned = () => own;
 // A TV that can't reach the server keeps what it last knew for a week, so a flaky connection doesn't lock a paid game.
 const fresh = () => Date.now() - (own.at || 0) < WEEK;
-export const locked = id => SHOP && !FREE.includes(id) && !(fresh() && (own.pass || own.packs.includes(packOf(id)?.id)));
+const has = id => fresh() && (own.pass || own.packs.includes(packOf(id)?.id));
+// Each game this TV has not bought can be played once for free; after that it is locked until it is bought.
+let tried = store.get('pg-tried') || {};
+export const canTry = id => SHOP && !FREE.includes(id) && !has(id) && !tried[id];
+export const markTried = id => { if (canTry(id)) { tried = { ...tried, [id]: Date.now() }; store.set('pg-tried', tried); } };
+export const locked = id => SHOP && !FREE.includes(id) && !has(id) && !!tried[id];
+// The games this TV has bought (not the free ones), for the "Yours" row.
+export const ownedGames = () => (SHOP && fresh() && !own.pass && own.packs.length < PACKS.length ? PACKS.filter(p => own.packs.includes(p.id)).flatMap(p => p.games) : [])   // with a pass or every pack, everything is yours and the row says nothing;
 export async function refreshOwn() {
   if (!SHOP) return own;
   try {
