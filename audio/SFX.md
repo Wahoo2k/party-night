@@ -29,6 +29,40 @@ Every sound today is synthesized in `js/sfx.js`. Each row is one recorded file t
 | points | 2 | Points landing on a phone | Quick ascending coin-collect sparkle, under 1 second |
 | lockin | 2 | An answer locked in | Soft satisfying click with a tiny chime, very short |
 
+## Name That Sound
+Everyday sounds the players have to recognize. Plain, dry recordings with no music.
+
+| Name | Uses | What it is for | Prompt to generate |
+|---|---|---|---|
+| guess-dog | 1 | Name That Sound: a dog barking | A medium-sized dog barking three times, close up, clean recording, 2 seconds |
+| guess-cat | 1 | Name That Sound: a cat meowing | A house cat meowing twice, clear and close, 2 seconds |
+| guess-doorbell | 1 | Name That Sound: a doorbell | A classic two-tone ding-dong doorbell, 2 seconds |
+| guess-zipper | 1 | Name That Sound: a zipper | A jacket zipper being zipped up and then down, close up, 2 seconds |
+| guess-popcorn | 1 | Name That Sound: popcorn popping | Popcorn popping in a pot, rapid pops, 3 seconds |
+| guess-toilet | 1 | Name That Sound: a toilet flushing | A toilet flushing, 3 seconds |
+| guess-microwave | 1 | Name That Sound: a microwave beeping | A microwave oven finishing: three electronic beeps, 2 seconds |
+| guess-carhorn | 1 | Name That Sound: a car horn | A car horn honking twice, 2 seconds |
+| guess-keyboard | 1 | Name That Sound: typing on a keyboard | Fast typing on a computer keyboard, 3 seconds |
+| guess-sneeze | 1 | Name That Sound: a sneeze | A person sneezing loudly once, achoo, 1.5 seconds |
+| guess-rooster | 1 | Name That Sound: a rooster | A rooster crowing cock-a-doodle-doo once, 3 seconds |
+| guess-bowling | 1 | Name That Sound: a bowling strike | A bowling ball rolling down the lane and striking all the pins, 3 seconds |
+| guess-basketball | 1 | Name That Sound: a basketball bouncing | A basketball being dribbled on a gym floor, steady bounces, 3 seconds |
+| guess-sodacan | 1 | Name That Sound: a soda can opening | A soda can tab being cracked open with a fizz, 2 seconds |
+| guess-velcro | 1 | Name That Sound: velcro | A strip of velcro being ripped apart, 1.5 seconds |
+| guess-door | 1 | Name That Sound: a creaky door | An old wooden door creaking slowly open, 3 seconds |
+| guess-blender | 1 | Name That Sound: a blender | A kitchen blender running at high speed, 3 seconds |
+| guess-hairdryer | 1 | Name That Sound: a hair dryer | A handheld hair dryer blowing, switched on then off, 3 seconds |
+| guess-cow | 1 | Name That Sound: a cow | A cow mooing once, long and low, 2 seconds |
+| guess-frog | 1 | Name That Sound: a frog | A frog croaking ribbit several times by a pond, 3 seconds |
+| guess-owl | 1 | Name That Sound: an owl | An owl hooting hoo-hoo at night, 3 seconds |
+| guess-train | 1 | Name That Sound: a train horn | A freight train horn blowing two long blasts, 3 seconds |
+| guess-alarm | 1 | Name That Sound: an alarm clock | A digital alarm clock beeping insistently, 2 seconds |
+| guess-sizzle | 1 | Name That Sound: something frying | Bacon sizzling in a frying pan, 3 seconds |
+| guess-horse | 1 | Name That Sound: a horse galloping | A horse galloping on a dirt track, hoofbeats, 3 seconds |
+| guess-duck | 1 | Name That Sound: a duck | A duck quacking four times, 2 seconds |
+| guess-kettle | 1 | Name That Sound: a kettle whistling | A stovetop kettle whistling as it boils, rising, 3 seconds |
+| guess-snore | 1 | Name That Sound: someone snoring | A person snoring loudly in their sleep, two snores, 3 seconds |
+
 ## Music and stings
 Nothing here is synthesized except the two thinking beds and the night ambience; the others are silent until a file exists. Loops must be seamless. The game already plays each one at the right moment and lowers music under the narrator.
 
