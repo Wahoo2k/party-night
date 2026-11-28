@@ -10,7 +10,7 @@ import { newKeys, cleanPub, samePub, sharedKey, seal, unseal } from './secure.js
 import { cleanAct, textsIn, maskView, maskLine } from './content.js';
 import { settleName, cleanName, isRude, uniqueName, funName, MAX_NAME } from './names.js';
 import { tap } from './tap.js';
-import { avatarUrl, colorOf } from './avatars.js';
+import { avatarUrl, colorOf, SPECIAL_COUNT } from './avatars.js';
 import { quip } from './quips.js';
 
 const app = document.getElementById('app');
@@ -61,12 +61,28 @@ const joinUrl = () => {
 };
 
 // Every player gets a village character and a color that follow them through every game.
-// Player characters: twenty clay figures (js/avatars.js). A face is ['~<number>', its color]; older rooms may still
+// Player characters: twenty clay figures and a dozen odd ones (a devil, a werewolf…) from js/avatars.js. New players
+// are given a plain figure; the odd ones are there to be picked on the phone. A face is ['~<number>', its color]; older rooms may still
 // hold an emoji or symbol in the first slot, which is shown as text.
-const FACES = Array.from({ length: 20 }, (_, i) => ['~' + i, colorOf(i)]);
+const PLAIN = 20, FACES = [...Array.from({ length: PLAIN }, (_, i) => i), ...Array.from({ length: SPECIAL_COUNT }, (_, k) => 1000 + k)].map(n => ['~' + n, colorOf(n)]);
 const avNum = f => (typeof f?.[0] === 'string' && f[0][0] === '~' ? +f[0].slice(1) : null);
-// How a character feels right now (set when its player gains or loses points), by player name.
-const moods = {};
+// How a character feels right now, by player name: { m: mood, until, at, how: 'avpop' (swells large) or 'avhop' (a small jump) }.
+const moods = {}, feelT = {};
+// A character shows a feeling for a moment: points won or lost, a turn starting, an answer locked in, a wave.
+function feel(name, m, ms = 2000, how = 'avhop') {
+  const now = Date.now(), f = [...host.players, ...host.audience].find(p => p.name === name)?.face;
+  moods[name] = { m, until: now + ms, at: now, how };
+  if (avNum(f) === null) return;
+  const paint = () => document.querySelectorAll('[data-who]').forEach(i => {
+    if (i.dataset.who !== name) return;
+    const img = i.querySelector('img.av'), live = moods[name].until > Date.now(); if (!img) return;
+    img.src = avatarUrl(avNum(f), live ? moods[name].m : 'neutral');
+    i.classList.remove('avpop', 'avhop'); i.style.animationDelay = '';
+    if (live) { void i.offsetWidth; i.classList.add(moods[name].how); }
+  });
+  paint(); clearTimeout(feelT[name]); feelT[name] = setTimeout(paint, ms + 20);
+}
+const REACT_MOOD = { '👏': 'happy', '😂': 'happy', '🔥': 'happy', '❤️': 'happy', '👋': 'happy', '😱': 'wow', '👎': 'sad' };
 const moodOf = name => (moods[name] && moods[name].until > Date.now() ? moods[name].m : 'neutral');
 const faceHtml = (f, fallback = '🙂', mood = 'neutral') => { const n = avNum(f); return n === null ? f?.[0] || fallback : `<img class="av" alt="" src="${avatarUrl(n, mood)}">`; };
 function ensureFaces() {
@@ -74,7 +90,7 @@ function ensureFaces() {
   for (const p of everyone) {
     if (p.face) continue;
     const used = new Set(everyone.map(x => x.face?.[0]));
-    p.face = FACES.find(f => !used.has(f[0])) || FACES[Math.floor(Math.random() * FACES.length)];
+    p.face = FACES.slice(0, PLAIN).find(f => !used.has(f[0])) || FACES.find(f => !used.has(f[0])) || FACES[Math.floor(Math.random() * FACES.length)];
   }
 }
 // After a game draws its screen, put each player's character beside their name in the shared score, podium and roster parts.
@@ -199,22 +215,25 @@ function holdScores() {
     c.b.dataset.shown = show;
     const g = ss.gains[c.name], el = g ? now - g.at : 9e9;
     c.r.querySelector('.sgain')?.remove();
-    if (el < 2600) { const tag = document.createElement('small'); tag.className = 'sgain ' + (g.d < 0 ? 'neg' : ''); tag.textContent = (g.d > 0 ? '+' : '−') + Math.abs(g.d).toLocaleString(); tag.style.animationDelay = `-${el}ms`; c.r.append(tag); c.r.classList.add('sbump'); if (!moods[c.name] || moods[c.name].at !== g.at) { moods[c.name] = { m: g.d < 0 ? 'sad' : 'happy', until: g.at + 3200, at: g.at }; const av = c.r.querySelector('img.av'), f = host.players.find(p => p.name === c.name)?.face; if (av && avNum(f) !== null) { av.src = avatarUrl(avNum(f), moods[c.name].m); av.parentElement.classList.add('avpop'); } } c.r.style.setProperty('--bump', `-${el}ms`); }
+    if (el < 2600) { const tag = document.createElement('small'); tag.className = 'sgain ' + (g.d < 0 ? 'neg' : ''); tag.textContent = (g.d > 0 ? '+' : '−') + Math.abs(g.d).toLocaleString(); tag.style.animationDelay = `-${el}ms`; c.r.append(tag); c.r.classList.add('sbump'); if (gainSeen[c.name] !== g.at) { gainSeen[c.name] = g.at; feel(c.name, g.d < 0 ? 'sad' : 'happy', 3000, 'avpop'); } c.r.style.setProperty('--bump', `-${el}ms`); }
     else c.r.classList.remove('sbump');
   }
 }
+const gainSeen = {};
 let phoneHold = 0; window.__ss = () => ({ ...scoreShow, now: Date.now(), phoneHold });
 
 // Design rule 6: when play passes to someone else, say so. Any game whose heading reads "Name's turn" gets a banner
 // sweeping across the screen and a sound when the name changes. (GOAT Toss draws its own over the table.)
-let turnSeen = { game: '', who: '' }, turnSounds = 0;
+let turnSeen = { game: '', who: '' }, turnSounds = 0, turnShown = false;
 function turnBanner() {
   if (!host.state || host.gameId === 'ducks') return;
   const m = [...app.querySelectorAll('.stage h2')].map(h => h.textContent.trim().match(/^(.{1,24})'s turn$/)).find(Boolean);
+  turnShown = !!m;
   if (!m) return;
   const who = m[1], first = turnSeen.game !== host.gameId;
   if (!first && who === turnSeen.who) return;
   turnSeen = { game: host.gameId, who };
+  feel(who, 'wow', 2200, 'avpop');
   if (first) return;   // the opening turn is already announced by the game's title card
   document.querySelector('.turnflag')?.remove();
   const el = document.createElement('div'); el.className = 'turnflag'; el.innerHTML = '<div class="gturn in"><small>Up next</small><b></b></div>'; el.querySelector('b').textContent = who;
@@ -237,6 +256,7 @@ function shareSurvey() {
   if (answers.length) fetch(PARTY_FN, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: PARTY_KEY }, body: JSON.stringify({ action: 'survey', q: r.q, answers }) }).catch(() => {});
 }
 
+let doneSeen = { key: '', names: new Set() };
 function decorate() {
   holdScores(); turnBanner(); shareSurvey();
   const list = [...host.players].sort((a, b) => b.name.length - a.name.length);
@@ -249,7 +269,8 @@ function decorate() {
     const info = chips.map(c => { const t = c.textContent, done = /[✓🔒]/u.test(t) || c.classList.contains('skdone') || c.classList.contains('locked'); return { name: nm(c), done, mark: done || /✏/u.test(t) || c.classList.contains('waiting') }; });
     const rows = [...sc.querySelectorAll('.srow')], find = n => rows.find(x => nm(x.querySelector('span') || x) === n);
     if (!info.some(x => x.mark) || !info.every(x => find(x.name))) return;
-    info.forEach(x => find(x.name).classList.add(x.done ? 'sdone' : 'swait'));
+    const dk = scoreKeyOf(host.state); if (doneSeen.key !== dk) doneSeen = { key: dk, names: new Set() };
+    info.forEach(x => { find(x.name).classList.add(x.done ? 'sdone' : 'swait'); if (x.done && !doneSeen.names.has(x.name)) { doneSeen.names.add(x.name); if (!(moods[x.name]?.until > Date.now())) feel(x.name, 'happy', 1300); } });
     r.classList.add('asbadge');
   });
   app.querySelectorAll('.srow > span:first-child, .pod > b, .roster .chip, .ccseat > b, .gfseat > b, .hseat > b, .bjseat > b, .mmcast b, .ccplayers b').forEach(el => {
@@ -259,7 +280,14 @@ function decorate() {
     if (!p?.face) return;
     if (p.away && host.state) el.classList.add('away');
     const i = document.createElement('i');
-    i.className = 'pface'; i.innerHTML = faceHtml(p.face, '', moodOf(p.name)); if (avNum(p.face) !== null && moodOf(p.name) !== 'neutral') i.classList.add('avpop'); i.style.setProperty('--pc', p.face[1]);
+    // On the podium the winners beam and the champion keeps bouncing; whoever's turn it is stands a little taller.
+    const pod = el.parentElement?.classList.contains('pod') ? el.parentElement : null, live = moods[p.name]?.until > Date.now();
+    i.className = 'pface'; i.dataset.who = p.name; i.innerHTML = faceHtml(p.face, '', pod ? 'happy' : moodOf(p.name)); i.style.setProperty('--pc', p.face[1]);
+    if (avNum(p.face) !== null) {
+      if (pod) i.classList.add(pod.classList.contains('p1') ? 'avwin' : 'avcheer');
+      else if (live) { i.classList.add(moods[p.name].how || 'avpop'); i.style.animationDelay = `-${Date.now() - moods[p.name].at}ms`; }
+      else if (host.state && turnSeen.game === host.gameId && turnSeen.who === p.name && turnShown) i.classList.add('avturn');
+    }
     el.prepend(i);
   });
 }
@@ -524,7 +552,7 @@ function onMessage(m) {
     if (!p && !host.state && host.players.length < game().meta.max) {
       const { name, changed } = settleName(raw, others);
       host.players.push((p = { pid: m.pid, name, asked: raw, fixed: changed, pub }));
-      play('join');
+      play('join'); feel(name, 'wow', 2400, 'avpop');
     } else if (p && !host.state && !p.locked && raw !== p.asked) {
       const { name, changed } = settleName(raw, others);
       Object.assign(p, { name, asked: raw, fixed: changed });
@@ -557,6 +585,7 @@ function onMessage(m) {
     if (!who || now - (lastReact[m.pid] || 0) < 700) return;
     lastReact[m.pid] = now;
     floatReaction(m.e, who.name);
+    if (!(moods[who.name]?.until > now && moods[who.name].how === 'avpop')) feel(who.name, REACT_MOOD[m.e] || 'happy', 1500);
   } else if (m.t === 'act') {
     const actor = host.players.find(p => p.pid === m.pid) || host.audience.find(p => p.pid === m.pid);
     if (!actor) return;
@@ -992,7 +1021,7 @@ function renderLobby() {
     if (!menuAt || !rows.some(r => r.id === menuAt.row && r.games.includes(menuAt.game))) { const r = rows.find(x => x.games.includes(host.gameId)) || rows[0]; menuAt = { row: r.id, game: r.games.includes(host.gameId) ? host.gameId : r.games[0] }; }
     const card = (id, row) => { const m = GAMES[id].meta; return `<button class="gcard ${menuAt.row === row && menuAt.game === id ? 'on' : ''}" data-game="${id}" data-row="${row}"><span class="gimg">${thumb(id, ICONS[id])}<i class="gwash" style="--t:${TINT[THEME_OF[id]] || TINT.night}"></i><em class="gname ${m.name.length > 15 ? 'long' : m.name.length > 10 ? 'mid' : ''}">${esc(m.name)}</em></span><b class="gunder">${esc(m.name)}</b><small class="gfacts">${m.min}–${m.max} · ${m.mins} min</small>${locked(id) ? '<small class="glock" title="Locked">🔒</small>' : ''}${m.kids ? '<small class="gbadge">🧒</small>' : ''}${watching() && SAME_ROOM.includes(id) ? '<small class="sameroom">🏠 same room</small>' : ''}</button>`; };
     const barHtml = `<div class="joinbox">${host.settings.streamer ? '' : `<div class="qr">${qr(joinUrl())}</div>`}<div class="jtext"><small>${n ? 'Join on your phone' : 'Scan to join, or go to'}</small><span class="jurl">${esc(joinHost())}</span><b class="code mini">${host.settings.streamer ? '••••' : host.code}</b></div></div>
-        <div class="joined">${host.players.length ? host.players.map(p => `<span class="jface ${p.away ? 'away' : ''}" style="--pc:${p.face?.[1] || '#232a5c'}"><i>${faceHtml(p.face)}</i><em>${esc(p.name)}</em></span>`).join('') : '<span class="jwait">Waiting for the first player…</span>'}</div>
+        <div class="joined">${host.players.length ? host.players.map(p => `<span class="jface ${p.away ? 'away' : ''}" style="--pc:${p.face?.[1] || '#232a5c'}"><i data-who="${esc(p.name)}" class="${moods[p.name]?.until > Date.now() ? moods[p.name].how : ''}">${faceHtml(p.face, '🙂', moodOf(p.name))}</i><em>${esc(p.name)}</em></span>`).join('') : '<span class="jwait">Waiting for the first player…</span>'}</div>
         <div class="herobtns"><button class="btn ghost small" data-host="settings">⚙ Settings</button>${tq.has('local') || host.players.some(p => p.bot) ? '<button class="btn ghost small" data-host="addbot">🤖 Add a bot</button>' : ''}${host.tally?.games.length ? '<button class="btn ghost small" data-host="awards">🏆 Awards</button>' : ''}</div>`;
     const rowsHtml = `${rows.map(r => `<div class="grow" data-row="${r.id}"><h3>${esc(r.name)}</h3><div class="rail">${r.games.map(id => card(id, r.id)).join('')}</div></div>`).join('')}
       <div class="grow" data-row="nights"><h3>🌙 Ready-made nights</h3><div class="rail">${NIGHTS.map(x => `<button class="gcard night" data-host="night:${x.id}"><span class="gimg nightimg"><i>${x.icon}</i></span><b>${esc(x.name)}</b><small class="nightsub">${esc(x.blurb)}</small></button>`).join('')}</div></div>`;
@@ -1121,7 +1150,7 @@ function renderLobby() {
         return `<div class="ring n${Math.min(total, 12)}"><div class="fireflies">${Array.from({ length: 14 }, (_, k) => `<i style="left:${(k * 37) % 100}%;top:${(k * 53) % 100}%;animation-delay:${-(k * 0.9)}s"></i>`).join('')}</div>
           <div class="ringmid">${art(host.gameId, ICONS[host.gameId])}<h2>${esc(g.meta.name)}</h2><p>${n ? `${n} player${n === 1 ? '' : 's'} in` : 'Grab a seat!'}${need ? ` · need ${need} more` : ''}</p><button class="btn" data-host="start" ${need ? 'disabled' : ''}>${need ? 'Waiting…' : g.meta.teams ? 'Lock teams and start' : "Everybody's in!"}</button>${g.meta.teams && n ? `<div class="teamline">${TEAM_NAMES.map((nm, k) => `<span class="tl${k}">${esc(nm)} <b>${host.players.filter(p => teamPick()[p.pid] === k).length}</b></span>`).join('')}<small>Pick your team on your phone</small></div>` : ''}</div>
           ${Array.from({ length: total }, (_, i) => { const p = host.players[i]; return p
-            ? seat(i, `<i style="--pc:${p.face?.[1] || '#232a5c'}">${faceHtml(p.face)}</i><b>${esc(p.name)}</b>${i === 0 ? '<em>👑</em>' : ''}`, `taken ${g.meta.teams ? 'tm' + teamPick()[p.pid] : ''} ${p.bot ? 'bot' : ''} ${p.away ? 'away' : ''} ${seen.has(p.pid) ? '' : 'pop'} ${editing === p.pid ? 'on' : ''}`, `data-host="edit:${esc(p.pid)}" title="Rename or remove"`)
+            ? seat(i, `<i data-who="${esc(p.name)}" class="${moods[p.name]?.until > Date.now() ? moods[p.name].how : ''}" style="--pc:${p.face?.[1] || '#232a5c'}">${faceHtml(p.face, '🙂', moodOf(p.name))}</i><b>${esc(p.name)}</b>${i === 0 ? '<em>👑</em>' : ''}`, `taken ${g.meta.teams ? 'tm' + teamPick()[p.pid] : ''} ${p.bot ? 'bot' : ''} ${p.away ? 'away' : ''} ${seen.has(p.pid) ? '' : 'pop'} ${editing === p.pid ? 'on' : ''}`, `data-host="edit:${esc(p.pid)}" title="Rename or remove"`)
             : seat(i, '<i>Join!</i>', 'open'); }).join('')}</div>`;
       })()}
       <div class="row gfoot"><button class="btn ghost small" data-host="menu">← Games</button><button class="btn ghost small" data-host="addbot">🤖 Add a bot</button>${host.players.some(p => p.bot) ? '<button class="btn ghost small" data-host="clearbots">Remove bots</button>' : ''}<span class="muted small">Tap a seat to rename or remove.</span></div>

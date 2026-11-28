@@ -2772,5 +2772,19 @@ img.av{display:block;width:118%;height:118%;max-width:none;margin:-9%;object-fit
 i:has(> img.av){background:none!important;overflow:visible}
 .pface:has(> img.av){width:2.7em;height:2.7em;display:inline-grid;vertical-align:middle;margin-right:.25em;transition:transform .25s}
 .avpop{animation:avpop 2.6s cubic-bezier(.2,1.5,.4,1) both;z-index:5;position:relative}
+.avhop{animation:avhop .9s cubic-bezier(.3,1.6,.5,1) both;z-index:4;position:relative}
+@keyframes avhop{0%{transform:none}30%{transform:translateY(-.5em) scale(1.35) rotate(-6deg)}55%{transform:translateY(0) scale(1.2,1.05)}75%{transform:translateY(-.15em) scale(1.12)}100%{transform:none}}
+.avturn{animation:avturn 1.4s ease-in-out infinite;z-index:3;position:relative}
+@keyframes avturn{0%,100%{transform:scale(1.25)}50%{transform:scale(1.45) translateY(-.12em)}}
+.pod .pface:has(> img.av){width:4.2em;height:4.2em;display:grid;margin:0 auto .2em}
+.pod.p1 .pface:has(> img.av){width:6em;height:6em}
+.avwin{animation:avwin 1.1s ease-in-out infinite}.avcheer{animation:avwin 1.6s ease-in-out infinite}
+@keyframes avwin{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-.5em) rotate(5deg) scale(1.08)}}
+.seat.taken > i:has(> img.av) img{animation:avbob 3.2s ease-in-out infinite;animation-delay:calc(var(--d,0s) * -1.6)}
+@keyframes avbob{0%,100%{transform:none}50%{transform:translateY(-4%) rotate(2deg)}}
+.faces:has(img.av){grid-template-columns:repeat(5,minmax(0,1fr))}
+.cpod.r1 > i img.av{animation:avwin 1.1s ease-in-out 1.2s infinite}.cpod:not(.r1) > i img.av{animation:avbob 2.4s ease-in-out infinite}
+.jface > i{transition:transform .2s}.jface > i img.av{animation:avbob 3.2s ease-in-out infinite}.jface:nth-child(2n) > i img.av{animation-delay:-1.1s}.jface:nth-child(3n) > i img.av{animation-delay:-2.1s}
+@media (prefers-reduced-motion:reduce){.cpod > i img.av,.jface > i img.av{animation:none}.avturn,.avwin,.avcheer,.seat.taken > i img{animation:none}}
 @keyframes avpop{0%{transform:scale(1)}12%{transform:scale(2.3) rotate(-8deg)}24%{transform:scale(2) rotate(6deg)}80%{transform:scale(2)}100%{transform:scale(1)}}
 .facebtn:has(img.av){background:none;border-radius:16px;padding:2px}.facebtn.on:has(img.av){background:#fff2;border-color:#ffcf6b}.facebtn[disabled]:has(img.av){opacity:.25}
