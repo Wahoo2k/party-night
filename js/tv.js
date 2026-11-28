@@ -94,27 +94,41 @@ function ensureFaces() {
   }
 }
 // After a game draws its screen, put each player's character beside their name in the shared score, podium and roster parts.
-// Between rounds: a short standings screen, so the race is felt all game and not only at the podium. Rows start in
-// the order from the last time it was shown, then slide to the new order.
-let stand = { game: '', round: 0, order: [], scores: {} };
-function standings(v) {
-  const list = Array.isArray(v.scores) && v.scores.length >= 2 && v.scores[0]?.name && typeof v.scores[0].score === 'number' ? v.scores : null;
-  if (stand.game !== host.gameId || !list || (v.round || 0) < stand.round) { stand = { game: host.gameId, round: v.round || 0, order: [], scores: {} }; return; }
-  if (!(v.round > stand.round) || v.phase === 'over') return;
-  const done = stand.round; stand.round = v.round;
-  if (!done || !list.some(p => p.score) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+// Between rounds: a short standings screen, so the race is felt all game and not only at the podium. It works for
+// every game that keeps points: when a result has been shown and the game is about to move on, the standings come
+// up first (at most about once a minute, only if the scores have changed, and never just before the podium).
+// Rows start in the order from the last time it was shown, then slide to the new order.
+// (?standgap=<seconds> sets the wait; the ?local=1 test mode shows none unless it is given, so tests run undisturbed.)
+const sq = new URLSearchParams(location.search), STAND_GAP = (+sq.get('standgap') || (sq.has('local') ? 1e9 : 70)) * 1000, STAND_MS = 5000;
+let stand = { game: '', at: 0, order: [], scores: {}, el: null, timer: 0 };
+function standList() {
+  const l = scoreList(); if (l) return l;
+  const vals = scoreShow.game === host.gameId ? Object.entries(scoreShow.vals) : [];   // the score chips along the bottom
+  return vals.length >= 2 && vals.every(([n]) => host.players.some(p => p.name === n)) ? vals.map(([name, score]) => ({ name, score })) : null;
+}
+function standingsDue() {
+  const s = host.state, G = game(), now = Date.now();
+  if (stand.game !== host.gameId) stand = { game: host.gameId, at: now, order: [], scores: {}, el: null, timer: 0 };
+  if (!s || host.paused || host.intro || G.meta.standings === false || G.meta.teams || !REVEALISH.test(s.phase) || s.phase === 'over' || now - stand.at < STAND_GAP || matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
+  const list = standList();
+  if (!list || list.length < 2 || !list.some(p => p.score) || !list.some(p => p.score !== (stand.scores[p.name] || 0))) return null;
+  try { const c = JSON.parse(JSON.stringify(s)); G.hostAct(c, 'next', now); if (c.phase === 'over') return null; } catch { return null; }   // the podium is next: no need
+  return list;
+}
+function standings(list, then) {
   const now = [...list].sort((a, b) => b.score - a.score).slice(0, 8), before = [...now].sort((a, b) => (stand.order.indexOf(a.name) + 1 || 99) - (stand.order.indexOf(b.name) + 1 || 99));
   const max = Math.max(1, now[0].score), face = n => host.players.find(p => p.name === n)?.face;
-  const row = (p, i) => { const f = face(p.name), gain = p.score - (stand.scores[p.name] || 0); return `<div class="strow" data-n="${esc(p.name)}" style="--i:${i}"><i style="--pc:${f?.[1] || '#232a5c'}">${faceHtml(f, '🙂', gain > 0 ? 'happy' : 'neutral')}</i><b>${esc(p.name)}</b><div class="stbar"><span style="width:${Math.max(3, (100 * p.score) / max)}%"></span></div><em>${p.score.toLocaleString()}</em>${gain > 0 ? `<small>+${gain.toLocaleString()}</small>` : '<small></small>'}</div>`; };
+  const row = (p, i) => { const f = face(p.name), gain = p.score - (stand.scores[p.name] || 0); return `<div class="strow" data-n="${esc(p.name)}" style="--i:${i}"><i style="--pc:${f?.[1] || '#232a5c'}">${faceHtml(f, '🙂', gain > 0 ? 'happy' : gain < 0 ? 'sad' : 'neutral')}</i><b>${esc(p.name)}</b><div class="stbar"><span style="width:${Math.max(3, (100 * Math.max(0, p.score)) / max)}%"></span></div><em>${p.score.toLocaleString()}</em>${gain ? `<small>${gain > 0 ? '+' : '−'}${Math.abs(gain).toLocaleString()}</small>` : '<small></small>'}</div>`; };
   const el = document.createElement('div'); el.className = 'standings'; el.dataset.theme = THEME_OF[host.gameId] || '';
-  el.innerHTML = `<h2>After round ${done}</h2><div class="strows" style="--n:${now.length}">${before.map(row).join('')}</div>`;
+  el.innerHTML = `<h2>The standings</h2><div class="strows" style="--n:${now.length}">${before.map(row).join('')}</div>`;
   document.body.append(el);
-  tap.fn?.('ceremony', ['standings', el.dataset.theme, `<h2>After round ${done}</h2><div class="strows" style="--n:${now.length}">${now.map(row).join('')}</div>`, 0, 5200]);
+  tap.fn?.('ceremony', ['standings', el.dataset.theme, `<h2>The standings</h2><div class="strows" style="--n:${now.length}">${now.map(row).join('')}</div>`, 0, STAND_MS]);
   if (sfx.on) play('whoosh');
-  setTimeout(() => { now.forEach((p, i) => el.querySelector(`[data-n="${CSS.escape(p.name)}"]`)?.style.setProperty('--i', i)); if (sfx.on) play('pop'); }, 1300);
-  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 450); }, 5200);
-  el.onclick = () => el.remove();
-  stand.order = now.map(p => p.name); stand.scores = Object.fromEntries(list.map(p => [p.name, p.score]));
+  setTimeout(() => { now.forEach((p, i) => el.querySelector(`[data-n="${CSS.escape(p.name)}"]`)?.style.setProperty('--i', i)); if (sfx.on && el.isConnected) play('pop'); }, 1300);
+  const done = () => { if (stand.el !== el) return; clearTimeout(stand.timer); stand.el = null; el.classList.add('out'); setTimeout(() => el.remove(), 450); then(); };
+  stand.el = el; stand.timer = setTimeout(done, STAND_MS); stand.skip = done;
+  el.onclick = done;
+  stand.at = Date.now(); stand.order = now.map(p => p.name); stand.scores = Object.fromEntries(list.map(p => [p.name, p.score]));
 }
 
 // After the podium: one clear choice of what happens next, instead of two small buttons inside the game's last screen.
@@ -800,6 +814,7 @@ function teamPick() {
   return t;
 }
 function startGame(again) {
+  stand.game = '';
   if (locked(host.gameId)) { host.screen = 'gather'; return changed(); }   // not bought: the join screen shows how to unlock it
   // First time this room plays the game: explain it and wait for everyone before anything starts.
   if (!host.intro && !again && wantsIntro()) { host.intro = { id: host.gameId, ready: {}, at: Date.now() }; if (sfx.on) play('whoosh'); return changed(); }   // the game's own theme sting plays when it actually starts
@@ -818,6 +833,7 @@ function startGame(again) {
   setTimeout(() => banter(again ? 'again' : 'start'), 400);
 }
 
+let standPass = false;
 function hostAction(a) {
   if (a === 'start') return startGame();
   if (a === 'again') return startGame(true);
@@ -893,6 +909,9 @@ function hostAction(a) {
   }
   if (a === 'clearbots' && !host.state) { host.players = host.players.filter(p => !p.bot); return changed(); }
   if (!host.state) return;
+  // Moving on from a result: the standings come up first when they are due. A second press skips them.
+  if (a === 'next' && stand.el) return stand.skip();
+  if (a === 'next' && !standPass) { const due = standingsDue(); if (due) return standings(due, () => { standPass = true; try { hostAction('next'); } finally { standPass = false; } }); }
   game().hostAct(host.state, a, Date.now());
   changed();
 }
@@ -1203,7 +1222,7 @@ function render() {
   if (host.intro && host.state) host.intro = null;
   if (!host.state && host.intro) renderIntro();
   else if (!host.state) renderLobby();
-  else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); if (fresh) wordsIn(); if (v.phase === 'over') afterParty(); decorate(); pops(fresh); guideTip(); slideScores(); cardPops(fresh); standings(v); }
+  else { const v = tvView(); lastViewKey = viewKey(v); v.fresh = fresh; game().renderTV(v, app); if (fresh) wordsIn(); if (v.phase === 'over') afterParty(); decorate(); pops(fresh); guideTip(); slideScores(); cardPops(fresh); }
   document.body.classList.toggle('night', host.state?.phase === 'night');
   nightLine();
   // How-to screens show in full the first time a room plays a game, then get out of the way.

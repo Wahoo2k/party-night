@@ -4,6 +4,7 @@ import { esc } from '../ui.js';
 import { makeStd, face, SUITS, shuffle } from './cards.js';
 
 export const meta = {
+  standings: false,   // lowest score wins here, so the shared standings screen would read upside down
   id: 'hearts',
   name: 'Hearts',
   min: 4,

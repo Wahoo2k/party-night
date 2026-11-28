@@ -268,3 +268,9 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Twelve odd characters added (devil, werewolf, alien, vampire, robot, skull, ghost, pumpkin, zombie, pirate, ninja, cyclops), each with four moods. New players still get a plain figure; the odd ones are picked on the phone ("Pick your character", now with a "Surprise me" button).
 - Reactions, all from one helper (`feel` in js/tv.js): points won or lost (swell, happy or sad), a turn starting (swell, wide eyes, then stands taller while it is their turn), an answer locked in (small hop), a wave or emoji from the phone (hop with the matching mood), joining (swell), the winner bouncing on the podium, a gentle bob in the lobby.
 - Not done: per-game moments (robbed in Gold Rush, losing a life in Last One Standing, being voted out), the phone showing its own character's mood, draw-your-own. Not yet seen on the onn box — the bobbing is many small animations at once.
+
+## Standings between rounds, for every points game (28 Nov)
+- Before: the standings screen only appeared in games whose TV view had a `round` number (in practice Funny Answers and Letter Lists).
+- Now: when a result has been shown and the game is about to move on (the Next press, the auto-advance or the phone remote), the standings come up first for 5 seconds. Rules: at most about once every 70 seconds, only if scores changed, never just before the podium, a second press skips. Scores come from the game's score list or the score chips.
+- Not covered: turn games with no result screen (GOAT Toss, Go Fish, Memory Match, Color Clash…), team games, hidden-role games, Hearts (lowest wins; opted out with `meta.standings: false`). They keep the score strip only.
+- `?standgap=<seconds>` sets the wait; `?local=1` shows none unless it is given. Test: test/standings-e2e.mjs.
