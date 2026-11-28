@@ -85,10 +85,10 @@ export function tick(s, now = Date.now(), rnd = Math.random) { return s.deadline
 
 const ranking = s => s.players.map(p => ({ pid: p.pid, name: p.name, score: s.scores[p.pid] })).sort((a, b) => b.score - a.score);
 export function narration(s) {
-  if (s.phase === 'pick') return s.r === 0 ? `Welcome to Secret Word Hunt! ${nameOf(s, s.host)} is the Host and picks a secret word. Careful: one of you is the Insider and already knows it. Check your phones!` : `${nameOf(s, s.host)} is the Host this round. Check your phones.`;
-  if (s.phase === 'ask') return `The category is ${s.word.cat}. Ask ${nameOf(s, s.host)} yes or no questions. You have four minutes!`;
-  if (s.phase === 'vote') return `${nameOf(s, s.found)} found it! The word was ${s.word.word}. Now, who was the Insider? It was too easy... Vote!`;
-  if (s.phase === 'end') return !s.result.found ? `Time's up! The word was ${s.word.word}. Everyone loses this round.` : s.result.caught ? `You caught the Insider, ${nameOf(s, s.insider)}!` : `The Insider was ${nameOf(s, s.insider)}, and they got away with it!`;
+  if (s.phase === 'pick') return s.r === 0 ? `Welcome to Secret Word Hunt! The Host picks a secret word. Careful: one of you is the Insider and already knows it. Check your phones! ${nameOf(s, s.host)} is the Host.` : `New round, new Host. Check your phones. ${nameOf(s, s.host)} is the Host this round.`;
+  if (s.phase === 'ask') return `The category is ${s.word.cat}. Ask the Host yes or no questions. You have four minutes!`;
+  if (s.phase === 'vote') return `Found it! The word was ${s.word.word}. Now, who was the Insider? It was too easy... Vote!`;
+  if (s.phase === 'end') return !s.result.found ? `Time's up! The word was ${s.word.word}. Everyone loses this round.` : s.result.caught ? `You caught the Insider! It was ${nameOf(s, s.insider)}.` : `The Insider got away with it! It was ${nameOf(s, s.insider)}.`;
   if (s.phase === 'over') return `${ranking(s)[0].name} wins!`;
   return '';
 }

@@ -145,7 +145,7 @@ export function narration(s) {
     case 'pickOwn': return `${s.c === 0 ? 'Welcome to Pick a Case! ' : ''}${nameOf(s, contestant(s))}, sixteen cases, one hundred thousand points in one of them. Pick the case you'll keep. Everyone else, pick your lucky case.`;
     case 'offer': return `The phone is ringing. The buyer offers ${money(s.offer)} points. Deal, or keep going?`;
     case 'final': return 'Two cases left. Keep yours, or swap?';
-    case 'end': return s.result.how === 'deal' ? `Deal! ${s.result.name} takes ${money(s.result.won)}. Their case had ${money(s.result.ownValue)}.` : `${s.result.name} wins ${money(s.result.won)} points!`;
+    case 'end': return s.result.how === 'deal' ? `Deal! ${s.result.name} takes ${money(s.result.won)}. Their case had ${money(s.result.ownValue)}.` : `No deal, all the way to the end! ${s.result.name} wins ${money(s.result.won)} points!`;
     case 'over': return 'That\'s the end of Pick a Case!';
   }
   return '';

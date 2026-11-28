@@ -16,8 +16,7 @@ export const CATEGORIES = [
   'Something in a kitchen', 'A sport', 'A color', 'A TV show', 'A movie', 'A food', 'A dessert', 'Something you wear',
   'A job', 'A school subject', 'A musical instrument', 'A cartoon character', 'Something cold', 'Something hot',
   'Something in a park', 'A breakfast food', 'A body part', 'A famous person', 'A board game', 'A drink',
-  'Something with wheels', 'A bird', 'A sea creature', 'A holiday', 'A hobby', 'Something in a toolbox', 'A snack', 'Something at the beach',
-];
+  'Something with wheels', 'A bird', 'A sea creature', 'A holiday', 'A hobby', 'Something in a toolbox', 'A snack', 'Something at the beach', 'Something in a bathroom', 'Something in a garage', 'A flower', 'A tree', 'An insect', 'A zoo animal', 'A farm animal', 'A pizza topping', 'An ice cream flavor', 'A candy', 'Something in the sky', 'Something at a wedding', 'Something at a birthday party', 'Something in a classroom', 'Something in an office', 'A superhero', 'A book title', 'A song title', 'A band or singer', 'A video game', 'A toy', 'A kind of car', 'Something in a suitcase', 'Something that flies', 'Something round', 'Something green', 'Something that makes noise', 'A reason to be late', 'Something you plug in', 'A thing in a backpack', 'Something at a campsite', 'A restaurant or cafe', 'Something in a hospital', 'A kind of weather', 'A spice or herb', 'Something you can ride'];
 const LETTERS = 'ABCDEFGHIJKLMNOPRSTW';
 const PER_ROUND = 6;
 const ROUNDS = 3;

@@ -162,7 +162,7 @@ export function cue(s) {
 export function cueEvent(s) {
   if (!s.eventId) return null;
   const pickOf = (...a) => a[(+s.eventId || 0) % a.length];   // the same moment does not sound the same twice running
-  if (s.lastEvent === 'bank') return { id: s.eventId, sound: pickOf('points', 'safe', 'lockin'), react: s.banked >= 20 ? 'cheer' : null, say: `${nameOf(s, current(s))} banks ${s.banked}.`, delay: 0 };
+  if (s.lastEvent === 'bank') return { id: s.eventId, sound: pickOf('points', 'safe', 'lockin'), react: s.banked >= 20 ? 'cheer' : null, say: `Banked! ${nameOf(s, current(s))} banks ${s.banked}.`, delay: 0 };
   const r = s.last;
   if (!r) return null;
   if (r.pile) return { id: s.eventId, sound: pickOf('lose', 'death'), react: 'groan', fx: 'shake', say: 'Goat pile! There goes your whole score!', delay: TIMES.anim };

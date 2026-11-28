@@ -108,7 +108,7 @@ export function narration(s) {
   if (s.phase === 'roles') return 'Welcome to Mystery Manor. During dinner, the lights went out, and when they came back on, the Moon Diamond was gone! One of you is the thief. Check your phone for your character. Keep it secret if you are the thief!';
   if (s.phase === 'act') return [`Act one. ${ACTS[0]}. Read your clues, then share what you know. Or what you want people to think you know.`, `Act two. ${ACTS[1]}. New clues are on your phones and on the TV.`, `Act three. ${ACTS[2]}. This is your last chance to question each other.`][s.act];
   if (s.phase === 'accuse') return 'Time to accuse! On your phone, choose who did it, where, and how.';
-  if (s.phase === 'reveal') return `The thief was ${who(s, s.thief)}, in the ${ROOMS[s.room]}, with the ${ITEMS[s.item]}! ${s.caught ? 'And you caught them!' : 'And they got away with it!'}`;
+  if (s.phase === 'reveal') return `It happened in the ${ROOMS[s.room]}, with the ${ITEMS[s.item]}. The thief was ${who(s, s.thief)}! ${s.caught ? 'And you caught them!' : 'And they got away with it!'}`;   // the place and the tool are their own sentence, so the host can say them (a sentence with a player's name has no recording)
   return '';
 }
 export function cue(s) {

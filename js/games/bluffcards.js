@@ -86,7 +86,7 @@ const claimText = (s, c) => `${nameOf(s, c.pid)} played ${c.n} ${c.n === 1 ? WOR
 export function narration(s) {
   if (s.phase === 'play' && s.moves === 0) return `Welcome to Liar's Deck! Play cards face down and say they're ${WORDS[s.rank]}. Lie if you have to. Anyone can call bluff!`;
   if (s.phase === 'window') return claimText(s, s.claim) + '.';
-  if (s.phase === 'reveal') return s.reveal.lied ? `Bluff! ${nameOf(s, s.reveal.liar)} was lying and takes the pile.` : `Nope, ${nameOf(s, s.reveal.liar)} told the truth! ${nameOf(s, s.reveal.by)} takes the pile.`;
+  if (s.phase === 'reveal') return s.reveal.lied ? `Bluff! Caught lying. ${nameOf(s, s.reveal.liar)} takes the pile.` : `Nope, that was the truth! ${nameOf(s, s.reveal.by)} takes the pile.`;
   if (s.phase === 'over') return `${nameOf(s, s.winner)} is out of cards and wins!`;
   return '';
 }

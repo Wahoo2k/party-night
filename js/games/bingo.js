@@ -156,7 +156,7 @@ export function tick(s, now = Date.now(), rnd = Math.random) {
 export function narration(s) {
   if (s.phase === 'choose') return 'Welcome to Bingo! Pick numbers or pictures on the TV.';
   if (s.phase === 'calling' && !s.called.length) return `Round ${s.round + 1}: ${pattern(s).name}. ${pattern(s).hint}. Good luck!`;
-  if (s.phase === 'roundEnd') return s.winners.length ? `Bingo for ${s.winners.map(w => nameOf(s, w)).join(' and ')}!` : 'Out of calls! No winner this round.';
+  if (s.phase === 'roundEnd') return s.winners.length ? `Bingo! We have a winner. Well done, ${s.winners.map(w => nameOf(s, w)).join(' and ')}!` : 'Out of calls! No winner this round.';
   if (s.phase === 'over') return 'That\'s all for Bingo. Thanks for playing!';
   return '';
 }

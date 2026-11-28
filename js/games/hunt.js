@@ -18,6 +18,12 @@ export const HUNTS = [
   { say: 'Find something BROWN!', e: '🟤', c: '#8b5a2b' }, { say: 'Find something ROUND, like a ball!', e: '⚽', c: '#5a6fd8' }, { say: 'Find something SOFT, like a pillow!', e: '🧸', c: '#c88e4a' },
   { say: 'Find a SHOE!', e: '👟', c: '#5a6fd8' }, { say: 'Find a BOOK!', e: '📚', c: '#5a6fd8' }, { say: 'Find a SPOON!', e: '🥄', c: '#8a8fb8' },
   { say: 'Find something with a STAR on it!', e: '⭐', c: '#f2b21d' }, { say: 'Find something SQUARE, like a box!', e: '📦', c: '#c88e4a' }, { say: 'Touch your NOSE, then find a CHAIR!', e: '🪑', c: '#8b5a2b' },
+  { say: 'Find something GRAY!', e: '🩶', c: '#8a8fb8' }, { say: 'Find something SHINY!', e: '✨', c: '#f2b21d' }, { say: 'Find something STRIPED!', e: '🦓', c: '#1d1f2e' },
+  { say: 'Find something TINY!', e: '🐜', c: '#3fa34d' }, { say: 'Find something you can WEAR on your head!', e: '🧢', c: '#3f7fe0' }, { say: 'Find a SOCK!', e: '🧦', c: '#e2473b' },
+  { say: 'Find a CUP!', e: '🥤', c: '#f28a1d' }, { say: 'Find something with WHEELS!', e: '🛞', c: '#5a6fd8' }, { say: 'Find something that makes NOISE!', e: '🔔', c: '#f2b21d' },
+  { say: 'Find something with NUMBERS on it!', e: '🔢', c: '#3f7fe0' }, { say: 'Find a TOY!', e: '🧩', c: '#8a4fd1' }, { say: 'Find something BUMPY!', e: '🍍', c: '#f2b21d' },
+  { say: 'Find something LONG, like a rope!', e: '🪢', c: '#8b5a2b' }, { say: 'Find a KEY!', e: '🔑', c: '#f2b21d' }, { say: 'Find something you can DRAW with!', e: '🖍️', c: '#e2473b' },
+  { say: 'Find something FLAT, like a plate!', e: '🍽️', c: '#8a8fb8' }, { say: 'Hop on one foot, then find a PILLOW!', e: '🛏️', c: '#c88e4a' }, { say: 'Find something with a FACE on it!', e: '🙂', c: '#f2b21d' },
 ];
 export const ROUNDS = 8;
 export const TIMES = { get: 3500, go: 30000, done: 5000 };

@@ -6,7 +6,7 @@ import { GAMES } from '../js/games/index.js';
 import { QUIPS } from '../js/quips.js';
 import { sentences, clipId, voiceFor } from '../js/recorded.js';
 import fs from 'node:fs';
-const NAMES = ['Zorb', 'Quix', 'Vlad', 'Mirp', 'Jeff', 'Wynn', 'Oleg', 'Pask'];
+const NAMES = ['Zorb', 'Quix', 'Vlux', 'Mirp', 'Jexx', 'Wynq', 'Olux', 'Pazk'];   // made-up names that are not part of any real word: 'Vlad' used to hide every line about Vladivostok, 'Jeff' every Jefferson
 const RUNS = +process.env.RUNS || 2000, MARK = 'zqx';
 const mark = a => { if (!a || typeof a !== 'object') return a; for (const k of ['text', 'word', 'title', 'clue', 'answer', 'guess']) if (typeof a[k] === 'string' && a[k]) a[k] = MARK + ' ' + a[k]; for (const k of ['list', 'lines', 'items']) if (Array.isArray(a[k])) a[k] = a[k].map(x => (typeof x === 'string' && x ? MARK + ' ' + x : x)); return a; };
 const clips = new Map();   // id -> { voice, text, games:Set }

@@ -97,9 +97,9 @@ export function tick(s, now = Date.now(), rnd = Math.random) { return s.deadline
 
 const ranking = s => s.players.map(p => ({ pid: p.pid, name: p.name, score: s.scores[p.pid] })).sort((a, b) => b.score - a.score);
 export function narration(s) {
-  if (s.phase === 'pick') return s.turn === 0 ? `Welcome to Spot the Shade! ${nameOf(s, s.giver)} sees a secret color and will give a clue. No color names allowed!` : `${nameOf(s, s.giver)} is picking a color.`;
-  if (s.phase === 'guess') return `The clue is: ${s.clue}. Find that shade!`;
-  if (s.phase === 'reveal') { const best = s.result.list.filter(x => x.pts === 3); return best.length ? `Bullseye for ${best.map(x => x.name).join(' and ')}!` : 'So close!'; }
+  if (s.phase === 'pick') return s.turn === 0 ? `Welcome to Spot the Shade! One of you sees a secret color and gives a clue. No color names allowed! ${nameOf(s, s.giver)} is up first.` : `${['A new secret shade.', 'Next color.', 'Someone new picks a color.'][s.turn % 3]} ${nameOf(s, s.giver)} is picking.`;
+  if (s.phase === 'guess') return `The clue is in. Find that shade! The clue is: ${s.clue}.`;
+  if (s.phase === 'reveal') { const best = s.result.list.filter(x => x.pts === 3); return best.length ? `Bullseye! Well spotted, ${best.map(x => x.name).join(' and ')}.` : ['So close!', 'Nobody hit it exactly.', 'Near enough to argue about.'][s.turn % 3]; }
   if (s.phase === 'over') return `${ranking(s)[0].name} has the best eye for color!`;
   return '';
 }

@@ -79,8 +79,8 @@ const ranking = s => s.players.map(p => ({ pid: p.pid, name: p.name, score: s.sc
 const Q = s => QUESTIONS[s.qs[Math.min(s.q, s.qs.length - 1)]];
 export function narration(s) {
   if (s.phase === 'poll') return `${s.q === 0 ? 'Room Meter! Answer honestly. Nobody sees your answer. ' : ''}Is this you? People who ${Q(s)}. Yes or no.`;
-  if (s.phase === 'guess') return `${nameOf(s, spotter(s))}, what percent of this room ${Q(s)}?`;
-  if (s.phase === 'bet') return `${nameOf(s, spotter(s))} says ${s.guess} percent. Higher or lower?`;
+  if (s.phase === 'guess') return `What percent of this room ${Q(s)}? ${nameOf(s, spotter(s))}, your guess.`;
+  if (s.phase === 'bet') return `The guess is ${s.guess} percent. Higher or lower?`;
   if (s.phase === 'reveal') return `The real answer: ${s.result.truth} percent. ${s.result.diff === 0 ? 'Exactly right!' : s.result.diff <= 10 ? 'So close!' : s.result.diff >= 40 ? 'Way off!' : ''}`;
   if (s.phase === 'over') return `${ranking(s)[0].name} knows this room best!`;
   return '';

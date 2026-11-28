@@ -96,7 +96,7 @@ export function tick(s, now = Date.now(), rnd = Math.random) { return s.deadline
 
 export function narration(s) {
   if (s.phase === 'roles') return `Welcome to Inside Job. ${s.traitors.length} of you are secret traitors. Check your phone to see which side you're on.`;
-  if (s.phase === 'pick') return `Mission ${s.m + 1}. ${nameOf(s, leader(s))} is the leader. Pick a team of ${s.sizes[s.m]}.`;
+  if (s.phase === 'pick') return `Mission ${s.m + 1}. The leader picks a team of ${s.sizes[s.m]}. ${nameOf(s, leader(s))} is the leader.`;
   if (s.phase === 'vote') return 'Everyone, vote on this team.';
   if (s.phase === 'voteShow') return s.lastVote.approved ? 'The team is approved. Off you go!' : `The team is turned down.${s.rejects >= 3 ? ` That's ${s.rejects} in a row. Careful, five and the traitors win!` : ''}`;
   if (s.phase === 'mission') return 'The team is on the mission. Play your cards in secret.';
