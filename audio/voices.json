@@ -10,7 +10,8 @@
       "style": 0.75,
       "use_speaker_boost": true,
       "speed": 1.06
-    }
+    },
+    "model": "eleven_v4"
   },
   "night": {
     "voice": "Brian",
@@ -27,7 +28,7 @@
       "Phones out. Dignity optional.",
       "Two answers enter. One answer leaves. Vote for your favorite on your phone!",
       "Oh no, the trap! Team Moon wins!",
-      "And the winner is\u2026",
+      "And the winner is…",
       "Round two. The points are doubled, and so is the pressure."
     ],
     "night": [
@@ -44,5 +45,6 @@
       "use_speaker_boost": true,
       "speed": 1.06
     }
-  }
+  },
+  "_models": "New host (Callum) lines are recorded on eleven_v4 from 28 Nov 2026: Tom found it a little better, mostly on lines with emotion or an exclamation. Existing clips stay on eleven_multilingual_v2; the night voice (Brian) stays on v2."
 }
