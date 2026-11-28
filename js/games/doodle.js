@@ -6,6 +6,7 @@ import { svgFor, cleanStrokes, botDoodle, mountPad } from './sketch.js';
 
 export const meta = {
   id: 'doodle',
+  ownReveal: true,   // this game holds its scores back itself until its reveal has played
   name: 'Doodle Bluff',
   min: 3,
   max: 10,

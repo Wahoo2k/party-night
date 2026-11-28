@@ -5,6 +5,7 @@ import { isRude } from '../names.js';
 
 export const meta = {
   id: 'truths',
+  ownReveal: true,   // this game holds its scores back itself until its reveal has played
   name: 'Two Truths & a Lie',
   min: 3,
   max: 12,

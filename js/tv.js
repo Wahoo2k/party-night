@@ -152,7 +152,68 @@ function autoNext() {
 }
 setInterval(() => { if (host.state && !host.paused) autoNext(); }, 500);
 
+// Design rules 2 and 3 (see DESIGN.md), for every game at once.
+// Nothing gives the result away early: when a reveal starts, the score chips keep showing what everyone had until
+// the reveal has played out (its last beat, or a few seconds), and phones are not told the outcome before then.
+// Points are an event: when the new scores land, each chip that changed counts to its new number, shows "+N" and
+// the points sound plays. Outside a reveal (points scored mid-turn) the same thing happens straight away.
+const REVEALISH = /reveal|result|score|answer|roundEnd|tally|show/i;
+let scoreShow = { game: '', key: '', vals: {}, until: 0, gains: {}, timer: 0 };
+const scoreKeyOf = s => [host.gameId, s.phase, s.round, s.n, s.step, s.turn, s.idx, s.q, s.k, s.m].join('|');
+function holdScores() {
+  const rows = host.state ? [...app.querySelectorAll('.stage > .scores .srow')] : [];
+  if (!rows.length) return;
+  const nmOf = r => (r.querySelector('span') || r).textContent.replace(/^[^\p{L}\p{N}]+/u, '').trim();
+  const read = r => { const b = r.querySelector('b'); if (!b) return null; b.querySelectorAll('small').forEach(x => x.remove());   /* a game's own small "+N" gives way to the shared one */ const t = [...b.childNodes].find(n => n.nodeType === 3 && /\d/.test(n.nodeValue)); const m = t?.nodeValue.match(/[-−]?[\d,]+/); if (!m) return null; const shownNow = +m[0].replace(/,/g, '').replace('−', '-'); if (b.dataset.real === undefined || +b.dataset.shown !== shownNow) { b.dataset.real = shownNow; b.dataset.fmt = m[0].includes(',') ? ',' : ''; b.dataset.minus = m[0].startsWith('−') ? '−' : '-'; } return { r, b, t, raw: m[0], v: +b.dataset.real, name: nmOf(r) }; };   // the chip's true score is remembered on it, since the number on screen may be the held one
+  const cur = rows.map(read).filter(Boolean);
+  if (!cur.length) return;
+  const now = Date.now(), key = scoreKeyOf(host.state), ss = scoreShow;
+  if (ss.game !== host.gameId || !Object.keys(ss.vals).length || cur.every(c => c.v === 0)) { clearTimeout(ss.timer); scoreShow = { game: host.gameId, key, vals: Object.fromEntries(cur.map(c => [c.name, c.v])), until: 0, gains: {}, timer: 0 }; return; }
+  const changed = cur.filter(c => ss.vals[c.name] !== undefined && c.v !== ss.vals[c.name]);
+  if (changed.length && !ss.until) {
+    const wait = key !== ss.key && REVEALISH.test(host.state.phase) && !game().meta.ownReveal ? (() => { const top = Math.max(0, ...[...app.querySelectorAll('[data-beat]')].map(e => +e.dataset.beat || 1)); return top ? BEAT_FIRST + (top - 1) * BEAT_GAP + 500 : 2600; })() : 0;
+    ss.until = now + wait;
+    if (wait) { phoneHold = ss.until; clearTimeout(ss.timer); ss.timer = setTimeout(() => { phoneHold = 0; holdScores(); sendViews(); }, wait + 30); }
+  }
+  ss.key = key;
+  if (ss.until && now >= ss.until) {
+    let any = false;
+    for (const c of cur) { const was = ss.vals[c.name]; if (was !== undefined && was !== c.v) { ss.gains[c.name] = { d: c.v - was, at: now }; any = true; } ss.vals[c.name] = c.v; }
+    ss.until = 0;
+    if (any && sfx.on) play('points');
+  }
+  for (const c of cur) {
+    const held = ss.vals[c.name];
+    const show = held === undefined ? c.v : held, txt = (show < 0 ? c.b.dataset.minus : '') + (c.b.dataset.fmt || Math.abs(show) >= 1000 ? Math.abs(show).toLocaleString() : String(Math.abs(show)));
+    if (txt !== c.raw) c.t.nodeValue = c.t.nodeValue.replace(c.raw, txt);
+    c.b.dataset.shown = show;
+    const g = ss.gains[c.name], el = g ? now - g.at : 9e9;
+    c.r.querySelector('.sgain')?.remove();
+    if (el < 2600) { const tag = document.createElement('small'); tag.className = 'sgain ' + (g.d < 0 ? 'neg' : ''); tag.textContent = (g.d > 0 ? '+' : '−') + Math.abs(g.d).toLocaleString(); tag.style.animationDelay = `-${el}ms`; c.r.append(tag); c.r.classList.add('sbump'); c.r.style.setProperty('--bump', `-${el}ms`); }
+    else c.r.classList.remove('sbump');
+  }
+}
+let phoneHold = 0; window.__ss = () => ({ ...scoreShow, now: Date.now(), phoneHold });
+
+// Design rule 6: when play passes to someone else, say so. Any game whose heading reads "Name's turn" gets a banner
+// sweeping across the screen and a sound when the name changes. (GOAT Toss draws its own over the table.)
+let turnSeen = { game: '', who: '' }, turnSounds = 0;
+function turnBanner() {
+  if (!host.state || host.gameId === 'ducks') return;
+  const m = [...app.querySelectorAll('.stage h2')].map(h => h.textContent.trim().match(/^(.{1,24})'s turn$/)).find(Boolean);
+  if (!m) return;
+  const who = m[1], first = turnSeen.game !== host.gameId;
+  if (!first && who === turnSeen.who) return;
+  turnSeen = { game: host.gameId, who };
+  if (first) return;   // the opening turn is already announced by the game's title card
+  document.querySelector('.turnflag')?.remove();
+  const el = document.createElement('div'); el.className = 'turnflag'; el.innerHTML = '<div class="gturn in"><small>Up next</small><b></b></div>'; el.querySelector('b').textContent = who;
+  document.body.append(el); setTimeout(() => el.remove(), 2000);
+  if (sfx.on) play(['whoosh', 'join', 'lockin'][turnSounds++ % 3]);
+}
+
 function decorate() {
+  holdScores(); turnBanner();
   const list = [...host.players].sort((a, b) => b.name.length - a.name.length);
   // A list of names that only says who has finished does not need the middle of the screen: on the stage, each
   // player's score chip at the bottom gets a tick (or a pencil while they are still busy) and the list is hidden.
@@ -291,6 +352,7 @@ const remotePid = () => (host.settings.remote === false ? null : host.players.fi
 
 function sendViews(force) {
   if (!room) return;
+  if (!force && phoneHold && Date.now() < phoneHold && !host.paused) return;   // a reveal is still playing on the TV: phones hear the outcome when it has finished
   trackScores();
   for (const p of [...host.players, ...host.audience]) {
     if (p.bot) continue;
@@ -356,6 +418,11 @@ function changed() {
   sendViews();
 }
 
+// Design rule 8: the same moment never sounds the same twice running. A cue's sound is swapped for one of its
+// stand-ins, in turn. Title cards and the big game-over fanfare keep their own sound.
+const SOUND_KIN = { join: ['join', 'whoosh', 'lockin'], vote: ['vote', 'stamp', 'pop'], safe: ['safe', 'points', 'lockin'], stamp: ['stamp', 'pop', 'lockin'], tick: ['tick', 'pop'], lose: ['lose', 'death', 'sting-comic'], lockin: ['lockin', 'stamp', 'pop'] };
+const kinTurn = {};
+const vary = (name, title) => { const kin = !title && SOUND_KIN[name]; if (!kin) return name; kinTurn[name] = ((kinTurn[name] ?? -1) + 1) % kin.length; return kin[kinTurn[name]]; };
 // Sound effect first, then the narrator once it has played.
 let sayTimer = null;
 function announce() {
@@ -364,8 +431,8 @@ function announce() {
   clearTimeout(sayTimer);
   stopAmbient();
   if (c && sfx.on) {
-    play(c.sound);
-    if (c.after) setTimeout(() => play(c.after), c.wait - 500);
+    play(vary(c.sound, c.title));
+    if (c.after) setTimeout(() => play(vary(c.after)), c.wait - 500);
     if (c.ambient) setTimeout(startAmbient, c.wait);
   }
   const line = g.narration(s);
