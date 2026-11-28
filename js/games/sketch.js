@@ -2,6 +2,7 @@
 // the next draws that guess... Then the TV replays every chain so you can see how it fell apart.
 import { esc } from '../ui.js';
 import { isRude } from '../names.js';
+import { botArt } from './bot-art.js';
 
 export const meta = {
   id: 'sketch',
@@ -229,7 +230,7 @@ const twist = (t, rnd) => {
 export function botAct(v, rnd = Math.random) {
   if (v.done) return null;
   if (v.phase === 'write') return { type: 'text', text: PROMPTS[Math.floor(rnd() * PROMPTS.length)] };
-  if (v.phase === 'draw') return { type: 'draw', strokes: botDoodle(rnd) };
+  if (v.phase === 'draw') return { type: 'draw', strokes: (v.look ? v.look : botArt(v.task, rnd)) || botDoodle(rnd) };   // from memory, a bot simply copies what it saw
   if (v.phase === 'guess') return { type: 'text', text: twist(v._a, rnd) };
   if (v.phase === 'reveal' && v.entries) {
     const e = v.entries[v.entries.length - 1];

@@ -60,7 +60,8 @@ const joinUrl = () => {
 };
 
 // Every player gets a village character and a color that follow them through every game.
-const FACES = [['🦊', '#f28a3d'], ['🦉', '#c9a15a'], ['🐸', '#5fbf6b'], ['🐻', '#b0763f'], ['🐰', '#f2a0c0'], ['🦝', '#9aa3b8'], ['🦔', '#d9b38c'], ['🐢', '#3fa38f'], ['🦆', '#f2c94c'], ['🦋', '#6fa8ff'], ['🐝', '#f2b21d'], ['🦌', '#c98b5a'], ['🐺', '#8fa0c8'], ['🐱', '#f2b880'], ['🐶', '#d8a36a'], ['🐭', '#c0c0cc'], ['🐷', '#f29aa8'], ['🐮', '#e8e2d0'], ['🐞', '#e2473b'], ['🦜', '#4fc3a1']];
+// Player badges: a plain symbol on a colored disc. (\uFE0E asks for the flat text form of a symbol, not the emoji.)
+const FACES = [['★\uFE0E', '#e2553d'], ['◆\uFE0E', '#2f7fd8'], ['▲\uFE0E', '#2fa36b'], ['●\uFE0E', '#8a4fd1'], ['■\uFE0E', '#d99a1d'], ['♠\uFE0E', '#1f8f9c'], ['♥\uFE0E', '#d1457a'], ['♣\uFE0E', '#5b6ee1'], ['♦\uFE0E', '#c0612b'], ['✚\uFE0E', '#3d9a4a'], ['♪\uFE0E', '#b24fc0'], ['⚑\uFE0E', '#2b8cc4'], ['☀\uFE0E', '#e08a1e'], ['☾\uFE0E', '#6b62d6'], ['⚓\uFE0E', '#1c9c86'], ['♛\uFE0E', '#c9a227'], ['☂\uFE0E', '#d0503f'], ['✿\uFE0E', '#c7559b'], ['⚡\uFE0E', '#e0a800'], ['✈\uFE0E', '#4a90d9']];
 function ensureFaces() {
   const everyone = [...host.players, ...host.audience];
   for (const p of everyone) {
@@ -479,6 +480,7 @@ function announce() {
 function onMessage(m) {
   if (!m || typeof m !== 'object' || typeof m.pid !== 'string') return;
   lastSeen[m.pid] = Date.now();
+  lastHuman = Date.now();   // a real phone spoke (bots never send messages)
   const raw = String(m.name || '').slice(0, 60);
   if (m.t === 'hello') {
     if (kicked.has(m.pid)) return room.send({ t: 'view', to: m.pid, view: { phase: 'kicked' } });
@@ -894,6 +896,9 @@ const seen = new Set();
 const kicked = new Set();
 let editing = null;
 // A glyph for each game in the menu.
+// Inside the TV app there is only a remote, so the menu says which button starts a game. With a mouse or a finger,
+// clicking the game's picture is obvious and the hint only gets in the way.
+const TV_APP = /PartyNightTV/.test(navigator.userAgent) || new URLSearchParams(location.search).get('app') === 'android';
 // A touch screen with no mouse or remote: an iPad or phone used as the shared screen.
 const TOUCH = typeof matchMedia === 'function' && navigator.maxTouchPoints > 0 && matchMedia('(pointer: coarse)').matches && matchMedia('(hover: none)').matches;
 const ICONS = { sound: '👂', caption: '💬', dash: '✏️', gold: '💰', rps: '✊', auction: '🔨', grid: '🔠', fib: '🤔', clock: '⏱️', shake: '📳', survive: '❤️', story: '📖', oneword: '🤝', pindrop: '📍', topspot: '🥇', lineup: '🔢', werewolf: '🐺', imposter: '🕵️', bluff: '🤥', whosaid: '💬', ducks: '🐐', trivia: '🧠', spin: '🎡', crowd: '📊', bingo: '🎱', quick: '⚡', ladder: '🪜', cases: '💼', funny: '😂', letters: '🔤', taboo: '🚫', agents: '🕶️', sketch: '✏️', meld: '🧿', bowl: '🥗', crew: '🤝', charades: '🎭', clash: '🃏', blackjack: '♠️', gofish: '🐟', bluffcards: '🎴', hearts: '♥️', shade: '🎨', estimate: '🎯', truths: '🤞', wordhunt: '🔎', midnight: '🌙', missions: '🗝️', dares: '😈', split: '✂️', doodle: '🖼️', memory: '🧩', copycat: '🐱', hunt: '🌈', freeze: '🧊', haunted: '👻', bomb: '💣', potato: '🥔', mystery: '💎', bracket: '🏆', faker: '🤫', meter: '📈', rebus: '🧩' };
@@ -975,6 +980,8 @@ function renderLobby() {
     // cards underneath, one row per kind of game. The remote moves through the cards; rows slide, nothing scrolls by hand.
     if (!GAMES[host.gameId]) host.gameId = 'werewolf';
     const rows = SHELVES.filter(f => f.games).map(f => ({ id: f.id, name: f.name, games: f.games.filter(id => GAMES[id]) }));
+    // The games this TV has played most, first in line, so favorites are never a hunt. Shown once two games have been played.
+    { const most = Object.entries(host.played || {}).filter(([id, n]) => GAMES[id] && n > 0).sort((x, y) => y[1] - x[1]).slice(0, 8).map(e => e[0]); if (most.length >= 2) rows.unshift({ id: 'most', name: '🔁 Played most here', games: most }); }
     if (!menuAt || !rows.some(r => r.id === menuAt.row && r.games.includes(menuAt.game))) { const r = rows.find(x => x.games.includes(host.gameId)) || rows[0]; menuAt = { row: r.id, game: r.games.includes(host.gameId) ? host.gameId : r.games[0] }; }
     const card = (id, row) => { const m = GAMES[id].meta; return `<button class="gcard ${menuAt.row === row && menuAt.game === id ? 'on' : ''}" data-game="${id}" data-row="${row}"><span class="gimg">${thumb(id, ICONS[id])}<i class="gwash" style="--t:${TINT[THEME_OF[id]] || TINT.night}"></i><em class="gname ${m.name.length > 15 ? 'long' : m.name.length > 10 ? 'mid' : ''}">${esc(m.name)}</em></span><b class="gunder">${esc(m.name)}</b><small class="gfacts">${m.min}–${m.max} · ${m.mins} min</small>${locked(id) ? '<small class="glock" title="Locked">🔒</small>' : ''}${m.kids ? '<small class="gbadge">🧒</small>' : ''}${watching() && SAME_ROOM.includes(id) ? '<small class="sameroom">🏠 same room</small>' : ''}</button>`; };
     const barHtml = `<div class="joinbox">${host.settings.streamer ? '' : `<div class="qr">${qr(joinUrl())}</div>`}<div class="jtext"><small>${n ? 'Join on your phone' : 'Scan to join, or go to'}</small><span class="jurl">${esc(joinHost())}</span><b class="code mini">${host.settings.streamer ? '••••' : host.code}</b></div></div>
@@ -1000,7 +1007,7 @@ function renderLobby() {
         <div id="pvtags" class="pvtags"></div>
         <h2 id="pvname"></h2>
         <p id="pvblurb"></p>
-        <div class="heroact"><span class="playhint">▶ ${TOUCH ? 'Tap a game to play' : 'Press OK to play'}</span><span id="pvicon" hidden></span></div>
+        <div class="heroact">${TV_APP ? '<span class="playhint">▶ Press OK to play</span>' : ''}<span id="pvicon" hidden></span></div>
       </div>
       <div class="pvbox"><div class="pvstage" inert aria-hidden="true"></div><span class="pvlabel">Live preview</span></div>
       <div class="herobar">
@@ -1363,3 +1370,14 @@ function nightLine() {
   // measured a frame later, once the menu's layout is in place
   requestAnimationFrame(() => { if (el.dataset.key === html && el.clientWidth && run.offsetWidth > el.clientWidth + 4) { run.innerHTML = html + html; el.classList.add('roll'); run.style.animationDuration = Math.max(18, run.offsetWidth / 90) + 's'; } });
 }
+
+// A room nobody is using starts over. With no game on and no real phone heard from for six hours (a TV left on
+// overnight, or a room holding only test bots), the page reloads into a new room: new code, empty seats, same
+// settings and tallies of games played. A game in progress is never interrupted.
+let lastHuman = Date.now();
+const IDLE_MS = (+tq.get('idle') || 6 * 3600) * 1000;
+setInterval(() => {
+  if (host.state || host.intro || Date.now() - lastHuman < IDLE_MS) return;
+  try { store.set('pg-host', { ...host, at: 1 }); } catch {}
+  location.reload();
+}, 60000);

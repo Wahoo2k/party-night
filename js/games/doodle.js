@@ -3,6 +3,7 @@
 import { esc } from '../ui.js';
 import { isRude } from '../names.js';
 import { svgFor, cleanStrokes, botDoodle, mountPad } from './sketch.js';
+import { botArt } from './bot-art.js';
 
 export const meta = {
   id: 'doodle',
@@ -138,7 +139,7 @@ export function cue(s) {
   return null;
 }
 export function botAct(v, rnd = Math.random) {
-  if (v.phase === 'draw' && !v.done) return { type: 'draw', strokes: botDoodle(rnd) };
+  if (v.phase === 'draw' && !v.done) return { type: 'draw', strokes: botArt(v.title, rnd) || botDoodle(rnd) };
   if (v.phase === 'fake' && !v.mine && !v.sent) return { type: 'fake', text: TITLES[Math.floor(rnd() * TITLES.length)] };
   if (v.phase === 'pick' && !v.mine && !v.picked) { const ok = v.options.filter(o => !o.own); const o = ok[Math.floor(rnd() * ok.length)]; return o ? { type: 'pick', id: o.id } : null; }
   return null;

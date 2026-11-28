@@ -3,6 +3,7 @@
 import { esc } from '../ui.js';
 import { isRude } from '../names.js';
 import { svgFor, cleanStrokes, botDoodle, mountPad } from './sketch.js';
+import { botArt, artFor } from './bot-art.js';
 
 export const meta = {
   id: 'dash',
@@ -117,8 +118,9 @@ export function cue(s) {
 export function cueEvent(s) { const f = s.feed[s.feed.length - 1]; return s.phase === 'draw' && f?.ok ? { id: 'g' + s.i + '.' + Object.keys(s.got).length, sound: 'points' } : null; }
 
 export function botAct(v, rnd = Math.random) {
-  if (v.phase === 'pick' && v.choices) return { type: 'word', i: Math.floor(rnd() * 3) };
-  if (v.phase === 'draw' && v.artist) return rnd() < 0.3 ? { type: 'draft', strokes: botDoodle(rnd) } : null;
+  // A bot artist picks a word it can draw when it has the choice, and draws it stroke by stroke.
+  if (v.phase === 'pick' && v.choices) { const can = v.choices.findIndex(w => artFor(w)); return { type: 'word', i: can >= 0 ? can : Math.floor(rnd() * 3) }; }
+  if (v.phase === 'draw' && v.artist) { const full = botArt(v.word, () => 0.5) || null; if (!full) return rnd() < 0.3 ? { type: 'draft', strokes: botDoodle(rnd) } : null; const n = Math.min(full.length, (v.botStep || 0) + 1); return { type: 'draft', strokes: full.slice(0, n) }; }
   if (v.phase === 'draw' && !v.got && rnd() < 0.12) return { type: 'guess', text: rnd() < 0.5 ? v._a : ['potato', 'a blob', 'spaghetti?', 'my uncle'][Math.floor(rnd() * 4)] };
   return null;
 }
@@ -143,7 +145,7 @@ export function phoneView(s, pid) {
   const mine = pid === artist(s), v = { phase: s.phase, n: s.i + 1, of: s.order.length, artist: mine, artistName: nameOf(s, artist(s)), score: s.scores[pid] };
   if (s.phase === 'pick' && mine) v.choices = s.choices;
   if (s.phase === 'draw') {
-    if (mine) { v.word = s.word; v.gotN = Object.keys(s.got).length; }
+    if (mine) { v.word = s.word; v.gotN = Object.keys(s.got).length; if (String(pid).startsWith('bot-')) v.botStep = s.strokes.length; }
     else { v.got = s.got[pid] ? s.got[pid].pts : 0; const last = [...s.feed].reverse().find(f => f.pid === pid); v.last = last ? (last.close ? 'close' : last.ok ? 'right' : 'wrong') : ''; v.tries = s.feed.filter(f => f.pid === pid).length; if (String(pid).startsWith('bot-')) v._a = s.word; }
   }
   if (s.phase === 'result') { v.settled = !!s.settled; if (s.settled) { v.word = s.word; v.pts = mine ? s.result.artistPts : s.got[pid]?.pts || 0; } else v.score = s.result.before[pid]; }

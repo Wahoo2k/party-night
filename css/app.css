@@ -931,7 +931,7 @@ svg.sk.anim path{stroke-dasharray:1;stroke-dashoffset:1;animation:skdraw .4s lin
 @keyframes skdraw{to{stroke-dashoffset:0}}
 
 /* ---------- shared kit: emoji art, timer bar, winners' ceremony ---------- */
-body{font-family:Outfit,system-ui,'Noto Color Emoji',sans-serif}
+body{font-family:Outfit,system-ui,'Noto Sans Symbols','Noto Sans Symbols 2','Noto Color Emoji',sans-serif}
 #tbar{position:fixed;left:0;right:0;top:0;height:10px;z-index:15;background:#0b0e2a;pointer-events:none}
 #tbar span{display:block;height:100%;width:100%;background:linear-gradient(90deg,#3ed6a0,#ffd166);border-radius:0 6px 6px 0;box-shadow:0 0 14px #ffd16688}
 #tbar.hurry span{background:linear-gradient(90deg,#ff8a5c,#e2483d);box-shadow:0 0 18px #e2483dcc;animation:pulse .5s infinite}
