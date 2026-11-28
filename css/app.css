@@ -2575,3 +2575,22 @@ body.onstage[data-game=topspot] .panel.ts{background:none;box-shadow:none;border
 .luitem button:disabled{opacity:.25}
 .lutruth{text-align:left;margin:8px auto;padding-left:1.4em;font-weight:700}
 body.onstage[data-game=lineup] .panel.ts{background:none;box-shadow:none;border:0;padding:0}
+/* One Word (co-operative clue game) */
+.owbig{display:grid;gap:6px;justify-items:center;margin:8px auto 12px;padding:16px 22px;border-radius:18px;background:#12203cf2;color:#fff;max-width:900px;text-align:center}
+.owbig b{font:800 clamp(22px,calc(2.6*var(--vw,1vw)),40px)/1.15 Outfit,sans-serif}.owbig span{font-weight:700;opacity:.85}
+.owtally{display:inline-flex;align-items:baseline;gap:10px;margin:6px auto 10px;padding:6px 20px;border-radius:99px;background:#fff;color:#12203c;box-shadow:5px 5px 0 #12203c}
+.owtally b{font:800 44px/1 Outfit,sans-serif;color:#0f8a52}.owtally span{font-weight:800}
+.owclues{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;margin:10px 0 14px}
+.owclue{display:grid;justify-items:center;gap:2px;min-width:170px;padding:14px 22px 10px;border-radius:14px;background:#fffbe6;color:#12203c;box-shadow:6px 6px 0 #12203c;transform:rotate(var(--r,0deg));animation:pop .4s cubic-bezier(.3,1.5,.5,1) backwards}
+.owclue b{font:800 clamp(28px,calc(3.6*var(--vw,1vw)),58px)/1.05 Outfit,sans-serif}
+.owclue small{font-weight:700;opacity:.7}
+.owclue.cut{background:#d5d8e6;color:#12203c88}.owclue.cut b{text-decoration:line-through}
+.owclue.none{background:#12203ce6;color:#fff}
+.owclues.small .owclue b{font-size:clamp(22px,calc(2.4*var(--vw,1vw)),38px)}
+.owresult{display:flex;flex-wrap:wrap;justify-content:center;gap:18px;margin:6px 0 10px}
+.owguess,.owword{display:grid;justify-items:center;gap:2px;padding:12px 30px;border-radius:18px;background:#12203cf2;color:#fff;animation:slam .55s backwards}
+.owguess small,.owword small{font-weight:700;opacity:.8}.owguess b,.owword b{font:800 clamp(34px,calc(4.4*var(--vw,1vw)),72px)/1.05 Outfit,sans-serif}
+.owword.right{background:#0f5a35f2}.owword.wrong{background:#8f1d1df2}.owword em{font-style:normal;font-weight:800;font-size:22px}
+.owsecret{font-size:40px;color:#ffd60a;margin:0 0 6px}
+.owlist{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px}.owlist span{padding:8px 14px;border-radius:12px;background:#fffbe6;color:#12203c;font-weight:800;font-size:20px}
+body.onstage[data-game=oneword] .panel.ts{background:none;box-shadow:none;border:0;padding:0;text-align:center}
