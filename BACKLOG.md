@@ -312,3 +312,8 @@ The bar for "launch worthy" and the batch order are in the road-to-launch doc. B
 - More name-free host lines (28 Nov): Hearts (two of clubs leads, the Queen is taken, shooting the moon), Color Hunt, Bomb Squad, Clue Crew. Word Storm bots now find a believable number of words (their coin flip kept restarting their thinking pause).
 - Every game was run headless with bots at its smallest size, 3, 5, 8 and its largest (8 games each): all finish, no errors at any size.
 - Draft of packs by occasion (Party, Family, Game Show, Mystery Night, Game Table; six launch games each) is in the road-to-launch doc for Tom to edit; nothing changed in js/packs.js yet.
+
+## GOAT Toss: readable key and twists (28 Nov, from Tom's photo)
+- The key to the landings is a row of eight tall tiles (picture, name, points) and the tiles that just happened light up once the goats land. Names match what the game calls: "Butt heads" (was "Different sides"), "Nap time" (was "Same side"); "Goat pile: back to 0" was missing and is added.
+- Twists: **Double or nothing** (22% of turns, never a player's first): banking doubles the turn, butting heads also costs 10 from the bank. **One more!**: once a game, any other player can make the thrower toss again before they may bank (button on the watchers' phones; a dared thrower who walks away has the toss made for them). Bots use both. Tests in test/ducks.test.js.
+- Tom's idea to carry twists into other games is not started: candidates are a double-points round, a steal token and a "swap scores" token in the quiz games.

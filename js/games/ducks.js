@@ -5,7 +5,7 @@
 import { esc } from '../ui.js';
 
 export const meta = {
-  how: ['On your turn, swipe up on your phone to toss two goats onto the table.', 'How they land scores points: hooves up and on all fours are 5, a nose dive is 10, a horn stand is 15. Two the same is worth four times as much.', 'Keep tossing to build your turn, or bank your points to keep them.', "If the goats land on two different sides they butt heads and you lose the turn's points. First to 100 is the G.O.A.T."],
+  how: ['On your turn, swipe up on your phone to toss two goats onto the table.', 'How they land scores points: hooves up and on all fours are 5, a nose dive is 10, a horn stand is 15. Two the same is worth four times as much.', 'Keep tossing to build your turn, or bank your points to keep them.', "If the goats land on two different sides they butt heads and you lose the turn's points. First to 100 is the G.O.A.T.", 'Twists: now and then a turn is double or nothing, and once a game each player can shout "one more!" to make the thrower toss again before banking.'],
   id: 'ducks',
   name: 'GOAT Toss',
   min: 2,
@@ -75,6 +75,9 @@ export function setup(players, rnd = Math.random, prev = null) {
     endReason: null,
     deadline: Date.now() + TIMES.idle,
     winner: null,
+    twist: null,       // 'double' on a double-or-nothing turn
+    dares: Object.fromEntries(order.map(pid => [pid, 1])),   // each player may once make a thrower toss again before banking
+    forced: null,      // who called 'one more!' on this turn's thrower, until the next toss
   };
 }
 
@@ -87,8 +90,14 @@ function endTurn(s, now, reason) {
   s.endReason = reason;
 }
 
-function nextTurn(s, now) {
+// Twists. Double or nothing: now and then a turn is worth double when banked, but butting heads costs 10 points
+// already in the bank. Nobody gets one on their first turn, while the plain rules are still sinking in.
+export const DOUBLE_CHANCE = 0.22, DOUBLE_COST = 10;
+function nextTurn(s, now, rnd = Math.random) {
   s.t++;
+  s.twist = s.t >= s.order.length && rnd() < DOUBLE_CHANCE ? 'double' : null;
+  s.forced = null;
+  if (s.twist) { s.eventId++; s.lastEvent = 'twist'; }
   s.turnPts = 0;
   s.tosses = [];
   s.last = null;
@@ -99,18 +108,26 @@ function nextTurn(s, now) {
 
 function bank(s, now) {
   const pid = current(s);
-  s.scores[pid] += s.turnPts;
-  s.banked = s.turnPts;
+  const got = s.turnPts * (s.twist === 'double' ? 2 : 1);
+  s.scores[pid] += got;
+  s.banked = got;
   s.eventId++;
   s.lastEvent = 'bank';
+  s.forced = null;
   if (s.scores[pid] >= TARGET) { s.winner = pid; s.phase = 'over'; return; }
   endTurn(s, now, 'bank');
 }
 
 export function act(s, pid, a, now = Date.now(), rnd = Math.random) {
+  // "One more!": once a game, anyone watching can make the thrower toss again before they are allowed to bank.
+  if (a && a.type === 'dare') {
+    if (s.phase === 'turn' && pid !== current(s) && P(s, pid) && s.dares?.[pid] > 0 && !s.forced && !s.ending && !s.pendingWin && s.turnPts > 0 && now >= s.busyUntil) { s.dares[pid]--; s.forced = pid; s.eventId++; s.lastEvent = 'dare'; s.deadline = now + TIMES.idle; }
+    return s;
+  }
   if (s.phase !== 'turn' || !a || pid !== current(s) || s.ending || now < s.busyUntil) return s;
   if (a.type === 'toss') {
     const r = toss(rnd);
+    s.forced = null;
     s.last = r;
     s.tosses.push(r);
     s.eventId++;
@@ -122,14 +139,16 @@ export function act(s, pid, a, now = Date.now(), rnd = Math.random) {
       // Catch-up: whoever is in last place and well behind keeps half of the turn's points on a bust.
       const all = Object.values(s.scores), mine = s.scores[current(s)];
       const keep = mine === Math.min(...all) && Math.max(...all) - mine >= 30 ? Math.floor(s.turnPts / 2) : 0;
-      s.scores[current(s)] += keep; s.kept = keep; s.lost = s.turnPts - keep; s.turnPts = 0; endTurn(s, now + TIMES.anim, 'bust');
+      s.scores[current(s)] += keep; s.kept = keep; s.lost = s.turnPts - keep; s.turnPts = 0;
+      if (s.twist === 'double') { const cost = Math.min(DOUBLE_COST, s.scores[current(s)]); s.scores[current(s)] -= cost; s.lost += cost; }   // the 'nothing' half of double or nothing
+      endTurn(s, now + TIMES.anim, 'bust');
     }
     else {
       s.turnPts += r.pts;
       // Auto-bank the moment you'd cross the target, so nobody has to remember to.
-      if (s.scores[pid] + s.turnPts >= TARGET) { s.busyUntil = now + TIMES.anim; s.pendingWin = now + TIMES.anim; }
+      if (s.scores[pid] + s.turnPts * (s.twist === 'double' ? 2 : 1) >= TARGET) { s.busyUntil = now + TIMES.anim; s.pendingWin = now + TIMES.anim; }
     }
-  } else if (a.type === 'bank' && s.turnPts > 0) bank(s, now);
+  } else if (a.type === 'bank' && s.turnPts > 0 && !s.forced) bank(s, now);
   return s;
 }
 
@@ -142,7 +161,7 @@ export function tick(s, now = Date.now()) {
   if (s.phase !== 'turn') return s;
   if (s.pendingWin && now >= s.pendingWin) { s.pendingWin = 0; bank(s, now); return s; }
   if (s.ending && now >= s.ending) nextTurn(s, now);
-  else if (!s.ending && now >= s.deadline && now >= s.busyUntil) { if (s.turnPts > 0) bank(s, now); else endTurn(s, now, 'skip'); }
+  else if (!s.ending && now >= s.deadline && now >= s.busyUntil) { if (s.forced) act(s, current(s), { type: 'toss' }, now); else if (s.turnPts > 0) bank(s, now); else endTurn(s, now, 'skip'); }   // a thrower who was dared and walked away gets the toss made for them
   return s;
 }
 
@@ -163,6 +182,8 @@ export function cueEvent(s) {
   if (!s.eventId) return null;
   const pickOf = (...a) => a[(+s.eventId || 0) % a.length];   // the same moment does not sound the same twice running
   if (s.lastEvent === 'bank') return { id: s.eventId, sound: pickOf('points', 'safe', 'lockin'), react: s.banked >= 20 ? 'cheer' : null, say: `Banked! ${nameOf(s, current(s))} banks ${s.banked}.`, delay: 0 };
+  if (s.lastEvent === 'twist') return { id: s.eventId, sound: 'sting-show', say: 'Double or nothing!', delay: 300 };
+  if (s.lastEvent === 'dare') return { id: s.eventId, sound: 'sting-comic', react: 'laugh', say: 'One more toss! No banking yet.', delay: 0 };
   const r = s.last;
   if (!r) return null;
   if (r.pile) return { id: s.eventId, sound: pickOf('lose', 'death'), react: 'groan', fx: 'shake', say: 'Goat pile! There goes your whole score!', delay: TIMES.anim };
@@ -172,9 +193,11 @@ export function cueEvent(s) {
 }
 
 export function botAct(v, rnd = Math.random) {
+  if (v.phase === 'turn' && !v.myTurn && v.canDare && !v.busy && v.theirTurnPts >= 15 && rnd() < 0.12) return { type: 'dare' };
   if (v.phase !== 'turn' || !v.myTurn || v.busy || v.ending) return null;
+  if (v.forced) return { type: 'toss' };
   const need = TARGET - v.score;
-  if (v.turnPts >= need) return { type: 'bank' };
+  if (v.turnPts * (v.twist === 'double' ? 2 : 1) >= need) return { type: 'bank' };
   return v.turnPts >= 15 + Math.floor(rnd() * 10) ? { type: 'bank' } : { type: 'toss' };
 }
 
@@ -185,7 +208,7 @@ export function tvView(s, now = Date.now()) {
   return {
     phase: s.phase, target: TARGET,
     who: nameOf(s, current(s)),
-    turnPts: s.turnPts,
+    turnPts: s.turnPts, twist: s.twist || null, forcedBy: s.forced ? nameOf(s, s.forced) : null,
     tosses: s.tosses.map(r => ({ name: r.name, pts: r.pts, bust: !!r.bust, pile: !!r.pile })),
     last: s.last, eventId: s.eventId, lastEvent: s.lastEvent,
     animating: now < s.busyUntil,
@@ -204,7 +227,8 @@ export function phoneView(s, pid, now = Date.now()) {
     who: nameOf(s, current(s)),
     score: s.scores[pid],
     turnPts: current(s) === pid ? s.turnPts : 0,
-    theirTurnPts: s.turnPts,
+    theirTurnPts: s.turnPts, twist: s.twist || null, forced: current(s) === pid && !!s.forced, forcedBy: s.forced ? nameOf(s, s.forced) : null,
+    canDare: current(s) !== pid && s.dares?.[pid] > 0 && !s.forced && !s.ending && !s.pendingWin && s.turnPts > 0 && now >= s.busyUntil, daresLeft: s.dares?.[pid] || 0,
     target: TARGET,
     busy: now < s.busyUntil,
     ending: !!s.ending,
@@ -334,10 +358,15 @@ export function renderTV(v, el) {
     const table = tossScene(v);
     const result = last && !v.animating ? `<div class="toss-name ${last.bust || last.pile ? 'lose' : last.double ? 'win' : ''}">${esc(last.name)} ${last.pts ? `<b>+${last.pts}</b>` : ''}</div>` : '<div class="toss-name blank"></div>';
     const status = v.ending && !v.animating
-      ? v.endReason === 'bank' ? `<p class="say win">Banked ${v.banked} points!</p>` : v.endReason === 'bust' ? `<p class="say lose">They butt heads! ${v.lost ? `Lost ${v.lost} points this turn.` : 'Turn over.'}</p>` : v.endReason === 'pile' ? `<p class="say lose">Goat pile! Back to zero.</p>` : '<p class="say">Turn skipped.</p>'
+      ? v.endReason === 'bank' ? `<p class="say win">Banked ${v.banked} points!${v.twist === 'double' ? ' Doubled!' : ''}</p>` : v.endReason === 'bust' ? `<p class="say lose">They butt heads! ${v.lost ? `Lost ${v.lost} points this turn.` : 'Turn over.'}</p>` : v.endReason === 'pile' ? `<p class="say lose">Goat pile! Back to zero.</p>` : '<p class="say">Turn skipped.</p>'
       : `<p class="say">This turn: <b class="turnpts">${v.turnPts}</b></p>${(() => { const c = v.board.find(p => p.now); if (!c) return ''; const need = v.target - c.score - v.turnPts; return need <= 0 ? '<p class="say win" data-pop="bankwin" data-snd="gasp">Bank it to be the G.O.A.T.!</p>' : need <= 15 ? `<p class="say" data-pop="near${c.name}" data-snd="gasp">🔥 ${need} away from winning!</p>` : ''; })()}`;
-    const legend = `<div class="glegend">${[['left', 'right', 'Different sides', 'lose turn', 'lose'], ['left', 'left', 'Same side', '1'], ['back', '', 'Hooves up', '5'], ['stand', '', 'On all fours', '5'], ['nose', '', 'Nose dive', '10'], ['horn', '', 'Horn stand', '15'], ['back', 'back', 'Two alike', '×4']].map(([a, b, n, p, c]) => `<div class="gl ${c || ''}"><span class="glpic">${goatImg(a)}${b ? goatImg(b) : ''}</span><small>${n}</small><b>${p}</b></div>`).join('')}</div>`;
-    h = `<div class="ghead"><h2>${esc(v.who)}'s turn</h2>${result}</div>${table}<div class="gfoot">${status}<div class="history">${v.tosses.map(t => `<span class="${t.bust || t.pile ? 'lose' : ''}">${esc(t.name)}${t.pts ? ' +' + t.pts : ''}</span>`).join('')}</div></div>${legend}<button class="btn ghost" data-host="next" ${v.animating ? 'style="visibility:hidden"' : ''}>${v.ending ? 'Next player' : 'Skip / bank for them'}</button>`;
+    // The key to the landings, named exactly as the game calls them. Once the goats have landed, the entries that
+    // just happened light up, so the key teaches itself.
+    const side = k => k === 'left' || k === 'right', L = last && !v.animating ? last : null;
+    const hit = L ? new Set(L.pile ? ['pile'] : side(L.a) && side(L.b) ? [L.a === L.b ? 'nap' : 'bust'] : [side(L.a) ? '' : L.a, side(L.b) ? '' : L.b, L.a === L.b ? 'pair' : ''].filter(Boolean)) : new Set();
+    const legend = `<div class="glegend">${[['bust', 'left', 'right', 'Butt heads', 'lose turn', 'lose'], ['nap', 'left', 'left', 'Nap time', '1'], ['back', 'back', '', 'Hooves up', '5'], ['stand', 'stand', '', 'On all fours', '5'], ['nose', 'nose', '', 'Nose dive', '10'], ['horn', 'horn', '', 'Horn stand', '15'], ['pair', 'back', 'back', 'Two alike', '×4'], ['pile', 'left', 'left', 'Goat pile', 'back to 0', 'lose']].map(([k, a, b, n, p, c]) => `<div class="gl ${c || ''} ${hit.has(k) ? 'hit' : ''}"><span class="glpic ${k === 'pile' ? 'pile' : ''}">${goatImg(a)}${b ? goatImg(b) : ''}</span><small>${n}</small><b>${p}</b></div>`).join('')}</div>`;
+    const twists = `${v.twist === 'double' ? '<p class="gtwist dbl">✨ Double or nothing: bank for double, butt heads costs 10</p>' : ''}${v.forcedBy ? `<p class="gtwist dare">😈 ${esc(v.forcedBy)} says: one more toss!</p>` : ''}`;
+    h = `<div class="ghead"><h2>${esc(v.who)}'s turn</h2>${result}</div>${table}<div class="gfoot">${status}${twists}<div class="history">${v.tosses.map(t => `<span class="${t.bust || t.pile ? 'lose' : ''}">${esc(t.name)}${t.pts ? ' +' + t.pts : ''}</span>`).join('')}</div></div>${legend}<button class="btn ghost" data-host="next" ${v.animating ? 'style="visibility:hidden"' : ''}>${v.ending ? 'Next player' : 'Skip / bank for them'}</button>`;
   }
   if (v.phase === 'over') h = `<h2 class="win">${esc(v.winner)} is the G.O.A.T.!</h2><p class="say">Greatest Of All Time, at least until the next game.</p><div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
   // Big moments, drawn over the table so they never change the layout: whose turn it is when it changes hands,
@@ -366,18 +395,19 @@ export function renderPhone(v, el, send) {
   let h = '';
   if (v.phase === 'spectate') h = '<h2>Game in progress</h2><p>You\'ll join the next game.</p>';
   else if (v.phase === 'over') h = `<h2 class="${v.won ? 'win' : ''}">${v.won ? 'You are the G.O.A.T.!' : `${esc(v.winner)} is the G.O.A.T.`}</h2><p class="say">You finished with ${v.score}.</p>`;
-  else if (!v.myTurn) h = `<h2>${esc(v.who)} is tossing</h2><p class="say">Their turn so far: <b>${v.theirTurnPts}</b></p><p class="muted">Your score: ${v.score} of ${v.target}</p>`;
+  else if (!v.myTurn) h = `<h2>${esc(v.who)} is tossing</h2><p class="say">Their turn so far: <b>${v.theirTurnPts}</b>${v.twist === 'double' ? ' · double or nothing' : ''}</p>${v.forcedBy ? `<p class="say">😈 ${esc(v.forcedBy)} made them toss again!</p>` : ''}<p class="muted">Your score: ${v.score} of ${v.target}</p>${v.daresLeft ? `<button class="btn ghost" data-dare ${v.canDare ? '' : 'disabled'}>😈 One more! Make them toss again</button><p class="muted small">Once a game. They cannot bank until they toss again.</p>` : ''}`;
   else {
     const locked = v.busy || v.ending;
     const msg = v.ending ? (v.endReason === 'bust' ? '<p class="say lose">They butt heads! Turn over.</p>' : v.endReason === 'pile' ? '<p class="say lose">Goat pile! Ouch.</p>' : '<p class="say">Turn over.</p>') : v.last ? `<p class="say">${esc(v.last.name)}${v.last.pts ? ` +${v.last.pts}` : ''}</p>` : '<p class="say">Your turn!</p>';
-    h = `<h2>Your turn</h2>${msg}
+    h = `<h2>Your turn</h2>${v.twist === 'double' ? '<p class="say win">✨ Double or nothing! Bank for double. Butt heads costs you 10.</p>' : ''}${v.forced ? `<p class="say lose">😈 ${esc(v.forcedBy)} says one more toss before you can bank!</p>` : ''}${msg}
       <div class="swipe ${locked ? 'locked' : ''}" id="swipe"${locked ? '' : ' data-pad'}><div class="ducks-mini">${goatImg('stand')}${goatImg('stand')}</div><b>${locked ? '…' : 'Swipe up to toss'}</b><small>or tap</small></div>
       <div class="turnbar"><div><small>This turn</small><b>${v.turnPts}</b></div><div><small>Banked</small><b>${v.score}</b></div><div><small>Need</small><b>${Math.max(0, v.target - v.score - v.turnPts)}</b></div></div>
-      <button class="btn" data-bank ${v.turnPts > 0 && !locked ? '' : 'disabled'}>Bank ${v.turnPts} points</button>
+      <button class="btn" data-bank ${v.turnPts > 0 && !locked && !v.forced ? '' : 'disabled'}>${v.forced ? 'Toss once more first' : `Bank ${v.turnPts * (v.twist === 'double' ? 2 : 1)} points`}</button>
       <p class="muted">Two goats on different sides butt heads: you lose this turn's points. Bank before your luck runs out.</p>`;
   }
   el.innerHTML = h;
   el.querySelector('[data-bank]')?.addEventListener('click', () => send({ type: 'bank' }));
+  el.querySelector('[data-dare]')?.addEventListener('click', () => send({ type: 'dare' }));
   const sw = el.querySelector('#swipe');
   if (sw && !sw.classList.contains('locked')) {
     let y0 = null, fired = false;

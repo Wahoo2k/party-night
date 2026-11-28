@@ -2800,3 +2800,18 @@ i:has(> img.av){background:none!important;overflow:visible}
 /* A screen that redraws every second (a countdown) restarted these entrance animations each time, so answer tiles
    sat half-faded for the whole vote. They animate only when the screen first arrives. */
 .stage:not(.enter) .ans,.stage:not(.enter) .dbopt{animation:none}
+
+/* GOAT Toss: a key to the landings that can be read from the couch and lights up, and the two twists */
+body.onstage[data-game=ducks] .glegend{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;margin:6px 0 8px}
+body.onstage[data-game=ducks] .gl{flex-direction:column;justify-content:flex-start;gap:2px;padding:8px 6px 7px;border-radius:16px;white-space:normal;text-align:center;border:3px solid #0000;transition:transform .25s,background .25s,border-color .25s}
+body.onstage[data-game=ducks] .gl .glpic{justify-content:center;min-height:58px;align-items:center}
+body.onstage[data-game=ducks] .gl .glpic .gspr{width:58px}
+body.onstage[data-game=ducks] .gl .glpic.pile .gspr+.gspr{margin-left:-34px;transform:rotate(24deg)}
+body.onstage[data-game=ducks] .gl small{font:700 19px/1.15 'DM Sans',sans-serif;color:#fff}
+body.onstage[data-game=ducks] .gl b{margin:0;font:800 25px/1.1 Outfit,sans-serif}
+body.onstage[data-game=ducks] .gl.hit{background:#ffd166;border-color:#fff;transform:translateY(-6px) scale(1.08);box-shadow:0 8px 22px #000a;animation:glhit .5s cubic-bezier(.3,1.7,.5,1) both}
+body.onstage[data-game=ducks] .gl.hit small,body.onstage[data-game=ducks] .gl.hit b{color:#221a3a}
+body.onstage[data-game=ducks] .gl.lose.hit{background:#ff8f7f}
+@keyframes glhit{0%{transform:scale(.9)}100%{transform:translateY(-6px) scale(1.08)}}
+.gtwist{display:inline-block;margin:0 0 0 12px;padding:.25em .8em;border-radius:99px;font:800 clamp(15px,calc(1.5*var(--vw,1vw)),24px)/1.3 Outfit,'DM Sans',sans-serif;animation:pop .35s both}
+.gtwist.dbl{background:linear-gradient(90deg,#ffd166,#ff9f43);color:#221a3a}.gtwist.dare{background:#7a2fd6;color:#fff}

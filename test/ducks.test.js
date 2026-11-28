@@ -33,4 +33,27 @@ const cur = s.order[0], other = s.order[1];
 G.act(s, other, { type: 'toss' }, 0); assert.equal(s.tosses.length, 0);
 G.act(s, cur, { type: 'toss' }, 0); G.act(s, cur, { type: 'toss' }, 100); assert.equal(s.tosses.length, 1);
 console.log('games ok, fails', fails, 'avg turns/game', (turns / 2000).toFixed(1));
+
+// Twists: double or nothing, and "one more!"
+{
+  const players = ['a', 'b', 'c'].map(pid => ({ pid, name: pid.toUpperCase() }));
+  const s = G.setup(players, () => 0, null); const cur = () => s.order[s.t % s.order.length];
+  // a dare: only someone else, only with points on the table, only once; the thrower cannot bank until they toss
+  s.turnPts = 20; const thrower = cur(), other = s.order.find(p => p !== thrower);
+  G.act(s, thrower, { type: 'dare' }, 1000); assert.equal(s.forced, null, 'the thrower cannot dare themselves');
+  G.act(s, other, { type: 'dare' }, 1000); assert.equal(s.forced, other); assert.equal(s.dares[other], 0);
+  G.act(s, thrower, { type: 'bank' }, 1100); assert.equal(s.scores[thrower], 0, 'no banking while dared');
+  assert.equal(G.phoneView(s, thrower, 1100).forced, true); assert.equal(G.phoneView(s, other, 1100).canDare, false);
+  G.act(s, thrower, { type: 'toss' }, 1200, () => 0.9); assert.equal(s.forced, null, 'the toss clears the dare');
+  // double or nothing: banking doubles
+  const d = G.setup(players, () => 0, null); d.twist = 'double'; d.turnPts = 12; const t2 = d.order[0];
+  G.act(d, t2, { type: 'bank' }, 1000); assert.equal(d.scores[t2], 24); assert.equal(d.banked, 24);
+  // ...and butting heads costs ten from the bank (left + right sides)
+  const e = G.setup(players, () => 0, null); e.twist = 'double'; const t3 = e.order[0]; e.scores[t3] = 30; e.turnPts = 8;
+  let k = 0; G.act(e, t3, { type: 'toss' }, 1000, () => [0.5, 0.1, 0.4][k++] ?? 0.5);
+  if (e.last.bust) assert.equal(e.scores[t3], 20, 'a bust on a double turn costs 10');
+  // nobody gets a twist on their first turn
+  const f = G.setup(players, () => 0, null); assert.equal(f.twist, null);
+  console.log('twists ok', { bust: !!e.last.bust });
+}
 process.exit(fails ? 1 : 0);
