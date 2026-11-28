@@ -3,8 +3,7 @@ import assert from 'node:assert';
 import fs from 'node:fs';
 import * as G from '../js/games/caption.js';
 assert.equal(new Set(G.PICS.map(p => p[0])).size, G.PICS.length);
-const here = p => fs.existsSync(new URL(`../art/${p[0]}.jpg`, import.meta.url));
-if (G.PICS.some(here)) G.PICS.forEach(p => assert.ok(here(p), 'missing picture art/' + p[0] + '.jpg'));   // once any picture is in, they must all be
+G.PICS.forEach(p => assert.ok(fs.existsSync(new URL(`../art/${p[0]}.jpg`, import.meta.url)), 'missing picture art/' + p[0] + '.jpg'));
 assert.equal(G.cleanCaption(' ').ok, false); assert.equal(G.cleanCaption('  hello   there ').text, 'hello there');
 for (let g = 0; g < 200; g++) { const ps = Array.from({ length: 3 + (g % 8) }, (_, i) => ({ pid: 'bot-' + i, name: 'B' + i })), s = G.setup(ps, Math.random, null, { short: g % 2 === 0 }); let t = Date.now(), n = 0;
   while (s.phase !== 'over' && n++ < 3000) { if (s.phase === 'vote') assert.ok(!/"by"/.test(JSON.stringify(G.tvView(s, t))), 'no names while voting'); for (const p of ps) { const a = G.botAct(G.phoneView(s, p.pid)); if (a) G.act(s, p.pid, a, t); } t += 800; G.tick(s, t); }

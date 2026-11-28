@@ -14,7 +14,11 @@ export const meta = {
 
 // The pictures, as art/<name>.jpg, with a plain description (shown to nobody; it is here for whoever maintains the list).
 export const PICS = [
-  ['cap-01', 'a raccoon in a suit presenting a chart to pigeons'], ['cap-02', 'a T. rex failing to make a bed'], ['cap-03', 'a stressed cat doing paperwork'], ['cap-04', 'a dog driving a convertible with a goldfish'],
+  ['cap-01', 'a raccoon in a suit presenting a chart to pigeons'],
+];
+// Planned pictures, not yet in art/. Move each up into PICS once its file is there.
+export const PLANNED = [
+  ['cap-02', 'a T. rex failing to make a bed'], ['cap-03', 'a stressed cat doing paperwork'], ['cap-04', 'a dog driving a convertible with a goldfish'],
   ['cap-05', 'a snowman melting on a beach'], ['cap-06', 'two squirrels in a stand-off over an acorn'], ['cap-07', 'a grandmother in armor knitting on a dragon'], ['cap-08', 'an octopus barista'],
   ['cap-09', 'a sheep horrified by its haircut'], ['cap-10', 'a bear in a tiny canoe paddled by a duck'], ['cap-11', 'a giraffe stuck in a revolving door'], ['cap-12', 'an alien tourist photographing a cow'],
 ];
