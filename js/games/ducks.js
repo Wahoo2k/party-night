@@ -5,7 +5,7 @@
 import { esc } from '../ui.js';
 
 export const meta = {
-  how: ['On your turn, swipe up on your phone to toss two goats onto the table.', 'How they land scores points: hooves up and on all fours are 5, a nose dive is 10, a horn stand is 15. Two the same is worth four times as much.', 'Keep tossing to build your turn, or bank your points to keep them.', "If the goats land on two different sides they butt heads and you lose the turn's points. First to 100 is the G.O.A.T.", 'Twists: now and then a turn is double or nothing, and once a game each player can shout "one more!" to make the thrower toss again before banking.'],
+  how: ['Swipe up on your phone to toss two goats onto the table. With four or more players, everybody tosses at the same time.', 'How they land scores points: hooves up and on all fours are 5, a nose dive is 10, a horn stand is 15. Two the same is worth four times as much.', 'Keep tossing to build your turn, or bank your points to keep them.', "If the goats land on two different sides they butt heads and you lose the turn's points. First to 100 is the G.O.A.T.", 'Twists: now and then a turn is double or nothing, and once a game each player can shout "one more!" to make the thrower toss again before banking.'],
   id: 'ducks',
   name: 'GOAT Toss',
   min: 2,
@@ -52,14 +52,14 @@ export function toss(rnd = Math.random) {
   return { a, b, ...score(a, b) };
 }
 
-export function setup(players, rnd = Math.random, prev = null) {
+export function setup(players, rnd = Math.random, prev = null, opts = {}) {
   const order = players.map(p => p.pid);
   // Rotate who goes first each game.
   const start = prev ? (order.indexOf(prev.order?.[0]) + 1) % order.length : Math.floor(rnd() * order.length);
   const rotated = order.slice(start).concat(order.slice(0, start));
   const scores = {};
   players.forEach(p => (scores[p.pid] = 0));
-  return {
+  const st = {
     game: 'ducks',
     phase: 'turn',
     players: players.map(p => ({ pid: p.pid, name: p.name })),
@@ -79,6 +79,81 @@ export function setup(players, rnd = Math.random, prev = null) {
     dares: Object.fromEntries(order.map(pid => [pid, 1])),   // each player may once make a thrower toss again before banking
     forced: null,      // who called 'one more!' on this turn's thrower, until the next toss
   };
+  // Four or more players all toss at the same time, so nobody waits five turns to touch their phone.
+  if (players.length >= TOGETHER_MIN && opts?.together !== false) {
+    st.mode = 'together';
+    st.tg = { round: 1, wave: 1, step: 'wave', pens: Object.fromEntries(order.map(pid => [pid, newPen()])) };
+    st.deadline = Date.now() + TG.first;
+  }
+  return st;
+}
+
+// ---------- everyone at once (4+ players) ----------
+// A round: everybody tosses together. Whoever is still standing then chooses, secretly, to toss again or bank; the
+// choices play out together, and so on until every player has banked or butted heads. Then the next round. The game
+// ends at the end of a round in which somebody has reached the target: highest score wins, a tie plays on.
+export const TOGETHER_MIN = 4;
+export const TG = { first: 10000, choose: 10000, anim: 2600, show: 2600, roundEnd: 3800 };
+const newPen = () => ({ pts: 0, state: 'in', choice: null, last: null, got: 0, lost: 0, kept: 0, tossed: false });
+const tgIn = s => s.order.filter(pid => s.tg.pens[pid].state === 'in');
+const tgEvent = (s, name) => { s.eventId++; s.lastEvent = name; };
+function tgStartRound(s, now, rnd = Math.random) {
+  const g = s.tg; g.round++; g.wave = 1; g.step = 'wave';
+  for (const pid of s.order) g.pens[pid] = newPen();
+  s.twist = rnd() < DOUBLE_CHANCE ? 'double' : null;
+  s.busyUntil = 0; s.deadline = now + TG.first;
+  tgEvent(s, s.twist ? 'twist' : 'tgRound');
+}
+function tgRoundEnd(s, now) { s.tg.step = 'roundEnd'; s.deadline = now + TG.roundEnd; tgEvent(s, 'tgRoundEnd'); }
+function tgResolve(s, now, rnd = Math.random) {
+  const g = s.tg, mult = s.twist === 'double' ? 2 : 1; let tossed = 0;
+  for (const pid of s.order) g.pens[pid].tossed = false;
+  for (const pid of tgIn(s)) {
+    const pen = g.pens[pid], choice = pen.choice || (g.wave === 1 || pen.pts === 0 ? 'toss' : 'bank');   // walked away: keep what you have
+    pen.choice = null;
+    if (choice === 'bank') { pen.got = pen.pts * mult; s.scores[pid] += pen.got; pen.state = 'banked'; continue; }
+    const r = toss(rnd); pen.last = r; pen.tossed = true; tossed++;
+    if (r.pile) { pen.lost = s.scores[pid]; s.scores[pid] = 0; pen.pts = 0; pen.state = 'pile'; }
+    else if (r.bust) {
+      const all = Object.values(s.scores), mine = s.scores[pid];
+      pen.kept = mine === Math.min(...all) && Math.max(...all) - mine >= 30 ? Math.floor(pen.pts / 2) : 0;   // the same catch-up as turn by turn
+      s.scores[pid] += pen.kept; pen.lost = pen.pts - pen.kept; pen.pts = 0; pen.state = 'bust';
+      if (s.twist === 'double') { const cost = Math.min(DOUBLE_COST, s.scores[pid]); s.scores[pid] -= cost; pen.lost += cost; }
+    } else pen.pts += r.pts;
+  }
+  if (!tossed) return tgRoundEnd(s, now);
+  g.step = 'land'; s.busyUntil = now + TG.anim; s.deadline = now + TG.anim + TG.show; tgEvent(s, 'tgLand');
+}
+function tgAdvance(s, now, rnd = Math.random) {
+  const g = s.tg;
+  if (g.step === 'wave') return tgResolve(s, now, rnd);
+  if (g.step === 'land') { if (!tgIn(s).length) return tgRoundEnd(s, now); g.wave++; g.step = 'wave'; s.deadline = now + TG.choose; return tgEvent(s, 'tgWave'); }
+  const top = s.order.map(pid => [pid, s.scores[pid]]).sort((a, b) => b[1] - a[1]);
+  if (top[0][1] >= TARGET && top[0][1] > top[1][1]) { s.winner = top[0][0]; s.phase = 'over'; return; }
+  tgStartRound(s, now, rnd);
+}
+function tgAct(s, pid, a, now, rnd) {
+  const g = s.tg, pen = g.pens[pid];
+  if (s.phase !== 'turn' || g.step !== 'wave' || !pen || pen.state !== 'in' || pen.choice) return s;
+  if (a.type === 'toss') pen.choice = 'toss'; else if (a.type === 'bank' && g.wave > 1 && pen.pts > 0) pen.choice = 'bank'; else return s;
+  if (tgIn(s).every(q => g.pens[q].choice)) tgResolve(s, now, rnd);
+  return s;
+}
+function tgCue(s) {
+  const g = s.tg, k = +s.eventId || 0, pick = (...a) => a[k % a.length];
+  if (s.lastEvent === 'twist') return { id: s.eventId, sound: 'sting-show', say: 'Double or nothing!', delay: 300 };
+  if (s.lastEvent === 'tgRound') return { id: s.eventId, sound: 'whoosh', say: pick('Next round. Everybody toss!', 'New round! Swipe up to toss.', 'Here we go again. All goats in the air!', 'Another round. Toss them!'), delay: 0 };
+  if (s.lastEvent === 'tgWave') return { id: s.eventId, sound: 'vote', say: pick('Toss again, or bank it?', 'Push your luck, or bank?', 'Who is brave enough to toss again?', 'Bank it, or risk it?'), delay: 0 };
+  if (s.lastEvent === 'tgRoundEnd') return { id: s.eventId, sound: 'points', say: pick('Round over. Check the scores!', 'Everybody is done. Look at that board.', 'That is the round!'), delay: 0 };
+  if (s.lastEvent === 'tgLand') {
+    const rs = s.order.map(pid => g.pens[pid]).filter(p => p.tossed), busts = rs.filter(p => p.last.bust).length, best = rs.map(p => p.last).sort((a, b) => b.pts - a.pts)[0];
+    if (rs.some(p => p.last.pile)) return { id: s.eventId, sound: 'death', react: 'groan', fx: 'shake', say: 'Goat pile! There goes a whole score!', delay: TG.anim };
+    if (busts === rs.length) return { id: s.eventId, sound: 'lose', react: 'groan', fx: 'shake', say: rs.length > 1 ? pick('They all butt heads!', 'Butt heads everywhere! Nobody survives that one.') : 'They butt heads! Turn over.', delay: TG.anim };
+    if (best.double) return { id: s.eventId, sound: 'win', react: 'cheer', fx: 'gold', say: `${best.name}! ${best.pts} points!`, delay: TG.anim };
+    if (busts) return { id: s.eventId, sound: 'sting-comic', react: 'laugh', say: pick('Butt heads! Somebody is out.', 'Ouch. Not everyone survived that.', 'Some goats butt heads!'), delay: TG.anim };
+    return { id: s.eventId, sound: best.pts >= 10 ? 'points' : 'pop', react: best.pts >= 15 ? 'cheer' : null, say: best.pts >= 10 ? `${best.name}! ${best.pts}!` : pick('Everybody is still in!', '', 'Safe, all of you.', ''), delay: TG.anim };
+  }
+  return null;
 }
 
 const P = (s, pid) => s.players.find(p => p.pid === pid);
@@ -119,6 +194,7 @@ function bank(s, now) {
 }
 
 export function act(s, pid, a, now = Date.now(), rnd = Math.random) {
+  if (s.mode === 'together') return a ? tgAct(s, pid, a, now, rnd) : s;
   // "One more!": once a game, anyone watching can make the thrower toss again before they are allowed to bank.
   if (a && a.type === 'dare') {
     if (s.phase === 'turn' && pid !== current(s) && P(s, pid) && s.dares?.[pid] > 0 && !s.forced && !s.ending && !s.pendingWin && s.turnPts > 0 && now >= s.busyUntil) { s.dares[pid]--; s.forced = pid; s.eventId++; s.lastEvent = 'dare'; s.deadline = now + TIMES.idle; }
@@ -153,12 +229,14 @@ export function act(s, pid, a, now = Date.now(), rnd = Math.random) {
 }
 
 export function hostAct(s, a, now = Date.now()) {
+  if (s.mode === 'together') { if (a === 'next' && s.phase === 'turn' && now >= s.busyUntil) tgAdvance(s, now); return s; }
   if (a === 'next' && s.phase === 'turn') { if (s.ending) nextTurn(s, now); else if (s.turnPts > 0) bank(s, now); else { endTurn(s, now, 'skip'); } }
   return s;
 }
 
 export function tick(s, now = Date.now()) {
   if (s.phase !== 'turn') return s;
+  if (s.mode === 'together') { if (now >= s.deadline) tgAdvance(s, now); return s; }
   if (s.pendingWin && now >= s.pendingWin) { s.pendingWin = 0; bank(s, now); return s; }
   if (s.ending && now >= s.ending) nextTurn(s, now);
   else if (!s.ending && now >= s.deadline && now >= s.busyUntil) { if (s.forced) act(s, current(s), { type: 'toss' }, now); else if (s.turnPts > 0) bank(s, now); else endTurn(s, now, 'skip'); }   // a thrower who was dared and walked away gets the toss made for them
@@ -166,12 +244,14 @@ export function tick(s, now = Date.now()) {
 }
 
 export function narration(s) {
+  if (s.mode === 'together' && s.phase === 'turn') return s.tg.round === 1 && s.tg.wave === 1 && s.tg.step === 'wave' ? `Welcome to GOAT Toss! Everybody tosses at the same time. Keep tossing to build your round, or bank your points before your goats butt heads. First to ${TARGET} is the greatest of all time. Swipe up on your phone to toss!` : '';
   if (s.phase === 'turn' && s.t === 0 && !s.tosses.length) return `Welcome to GOAT Toss! First to ${TARGET} points is the greatest of all time. ${nameOf(s, current(s))}, you're up first. Swipe up on your phone to toss.`;
   if (s.phase === 'over') return `${nameOf(s, s.winner)} is the greatest of all time!`;
   return '';
 }
 
 export function cue(s) {
+  if (s.mode === 'together' && s.phase === 'turn') return s.tg.round === 1 && s.tg.wave === 1 && s.tg.step === 'wave' ? { sound: 'join', wait: 700, title: 'GOAT Toss', sub: `Everybody tosses at once. First to ${TARGET} wins` } : null;
   if (s.phase === 'turn' && s.t === 0 && !s.tosses.length) return { sound: 'join', wait: 700, title: 'GOAT Toss', sub: `First to ${TARGET} is the Greatest Of All Time` };
   if (s.phase === 'over') return { sound: 'win', wait: 1600, title: `${nameOf(s, s.winner)} is the G.O.A.T.!`, sub: 'Greatest Of All Time', tone: 'dawn', fx: 'confetti' };
   return null;
@@ -180,6 +260,7 @@ export function cue(s) {
 // Sounds and lines for moments inside a turn (tosses, banks). The TV plays these as they happen.
 export function cueEvent(s) {
   if (!s.eventId) return null;
+  if (s.mode === 'together') return s.phase === 'turn' ? tgCue(s) : null;
   const pickOf = (...a) => a[(+s.eventId || 0) % a.length];   // the same moment does not sound the same twice running
   if (s.lastEvent === 'bank') return { id: s.eventId, sound: pickOf('points', 'safe', 'lockin'), react: s.banked >= 20 ? 'cheer' : null, say: `Banked! ${nameOf(s, current(s))} banks ${s.banked}.`, delay: 0 };
   if (s.lastEvent === 'twist') return { id: s.eventId, sound: 'sting-show', say: 'Double or nothing!', delay: 300 };
@@ -193,6 +274,7 @@ export function cueEvent(s) {
 }
 
 export function botAct(v, rnd = Math.random) {
+  if (v.tg) { if (v.phase !== 'turn' || v.tg.step !== 'wave' || v.tg.state !== 'in' || v.tg.chosen) return null; if (v.tg.wave === 1) return { type: 'toss' }; const m = v.twist === 'double' ? 2 : 1; return v.score + v.tg.pts * m >= TARGET || v.tg.pts >= 15 + Math.floor(rnd() * 10) ? { type: 'bank' } : { type: 'toss' }; }
   if (v.phase === 'turn' && !v.myTurn && v.canDare && !v.busy && v.theirTurnPts >= 15 && rnd() < 0.12) return { type: 'dare' };
   if (v.phase !== 'turn' || !v.myTurn || v.busy || v.ending) return null;
   if (v.forced) return { type: 'toss' };
@@ -202,9 +284,19 @@ export function botAct(v, rnd = Math.random) {
 }
 
 // ---------- views ----------
-const board = s => s.order.map(pid => ({ pid, name: nameOf(s, pid), score: s.scores[pid], now: pid === current(s) && s.phase === 'turn' }));
+const board = s => s.mode === 'together' ? s.order.map(pid => ({ pid, name: nameOf(s, pid), score: s.scores[pid], now: false })).sort((a, b) => b.score - a.score) : s.order.map(pid => ({ pid, name: nameOf(s, pid), score: s.scores[pid], now: pid === current(s) && s.phase === 'turn' }));
 
 export function tvView(s, now = Date.now()) {
+  if (s.mode === 'together') {
+    const g = s.tg;
+    return {
+      phase: s.phase, target: TARGET, mode: 'together', twist: s.twist || null, eventId: s.eventId,
+      round: g.round, wave: g.wave, step: g.step, animating: now < s.busyUntil, animLeft: Math.max(0, s.busyUntil - now),
+      left: Math.max(0, Math.ceil((s.deadline - now) / 1000)),
+      pens: s.order.map(pid => { const p = g.pens[pid]; return { name: nameOf(s, pid), pts: p.pts, state: p.state, chosen: !!p.choice, tossed: p.tossed, got: p.got, lost: p.lost, kept: p.kept, last: p.last && { a: p.last.a, b: p.last.b, name: p.last.name, pts: p.last.pts, bust: !!p.last.bust, pile: !!p.last.pile, double: !!p.last.double } }; }),
+      board: board(s), winner: s.winner ? nameOf(s, s.winner) : null,
+    };
+  }
   return {
     phase: s.phase, target: TARGET,
     who: nameOf(s, current(s)),
@@ -221,6 +313,12 @@ export function tvView(s, now = Date.now()) {
 
 export function phoneView(s, pid, now = Date.now()) {
   if (!P(s, pid)) return { phase: 'spectate' };
+  if (s.mode === 'together') {
+    const g = s.tg, p = g.pens[pid];
+    return { phase: s.phase, target: TARGET, score: s.scores[pid], twist: s.twist || null, eventId: s.eventId, busy: now < s.busyUntil,
+      tg: { step: g.step, wave: g.wave, round: g.round, state: p.state, chosen: !!p.choice, choice: p.choice, pts: p.pts, got: p.got, lost: p.lost, kept: p.kept, tossed: p.tossed, last: p.last && { name: p.last.name, pts: p.last.pts, bust: !!p.last.bust, pile: !!p.last.pile } },
+      won: s.winner === pid, winner: s.winner ? nameOf(s, s.winner) : null };
+  }
   return {
     phase: s.phase,
     myTurn: current(s) === pid,
@@ -344,16 +442,29 @@ function tossScene(v) {
 }
 
 // ---------- renderers ----------
-const shown = { land: '', landAt: 0, turn: '', turnAt: 0 }; let turnCount = 0;
+const shown = { land: '', landAt: 0, turn: '', turnAt: 0 }; let turnCount = 0, tgSeen = 0;
 export function renderTV(v, el) {
   document.body.classList.toggle('day', true);
   // While a toss is in the air, the screen is left alone: redrawing it (the clock does, every second) would rebuild
   // the scene mid-flight and cost frames. The same toss keeps animating; the full redraw comes when it lands.
   const live = el.querySelector('.g3d');
-  if (v.phase === 'turn' && v.animating && live && live.dataset.anim === '1' && live.dataset.e === String(v.eventId)) return;
+  if (v.phase === 'turn' && v.mode !== 'together' && v.animating && live && live.dataset.anim === '1' && live.dataset.e === String(v.eventId)) return;
   const board = `<div class="scores"><h3>First to ${v.target}</h3>${v.board.map(p => `<div class="srow ${p.now ? 'now' : ''}"><span>${esc(p.name)}</span><b>${p.score}${p.now && v.ending && !v.animating && v.endReason === 'bank' && v.banked ? `<small class="ggain">+${v.banked}</small>` : ''}</b></div>`).join('')}</div>`;
   let h = '';
-  if (v.phase === 'turn') {
+  if (v.phase === 'turn' && v.mode === 'together') {
+    const since = v.animating ? TG.anim - v.animLeft : TG.anim, landed = !v.animating;
+    const head = v.step === 'roundEnd' ? 'Round over' : v.step === 'land' ? (landed ? 'How they landed' : 'Goats in the air!') : v.wave === 1 ? 'Everybody toss!' : 'Toss again, or bank?';
+    const pen = (p, i) => {
+      const flying = p.tossed && v.step === 'land' && !landed;
+      const goats = p.last ? `<div class="gpgoats ${p.tossed && v.step === 'land' ? 'drop' : ''}" style="--d:${-since + (i % 4) * 90}ms">${goatImg(p.last.a)}${goatImg(p.last.b)}</div>` : `<div class="gpgoats idle">${goatImg('stand')}${goatImg('stand')}</div>`;
+      const what = flying ? '<small class="gpwhat">…</small>' : p.state === 'banked' ? `<small class="gpwhat win">Banked +${p.got}</small>` : p.state === 'bust' ? `<small class="gpwhat lose">Butt heads!${p.lost ? ` −${p.lost}` : ''}${p.kept ? ` kept ${p.kept}` : ''}</small>` : p.state === 'pile' ? '<small class="gpwhat lose">Goat pile! Back to 0</small>' : p.last ? `<small class="gpwhat">${esc(p.last.name)}${p.last.pts ? ` +${p.last.pts}` : ''}</small>` : '<small class="gpwhat">Swipe up to toss</small>';
+      const chip = p.state === 'in' && v.step === 'wave' ? `<i class="gpchip ${p.chosen ? 'ok' : ''}">${p.chosen ? '✓ ready' : 'deciding…'}</i>` : '';
+      return `<div class="gpen ${flying ? 'in' : p.state} ${p.state === 'in' && p.last && p.last.double && landed ? 'gold' : ''}"><h4>${esc(p.name)}</h4>${goats}${what}<b class="gppts">${p.state === 'in' && !flying ? p.pts : p.state === 'banked' ? '✓' : flying ? '' : '✗'}</b>${chip}</div>`;
+    };
+    const legend = `<div class="glegend">${[['bust', 'left', 'right', 'Butt heads', 'out', 'lose'], ['nap', 'left', 'left', 'Nap time', '1'], ['back', 'back', '', 'Hooves up', '5'], ['stand', 'stand', '', 'On all fours', '5'], ['nose', 'nose', '', 'Nose dive', '10'], ['horn', 'horn', '', 'Horn stand', '15'], ['pair', 'back', 'back', 'Two alike', '×4'], ['pile', 'left', 'left', 'Goat pile', 'back to 0', 'lose']].map(([k, a, b, n, p, c]) => `<div class="gl ${c || ''}"><span class="glpic ${k === 'pile' ? 'pile' : ''}">${goatImg(a)}${b ? goatImg(b) : ''}</span><small>${n}</small><b>${p}</b></div>`).join('')}</div>`;
+    h = `<div class="ghead"><h2>Round ${v.round} · ${head}</h2>${v.step === 'wave' ? `<span class="clock small ${v.left <= 3 ? 'hurry' : ''}">${v.left}</span>` : ''}</div>${v.twist === 'double' ? '<p class="gtwist dbl">✨ Double or nothing: bank for double, butt heads costs 10</p>' : ''}
+      <div class="gpens n${Math.min(10, v.pens.length)}">${v.pens.map(pen).join('')}</div>${legend}<button class="btn ghost" data-host="next" ${v.animating ? 'style="visibility:hidden"' : ''}>${v.step === 'wave' ? 'Go now' : 'Next'}</button>`;
+  } else if (v.phase === 'turn') {
     const last = v.last;
     const table = tossScene(v);
     const result = last && !v.animating ? `<div class="toss-name ${last.bust || last.pile ? 'lose' : last.double ? 'win' : ''}">${esc(last.name)} ${last.pts ? `<b>+${last.pts}</b>` : ''}</div>` : '<div class="toss-name blank"></div>';
@@ -372,7 +483,7 @@ export function renderTV(v, el) {
   // Big moments, drawn over the table so they never change the layout: whose turn it is when it changes hands,
   // what a toss scored once it lands, and what a turn banked or lost. Each one animates once.
   let over = '';
-  if (v.phase === 'turn') {
+  if (v.phase === 'turn' && v.mode !== 'together') {
     const turnKey = v.who, landKey = `${v.eventId}.${v.ending ? v.endReason : ''}`, last = v.last, now = Date.now();
     // A redraw while one of these is still playing carries on from where it was.
     const land = () => { if (landKey !== shown.land) { shown.land = landKey; shown.landAt = now; } const el = now - shown.landAt; return el < 2200 ? `in" style="animation-delay:-${el}ms` : ''; };
@@ -389,12 +500,25 @@ export function renderTV(v, el) {
   }
   el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel">${h}${over ? `<div class="gover">${over}</div>` : ''}</div>${board}</div>`;
   const scene = el.querySelector('.g3d'); if (scene && v.last) tossRun(scene, v);
+  if (v.mode === 'together' && v.step === 'land' && v.animating && tgSeen !== v.eventId) { tgSeen = v.eventId; import('../sfx.js').then(m => { m.play('whoosh'); setTimeout(() => m.play('stamp'), TG.anim - 500); }).catch(() => {}); }
 }
 
 export function renderPhone(v, el, send) {
   let h = '';
   if (v.phase === 'spectate') h = '<h2>Game in progress</h2><p>You\'ll join the next game.</p>';
   else if (v.phase === 'over') h = `<h2 class="${v.won ? 'win' : ''}">${v.won ? 'You are the G.O.A.T.!' : `${esc(v.winner)} is the G.O.A.T.`}</h2><p class="say">You finished with ${v.score}.</p>`;
+  else if (v.tg) {
+    const t = v.tg, mult = v.twist === 'double' ? 2 : 1, dbl = v.twist === 'double' ? '<p class="say win">✨ Double or nothing! Bank for double. Butt heads costs you 10.</p>' : '';
+    const bar = `<div class="turnbar"><div><small>This round</small><b>${t.pts}</b></div><div><small>Banked</small><b>${v.score}</b></div><div><small>Need</small><b>${Math.max(0, v.target - v.score - t.pts * mult)}</b></div></div>`;
+    if (t.state === 'banked') h = `<h2 class="win">Banked +${t.got}</h2><p class="say">You are safe. Watch the others push their luck.</p>${bar}`;
+    else if (t.state === 'bust' || t.state === 'pile') h = v.busy ? `<h2>Goats in the air…</h2>${bar}` : `<h2 class="lose">${t.state === 'pile' ? 'Goat pile!' : 'Butt heads!'}</h2><p class="say">${t.state === 'pile' ? 'Back to zero. Ouch.' : t.kept ? `You keep ${t.kept} as the underdog.` : 'You are out until the next round.'}</p>${bar}`;
+    else if (t.step === 'land' || t.chosen) h = `<h2>${t.step === 'land' ? (v.busy ? 'Goats in the air…' : `${esc(t.last?.name || '')}${t.last?.pts ? ` +${t.last.pts}` : ''}`) : t.choice === 'bank' ? 'Banking…' : 'Ready to toss!'}</h2><p class="say">${t.step === 'land' ? 'Watch the TV.' : 'Waiting for the others.'}</p>${dbl}${bar}`;
+    else if (t.step === 'roundEnd') h = `<h2>Round over</h2>${bar}`;
+    else h = `<h2>${t.wave === 1 ? 'Toss your goats!' : 'Toss again, or bank?'}</h2>${dbl}${t.last ? `<p class="say">${esc(t.last.name)}${t.last.pts ? ` +${t.last.pts}` : ''}</p>` : ''}
+      <div class="swipe" id="swipe" data-pad><div class="ducks-mini">${goatImg('stand')}${goatImg('stand')}</div><b>Swipe up to toss</b><small>or tap</small></div>${bar}
+      ${t.wave > 1 ? `<button class="btn" data-bank>Bank ${t.pts * mult} points</button>` : ''}
+      <p class="muted">Everyone tosses at once. Two goats on different sides butt heads: you lose this round's points.</p>`;
+  }
   else if (!v.myTurn) h = `<h2>${esc(v.who)} is tossing</h2><p class="say">Their turn so far: <b>${v.theirTurnPts}</b>${v.twist === 'double' ? ' · double or nothing' : ''}</p>${v.forcedBy ? `<p class="say">😈 ${esc(v.forcedBy)} made them toss again!</p>` : ''}<p class="muted">Your score: ${v.score} of ${v.target}</p>${v.daresLeft ? `<button class="btn ghost" data-dare ${v.canDare ? '' : 'disabled'}>😈 One more! Make them toss again</button><p class="muted small">Once a game. They cannot bank until they toss again.</p>` : ''}`;
   else {
     const locked = v.busy || v.ending;

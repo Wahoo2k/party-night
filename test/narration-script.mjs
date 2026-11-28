@@ -14,7 +14,8 @@ const add = (voice, text, game) => { const id = clipId(voice, text); if (!clips.
 const perGame = {};
 for (const [id, G] of Object.entries(GAMES)) {
   const seen = new Map(), typedPrefix = new Set(), typedExact = new Set();
-  const n = Math.min(G.meta.max, Math.max(G.meta.min, 6));
+  let n = Math.min(G.meta.max, Math.max(G.meta.min, 6));
+  const sizes = G.TOGETHER_MIN ? [n, G.TOGETHER_MIN - 1] : [n];   // GOAT Toss plays differently with four or more: hear both
   const run = marked => {
     const hear = line => { if (!line || typeof line !== 'string') return; for (const s of sentences(line, NAMES)) {
       if (marked) { const i = s.indexOf(MARK); if (i < 0) continue; const pre = s.slice(0, i).trim(); if (pre.length >= 8) typedPrefix.add(pre); typedExact.add(s.split(MARK + ' ').join('').split(MARK).join('')); }
@@ -34,7 +35,7 @@ for (const [id, G] of Object.entries(GAMES)) {
       hear(G.narration?.(s));
     } catch {}
   };
-  for (let g = 0; g < RUNS; g++) { run(false); run(true); }
+  for (let g = 0; g < RUNS; g++) { n = sizes[g % sizes.length]; run(false); run(true); }
   const voice = voiceFor(id);
   const all = [...seen.keys()];
   const named = all.filter(s => s.includes('{name}'));
