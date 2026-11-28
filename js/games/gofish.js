@@ -101,7 +101,7 @@ export function cue(s) {
 }
 export function cueEvent(s) {
   if (!s.last || s.phase === 'over') return null;
-  return { id: s.eventId, sound: s.last.kind === 'set' ? 'win' : s.last.kind === 'fish' ? 'tick' : 'safe', say: s.last.kind === 'fish' ? 'Go fish!' : s.last.kind === 'set' ? 'A set!' : '' };
+  return { id: s.eventId, sound: s.last.kind === 'set' ? 'win' : s.last.kind === 'fish' ? 'tick' : 'safe', say: s.last.kind === 'fish' ? ['Go fish!', 'Nope. Go fish!', 'Go fish! Draw a card.'][s.eventId % 3] : s.last.kind === 'set' ? ['A set!', 'All four! That is a set.', 'A full set!'][s.eventId % 3] : s.last.kind === 'got' ? ['Hand them over!', 'Good guess!', 'Yes! The cards change hands.', 'Got some!'][s.eventId % 4] : s.last.kind === 'lucky' ? 'Go fish! And a lucky catch!' : '' };
 }
 
 export function botAct(v, rnd = Math.random) {
