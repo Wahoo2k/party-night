@@ -195,3 +195,9 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Mind Meld: bots give a real clue for every scale (js/games/meld-clues.js, five per scale), never "pretty far left".
 - Menu: a row scrolling under a resting mouse pointer no longer changes the game shown.
 - js/fresh.js: on the menu the TV page checks every 3 minutes for a new version and reloads itself.
+- Tall Tales reveal plays in beats: answer, who picked it one by one, then the stamp (lie or truth), a rotating reaction sound, and the points in big type. Scores stay at their old values until the reveal ends. Picking shows a lock on each name. Reveal holds one size.
+- Sketch Telephone reveal holds one size (empty slots for cards to come).
+- Room Meter: the reveal lists who said yes and who said no; the wording no longer promises answers stay secret.
+- Menu: returning from a game lands on that game's card (was Settings); player names that don't fit become "+N".
+- Settings: bots labelled as test bots.
+- To do: same reveal treatment for Doodle Bluff and Two Truths; Back on the remote during a game should open pause, not exit.

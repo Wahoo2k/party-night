@@ -884,7 +884,10 @@ function renderLobby() {
     app.querySelectorAll('.gcard.night').forEach(c => (c.onfocus = () => show(c, true)));
     pick(menuAt.game, true);
     const cur = app.querySelector('.gcard.on');
-    if (cur) { show(cur, false); if (!app.contains(document.activeElement)) cur.focus({ preventScroll: true }); }
+    if (cur) { show(cur, false); const ae = document.activeElement; if (!ae?.closest?.('.hub') || !ae.offsetParent) cur.focus({ preventScroll: true }); }   // back from a game: land on the game's card, not on whatever was last pressed
+    // Players in the top bar: only whole names are shown; the rest become a "+3" count, so a name is never cut off by the buttons.
+    const jd = app.querySelector('.joined');
+    if (jd) { const edge = jd.getBoundingClientRect().right, faces = [...jd.querySelectorAll('.jface')]; let hid = 0; faces.forEach(f => { if (f.getBoundingClientRect().right > edge - 1) { f.hidden = true; hid++; } }); if (hid) { let k = faces.length - hid; const more = document.createElement('span'); more.className = 'jmore'; jd.append(more); const fit = () => { more.textContent = `+${faces.length - k}`; return more.getBoundingClientRect().right <= edge; }; while (!fit() && k > 0) faces[--k].hidden = true; } }
     host.players.forEach(p => seen.add(p.pid));
     return;
   }
@@ -1051,7 +1054,7 @@ function render() {
   autoNext();
   app.querySelectorAll('[data-game]').forEach(b => (b.onclick = () => { host.gameId = b.dataset.game; host.screen = 'gather'; host.queue = []; host.night = null; if (sfx.on) play('lockin'); flash('wipe'); changed(); }));
   app.querySelectorAll('[data-shelf]').forEach(b => (b.onclick = () => { host.shelf = b.dataset.shelf; save(); render(); }));
-  autofocus(app);
+  if (!app.querySelector('.hub')) autofocus(app);
   // Scores sit along the bottom as a row of players when the game has a plain score list beside its panel.
   const stg = app.querySelector('.stage'), sc = stg && stg.children.length === 2 && stg.lastElementChild.matches('.scores') && !stg.lastElementChild.querySelector('.tscore') ? stg.lastElementChild : null;
   if (sc && onStage) { stg.classList.add('railed'); sc.classList.toggle('many', sc.querySelectorAll('.srow').length > 8); }

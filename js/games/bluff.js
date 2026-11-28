@@ -13,7 +13,7 @@ export const meta = {
   blurb: 'Write a fake answer to a strange true fact, then sniff out the real one.',
 };
 
-export const TIMES = { write: 60000, pick: 30000, step: 3800, scores: 7000 };
+export const TIMES = { write: 60000, pick: 30000, step: 6000, scores: 8000 };
 const PROMPTS = 4;                 // facts per game; the last one is worth double
 const TRUTH_PTS = 1000, FOOL_PTS = 500;
 
@@ -166,7 +166,7 @@ export function cue(s) {
   switch (s.phase) {
     case 'write': return { sound: 'join', wait: 700, title: s.n === s.facts.length - 1 ? 'Final Fact' : `Fact ${s.n + 1}`, sub: s.n === s.facts.length - 1 ? 'Double points!' : 'Write a convincing lie' };
     case 'pick': return { sound: 'vote', wait: 500, title: 'Find the Truth', sub: 'One answer is real' };
-    case 'reveal': return { sound: 'drumroll', wait: 0 };
+    case 'reveal': return null;   // the reveal plays its own sounds, card by card
     case 'over': return { sound: 'win', wait: 1600, title: 'Game Over', sub: 'The master of lies', tone: 'dawn', fx: 'confetti' };
   }
   return null;
@@ -192,8 +192,10 @@ export function tvView(s, now = Date.now()) {
     left: Math.max(0, Math.ceil(((s.deadline || 0) - now) / 1000)),
     scores: board(s),
   };
+  // While the cards are still being turned over, the score list shows what everyone had before this fact.
+  if (s.phase === 'reveal') v.scores = v.scores.map(p => ({ ...p, score: p.score - p.gained, gained: 0 })).sort((a, b) => b.score - a.score);
   if (s.phase === 'write') { v.done = Object.keys(s.lies).length; v.need = s.players.length; v.writers = s.players.map(p => ({ name: p.name, done: !!s.lies[p.pid] })); }
-  if (s.phase === 'pick') { v.options = s.options.map(o => ({ text: o.text })); v.done = Object.keys(s.picks).length; v.need = s.players.length; }
+  if (s.phase === 'pick') { v.options = s.options.map(o => ({ text: o.text })); v.done = Object.keys(s.picks).length; v.need = s.players.length; v.pickers = s.players.map(p => ({ name: p.name, done: !!s.picks[p.pid] })); }
   if (s.phase === 'reveal' || s.phase === 'scores') {
     const shown = s.phase === 'scores' ? s.reveal.length : s.step + 1;
     v.items = s.reveal.slice(0, shown).map(id => {
@@ -202,9 +204,11 @@ export function tvView(s, now = Date.now()) {
         text: o.text, truth: o.truth, house: o.house,
         authors: o.authors.map(a => nameOf(s, a)),
         fooled: Object.entries(s.picks).filter(([, x]) => x === id).map(([pid]) => nameOf(s, pid)),
+        // What this card paid: the truth pays each finder; a lie pays its writer for everyone else it fooled.
+        pts: o.truth ? TRUTH_PTS * (s.n === s.facts.length - 1 ? 2 : 1) : o.house ? 0 : FOOL_PTS * (s.n === s.facts.length - 1 ? 2 : 1) * Math.max(...o.authors.map(a => Object.entries(s.picks).filter(([pid, x]) => x === id && pid !== a).length), 0),
       };
     });
-    v.current = s.phase === 'reveal' ? s.step : -1;
+    v.current = s.phase === 'reveal' ? s.step : -1; v.slots = s.reveal.length;
     v.shown = s.phase !== 'reveal' || s.step >= s.reveal.length - 1;   // the phone never gets ahead of the TV's reveal
     v.answer = v.shown ? f.a : null; if (!v.shown) v.foundTruth = null;
   }
@@ -239,6 +243,8 @@ const blank = q => esc(q).replace('____', '<span class="blank">_____</span>');
 const mmss = n => `${Math.floor(n / 60)}:${String(n % 60).padStart(2, '0')}`;
 const pts = n => n.toLocaleString();
 
+let revealKey = '', revealTimers = [], fooledTurn = 0;
+const FOOLED_SOUNDS = ['laugh', 'gasp', 'groan', 'sting-comic'];   // a different reaction each time someone is fooled
 export function renderTV(v, el) {
   document.body.classList.toggle('day', ['reveal', 'scores', 'over'].includes(v.phase));
   const scores = `<div class="scores"><h3>Scores</h3>${v.scores.map(p => `<div class="srow"><span>${esc(p.name)}</span><b>${pts(p.score)}${p.gained && ['scores', 'over'].includes(v.phase) ? `<small> +${pts(p.gained)}</small>` : ''}</b></div>`).join('')}</div>`;
@@ -246,13 +252,28 @@ export function renderTV(v, el) {
   const progress = v.need ? `<div class="meter"><span style="width:${(100 * v.done) / v.need}%"></span></div>` : '';
   let h = '';
   if (v.phase === 'write') h = `${head}<p class="say">Write a fake answer on your phone. Make it believable!</p><p class="clock ${v.left <= 10 ? 'hurry' : ''}">${mmss(v.left)}</p>${progress}<div class="roster">${v.writers.map(w => `<div class="chip ${w.done ? '' : 'waiting'}">${esc(w.name)}${w.done ? ' ✓' : ''}</div>`).join('')}</div><button class="btn ghost" data-host="next">Stop writing</button>`;
-  if (v.phase === 'pick') h = `${head}<p class="say">Which one is the truth? Pick on your phone.</p><div class="answers">${v.options.map((o, i) => `<div class="ans" style="animation-delay:${i * 0.08}s">${esc(o.text)}</div>`).join('')}</div><p class="clock ${v.left <= 10 ? 'hurry' : ''}">${mmss(v.left)}</p>${progress}<button class="btn ghost" data-host="next">Close picks</button>`;
+  if (v.phase === 'pick') h = `${head}<p class="say">Which one is the truth? Pick on your phone.</p><div class="answers">${v.options.map((o, i) => `<div class="ans" style="animation-delay:${i * 0.08}s">${esc(o.text)}</div>`).join('')}</div><p class="clock ${v.left <= 10 ? 'hurry' : ''}">${mmss(v.left)}</p>${progress}<div class="roster">${(v.pickers || []).map(w => `<div class="chip ${w.done ? 'locked' : 'waiting'}">${w.done ? '🔒 ' : ''}${esc(w.name)}</div>`).join('')}</div><button class="btn ghost" data-host="next">Close picks</button>`;
   if (v.phase === 'reveal' || v.phase === 'scores') {
-    h = `${head}<div class="reveals">${v.items.map((it, i) => `<div class="rv ${it.truth ? 'truth' : 'lie'} ${i === v.current ? 'now' : ''}">
+    // Each card plays out in beats: the answer lands, the people who picked it pop in one by one, and only then
+    // the stamp says whether they were fooled or right, with the points it paid. A redraw of the same step shows it finished.
+    const key = `${v.n}.${v.current}`, playing = v.current >= 0 && key !== revealKey;
+    revealKey = key; revealTimers.forEach(clearTimeout); revealTimers = [];
+    const cur = v.items[v.current], gap = cur ? Math.min(380, 2400 / Math.max(1, cur.fooled.length)) : 0, stamp = cur ? 900 + cur.fooled.length * gap + 900 : 0;
+    h = `${head}<div class="reveals">${v.items.map((it, i) => `<div class="rv ${it.truth ? 'truth' : 'lie'} ${i === v.current ? 'now' : ''} ${i === v.current && playing ? 'play' : ''}" style="--stamp:${stamp}ms">
         <div class="rv-text">${esc(it.text)}</div>
+        <div class="rv-votes">${it.fooled.length ? `<small>Picked by</small>${it.fooled.map((n, k) => `<span class="chip" style="animation-delay:${900 + k * gap}ms">${esc(n)}</span>`).join('')}` : '<small>Nobody picked it!</small>'}</div>
         <div class="rv-tag">${it.truth ? 'THE TRUTH' : it.house ? 'Our lie' : `Lie by ${it.authors.map(esc).join(' & ')}`}</div>
-        <div class="rv-who">${it.fooled.length ? (it.truth ? 'Found by ' : 'Fooled ') + it.fooled.map(esc).join(', ') : it.truth ? 'Nobody found it!' : ''}</div>
-      </div>`).join('')}</div>${v.phase === 'scores' ? '<button class="btn" data-host="next">Next fact</button>' : ''}`;
+        ${it.pts && it.fooled.length ? `<div class="rv-pts">+${pts(it.pts)}<small>${it.truth ? (it.fooled.length > 1 ? 'each' : `for ${esc(it.fooled[0] || '')}`) : `for ${it.authors.map(esc).join(' & ')}`}</small></div>` : ''}
+      </div>`).concat(Array.from({ length: Math.max(0, (v.slots || 0) - v.items.length) }, () => '<div class="rv slot"><div class="rv-text">&nbsp;</div><div class="rv-votes"><small>&nbsp;</small><span class="chip">&nbsp;</span></div><div class="rv-tag">&nbsp;</div><div class="rv-pts">&nbsp;</div></div>')).join('')}</div>${v.phase === 'scores' ? '<button class="btn" data-host="next">Next fact</button>' : ''}`;
+    if (playing && cur) import('../sfx.js').then(m => {
+      const at = (ms, fn) => revealTimers.push(setTimeout(fn, ms));
+      at(0, () => m.play('whoosh'));
+      cur.fooled.forEach((_, k) => at(900 + k * gap, () => m.play('pop')));
+      at(stamp, () => m.play('stamp'));
+      if (cur.truth) { at(stamp + 250, () => m.play(cur.fooled.length ? 'win' : 'groan')); if (cur.fooled.length) at(stamp + 700, () => m.play('cheer')); }
+      else at(stamp + 250, () => m.play(FOOLED_SOUNDS[fooledTurn++ % FOOLED_SOUNDS.length]));
+      if (cur.pts && cur.fooled.length) at(stamp + 900, () => m.play('points'));
+    }).catch(() => {});
   }
   if (v.phase === 'over') h = `<h2 class="win">${esc(v.scores[0]?.name || '')} wins!</h2><p class="say">The master of lies, with ${pts(v.scores[0]?.score || 0)} points.</p><div class="podium">${v.scores.slice(0, 3).map((p, i) => `<div class="pod p${i + 1}"><b>${esc(p.name)}</b><span>${pts(p.score)}</span></div>`).join('')}</div><div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
   el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel">${h}</div>${scores}</div>`;

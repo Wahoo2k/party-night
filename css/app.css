@@ -2330,3 +2330,39 @@ body.lite .g3d .gtop{background:repeating-linear-gradient(90deg,#0000 0 168px,#2
 /* Sketch Telephone reveal: empty slots hold the room for cards still to come, so the strip never changes size. */
 .chainrow .link.slot{visibility:hidden;animation:none}
 .chainrow .link.slot .sktext{aspect-ratio:1}
+/* Room Meter reveal: who said yes and who said no. */
+.rmsaid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}
+.rmsaid>div{display:flex;flex-wrap:wrap;align-items:center;align-content:flex-start;gap:6px;padding:10px 12px;border-radius:14px;background:#0000001a}
+.rmsaid small{flex:0 0 100%;font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:13px;opacity:.75}
+.rmsaid .yes .chip{background:#2fbf71;color:#fff}.rmsaid .no .chip{background:#ffffffcc;color:#1a1238}
+.rmsaid em{opacity:.6}
+body.onstage .rmsaid .chip{font-size:20px;padding:5px 14px}
+.stage.enter .rmsaid{animation:rise .5s 3s both}
+/* Fib reveal in beats: answer, who picked it (one by one), then the stamp and the points. */
+.rv-votes{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px}
+.rv-votes small{font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:13px;opacity:.65;margin-right:4px}
+.rv-votes .chip{background:#22323a;color:#fff;font-weight:700}
+.rv-pts{grid-column:1/-1;font:800 clamp(30px,calc(3*var(--vw,1vw)),46px)/1 Outfit,sans-serif;color:var(--red);margin-top:8px}
+.rv.truth .rv-pts{color:#1e9e5a}
+.rv-pts small{font-size:.42em;font-weight:700;margin-left:8px;opacity:.75}
+.rv.play .rv-votes .chip{animation:pop .35s cubic-bezier(.3,1.6,.5,1) both}
+.rv.play .rv-tag{animation:stampin .45s var(--stamp) both}
+.rv.play .rv-pts{animation:slam .55s calc(var(--stamp) + .9s) both}
+body.onstage[data-game=bluff] .rv-votes .chip{font-size:20px;padding:4px 13px}
+body.onstage[data-game=bluff] .rv-pts{font-size:52px}
+body.onstage[data-game=bluff] .rv.truth.now:not(.play){animation:none}
+/* Until the stamp lands nobody can tell a lie from the truth: the card stays plain. */
+@keyframes rvlie{from{border-top-color:#8a97a0}to{border-top-color:#c0392b}}
+@keyframes rvtruth{from{background:#fdf6e3;border-top-color:#8a97a0;box-shadow:0 8px 18px #0005}to{background:#e6f7ec;border-top-color:#1e9e5a;box-shadow:0 0 0 5px #1e9e5a,0 0 50px #7fe0a888}}
+body.onstage[data-game=bluff] .rv.lie.play{animation:cardflip .6s cubic-bezier(.2,1.2,.4,1),rvlie .3s var(--stamp) both}
+body.onstage[data-game=bluff] .rv.truth.play{animation:cardflip .6s cubic-bezier(.2,1.2,.4,1),rvtruth .4s var(--stamp) both}
+body.onstage[data-game=bluff] .rv:not(.play){animation:none}
+/* Picking: a lock appears on each name as they choose. */
+.roster .chip.locked{background:#2fbf71;color:#fff;animation:pop .3s both}
+/* Points gained this round, big, in the score list. */
+body[data-game=bluff] .scores .srow b small{display:inline-block;font-size:1em;font-weight:800;color:#1e9e5a;animation:slam .5s .3s both}
+.joined .jmore{flex:0 0 auto;padding:3px 9px;border-radius:99px;background:#ffffff26;font-weight:800;font-size:12px}
+.joined .jface{flex:0 0 auto}
+.joined [hidden]{display:none!important}
+/* Empty places for the cards still to come, so the reveal stays one size from the first card to the last. */
+.rv.slot{visibility:hidden;animation:none!important}

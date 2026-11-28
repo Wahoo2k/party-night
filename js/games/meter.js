@@ -12,7 +12,7 @@ export const QUESTIONS = [
   'are afraid of spiders', 'have walked into a glass door', 'like the smell of gasoline', 'have re-read the same book three times', 'would rather be too hot than too cold',
   'have gone a whole day without their phone this year', 'put ketchup on eggs', 'have stayed up past 2 a.m. this week', 'have a food they refuse to share', 'believe a hot dog is a sandwich',
 ];
-export const TIMES = { poll: 22000, guess: 25000, bet: 20000, reveal: 9000 };
+export const TIMES = { poll: 22000, guess: 25000, bet: 20000, reveal: 13000 };
 const shuffle = (a, rnd) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const nameOf = (s, pid) => (s.players.find(p => p.pid === pid) || {}).name || 'Someone';
 const MUCH = 20;   // "much higher / much lower" means at least this many points away
@@ -80,7 +80,7 @@ export function narration(s) {
   return '';
 }
 export function cue(s) {
-  if (s.phase === 'poll') return { sound: 'join', wait: 700, title: s.q === 0 ? 'Room Meter' : `Question ${s.q + 1}`, sub: 'Answer honestly. It stays secret.' };
+  if (s.phase === 'poll') return { sound: 'join', wait: 700, title: s.q === 0 ? 'Room Meter' : `Question ${s.q + 1}`, sub: 'Answer honestly!' };
   if (s.phase === 'guess') return { sound: 'vote', wait: 400 };
   if (s.phase === 'bet') return { sound: 'stamp', wait: 400 };
   if (s.phase === 'reveal') return { sound: 'drumroll', after: s.result.diff <= 10 ? 'win' : 'safe', wait: 2200, react: s.result.diff <= 10 ? 'cheer' : s.result.diff >= 40 ? 'gasp' : null, fx: s.result.diff === 0 ? 'confetti' : null };
@@ -99,7 +99,7 @@ export function tvView(s, now = Date.now()) {
   if (s.phase === 'poll') { v.n = Object.keys(s.yes).length; v.total = s.players.length; }
   if (s.phase === 'guess') v.guess = s.guess;
   if (s.phase === 'bet' || s.phase === 'reveal') { v.guess = s.guess; v.n = Object.keys(s.bets).length; v.total = s.players.length - 1; }
-  if (s.phase === 'reveal') { v.result = { truth: s.result.truth, diff: s.result.diff, yes: s.result.yes, of: s.result.of }; v.bets = Object.entries(s.bets).map(([pid, b]) => ({ name: nameOf(s, pid), bet: b, won: s.result.gained[pid] > 0 })); v.spotGain = s.result.gained[spotter(s)]; }
+  if (s.phase === 'reveal') { v.result = { truth: s.result.truth, diff: s.result.diff, yes: s.result.yes, of: s.result.of }; v.bets = Object.entries(s.bets).map(([pid, b]) => ({ name: nameOf(s, pid), bet: b, won: s.result.gained[pid] > 0 })); v.spotGain = s.result.gained[spotter(s)]; v.said = s.players.filter(p => s.yes[p.pid] !== undefined).map(p => ({ name: p.name, yes: s.yes[p.pid] })); }
   return v;
 }
 export function phoneView(s, pid) {
@@ -118,18 +118,18 @@ export function renderTV(v, el) {
   document.body.classList.toggle('day', v.phase === 'reveal' || v.phase === 'over');
   const scores = `<div class="scores"><h3>Scores</h3>${v.scores.map(p => `<div class="srow"><span>${esc(p.name)}</span><b>${p.score.toLocaleString()}</b></div>`).join('')}</div>`;
   let h = `<p class="cat">Question ${v.q} of ${v.of}</p><div class="cq">What percent of this room ${esc(v.text)}?</div>`;
-  if (v.phase === 'poll') h += `<p class="say">Answer yes or no on your phone. It stays secret.</p><p class="clock ${v.left <= 5 ? 'hurry' : ''}">${v.left}</p><div class="meter"><span style="width:${(100 * v.n) / v.total}%"></span></div><button class="btn ghost" data-host="next">Move on</button>
-    <div class="how"><h3>How to play</h3><ol><li>Everyone secretly answers a yes-or-no question.</li><li>One player guesses what percent of the room said yes.</li><li>Everyone else bets: is the truth higher or lower? "Much" means 20 points or more, and pays double.</li><li>The closer the guess, the more the guesser scores.</li></ol></div>`;
+  if (v.phase === 'poll') h += `<p class="say">Answer yes or no on your phone. Answers are shown after the guess.</p><p class="clock ${v.left <= 5 ? 'hurry' : ''}">${v.left}</p><div class="meter"><span style="width:${(100 * v.n) / v.total}%"></span></div><button class="btn ghost" data-host="next">Move on</button>
+    <div class="how"><h3>How to play</h3><ol><li>Everyone answers a yes-or-no question. Answers stay hidden until the reveal.</li><li>One player guesses what percent of the room said yes.</li><li>Everyone else bets: is the truth higher or lower? "Much" means 20 points or more, and pays double.</li><li>The closer the guess, the more the guesser scores.</li></ol></div>`;
   if (v.phase === 'guess') h += `<p class="say"><b>${esc(v.spotter)}</b> is setting the guess…</p>${gauge(0, v.guess, false)}<p class="center"><span class="clock">${v.left}</span></p>`;
   if (v.phase === 'bet') h += `<p class="say"><b>${esc(v.spotter)}</b> says <b>${v.guess}%</b>. Everyone else: higher or lower?</p>${gauge(0, v.guess, false)}<p class="center"><span class="clock">${v.left}</span></p><div class="meter"><span style="width:${v.total ? (100 * v.n) / v.total : 0}%"></span></div><button class="btn ghost" data-host="next">Reveal</button>`;
-  if (v.phase === 'reveal') h += `${gauge(v.result.truth, v.guess, true)}<p class="say center">${v.result.yes} of ${v.result.of} said yes. ${esc(v.spotter)} was off by ${v.result.diff} and gets <b>${v.spotGain.toLocaleString()}</b>.</p><div class="tally">${v.bets.map(b => `<div class="${b.won ? 'win' : ''}">${esc(b.name)}: ${BET[b.bet]} ${b.won ? '✓' : ''}</div>`).join('')}</div><button class="btn" data-host="next">Next</button>`;
+  if (v.phase === 'reveal') h += `${gauge(v.result.truth, v.guess, true)}<p class="say center">${v.result.yes} of ${v.result.of} said yes. ${esc(v.spotter)} was off by ${v.result.diff} and gets <b>${v.spotGain.toLocaleString()}</b>.</p><div class="rmsaid"><div class="yes"><small>Said yes</small>${v.said.filter(x => x.yes).map(x => `<span class="chip">${esc(x.name)}</span>`).join('') || '<em>Nobody</em>'}</div><div class="no"><small>Said no</small>${v.said.filter(x => !x.yes).map(x => `<span class="chip">${esc(x.name)}</span>`).join('') || '<em>Nobody</em>'}</div></div><div class="tally">${v.bets.map(b => `<div class="${b.won ? 'win' : ''}">${esc(b.name)}: ${BET[b.bet]} ${b.won ? '✓' : ''}</div>`).join('')}</div><button class="btn" data-host="next">Next</button>`;
   if (v.phase === 'over') h = `<h2 class="win">${esc(v.scores[0].name)} knows this room best!</h2><div class="podium">${v.scores.slice(0, 3).map((p, i) => `<div class="pod p${i + 1}"><b>${esc(p.name)}</b><span>${p.score.toLocaleString()}</span></div>`).join('')}</div><div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
   el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel">${h}</div>${scores}</div>`;
 }
 export function renderPhone(v, el, send) {
   if (v.phase === 'spectate') { el.innerHTML = '<h2>Game in progress</h2>'; return; }
   let h = `<p class="muted">…${esc(v.text)}</p>`;
-  if (v.phase === 'poll') h += v.mine === null ? '<h2>Is this you?</h2><button class="btn" data-yes="1">Yes</button><button class="btn ghost" data-yes="0">No</button><p class="muted small">Nobody will see your answer.</p>' : '<h2>Got it 🤫</h2>';
+  if (v.phase === 'poll') h += v.mine === null ? '<h2>Is this you?</h2><button class="btn" data-yes="1">Yes</button><button class="btn ghost" data-yes="0">No</button><p class="muted small">Everyone sees who said yes after the guess.</p>' : '<h2>Got it 🤫</h2>';
   else if (v.phase === 'guess') h += v.spotter ? `<h2>What percent said yes?</h2><p class="rmnum"><span id="rv">${v.guess ?? 50}</span>%</p><input type="range" id="rs" min="0" max="100" step="5" value="${v.guess ?? 50}"><button class="btn" id="rl">Lock it in</button>` : `<h2>${esc(v.spotName)} is guessing…</h2>`;
   else if (v.phase === 'bet') h += v.spotter ? `<h2>You said ${v.guess}%</h2><p class="say">Now they bet against you.</p>` : v.bet ? `<h2>${BET[v.bet]} ✓</h2>` : `<h2>${esc(v.spotName)} says ${v.guess}%</h2><button class="btn" data-bet="higher">▲ Higher</button><button class="btn" data-bet="lower">▼ Lower</button><button class="btn ghost" data-bet="much-higher">⏫ Much higher (20+) · double</button><button class="btn ghost" data-bet="much-lower">⏬ Much lower (20+) · double</button>`;
   else if (v.phase === 'reveal') h += `<h2 class="${v.gained ? 'win' : ''}">${v.truth}%${v.gained ? ` · +${v.gained.toLocaleString()}` : ''}</h2>`;
