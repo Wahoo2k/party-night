@@ -889,13 +889,13 @@ const seen = new Set();
 const kicked = new Set();
 let editing = null;
 // A glyph for each game in the menu.
-const ICONS = { oneword: '🤝', pindrop: '📍', topspot: '🥇', lineup: '🔢', werewolf: '🐺', imposter: '🕵️', bluff: '🤥', whosaid: '💬', ducks: '🐐', trivia: '🧠', spin: '🎡', crowd: '📊', bingo: '🎱', quick: '⚡', ladder: '🪜', cases: '💼', funny: '😂', letters: '🔤', taboo: '🚫', agents: '🕶️', sketch: '✏️', meld: '🧿', bowl: '🥗', crew: '🤝', charades: '🎭', clash: '🃏', blackjack: '♠️', gofish: '🐟', bluffcards: '🎴', hearts: '♥️', shade: '🎨', estimate: '🎯', truths: '🤞', wordhunt: '🔎', midnight: '🌙', missions: '🗝️', dares: '😈', split: '✂️', doodle: '🖼️', memory: '🧩', copycat: '🐱', hunt: '🌈', freeze: '🧊', haunted: '👻', bomb: '💣', potato: '🥔', mystery: '💎', bracket: '🏆', faker: '🤫', meter: '📈', rebus: '🧩' };
+const ICONS = { shake: '📳', survive: '❤️', story: '📖', oneword: '🤝', pindrop: '📍', topspot: '🥇', lineup: '🔢', werewolf: '🐺', imposter: '🕵️', bluff: '🤥', whosaid: '💬', ducks: '🐐', trivia: '🧠', spin: '🎡', crowd: '📊', bingo: '🎱', quick: '⚡', ladder: '🪜', cases: '💼', funny: '😂', letters: '🔤', taboo: '🚫', agents: '🕶️', sketch: '✏️', meld: '🧿', bowl: '🥗', crew: '🤝', charades: '🎭', clash: '🃏', blackjack: '♠️', gofish: '🐟', bluffcards: '🎴', hearts: '♥️', shade: '🎨', estimate: '🎯', truths: '🤞', wordhunt: '🔎', midnight: '🌙', missions: '🗝️', dares: '😈', split: '✂️', doodle: '🖼️', memory: '🧩', copycat: '🐱', hunt: '🌈', freeze: '🧊', haunted: '👻', bomb: '💣', potato: '🥔', mystery: '💎', bracket: '🏆', faker: '🤫', meter: '📈', rebus: '🧩' };
 
 // Each game lives in its own visual world: a color scheme, a background and a headline typeface. Games not listed keep the night village.
 const THEME_OF = {};
 Object.entries({
-  comic: ['funny', 'bracket', 'split', 'dares', 'bluffcards', 'topspot', 'lineup'], paper: ['bluff', 'truths', 'whosaid', 'meter', 'letters', 'pindrop'], sketch: ['sketch', 'doodle', 'shade'],
-  kids: ['hunt', 'freeze', 'copycat', 'memory', 'ducks', 'potato', 'bingo', 'charades', 'gofish'], show: ['trivia', 'spin', 'crowd', 'ladder', 'cases', 'quick', 'estimate', 'rebus'],
+  comic: ['funny', 'bracket', 'split', 'dares', 'bluffcards', 'topspot', 'lineup', 'story'], paper: ['bluff', 'truths', 'whosaid', 'meter', 'letters', 'pindrop'], sketch: ['sketch', 'doodle', 'shade'],
+  kids: ['hunt', 'freeze', 'copycat', 'memory', 'ducks', 'potato', 'bingo', 'charades', 'gofish', 'shake'], show: ['trivia', 'spin', 'crowd', 'ladder', 'cases', 'quick', 'estimate', 'rebus', 'survive'],
   noir: ['imposter', 'faker', 'wordhunt', 'agents', 'missions', 'mystery', 'bomb'], teams: ['taboo', 'bowl', 'crew', 'meld', 'oneword'], felt: ['clash', 'blackjack', 'hearts'],
 }).forEach(([t, ids]) => ids.forEach(id => (THEME_OF[id] = t)));
 // Headlines arrive a word at a time.

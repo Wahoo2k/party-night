@@ -26,6 +26,20 @@ export const QUESTIONS = [
   ['How many sides does a stop sign have?', 8], ['How many stars were on the U.S. flag in 1960, before Hawaii\'s star was added?', 49], ['How many white keys are on a standard piano?', 52],
   ['How many eyes does a typical spider have?', 8], ['How many inches are in a yard?', 36], ['In what year was the Declaration of Independence signed?', 1776],
   ['How many weeks long is a typical human pregnancy?', 40], ['How many Great Lakes are there?', 5], ['How many cards are in a standard deck, counting two jokers?', 54],
+  ['How many stripes are on the U.S. flag?', 13], ['How many elements are in the periodic table?', 118], ['In what year did World War II end?', 1945],
+  ['How many players does one baseball team have on the field?', 9], ['How many ounces are in a pound?', 16], ['How many strings does a standard guitar have?', 6],
+  ['In what year did Christopher Columbus first reach the Americas?', 1492], ['How many zeros are in one billion?', 9], ['How many rings are on the Olympic flag?', 5],
+  ['How many Earth days long is a year on Mars?', 687], ['How many miles long is a marathon, to the nearest mile?', 26], ['How many feet off the ground is a regulation basketball hoop?', 10],
+  ['How many pieces does each player start with in chess?', 16], ['How many presidents are carved into Mount Rushmore?', 4], ['How many feet tall is Mount Everest?', 29032],
+  ['In what year did the U.S. Civil War end?', 1865], ['How many amendments does the U.S. Constitution have?', 27], ['How many justices sit on the U.S. Supreme Court?', 9],
+  ['How many members does the U.S. House of Representatives have?', 435], ['How many degrees are in a full circle?', 360], ['How many sides does a dodecagon have?', 12],
+  ['How many ribs does a typical adult have?', 24], ['How many chromosomes does a typical human cell have?', 46], ['About how many miles per hour is the speed of sound at sea level?', 767],
+  ['How many pounds are in a stone?', 14], ['How many yards long is an American football field, goal line to goal line?', 100], ['How many stitches are on a regulation baseball?', 108],
+  ['What is a perfect score in ten-pin bowling?', 300], ['How many points is the bullseye worth in darts?', 50], ['In what year did the first iPhone go on sale?', 2007],
+  ['In what year was Sputnik, the first satellite, launched?', 1957], ['In what year was the Great Fire of London?', 1666], ['In what year was the telephone patented?', 1876],
+  ['In what year was the U.S. Constitution signed?', 1787], ['How many floors does the Empire State Building have?', 102], ['How many official languages does the United Nations have?', 6],
+  ['How many countries share a border with Germany?', 9], ['How many U.S. states touch the Pacific Ocean?', 5], ['How many minutes long is a regulation soccer match, without stoppage time?', 90],
+  ['How many black keys are on a standard piano?', 36], ['How many tablespoons are in a cup?', 16], ['How many planets are in our solar system?', 8],
 ];
 export const PER_GAME = 7;
 export const TIMES = { answer: 45000, bet: 35000, reveal: 9000 };

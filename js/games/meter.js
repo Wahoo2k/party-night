@@ -11,6 +11,12 @@ export const QUESTIONS = [
   'can ride a bike with no hands', 'have named a car, plant or gadget', 'have waved at someone who was waving at somebody else', 'prefer the window seat', 'have eaten food off the floor this year',
   'are afraid of spiders', 'have walked into a glass door', 'like the smell of gasoline', 'have re-read the same book three times', 'would rather be too hot than too cold',
   'have gone a whole day without their phone this year', 'put ketchup on eggs', 'have stayed up past 2 a.m. this week', 'have a food they refuse to share', 'believe a hot dog is a sandwich',
+  'have eaten dessert before dinner', 'have locked themselves out of the house', 'still sleep with a stuffed animal or a special blanket', 'have dropped a phone in water', 'can whistle',
+  'have pulled an all-nighter', 'have been on TV', 'have broken a bone', 'would go to space tomorrow if it were free', 'have forgotten someone\'s name right after hearing it',
+  'have talked to a pet in a baby voice', 'have clapped when a plane landed', 'think pineapple belongs on pizza', 'have pretended to like a gift', 'can touch their toes right now',
+  'have tripped going UP the stairs', 'have cried during a cartoon movie', 'sing in the shower', 'have met a famous person', 'have eaten an entire pizza alone',
+  'have had a song stuck in their head today', 'can roll their tongue', 'have laughed at exactly the wrong moment', 'would rather have a dog than a cat', 'have fallen out of bed',
+  'have been to more than five countries', 'have said "you too" when a waiter said "enjoy your meal"', 'have looked for a phone that was already in their hand', 'know all the words to at least one rap song', 'have stayed in pajamas past noon this week',
 ];
 export const TIMES = { poll: 22000, guess: 25000, bet: 20000, reveal: 13000 };
 const shuffle = (a, rnd) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };

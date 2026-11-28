@@ -19,6 +19,13 @@ export const TITLES = [
   'A shark learning to knit', 'A potato\'s birthday party', 'A dog\'s dream job', 'The moon eating cheese', 'A banana in disguise', 'A superhero who is afraid of mice',
   'A volcano taking a bath', 'Penguins at the beach', 'A tree with a secret', 'Spaghetti weather', 'A shy ghost', 'The last slice of pizza',
   'A frog king\'s crown', 'An alien\'s first pancake', 'A worm with big plans', 'The laziest dragon', 'A sock\'s great escape', 'A pirate\'s rubber duck',
+  'A penguin at the beach', 'A robot learning to dance', 'The loneliest sock', 'A giraffe in an elevator', 'A ghost who is scared of people', 'Pizza delivery by dragon',
+  'A cow on a skateboard', 'The world\'s worst haircut', 'A snowman on vacation', 'A pirate who gets seasick', 'An octopus playing the drums', 'A very fancy pigeon',
+  'A T. rex making the bed', 'An alien\'s first day at school', 'A mermaid stuck in traffic', 'A bear ordering coffee', 'The slowest race car', 'A vampire at the dentist',
+  'A cactus giving a hug', 'A fish walking a dog', 'A wedding for two spoons', 'A mountain with a cold', 'A sloth running late', 'A knight afraid of his horse',
+  'A toaster in love', 'A squirrel robbing a bank', 'The moon wearing sunglasses', 'A duck doing taxes', 'A sandwich running away', 'A wizard stuck in a revolving door',
+  'A zombie on a diet', 'A whale in a bathtub', 'A grumpy rainbow', 'A turtle with a jetpack', 'A scarecrow on a date', 'A bored frog king',
+  'A yeti at a pool party', 'A lighthouse that is afraid of the dark', 'A unicorn stuck in a sweater', 'A chicken crossing the road, finally',
 ];
 export const TIMES = { draw: 75000, fake: 45000, pick: 30000, reveal: 9000 };
 const shuffle = (a, rnd) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };

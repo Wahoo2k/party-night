@@ -55,9 +55,12 @@ import * as pindrop from './pindrop.js';
 import * as topspot from './topspot.js';
 import * as lineup from './lineup.js';
 import * as oneword from './oneword.js';
+import * as story from './story.js';
+import * as survive from './survive.js';
+import * as shake from './shake.js';
 import * as rebus from './rebus.js';
 
-export const GAMES = { pindrop, topspot, lineup, oneword, werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards, hearts, shade, estimate, truths, wordhunt, midnight, missions, dares, split, doodle, memory, copycat, hunt, freeze, haunted, bomb, potato, mystery , bracket, faker, meter, rebus};
+export const GAMES = { pindrop, topspot, lineup, oneword, story, survive, shake, werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards, hearts, shade, estimate, truths, wordhunt, midnight, missions, dares, split, doodle, memory, copycat, hunt, freeze, haunted, bomb, potato, mystery , bracket, faker, meter, rebus};
 
 // Intro steps and card facts live in one file (guide.js) and are folded into each game's meta here.
 for (const [id, G] of Object.entries(GAMES)) {
@@ -71,10 +74,10 @@ export const LAUNCH = ['funny', 'bluff', 'whosaid', 'ducks', 'faker', 'sketch', 
 export const SHELVES = [
   { id: 'featured', name: '⭐ Start here', games: ['funny', 'ducks', 'bluff', 'whosaid', 'werewolf', 'sketch', 'trivia', 'faker', 'doodle', 'agents', 'taboo', 'spin'] },
   { id: 'all', name: 'All games' },
-  { id: 'party', name: '🎉 Party', games: ['quick', 'potato', 'bracket', 'truths', 'meld', 'meter', 'bowl', 'funny', 'bluff', 'whosaid', 'faker', 'oneword'] },
-  { id: 'trivia', name: '🧠 Game shows & puzzles', games: ['trivia', 'spin', 'crowd', 'rebus', 'pindrop', 'topspot', 'lineup'] },
+  { id: 'party', name: '🎉 Party', games: ['quick', 'potato', 'bracket', 'truths', 'meld', 'meter', 'bowl', 'funny', 'bluff', 'whosaid', 'faker', 'oneword', 'story'] },
+  { id: 'trivia', name: '🧠 Game shows & puzzles', games: ['trivia', 'spin', 'crowd', 'rebus', 'pindrop', 'topspot', 'lineup', 'survive'] },
   { id: 'secret', name: '🕵️ Secret roles', games: ['werewolf', 'imposter', 'agents', 'faker'] },
-  { id: 'family', name: '👨‍👩‍👧 Family & all ages', games: ['ducks', 'memory', 'clash', 'sketch', 'doodle', 'bowl', 'crowd'] },
+  { id: 'family', name: '👨‍👩‍👧 Family & all ages', games: ['ducks', 'memory', 'clash', 'sketch', 'doodle', 'bowl', 'crowd', 'shake'] },
   { id: 'kids', name: '👶 Little kids', games: ['ducks', 'memory', 'charades', 'bingo', 'gofish', 'copycat', 'hunt', 'freeze'] },
   { id: 'more', name: '➕ More games', games: Object.keys(GAMES).filter(id => !LAUNCH.includes(id)) },
 ];
