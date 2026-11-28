@@ -16,7 +16,7 @@ export const meta = {
 export const PICS = [
   ['cap-01', 'a raccoon in a suit presenting a chart to pigeons'], ['cap-02', 'a T. rex failing to make a bed'], ['cap-03', 'a stressed cat doing paperwork'], ['cap-04', 'a job interview where the candidate is wearing a full suit of armor'],
   ['cap-06', 'an office meeting where a horse sits at the table and nobody mentions it'], ['cap-08', 'two astronauts on the moon staring at a parking ticket on their rover'], ['cap-09', 'a doctor showing a patient an x-ray with a rubber duck in it'],
-  ['cap-05', 'a couple at a fancy restaurant; the waiter is presenting a single pea under a silver dome'], ['cap-07', 'a man asleep on a pool float drifting far out at sea past a lighthouse and a cargo ship'], ['cap-10', 'a wedding where the groom is checking his phone and the bride is checking hers'],
+  ['cap-05', 'a couple at a fancy restaurant; the waiter is presenting a single pea under a silver dome'], ['cap-07', 'a man asleep on a pool float drifting far out at sea past a lighthouse and a cargo ship'], ['cap-10', 'a wedding where the groom is checking his phone and the bride is checking hers'], ['cap-11', 'a firefighter up a tree while a cat on the ground watches'],
 ];
 // Planned pictures, not yet in art/. Move each up into PICS once its file is there.
 // Pictures still to make. The style for these is drier and more grown-up than a children's book: a deadpan gag
@@ -24,7 +24,7 @@ export const PICS = [
 // is in art/.
 export const PLANNED = [
  
-  ['cap-11', 'a firefighter up a tree while a cat on the ground watches'],
+ 
   ['cap-12', 'a pirate at an airport security checkpoint emptying hooks and swords into a tray'],
 ];
 export const EACH = 100, FAVORITE = 100;
