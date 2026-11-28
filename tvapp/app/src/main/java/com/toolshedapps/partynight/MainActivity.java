@@ -45,8 +45,15 @@ public class MainActivity extends Activity {
         s.setMediaPlaybackRequiresUserGesture(false);    // narration and music start without a click
         s.setUserAgentString(s.getUserAgentString() + " PartyNightTV/" + BuildConfig.VERSION_NAME);
         s.setSupportZoom(false);
-        s.setLoadWithOverviewMode(true);
-        s.setUseWideViewPort(true);
+        // The page is laid out at exactly the screen's width and never zoomed by the web view. (With the 'wide
+        // viewport' and 'overview' modes on, the view re-zoomed the whole page whenever something reached past an edge.)
+        s.setLoadWithOverviewMode(false);
+        s.setUseWideViewPort(false);
+        s.setBuiltInZoomControls(false);
+        s.setTextZoom(100);
+        web.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        web.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        web.setVerticalScrollBarEnabled(false); web.setHorizontalScrollBarEnabled(false);
 
         web.setWebViewClient(new WebViewClient() {
             @Override

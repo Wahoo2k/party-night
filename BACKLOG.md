@@ -179,3 +179,9 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Built by the "TV app" job on GitHub on every change under tvapp/, and published as a download: release "tv-test", file party-night-tv.apk. Short address: wahoo2k.github.io/party-night/get
 - Test builds are signed with tvapp/test-signing.jks, which is in the repository on purpose so each build installs over the last. It must never be used for a store release.
 - Not tested on any device. The same file should install on Fire TV. No store billing yet; with the shop off, nothing is locked.
+
+## First night on the onn box: fixes (Nov 27)
+- Whole picture re-zooming on the TV (background and game together): the app's web view was in "wide viewport / overview" mode, which re-zooms the page whenever anything reaches past an edge. The shell now lays the page out at the screen's exact width with zoom off (needs the new app build). The TV page also locks its own zoom (viewport min and max scale 1) and never lets a game screen scroll or widen the document; GOAT Toss's 3D scene is contained.
+- Stage breathing: the stage no longer re-zooms for small changes in content height (it grows only for 7% or more extra room, shrinks whenever it must). It still changes size between phases whose content differs a lot.
+- Lag: "lite" mode on TV boxes and smart TVs (by user agent, or ?lite=1): no drifting background shapes, no blurs, no soft shadows on moving pieces. Not yet confirmed on the box.
+- Phone: holding a picture (Werewolf's role card) no longer opens the browser's save-image menu. While the on-screen keyboard is up, host controls, "How to play", the "Your move" banner and the Show TV button hide; they return when it closes.

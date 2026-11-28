@@ -245,11 +245,12 @@ export function fitScreen(app) {
 // up as well as down, so it looks the same on a TV box, a laptop and a big monitor. A few design widths are tried
 // and the one that ends up largest on screen wins (tall boards prefer a wider layout).
 let stageH = -1, stageRO = null;
+let stageLast = null;
 export function stageFit(app, on) {
   const st = app.style;
   // Content that grows or shrinks after it is drawn (a tip fading out, a list filling in) triggers a fresh fit.
   if (!stageRO && typeof ResizeObserver === 'function') { stageRO = new ResizeObserver(() => { if (document.body.classList.contains('onstage') && app.offsetHeight !== stageH) stageFit(app, true); }); stageRO.observe(app); }
-  if (!on) { st.transform = ''; st.width = ''; st.maxWidth = ''; st.position = ''; st.left = ''; st.top = ''; st.transformOrigin = ''; st.removeProperty('--vw'); st.removeProperty('--vh'); return fitScreen(app); }
+  if (!on) { stageLast = null; st.transform = ''; st.width = ''; st.maxWidth = ''; st.position = ''; st.left = ''; st.top = ''; st.transformOrigin = ''; st.removeProperty('--vw'); st.removeProperty('--vh'); return fitScreen(app); }
   document.body.classList.remove('compact');
   st.zoom = ''; st.position = 'absolute'; st.left = '50%'; st.maxWidth = 'none'; st.transformOrigin = '50% 0'; st.transform = 'translateX(-50%)';
   const availW = innerWidth * 0.93, top = innerHeight * 0.05, availH = innerHeight * 0.9;
@@ -264,6 +265,9 @@ export function stageFit(app, on) {
     if (!best || z > best.z * 1.04) best = { w, h, z };   // biggest on screen wins; ties go to the narrower layout
   }
   setUnits(best.w); st.width = best.w + 'px';
+  // Small changes in content height (a line of text more or less) don't re-zoom the stage: it only grows when there
+  // is clearly more room, and always shrinks when it must, so the picture isn't seen breathing in and out.
+  if (stageLast && stageLast.w === best.w && stageLast.iw === innerWidth && stageLast.ih === innerHeight && best.z >= stageLast.z && best.z < stageLast.z * 1.07) best.z = stageLast.z;
   // Keep clear of the join badge in the bottom-left corner: shrink just enough that the two don't overlap.
   const jq = document.getElementById('joinqr'), jr = jq && !jq.hidden ? jq.getBoundingClientRect() : null;
   if (jr && jr.width) {
@@ -274,6 +278,7 @@ export function stageFit(app, on) {
   st.top = Math.round(top + Math.max(0, availH - best.h * best.z) * 0.42) + 'px';
   st.transform = `translateX(-50%) scale(${best.z.toFixed(3)})`;
   stageH = app.offsetHeight;
+  stageLast = { w: best.w, z: best.z, iw: innerWidth, ih: innerHeight };
   return best.z;
 }
 export function keepFitted(app) {

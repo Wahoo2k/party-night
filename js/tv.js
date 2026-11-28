@@ -1014,6 +1014,7 @@ function render() {
   const onStage = host.state || host.intro;
   document.body.dataset.theme = onStage ? THEME_OF[host.gameId] || '' : '';
   document.body.dataset.game = onStage ? host.gameId : '';
+  document.documentElement.style.overflow = onStage ? 'hidden' : '';   // a game screen never scrolls or widens the page
   document.body.classList.toggle('inlobby', !onStage);
   document.body.classList.toggle('onstage', !!onStage);
   document.body.classList.toggle('hubmode', !onStage && (host.screen || 'menu') === 'menu');
@@ -1147,6 +1148,10 @@ window.partyBack = () => {
   if (!host.state && !host.intro && host.screen && host.screen !== 'menu') { hostAction('menu'); return true; }
   return false;
 };
+
+// TV boxes and smart TVs have weak graphics chips. On them the page drops its most expensive effects (blurs, soft
+// shadows on moving pieces, the drifting background shapes); the games look the same otherwise.
+if (/PartyNightTV|Android TV|GoogleTV|AFT[A-Z]|BRAVIA|SmartTV|SMART-TV|Tizen|Web0S|webOS|Roku|CrKey/i.test(navigator.userAgent) || tq.has('lite')) document.body.classList.add('lite');
 
 connect();
 

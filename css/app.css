@@ -2267,3 +2267,21 @@ body.phone .ducks-mini .gspr{width:84px}
 .unlockhead>div{display:grid;gap:6px;min-width:0}
 .unlockart{flex:0 0 32%;width:auto;position:relative}
 .unlockinfo h2{font-size:clamp(26px,calc(3.4*var(--vw,1vw)),60px)}
+
+/* Nothing on a game screen may widen or scroll the page: a TV's web view answers that by zooming the whole picture. */
+html:has(body.onstage),body.onstage{overflow:hidden}
+.gtable.g3d{contain:layout}
+/* Lite mode for TV boxes (set from js/tv.js): the costly effects go, the look stays. */
+body.lite #backdrop{display:none!important}
+body.lite *,body.lite *::before,body.lite *::after{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+body.lite .g3d .g3 .gspr,body.lite .g3d .gcup,body.lite .goatpic{filter:none!important}
+body.lite .g3d .gtop{box-shadow:none}
+body.lite .stage .panel{box-shadow:0 6px 16px #0006}
+
+/* Phones: pressing and holding a picture (to peek at a secret role, say) must never bring up the browser's
+   save-image menu or start a drag. Pictures on the phone are for looking at; taps go to the button around them. */
+body.phone img{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none;pointer-events:none}
+body.phone{-webkit-touch-callout:none}
+
+/* Phone, keyboard up: only the question, the box and the send button. */
+body.phone.typing #hostfab,body.phone.typing #helpbtn,body.phone.typing .actbar,body.phone.typing #tvbtn{display:none!important}

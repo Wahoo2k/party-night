@@ -204,6 +204,27 @@ async function keepsake(n, btn) {
     toast('Saved to your downloads');
   } catch (e) { if (e?.name !== 'AbortError') { btn.textContent = 'Could not save the picture'; } }
 }
+// No long-press menus on the controller: holding is a game gesture here (peek at a role, hold to buzz).
+document.addEventListener('contextmenu', e => { if (!e.target.closest?.('input, textarea')) e.preventDefault(); });
+document.addEventListener('dragstart', e => e.preventDefault());
+// While the on-screen keyboard is up, the phone shows only what the typist needs: the question, the box and the send
+// button. The floating extras (host controls, "How to play", the "Your move" banner) step aside until it closes.
+// "Keyboard up" means a text box has the cursor AND the visible screen has shrunk; a box that merely has the cursor
+// (they often do, as soon as a question appears) changes nothing.
+let tallest = 0;
+function typingCheck() {
+  const vv = window.visualViewport, h = vv ? vv.height : innerHeight;
+  tallest = Math.max(tallest, h);
+  const box = document.activeElement?.matches?.('input:not([type=checkbox]):not([type=radio]):not([type=range]), textarea');
+  const up = !!box && h < tallest - 120;
+  if (up && !document.body.classList.contains('typing')) setTimeout(() => (document.activeElement?.closest?.('form') || document.activeElement)?.scrollIntoView?.({ block: 'center', behavior: 'smooth' }), 200);
+  document.body.classList.toggle('typing', up);
+}
+window.visualViewport?.addEventListener('resize', typingCheck);
+addEventListener('resize', typingCheck);
+addEventListener('orientationchange', () => { tallest = 0; setTimeout(typingCheck, 400); });
+document.addEventListener('focusin', () => setTimeout(typingCheck, 350));
+document.addEventListener('focusout', () => setTimeout(typingCheck, 300));
 function chime() {
   if (!actx || actx.state !== 'running') return;
   try { [[660, 0], [880, 0.12]].forEach(([f, t]) => { const o = actx.createOscillator(), g = actx.createGain(); o.type = 'sine'; o.frequency.value = f; g.gain.setValueAtTime(0.0001, actx.currentTime + t); g.gain.exponentialRampToValueAtTime(0.18, actx.currentTime + t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + t + 0.22); o.connect(g).connect(actx.destination); o.start(actx.currentTime + t); o.stop(actx.currentTime + t + 0.25); }); } catch {}
@@ -213,6 +234,7 @@ function chime() {
 // watch the TV when there's nothing to tap, your points the moment you score, and your place at the end.
 let couldAct = false, lastGain = 0, lastPlace = '', remoteOpen = false;
 function polish(v, wrap, isNew) {
+  typingCheck();
   const canAct = !!wrap.querySelector('button:not([disabled]):not(#leave), input:not([disabled]), textarea, canvas, [data-pad], svg.pad');
   // A bar across the top of every screen says, in one line, whether it is your move and what to do.
   const help = (GAMES[v.game] || {}).phoneHelp?.(v) || null;
