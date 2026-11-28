@@ -89,8 +89,12 @@ export function tick(s, now = Date.now(), rnd = Math.random) {
 }
 
 const ranking = s => s.players.map(p => ({ pid: p.pid, name: p.name, score: s.scores[p.pid] })).sort((a, b) => b.score - a.score);
+const say = (lines, k) => lines[((k % lines.length) + lines.length) % lines.length];   // the host does not say the same thing every round
+
 export function narration(s) {
   if (s.phase === 'setup') return 'Welcome to Shake It! Your phone is the controller. Hold on to it tightly.';
+  if (s.phase === 'ready') { const k = kind(s); return k === 'shake' ? say(['Shake race! Shake your phone as hard as you can.', 'Shake race again. Hold on tight!'], s.i) : k === 'draw' ? say(['Quick draw! Hold still. When the TV says GO, flick your phone, and not before.', 'Quick draw again. Steady… wait for it.'], s.i) : say(['Statue! Phone flat on your open palm, arm out. Whoever moves least wins.', 'Statue again. Nobody move.'], s.i); }
+  if (s.phase === 'result') { const rows = s.result.rows; return !rows.some(r => r.pts > 0) ? 'Nobody scored. Did anyone pick up their phone?' : say(['And the results!', 'Here is how you did.', 'Shaken, and scored.'], s.i); }
   if (s.phase === 'over') return 'And that is the game. Thanks for playing!';
   return '';
 }

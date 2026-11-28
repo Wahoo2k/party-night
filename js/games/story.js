@@ -138,8 +138,13 @@ export function tick(s, now = Date.now(), rnd = Math.random) {
 }
 
 const ranking = s => s.players.map(p => ({ pid: p.pid, name: p.name, score: s.scores[p.pid] })).sort((a, b) => b.score - a.score);
+const say = (lines, k) => lines[((k % lines.length) + lines.length) % lines.length];   // the host does not say the same thing every round
+
 export function narration(s) {
-  if (s.phase === 'fill' && s.i === 0) return 'Welcome to Silly Story! Your phone wants a few words. Don\'t ask why.';
+  if (s.phase === 'fill') return s.i === 0 ? 'Welcome to Silly Story! Your phone wants a few words. Don\'t ask why.' : say(['Another story. More words, please.', 'Round two. Be even sillier.', 'New story. Same nonsense.'], s.i);
+  if (s.phase === 'story') return say(['Here is the story you wrote. Read along!', 'And now, the masterpiece.', 'Settle in. Story time.'], s.i);
+  if (s.phase === 'vote') return say(['Which word was the funniest? Vote on your phone.', 'Tap the word that made the story.', 'Pick your favorite word.'], s.i);
+  if (s.phase === 'result') return say(['And the best words were…', 'The room has voted.', 'Those words did the heavy lifting.'], s.i);
   if (s.phase === 'over') return 'The end. Thanks for playing!';
   return '';
 }

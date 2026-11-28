@@ -2,8 +2,8 @@
 
 Built by `node test/narration-script.mjs` from 2000 bot-played games of each title. One clip per sentence; the full list with clip ids is `record-list.csv`.
 
-- **Host voice:** 6118 clips, 167,446 characters.
-- **Night narrator** (Werewolf, Midnight Wolves, Haunted Quiz): 259 clips, 7,148 characters.
+- **Host voice:** 6283 clips, 172,147 characters.
+- **Night narrator** (Werewolf, Midnight Wolves, Haunted Quiz): 257 clips, 7,132 characters.
 - Sentences that carry a player's name or text a player typed have no clip and are not spoken.
 - Host banter by moment is in QUIPS.md.
 
@@ -13,23 +13,21 @@ Every game (11):
 - Welcome to Pin Drop!
 - Drop your pin on the map.
 - Closest wins.
-- Close!
 - On we go.
 - Not far off.
 - Where to now?
+- Close!
 - Pack your bags.
 - Next stop.
 - That's the whole world tour.
 - Thanks for playing!
 
-Questions, words and answers (477, 15,826 characters), for example:
-- Where in the world is the Colosseum?
-- It is in Rome, Italy.
-- Where in the world is the city of Bangkok?
-- It is in Thailand.
-- Where in the world is Mont-Saint-Michel?
-
-Not spoken: 1 sentence with a player's name (e.g. “Where in the world is the city of {name}ivostok?”).
+Questions, words and answers (478, 15,876 characters), for example:
+- Where in the world is the Aral Sea?
+- It is in Kazakhstan and Uzbekistan.
+- Where in the world is Death Valley?
+- It is in California, USA.
+- Where in the world is the Hollywood Sign?
 
 ## Top Spot (topspot) · host
 
@@ -37,13 +35,13 @@ Every game (18):
 - Welcome to Top Spot!
 - One guess each.
 - Aim for the most popular answer.
-- Everybody is on the board.
+- Let us see who is on the board.
 - Deep Cut.
 - Go for the bottom of the board.
 - A full house.
 - Top Spot again.
 - Think like everyone else.
-- Let us see who is on the board.
+- The survey says…
 - The Sweep!
 - Everyone, find as many answers as you can.
 - Time!
@@ -51,14 +49,14 @@ Every game (18):
 - And that's the survey.
 - Thanks for playing!
 - Some of you got there.
-- The survey says…
+- Everybody is on the board.
 
 Questions, words and answers (57, 1,841 characters), for example:
-- Name an animal you might see on a farm.
+- Name something you do on a road trip.
 - Name something with buttons.
-- Name a thing people do on New Year's Eve.
-- Name a place where you have to be quiet.
-- Name something a baby does.
+- Name something you wear in winter.
+- Name a holiday.
+- Name something people are afraid of.
 
 ## Line Up (lineup) · host
 
@@ -67,21 +65,21 @@ Every game (12):
 - Put the five things in order on your phone.
 - A perfect line-up!
 - Five more to sort.
-- Here is how it should look.
+- Somebody got every one right.
 - Line them up.
 - Another one.
-- Somebody got every one right.
 - Next line-up.
 - Everything is in its place.
 - Thanks for playing!
 - Nobody got it perfect.
+- Here is how it should look.
 
-Questions, words and answers (39, 1,012 characters), for example:
-- Closest to the Sun to farthest.
+Questions, words and answers (43, 1,118 characters), for example:
+- Shortest animal to tallest.
+- Smallest number to biggest.
 - Smallest ocean to largest.
-- Earliest in the year to latest.
-- Lightest to heaviest.
-- Coldest to hottest.
+- Fewest players on the field to most.
+- Invented first to invented last.
 
 ## One Word (oneword) · host
 
@@ -96,22 +94,22 @@ Every game (19):
 - Yes!
 - Nice work, team.
 - Clues, please.
-- Correct!
+- Not this time.
 - One word each.
 - Make it count.
-- Not quite.
 - Next word.
-- So close.
+- Correct!
 - That's the game.
 - Nice work, team!
-- Not this time.
+- Not quite.
+- So close.
 
 Questions, words and answers (208, 3,861 characters), for example:
-- The word was Shadow.
-- The word was Queen.
-- The word was Orange.
-- The word was Square.
-- The word was Helmet.
+- The word was Spider.
+- The word was Battery.
+- The word was Bug.
+- The word was Boot.
+- The word was Star.
 
 ## Silly Story (story) · host
 
@@ -133,26 +131,26 @@ Every game (21):
 - Here it comes.
 - Not everyone made it through.
 - Lives on the line.
-- That cost a life.
+- Everyone survives.
 - Ready?
+- That is a knockout.
 - Next question.
-- Somebody is out of lives.
 - Stay sharp.
 - And we have lost someone.
-- Nobody got it, so nobody is hurt.
-- Everyone survives.
-- No lives lost.
-- A clean round.
+- Somebody is out of lives.
 - And that is the game.
 - Thanks for playing!
-- That is a knockout.
+- That cost a life.
+- A clean round.
+- No lives lost.
+- Nobody got it, so nobody is hurt.
 
 Questions, words and answers (341, 10,509 characters), for example:
-- Which instrument has black and white keys?
-- The answer is Piano.
-- Which shape has four equal sides?
-- The answer is Square.
-- How many legs does a spider have?
+- How many continents are there?
+- The answer is 7.
+- What is the capital of the United States?
+- The answer is Washington, D.C..
+- What do you wear on your feet?
 
 ## Shake It (shake) · host
 
@@ -169,29 +167,29 @@ Every game (19):
 - Welcome to Fact or Fib!
 - True or false?
 - Keep getting them right to build a streak.
-- True!
+- False!
 - How about this one?
 - That is a fact.
-- Too easy.
 - Here we go.
 - Fact!
-- False!
 - Next one.
 - Try this.
-- Nope.
-- A fib.
+- True!
 - Fib!
 - Last one.
 - Streaks still count.
 - And that is the game.
 - Thanks for playing!
+- Nope.
+- A fib.
+- Too easy.
 
 Questions, words and answers (313, 10,871 characters), for example:
-- Antarctica is a desert.
-- It gets almost no rain or snow.
-- Butterflies taste with their feet.
-- They stand on dinner to check it.
-- The shortest war in history lasted less than an hour.
+- The Titanic sank on its tenth voyage.
+- It sank on its first.
+- Tomatoes were once feared as poisonous in Europe.
+- People called them poison apples.
+- Hawaii moves a few inches closer to Japan every year.
 
 ## Inner Clock (clock) · host
 
@@ -199,6 +197,7 @@ Every game (23):
 - Welcome to Inner Clock!
 - Stop the clock at exactly the right moment.
 - It will not stay on screen for long.
+- Stop at eight seconds.
 - Nobody stopped the clock!
 - Again.
 - Stop at nine seconds.
@@ -211,21 +210,20 @@ Every game (23):
 - Double points!
 - And that is the game.
 - Thanks for playing!
-- Stop at eleven seconds.
-- Stop at eight seconds.
-- Stop at six seconds.
-- Stop at thirteen seconds.
-- Stop at ten seconds.
 - Stop at seven seconds.
-- Stop at fifteen seconds.
+- Stop at thirteen seconds.
+- Stop at sixteen seconds.
+- Stop at eleven seconds.
+- Stop at ten seconds.
+- Stop at six seconds.
 - Stop at seventeen seconds.
 
 Questions, words and answers (6, 143 characters), for example:
-- Stop at five seconds.
-- Stop at eighteen seconds.
-- Stop at sixteen seconds.
+- Stop at fifteen seconds.
 - Stop at twenty seconds.
 - Stop at fourteen seconds.
+- Stop at eighteen seconds.
+- Stop at five seconds.
 
 ## Doodle Dash (dash) · host
 
@@ -246,11 +244,11 @@ Every game (14):
 - Thanks for playing!
 
 Questions, words and answers (160, 3,209 characters), for example:
-- The word was shark.
-- The word was mermaid.
-- The word was mask.
-- The word was cowboy.
-- The word was tree.
+- The word was alien.
+- The word was ghost.
+- The word was volcano.
+- The word was boat.
+- The word was astronaut.
 
 ## Gold Rush (gold) · host
 
@@ -263,28 +261,28 @@ Every game (23):
 - Here we go.
 - Open one.
 - Carefully.
-- Thief!
+- Jackpot!
 - For a chest.
 - Pick a chest!
 - Next question.
+- Thief!
 - More gold on the table.
-- The big one!
 - A swap!
 - Scores change hands.
 - Last question.
 - Last chests.
 - And that is the game.
 - Thanks for playing!
-- A good haul.
-- Jackpot!
+- The big one!
 - Gold everywhere but in the bag.
+- A good haul.
 
 Questions, words and answers (232, 6,870 characters), for example:
-- In which direction does the Sun rise?
-- The answer is East.
-- Which sport is played at Wimbledon?
-- The answer is Tennis.
-- How many hours are in a day?
+- Which ocean lies between America and Europe?
+- The answer is Atlantic.
+- How many zeros are in one million?
+- The answer is 6.
+- What is the smallest planet in our solar system?
 
 ## Rock Paper Showdown (rps) · host
 
@@ -292,21 +290,21 @@ Every game (18):
 - Welcome to Rock Paper Showdown!
 - Everyone throws at once.
 - You score for every player you beat.
-- Paper covers rock!
+- Rock, paper and scissors.
+- Everybody beats somebody.
 - Rock, paper, scissors!
 - A bit of everything.
 - Points all round!
 - Ready?
 - Throw!
-- Rock, paper and scissors.
-- Everybody beats somebody.
-- Rock crushes scissors!
+- Scissors cut paper!
 - Again!
+- Paper covers rock!
 - Final throw.
 - Double points!
 - And that is the game.
 - Thanks for playing!
-- Scissors cut paper!
+- Rock crushes scissors!
 
 Questions, words and answers (2, 35 characters), for example:
 - Everybody threw the same.
@@ -324,24 +322,24 @@ Every game (20):
 - Lot two.
 - Somebody overpaid.
 - Lot three.
-- That one will sting.
+- Worth every coin.
 - Lot four.
-- Ouch.
-- That cost too much.
 - Lot five.
-- Nicely done.
 - Lot six.
 - Lot seven.
 - And that is the game.
 - Thanks for playing!
-- Worth every coin.
+- Ouch.
+- That cost too much.
+- Nicely done.
+- That one will sting.
 
 Questions, words and answers (50, 1,566 characters), for example:
-- A hot air balloon with a small hole.
-- A trunk of magician's props.
+- A guitar that belonged to a legend.
+- A weather vane shaped like a pig.
 - A snow globe of a town that does not exist.
-- A mystery crate, still nailed shut.
-- A crown from a school play.
+- A very fancy cheese, aged 40 years.
+- A jar of very old coins.
 
 ## Word Storm (grid) · host
 
@@ -366,11 +364,11 @@ Every game (4):
 - Thanks for playing!
 
 Questions, words and answers (44, 984 characters), for example:
-- It was a train horn.
-- It was a dog barking.
-- It was tape pulled off a roll.
-- It was a ping-pong rally.
+- It was a kettle whistling.
+- It was a referee's whistle.
 - It was a rooster.
+- It was a zipper.
+- It was a horse galloping.
 
 ## Caption This (caption) · host
 
@@ -380,20 +378,20 @@ Every game (19):
 - Write the funniest caption you can.
 - The captions are in.
 - Vote for the best one!
-- A tie for favorite!
+- We have a favorite!
 - Another one.
 - Make it funny.
 - Read them all, then pick your favorite.
+- A tie for favorite!
 - New picture, new captions.
 - Which one made you laugh?
 - Vote now.
-- And that one wins the round.
 - What is going on here?
 - You tell us.
 - And that is the game.
 - Thanks for playing!
-- We have a favorite!
 - The room has spoken.
+- And that one wins the round.
 
 ## Werewolf (werewolf) · night narrator
 
@@ -409,33 +407,32 @@ Every game (31):
 - Everyone else, pick who you suspect.
 - Good morning, village.
 - Claw marks lead into the forest.
-- They were a Villager.
+- They were a Seer.
 - Now talk it over.
 - Who do you suspect?
 - Time to vote.
 - Choose who leaves the village on your phone.
+- They were a Doctor.
 - Night 2.
 - The village sleeps.
 - Make your choice on your phone, and not a sound.
 - A scream at midnight.
-- They were a Doctor.
+- They were a Villager.
+- The vote was split, so nobody was voted out.
+- Night 3.
 - The werewolves win!
 - They now outnumber the village.
-- The vote was split, so nobody was voted out.
 - They were a Werewolf.
 - The village wins!
 - Every werewolf has been found.
-- They were a Seer.
 - Howls echoed through the night, but the Doctor got there first.
 - Everyone survived!
-- Night 3.
 
-Questions, words and answers (6, 64 characters), for example:
+Questions, words and answers (4, 48 characters), for example:
 - Night 4.
 - Night 5.
-- Night 6.
 - The wolves feasted well.
-- Night 7.
+- Night 6.
 
 Not spoken: 6 sentences with a player's name (e.g. “The village wakes to find {name} gone.”).
 
@@ -455,11 +452,11 @@ Every game (11):
 - The imposter got away!
 
 Questions, words and answers (166, 3,628 characters), for example:
-- The category is Holidays.
-- The word was Fourth of July.
-- The category is Animals.
-- The word was Owl.
 - The category is Things.
+- The word was Guitar.
+- The category is Holidays.
+- You caught the imposter!
+- But wait.
 
 ## Tall Tales (bluff) · host
 
@@ -475,10 +472,10 @@ Every game (8):
 
 Questions, words and answers (66, 3,192 characters), for example:
 - Some cats are allergic to blank.
-- It's impossible to hum while holding your blank.
+- The national animal of Scotland is the blank.
+- A shrimp's heart is located in its blank.
+- Mr. Potato Head was the first toy ever advertised on blank.
 - The planet Pluto was named by an 11-year-old girl from blank.
-- The tiny pocket inside the front pocket of jeans was first made to hold a blank.
-- A baby porcupine is called a blank.
 
 ## Who Said That? (whosaid) · host
 
@@ -493,135 +490,136 @@ Every game (8):
 - Turns out you don't know each other as well as you thought.
 
 Questions, words and answers (71, 2,961 characters), for example:
-- If you could live anywhere in the world, where?
-- What would your superhero name be?
-- If you were famous, what would you be famous for?
-- What's the best thing you know how to cook?
-- What's a tradition you'd love to start?
+- What's the best sound in the world?
+- Where's the strangest place you've fallen asleep?
+- What would you want your last meal to be?
+- What's your least favorite household sound?
+- What's the longest you've gone without sleep, and why?
 
-Not spoken: 1 sentence with a player's name (e.g. “It was {name}!”), 543 with typed text (e.g. “Someone answered: Japan.”).
+Not spoken: 1 sentence with a player's name (e.g. “It was {name}!”), 544 with typed text (e.g. “Someone answered: A baby laughing.”).
 
 ## GOAT Toss (ducks) · host
 
-Every game (26):
+Every game (27):
 - Welcome to GOAT Toss!
 - First to 100 points is the greatest of all time.
 - You're up first.
 - Swipe up on your phone to toss.
-- Stampede!
-- 20 points!
-- Double hooves up!
-- They butt heads!
-- Turn over.
-- Hooves up + On all fours!
+- On all fours + Hooves up!
 - 10!
-- Nose dive!
+- Banked!
 - Hooves up + Horn stand!
 - 20!
-- Horn stand!
+- Double hooves up!
+- 20 points!
+- They butt heads!
+- Turn over.
+- Nose dive!
+- But the underdog keeps 2.
+- Nose dive + Hooves up!
 - 15!
+- Hooves up + Nose dive!
+- Horn stand!
 - Horn stand + Hooves up!
-- On all fours + Hooves up!
+- On all fours + Nose dive!
+- Hooves up + On all fours!
+- Stampede!
 - Goat pile!
 - There goes your whole score!
-- Hooves up + Nose dive!
-- On all fours + Nose dive!
-- Nose dive + Hooves up!
-- But the underdog keeps 2.
 - Nose dive + On all fours!
 - But the underdog keeps 5.
 
 Questions, words and answers (18, 382 characters), for example:
-- Horn stand + On all fours!
-- But the underdog keeps 7.
-- But the underdog keeps 1.
 - On all fours + Horn stand!
-- Double nose dive!
+- Horn stand + Nose dive!
+- 25!
+- But the underdog keeps 3.
+- But the underdog keeps 10.
 
-Not spoken: 70 sentences with a player's name (e.g. “{name} banks 25.”).
+Not spoken: 67 sentences with a player's name (e.g. “{name} banks 16.”).
 
 ## Trivia Board (trivia) · host
 
 Every game (8):
 - Welcome to Trivia Board!
 - Pick a category on your phone.
-- Correct!
-- Pick the next one.
 - You found the Wager Tile!
 - How much will you bet?
+- Pick the next one.
+- Correct!
 - Time for the Final Bet.
 - Everyone, place your bet on your phone.
 
-Questions, words and answers (361, 12,336 characters), for example:
-- French fries are traditionally made from this vegetable.
-- This pricey spice comes from the dried threads of a crocus flower.
-- The color of the medal for first place.
-- The main ingredient in hummus.
-- The four-member British band known as the Fab Four.
+Questions, words and answers (363, 12,433 characters), for example:
+- The answer was Japanese.
+- The appliance that keeps food cold.
+- The instrument with six strings that you strum.
+- "Bonjour" means hello in this language.
+- You use this to sweep up dust and crumbs from carpet with suction.
 
-Not spoken: 4 sentences with a player's name (e.g. “{name}”).
+Not spoken: 2 sentences with a player's name (e.g. “{name}”).
 
 ## Spin & Solve (spin) · host
 
 Every game (51):
 - Welcome to Spin and Solve!
-- The category is Thing.
-- Spin the wheel on your phone.
-- 2 T's
-- No N
-- Skip!
-- No S
-- One R
-- No E
-- One H
-- One A
-- One L
-- No D
-- No O
-- One C
-- Round 2.
-- No T
-- One N
-- One S
-- No R
-- No H
-- No C
-- No M
-- 2 E's
-- One P
-- Round 3.
-- The category is Phrase.
-- 2 S's
-- 2 H's
-- Wipeout!
-- One D
-- No G
-- No P
-- The category is Event.
-- One T
-- One E
-- No B
-- No L
-- 2 A's
 - The category is Place.
-- One G
-- No F
-- Sorry, no.
-- 2 L's
-- The category is Food & Drink.
-- One M
-- No A
-- 2 N's
+- Spin the wheel on your phone.
+- Skip!
+- 2 T's
+- One N
 - 3 E's
+- One S
+- One R
+- No A
+- No H
+- No L
+- No D
+- Round 2.
+- The category is Thing.
+- No T
+- 2 E's
+- One A
+- No R
+- One L
+- No C
+- Wipeout!
+- No M
+- Sorry, no.
+- Round 3.
+- The category is Food & Drink.
+- One E
+- No S
 - 2 R's
+- One M
+- 2 A's
+- No G
 - The category is Fun & Games.
+- One T
+- No N
+- One H
+- One D
+- No E
+- 2 N's
+- One P
+- No B
+- No F
+- The category is Phrase.
+- No O
+- No P
+- One G
+- The category is Event.
+- 2 S's
+- 2 L's
+- 2 H's
+- One C
 
 Questions, words and answers (63, 324 characters), for example:
-- 2 I's
+- One O
 - 2 G's
-- 3 T's
-- 2 B's
-- 2 M's
+- 2 C's
+- 2 P's
+- 5 E's
 
 Not spoken: 2 sentences with a player's name (e.g. “{name} solved it!”).
 
@@ -629,29 +627,29 @@ Not spoken: 2 sentences with a player's name (e.g. “{name} solved it!”).
 
 Every game (11):
 - Welcome to Crowd Says!
-- Team Moon takes 100 points!
-- Strike 1!
-- Final round, double points!
 - Strike 2!
-- Team Moon wins Crowd Says!
-- Team Sun takes 100 points!
-- Team Sun wins Crowd Says!
 - Three strikes!
 - One guess to steal the points.
 - Strike 3!
+- Final round, double points!
+- Team Moon wins Crowd Says!
+- Team Sun wins Crowd Says!
+- Strike 1!
+- Team Sun takes 100 points!
+- Team Moon takes 100 points!
 
-Questions, words and answers (310, 8,399 characters), for example:
-- Name a reason to call in sick.
-- Name a reason a dog might bark.
-- Team Sun takes 97 points!
-- Name something that is sticky.
-- Name a chore kids hate.
+Questions, words and answers (304, 8,244 characters), for example:
+- Name a pet.
+- Team Sun takes 98 points!
+- Name an animal you might see on a farm.
+- Team Moon takes 71 points!
+- Name something people do when they can't sleep.
 
 Not spoken: 1 sentence with a player's name (e.g. “Face-off: {name} versus {name}.”).
 
 ## Bingo (bingo) · host
 
-Every game (91):
+Every game (94):
 - Welcome to Bingo!
 - Pick numbers or pictures on the TV.
 - Round 1: Any line.
@@ -660,91 +658,94 @@ Every game (91):
 - N.
 - 31.
 - O.
-- 70.
-- I.
-- 29.
-- 44.
+- 74.
 - B.
-- 6.
+- 8.
 - G.
-- 56.
-- 19.
-- 12.
-- 71.
-- 17.
-- 11.
+- 48.
+- 35.
+- I.
+- 21.
+- 67.
+- 51.
+- 36.
+- 1.
 - 34.
-- 60.
-- 28.
-- 69.
-- 68.
+- 63.
+- 49.
+- 72.
+- 46.
+- 47.
+- 43.
+- 53.
 - 24.
-- 66.
+- 27.
+- 26.
+- 19.
+- 37.
+- 60.
+- 44.
+- 56.
+- 39.
+- Bingo!
+- We have a winner.
+- Well done!
 - Round 2: Four corners.
 - All four corner squares.
-- 9.
-- 38.
-- 73.
-- 39.
-- 40.
-- 67.
-- 37.
+- 6.
 - 13.
-- 42.
-- 14.
-- 43.
-- 2.
-- 36.
-- 53.
-- 33.
-- 1.
-- 22.
-- 7.
-- 16.
-- 23.
-- 55.
-- 61.
-- 27.
-- 64.
 - 45.
-- 35.
-- 49.
-- 62.
-- 59.
+- 55.
+- 7.
+- 70.
 - 15.
+- 50.
+- 30.
+- 14.
+- 32.
+- 62.
+- 29.
+- 66.
+- 2.
+- 69.
 - Round 3: Full card.
 - Every square on the card.
-- 58.
-- 25.
-- 41.
-- 51.
-- 21.
-- 5.
-- 52.
-- 32.
-- 75.
-- 74.
-- 54.
-- 65.
+- 59.
+- 73.
+- 9.
+- 61.
+- 12.
+- 28.
+- 22.
+- 17.
 - 20.
-- 63.
-- 8.
-- 50.
-- 57.
-- 46.
+- 38.
+- 75.
+- 40.
+- 68.
+- 33.
+- 71.
+- 11.
+- 54.
+- 64.
 - 10.
-- 26.
-- 48.
-- 30.
-- 47.
 - 4.
-- 72.
+- 41.
+- 16.
+- 52.
 - 3.
+- 25.
+- 23.
 - That's all for Bingo.
 - Thanks for playing!
+- 65.
+- 42.
 - 18.
+- 57.
+- 58.
+- 5.
 
-Not spoken: 6 sentences with a player's name (e.g. “Bingo for {name}!”).
+Not spoken: 5 sentences with a player's name (e.g. “Well done, {name} and {name} and {name}!”).
 
 ## Show of Hands (quick) · host
 
@@ -752,14 +753,14 @@ Every game (2):
 - That's the pack!
 - Here's who read the room best.
 
-Questions, words and answers (331, 14,279 characters), for example:
-- Best road trip snack?
-- Most of you picked Chips and Candy and Beef jerky!
-- Would you rather give up dessert, or give up pizza?
-- Most of you picked Give up dessert!
-- Who is most likely to start a dance party?
+Questions, words and answers (327, 14,200 characters), for example:
+- Best way to spend a rainy day?
+- Most of you picked Movie marathon!
+- Would you rather talk to animals, or speak every human language?
+- Most of you picked Talk to animals!
+- Who is most likely to get lost in a grocery store?
 
-Not spoken: 4 sentences with a player's name (e.g. “The room says: {name}!”).
+Not spoken: 4 sentences with a player's name (e.g. “The room says: {name} and {name}!”).
 
 ## Million Ladder (ladder) · host
 
@@ -770,6 +771,7 @@ Every game (23):
 - For 1,000 points.
 - Locked in.
 - Let's see…
+- Oh no!
 - Correct!
 - 1,000 points.
 - For 2,000 points.
@@ -783,57 +785,57 @@ Every game (23):
 - For 50,000 points.
 - 50,000 points.
 - For 100,000 points.
-- Oh no!
 - 100,000 points.
 - For 250,000 points.
 - That's the end of Million Ladder!
 
 Questions, words and answers (347, 10,789 characters), for example:
-- In which direction does the Sun rise?
-- How many fingers are on one hand?
+- How many wheels does a tricycle have?
+- The answer was 3.
 - How many sides does a triangle have?
-- Which planet is known for its Great Red Spot?
-- Which country gifted the Statue of Liberty to the U.S.?
+- Which fruit is dried to make raisins?
+- What color is a ripe strawberry?
 
 Not spoken: 3 sentences with a player's name (e.g. “{name} walks away with 100,000 points.”).
 
 ## Pick a Case (cases) · host
 
-Every game (25):
+Every game (26):
 - Welcome to Pick a Case!
 - Sixteen cases, one hundred thousand points in one of them.
 - Pick the case you'll keep.
 - Everyone else, pick your lucky case.
-- 25,000
-- 25
+- 1,000
+- 75,000
+- 100
 - 50
-- 50,000
 - The phone is ringing.
 - Deal, or keep going?
 - No deal!
-- 1,000
-- 75,000
-- 500
-- 10
+- 50,000
 - 250
+- 10
+- 500
+- 2,500
 - 100,000
 - 5,000
-- 10,000
-- 100
+- 25,000
 - Two cases left.
 - Keep yours, or swap?
-- 2,500
-- Deal!
+- No deal, all the way to the end!
+- 10,000
+- 25
 - That's the end of Pick a Case!
+- Deal!
 
-Questions, words and answers (442, 12,781 characters), for example:
-- The buyer offers 5,200 points.
-- The buyer offers 5,900 points.
-- The buyer offers 1,700 points.
-- The buyer offers 465 points.
-- The buyer offers 730 points.
+Questions, words and answers (442, 12,786 characters), for example:
+- The buyer offers 5,150 points.
+- The buyer offers 7,150 points.
+- The buyer offers 13,500 points.
+- The buyer offers 6,200 points.
+- The buyer offers 9,800 points.
 
-Not spoken: 175 sentences with a player's name (e.g. “{name} wins 5 points!”).
+Not spoken: 176 sentences with a player's name (e.g. “{name} wins 10,000 points!”).
 
 ## Funny Answers (funny) · host
 
@@ -849,11 +851,11 @@ Every game (9):
 - That's the game!
 
 Questions, words and answers (127, 4,681 characters), for example:
-- The worst thing to pack for the beach.
-- The first rule of the secret club in the treehouse.
-- A terrible name for a pet goldfish.
-- A terrible slogan for a hotel.
-- Something a wizard would complain about.
+- What's really at the end of the rainbow.
+- A bad invention for the kitchen.
+- The worst song to play at a wedding.
+- A rejected ice cream flavor.
+- The worst way to wake someone up.
 
 ## Letter Lists (letters) · host
 
@@ -863,39 +865,40 @@ Every game (4):
 - Go!
 - That's the game!
 
-Questions, words and answers (56, 815 characters), for example:
-- Your letter is C.
-- A drink.
-- Your letter is J.
-- Something hot.
-- Your letter is E.
+Questions, words and answers (92, 1,462 characters), for example:
+- Your letter is B.
+- An ice cream flavor.
+- Your letter is I.
+- A fruit.
+- Your letter is H.
 
 ## Taboo Talk (taboo) · host
 
-Every game (16):
+Every game (17):
 - Welcome to Taboo Talk!
 - Team Sun, you're up.
 - You're giving clues.
 - Press start on your phone when your team is ready.
 - Taboo!
 - Time!
-- Team Sun got 25.
 - Team Moon, you're up.
+- Team Sun got 25.
+- Team Sun got 24.
+- Team Moon got 24.
+- Team Sun wins Taboo Talk!
+- Team Moon got 26.
 - Team Moon wins Taboo Talk!
 - Team Sun got 26.
-- Team Moon got 26.
 - Team Moon got 27.
-- Team Sun wins Taboo Talk!
 - Team Sun got 27.
-- Team Moon got 24.
 - Team Moon got 25.
 
-Questions, words and answers (39, 638 characters), for example:
-- Team Moon got 31.
-- Team Sun got 22.
+Questions, words and answers (35, 572 characters), for example:
+- Team Sun got 23.
+- Team Moon got 18.
+- Team Moon got 28.
+- Team Sun got 28.
 - Team Moon got 23.
-- Team Sun got 19.
-- Team Moon got 29.
 
 ## Secret Agents (agents) · host
 
@@ -903,18 +906,18 @@ Every game (10):
 - Welcome to Secret Agents!
 - Team Moon goes first.
 - Spymasters, check your phones for the secret key.
-- A bystander.
+- Team Moon, your spymaster is thinking.
 - Team Sun, your spymaster is thinking.
+- A bystander.
 - That one belongs to the other team!
 - Team Sun found all their agents and wins!
-- Team Moon, your spymaster is thinking.
-- Team Moon found all their agents and wins!
 - Team Sun goes first.
+- Team Moon found all their agents and wins!
 
 Questions, words and answers (3, 45 characters), for example:
 - Oh no, the trap!
-- Team Sun wins!
 - Team Moon wins!
+- Team Sun wins!
 
 ## Sketch Telephone (sketch) · host
 
@@ -929,7 +932,7 @@ Every game (9):
 - Guess the drawing!
 - Time for the big reveal!
 
-Not spoken: 3478 sentences with a player's name (e.g. “{name} started with: A spider knitting a sweater”).
+Not spoken: 3479 sentences with a player's name (e.g. “{name} started with: A cowboy riding a chicken”).
 
 ## Mind Meld (meld) · host
 
@@ -939,13 +942,13 @@ Every game (3):
 - You're the mind reader.
 
 Questions, words and answers (106, 3,881 characters), for example:
-- They see a secret spot between Bad smell and Worst smell.
-- Calm to Chaotic.
-- Soft to Hard.
-- Boring to Exciting.
-- Overpriced to Bargain.
+- They see a secret spot between Snack and Meal.
+- Useless to Useful.
+- Bad smell to Worst smell.
+- Day to Night.
+- Stinky cheese to Mild cheese.
 
-Not spoken: 6 sentences with a player's name (e.g. “{name} is the mind reader.”), 256 with typed text (e.g. “The clue is: Burnt toast.”).
+Not spoken: 6 sentences with a player's name (e.g. “{name} is the mind reader.”), 256 with typed text (e.g. “The clue is: A bowl of soup.”).
 
 ## Salad Bowl (bowl) · host
 
@@ -964,17 +967,17 @@ Every game (16):
 - Round 3: Act it out.
 - No talking!
 - Charades only.
-- Team Moon wins!
 - Team Sun wins!
+- Team Moon wins!
 
-Questions, words and answers (12, 188 characters), for example:
+Questions, words and answers (10, 154 characters), for example:
 - Time!
-- 16 for Team Sun.
-- 17 for Team Moon.
+- 16 for Team Moon.
 - 17 for Team Sun.
-- 15 for Team Sun.
+- 17 for Team Moon.
+- 16 for Team Sun.
 
-Not spoken: 2 sentences with a player's name (e.g. “Team Moon, {name} is up.”).
+Not spoken: 2 sentences with a player's name (e.g. “Team Sun, {name} is up.”).
 
 ## Clue Crew (crew) · host
 
@@ -984,23 +987,23 @@ Every game (15):
 - Don't look at the TV or anyone's phone!
 - Everyone else, write a one-word clue.
 - Matching clues cancel out.
-- 1 clue made it.
-- What's the word?
-- Yes!
+- Passed.
 - Write your clues!
+- Yes!
+- 2 clues made it.
+- What's the word?
+- That costs us an extra card.
 - Oh no, every clue cancelled out!
 - Take a wild guess.
-- That costs us an extra card.
-- Passed.
-- 2 clues made it.
+- 1 clue made it.
 - Solid crew!
 
-Questions, words and answers (468, 8,216 characters), for example:
-- It was Wizard!
-- Nope, it was Skiing.
-- It was Farmer.
-- It was Western.
-- It was Surfing!
+Questions, words and answers (467, 8,196 characters), for example:
+- It was Cupcake.
+- It was Toothbrush!
+- It was Birthday!
+- Nope, it was Camera.
+- Nope, it was Airport.
 
 Not spoken: 1 sentence with a player's name (e.g. “{name} is guessing.”).
 
@@ -1012,20 +1015,20 @@ Every game (12):
 - You're up!
 - Press start when you're ready.
 - Time!
-- 28 guessed.
-- 25 guessed.
 - 26 guessed.
+- 25 guessed.
+- 27 guessed.
+- 22 guessed.
+- 28 guessed.
 - 24 guessed.
 - 23 guessed.
-- 22 guessed.
-- 27 guessed.
 
 Questions, words and answers (12, 132 characters), for example:
+- 18 guessed.
 - 29 guessed.
-- 21 guessed.
-- 31 guessed.
 - 20 guessed.
-- 30 guessed.
+- 21 guessed.
+- 19 guessed.
 
 Not spoken: 1 sentence with a player's name (e.g. “{name} wins Picture Charades!”).
 
@@ -1044,17 +1047,21 @@ Every game (15):
 - Everyone starts with 100 chips.
 - These are points, not real money.
 - Place your bets.
-- Dealer has 21.
-- Hand 2.
-- Dealer busts!
-- Hand 3.
 - Dealer has 17.
+- Hand 2.
+- Hand 3.
+- Dealer has 21.
 - Hand 4.
-- Hand 5.
-- Dealer has 19.
-- Hand 6.
-- Dealer has 20.
 - Dealer has 18.
+- Hand 5.
+- Dealer has 20.
+- Hand 6.
+- Dealer busts!
+- Dealer has 19.
+
+Questions, words and answers (2, 27 characters), for example:
+- Dealer has 15.
+- Dealer has 7.
 
 Not spoken: 1 sentence with a player's name (e.g. “{name} leaves the table with the most chips!”).
 
@@ -1064,22 +1071,24 @@ Every game (6):
 - Let's play Go Fish!
 - Ask someone for an animal you have.
 - Get all four to make a set.
-- Go fish!
 - A set!
+- Go fish!
 - It's a tie!
 
 Not spoken: 6 sentences with a player's name (e.g. “{name} goes first.”).
 
 ## Liar's Deck (bluffcards) · host
 
-Every game (5):
+Every game (7):
 - Welcome to Liar's Deck!
 - Play cards face down and say they're Aces.
 - Lie if you have to.
 - Anyone can call bluff!
+- Nope, that was the truth!
 - Bluff!
+- Caught lying.
 
-Not spoken: 56 sentences with a player's name (e.g. “Nope, {name} told the truth!”).
+Not spoken: 54 sentences with a player's name (e.g. “{name} takes the pile.”).
 
 ## Hearts (hearts) · host
 
@@ -1097,27 +1106,37 @@ Not spoken: 4 sentences with a player's name (e.g. “{name} has the two of club
 
 ## Spot the Shade (shade) · host
 
-Every game (4):
+Every game (13):
 - Welcome to Spot the Shade!
+- One of you sees a secret color and gives a clue.
 - No color names allowed!
+- The clue is in.
 - Find that shade!
+- Bullseye!
+- Well spotted.
+- Next color.
+- Nobody hit it exactly.
+- Someone new picks a color.
+- Near enough to argue about.
+- A new secret shade.
 - So close!
 
-Not spoken: 7 sentences with a player's name (e.g. “{name} sees a secret color and will give a clue.”), 20 with typed text (e.g. “The clue is: Sky.”).
+Not spoken: 6 sentences with a player's name (e.g. “{name} is up first.”), 20 with typed text (e.g. “The clue is: Pickle.”).
 
 ## Estimate & Bet (estimate) · host
 
-Every game (3):
+Every game (4):
 - Welcome to Estimate and Bet!
 - Nobody knows these exactly, so just make your best guess.
 - Now bet on the guess you think is closest without going over.
+- The answer is 16!
 
-Questions, words and answers (149, 5,009 characters), for example:
-- In what year was Sputnik, the first satellite, launched?
-- The answer is 1,957!
-- How many squares are on a chessboard?
-- The answer is 64!
-- How many minutes long is a regulation soccer match, without stoppage time?
+Questions, words and answers (148, 4,992 characters), for example:
+- What is the boiling point of water at sea level, in °F?
+- The answer is 212!
+- How many pounds are in a U.S. ton?
+- The answer is 2,000!
+- How many rings are on the Olympic flag?
 
 Not spoken: 1 sentence with a player's name (e.g. “{name} wins Estimate and Bet!”).
 
@@ -1134,35 +1153,40 @@ Not spoken: 2 sentences with a player's name (e.g. “{name}'s turn.”).
 
 ## Secret Word Hunt (wordhunt) · host
 
-Every game (19):
+Every game (24):
 - Welcome to Secret Word Hunt!
+- The Host picks a secret word.
 - Careful: one of you is the Insider and already knows it.
 - Check your phones!
-- The category is Things.
+- The category is Holidays.
+- Ask the Host yes or no questions.
 - You have four minutes!
+- Found it!
 - Now, who was the Insider?
 - It was too easy...
 - Vote!
+- The Insider got away with it!
+- New round, new Host.
 - Check your phones.
+- The category is Things.
+- The category is Sports.
+- The category is Movies.
+- The category is Food.
+- The category is Places.
 - The category is Jobs.
+- The category is Weather.
 - The category is Around the house.
 - The category is Animals.
-- The category is Holidays.
-- The category is Sports.
 - You caught the Insider!
-- The category is Movies.
-- The category is Places.
-- The category is Weather.
-- The category is Food.
 
 Questions, words and answers (150, 3,234 characters), for example:
-- The word was Snow globe.
-- The word was Scissors.
-- The word was Pilot.
-- The word was Remote control.
-- The word was Elephant.
+- The word was Fourth of July.
+- The word was Kite.
+- The word was Volleyball.
+- The word was Spies.
+- The word was Cupcake.
 
-Not spoken: 6 sentences with a player's name (e.g. “{name} is the Host and picks a secret word.”).
+Not spoken: 4 sentences with a player's name (e.g. “{name} is the Host.”).
 
 ## Midnight Wolves (midnight) · night narrator
 
@@ -1183,8 +1207,8 @@ Every game (18):
 - You have three minutes.
 - Time to vote!
 - Point at the wolf on your phone.
-- The werewolves win!
 - The village wins!
+- The werewolves win!
 
 ## Inside Job (missions) · host
 
@@ -1193,24 +1217,24 @@ Every game (22):
 - 2 of you are secret traitors.
 - Check your phone to see which side you're on.
 - Mission 1.
-- Pick a team of 2.
+- The leader picks a team of 2.
 - Everyone, vote on this team.
+- The team is turned down.
 - The team is approved.
 - Off you go!
 - The team is on the mission.
 - Play your cards in secret.
 - Mission success!
 - Mission 2.
-- Pick a team of 3.
+- The leader picks a team of 3.
 - Mission 3.
-- Pick a team of 4.
+- The leader picks a team of 4.
 - Mission failed!
-- 1 fail card.
+- 2 fail cards.
 - Mission 4.
-- The team is turned down.
+- 1 fail card.
 - Mission 5.
 - The traitors win!
-- 2 fail cards.
 
 Questions, words and answers (5, 103 characters), for example:
 - The crew wins!
@@ -1241,30 +1265,30 @@ Every game (25):
 - Welcome to Split the Room!
 - Finish your what-if question so the room splits right down the middle.
 - A perfect fifty-fifty scores the most!
-- Do you take them?
-- Deal?
-- Do you use it?
-- Do you take it?
-- Do you want it?
+- Do you do it?
 - Yes or no?
+- Do you want it?
+- Do you take it?
+- Do you sign up?
 - Round two!
 - Points count double.
 - Just kidding.
 - Same rules.
-- Do you do it?
 - Do you want the job?
-- Do you go?
-- Do you move in?
+- Do you accept?
 - Do you go back?
-- Do you take the power?
-- Do you keep it?
-- Do you sign up?
-- Do you buy it?
+- Do you go?
+- Deal?
+- Do you take them?
 - Everyone agreed.
 - No points!
-- Do you accept?
+- Do you move in?
+- Do you keep it?
+- Do you buy it?
+- Do you take the power?
+- Do you use it?
 
-Not spoken: 1 sentence with a player's name (e.g. “{name} splits the room best!”), 288 with typed text (e.g. “You get the best seats at any game, forever, but you have to wear socks on your hands.”).
+Not spoken: 1 sentence with a player's name (e.g. “{name} splits the room best!”), 288 with typed text (e.g. “You can time travel once, but your phone only plays polka music.”).
 
 ## Doodle Bluff (doodle) · host
 
@@ -1288,22 +1312,22 @@ Every game (22):
 - Tap two cards on your phone.
 - Not a match.
 - A match!
-- Two cows!
-- Go again!
-- Two penguins!
-- Two unicorns!
-- Two bunnies!
-- Two bees!
-- Two monkeys!
-- Two pigs!
-- Two frogs!
 - Two dinosaurs!
-- Two dogs!
-- Two cats!
+- Go again!
 - Two turtles!
-- Two octopuses!
-- Two lions!
+- Two frogs!
+- Two bees!
 - Two foxes!
+- Two pigs!
+- Two penguins!
+- Two cows!
+- Two unicorns!
+- Two cats!
+- Two bunnies!
+- Two lions!
+- Two octopuses!
+- Two monkeys!
+- Two dogs!
 
 Questions, words and answers (2, 34 characters), for example:
 - It's a tie!
@@ -1329,43 +1353,32 @@ Every game (14):
 - Round 8.
 - 7 in a row!
 
-Questions, words and answers (11, 114 characters), for example:
+Questions, words and answers (10, 105 characters), for example:
 - Round 9.
 - 8 in a row!
-- Round 10.
-- 5 in a row!
 - 6 in a row!
+- Round 10.
+- Round 11.
 
 Not spoken: 1 sentence with a player's name (e.g. “{name} has the best memory!”).
 
 ## Color Hunt (hunt) · host
 
-Every game (25):
+Every game (7):
 - Color Hunt!
 - When I say go, run and touch it, then tap your phone.
 - Ready?
-- Find something SOFT, like a pillow!
 - Go go go!
 - Great hunting!
 - Get ready!
-- Find a BOOK!
 - Someone
-- Find something PURPLE!
-- Find a SHOE!
-- Find a SPOON!
-- Find something with a STAR on it!
-- Find something RED!
+
+Questions, words and answers (36, 870 characters), for example:
 - Find something GREEN!
-- Find something WHITE!
-- Find something BROWN!
-- Find something SQUARE, like a box!
-- Find something BLACK!
-- Find something ORANGE!
-- Find something ROUND, like a ball!
-- Touch your NOSE, then find a CHAIR!
-- Find something BLUE!
-- Find something YELLOW!
-- Find something PINK!
+- Find something BUMPY!
+- Find a BOOK!
+- Find something SHINY!
+- Find something with a FACE on it!
 
 Not spoken: 3 sentences with a player's name (e.g. “{name}”).
 
@@ -1399,13 +1412,13 @@ Every game (12):
 - The answer is 6.
 
 Questions, words and answers (135, 4,190 characters), for example:
-- How many players does a soccer team have on the field?
-- The answer is 11.
-- Which is the smallest planet in our solar system?
-- The answer is Mercury.
-- Which planet has the biggest, brightest rings?
+- What is the main language spoken in Egypt?
+- The answer is Arabic.
+- What shape is a stop sign?
+- The answer is Octagon.
+- What is the capital of Italy?
 
-Not spoken: 8 sentences with a player's name (e.g. “{name} is now a ghost.”).
+Not spoken: 9 sentences with a player's name (e.g. “{name} wins the Haunted Quiz!”).
 
 ## Bomb Squad (bomb) · host
 
@@ -1421,22 +1434,22 @@ Every game (20):
 - Defused!
 - Nice work, team.
 - Bomb 2.
-- Wrong wire!
-- Boom!
 - Bomb 3.
 - Bomb 4.
 - Bomb 5.
 - Bomb 6.
 - All done!
-- The squad defused 5 of 6 bombs!
 - The squad defused 6 of 6 bombs!
+- Wrong wire!
+- Boom!
+- The squad defused 5 of 6 bombs!
 
 Questions, words and answers (8, 166 characters), for example:
-- The squad defused 4 of 6 bombs!
 - Three strikes.
-- The squad defused 3 bombs.
-- The squad defused 1 bombs.
+- The squad defused 2 bombs.
+- The squad defused 4 of 6 bombs!
 - The squad defused 0 bombs.
+- The squad defused 3 bombs.
 
 Not spoken: 2 sentences with a player's name (e.g. “{name} is the only one who can cut.”).
 
@@ -1448,11 +1461,11 @@ Every game (3):
 - Boom!
 
 Questions, words and answers (28, 496 characters), for example:
-- Name an animal!
-- Name a color!
-- Name a fruit!
+- Name something at the beach!
+- Name a bird!
 - Name a vegetable!
-- Name a breakfast food!
+- Name a song!
+- Name an animal!
 
 Not spoken: 3 sentences with a player's name (e.g. “{name} starts.”).
 
@@ -1478,10 +1491,14 @@ Every game (18):
 - On your phone, choose who did it, where, and how.
 - And they got away with it!
 
-Questions, words and answers (1, 20 characters), for example:
+Questions, words and answers (37, 1,748 characters), for example:
+- It happened in the Kitchen, with the Fishing rod.
+- It happened in the Greenhouse, with the Umbrella.
+- It happened in the Ballroom, with the Umbrella.
 - And you caught them!
+- It happened in the Library, with the Ladder.
 
-Not spoken: 358 sentences with a player's name (e.g. “The thief was {name} (The Chef), in the Observatory, with the Rope!”).
+Not spoken: 10 sentences with a player's name (e.g. “The thief was {name} (The Detective's Cousin)!”).
 
 ## Bracket Battle (bracket) · host
 
@@ -1494,21 +1511,21 @@ Every game (10):
 - Round one.
 - Semi-final.
 - Final.
-- Nobody saw that coming.
 - Next bracket.
+- Nobody saw that coming.
 
 Questions, words and answers (75, 2,545 characters), for example:
-- The best invention for lazy mornings.
-- The best pet that is not a dog or cat.
-- The worst ice cream flavor.
-- The worst ride at a theme park.
-- The worst thing to write on a birthday cake.
+- The best thing to do in an elevator.
+- The worst theme for a wedding.
+- The best thing to shout from a mountain top.
+- The best warning label.
+- The best animal to ride to work.
 
-Not spoken: 13 sentences with a player's name (e.g. “The champion is Seventeen bees, by {name}!”), 80 with typed text (e.g. “Seventeen bees, or Regret?”).
+Not spoken: 13 sentences with a player's name (e.g. “The champion is A very confused goose, by {name}!”), 80 with typed text (e.g. “Regret, or Seventeen bees?”).
 
 ## Act Natural (faker) · host
 
-Every game (36):
+Every game (39):
 - Act Natural!
 - One of you is faking.
 - Hands Up.
@@ -1518,68 +1535,72 @@ Every game (36):
 - One.
 - Go!
 - Hold it!
-- The instruction was: Raise your hand if you have ever locked yourself out.
 - Who looked unsure?
 - Vote for the faker.
 - The faker is still hiding.
 - One more try.
 - Same faker.
 - Try again.
-- Fingers.
-- The instruction was: Hold up 1 to 5 fingers: how good you are at keeping secrets.
-- The faker got away with it all round.
-- New round, new faker.
-- The instruction was: Hold up 1 to 5 fingers: how many cups of coffee or tea you have a day.
 - Point.
 - Caught!
-- The instruction was: Hold up 1 to 5 fingers: how much you like scary movies.
-- The instruction was: Hold up 1 to 5 fingers: how good a driver you are.
-- The instruction was: Hold up 1 to 5 fingers: how much you like karaoke.
-- The instruction was: Hold up 1 to 5 fingers: how spicy you like your food.
-- The instruction was: Hold up 1 to 5 fingers: how many hours of sleep you got last night (5 means 5 or more).
-- The instruction was: Point at the person most likely to win a game show.
-- The instruction was: Hold up 1 to 5 fingers: how much you like camping.
-- The instruction was: Hold up 1 to 5 fingers: how many countries you have visited (5 means 5 or more).
-- The instruction was: Hold up 1 to 5 fingers: how many times you hit snooze.
-- The instruction was: Point at the person most likely to survive in the wild.
-- The instruction was: Hold up 1 to 5 fingers: how many siblings you have.
+- New round, new faker.
+- Fingers.
 - The instruction was: Hold up 1 to 5 fingers: how messy your room is right now.
-- The instruction was: Raise your hand if you talk to your pets.
-
-Questions, words and answers (24, 1,665 characters), for example:
-- The instruction was: Raise your hand if you have eaten dessert before dinner this week.
-- The instruction was: Point at the person most likely to adopt ten cats.
-- The instruction was: Point at the person most likely to talk their way out of a ticket.
+- The faker got away with it all round.
+- The instruction was: Point at the person most likely to survive in the wild.
 - The instruction was: Point at the person most likely to get lost.
-- The instruction was: Point at the person who would be the worst spy.
+- The instruction was: Hold up 1 to 5 fingers: how many siblings you have.
+- The instruction was: Hold up 1 to 5 fingers: how many hours of sleep you got last night (5 means 5 or more).
+- The instruction was: Hold up 1 to 5 fingers: how many cups of coffee or tea you have a day.
+- The instruction was: Hold up 1 to 5 fingers: how good you are at keeping secrets.
+- The instruction was: Hold up 1 to 5 fingers: how spicy you like your food.
+- The instruction was: Raise your hand if you have been on TV.
+- The instruction was: Point at the loudest person in the room.
+- The instruction was: Hold up 1 to 5 fingers: how much you like karaoke.
+- The instruction was: Hold up 1 to 5 fingers: how many countries you have visited (5 means 5 or more).
+- The instruction was: Hold up 1 to 5 fingers: how much you like scary movies.
+- The instruction was: Hold up 1 to 5 fingers: how much you like camping.
+- The instruction was: Raise your hand if you talk to your pets.
+- The instruction was: Raise your hand if you have re-gifted a present.
+- The instruction was: Hold up 1 to 5 fingers: how many times you hit snooze.
+- The instruction was: Raise your hand if you have cried at a cartoon.
+- The instruction was: Hold up 1 to 5 fingers: how good a driver you are.
 
-Not spoken: 3 sentences with a player's name (e.g. “It was {name}!”).
+Questions, words and answers (21, 1,488 characters), for example:
+- The instruction was: Raise your hand if you have eaten dessert before dinner this week.
+- The instruction was: Point at the person most likely to win a game show.
+- The instruction was: Raise your hand if you have ever forgotten your own phone number.
+- The instruction was: Raise your hand if you are a morning person.
+- The instruction was: Point at the person most likely to become famous.
+
+Not spoken: 3 sentences with a player's name (e.g. “{name} was faking it.”).
 
 ## Room Meter (meter) · host
 
-Every game (13):
+Every game (14):
 - Room Meter!
 - Answer honestly.
 - Nobody sees your answer.
 - Is this you?
 - Yes or no.
+- Your guess.
 - Higher or lower?
-- The real answer: 67 percent.
-- The real answer: 33 percent.
-- Way off!
 - The real answer: 50 percent.
-- The real answer: 83 percent.
+- The real answer: 67 percent.
 - So close!
+- The real answer: 83 percent.
+- Way off!
+- The real answer: 33 percent.
 - The real answer: 17 percent.
 
-Questions, words and answers (127, 6,472 characters), for example:
-- People who have gotten lost using GPS.
-- What percent of this room have gotten lost using GPS?
-- People who have laughed so hard they snorted.
-- What percent of this room have laughed so hard they snorted?
-- People who think pineapple belongs on pizza.
+Questions, words and answers (188, 7,940 characters), for example:
+- People who have had a song stuck in their head today.
+- What percent of this room have had a song stuck in their head today?
+- The guess is 37 percent.
+- People who have binge-watched a whole season in one day.
+- What percent of this room have binge-watched a whole season in one day?
 
-Not spoken: 61 sentences with a player's name (e.g. “{name} says 52 percent.”).
+Not spoken: 1 sentence with a player's name (e.g. “{name} knows this room best!”).
 
 ## Brain Teasers (rebus) · host
 
@@ -1588,17 +1609,17 @@ Every game (9):
 - A different kind of puzzle every round.
 - Type your answer.
 - Faster is better.
-- What does it say?.
+- What is it?.
 - Say it out loud.
 - Zoomed in.
-- What is it?.
 - Put them together.
+- What does it say?.
 
 Questions, words and answers (170, 2,138 characters), for example:
-- Just between you and me!
-- Unscramble: for rain.
-- Umbrella!
-- Holy cow!
-- Pineapple!
+- Octopus!
+- Chocolate chip cookies!
+- Magnet!
+- Unscramble: a room.
+- Kitchen!
 
 Not spoken: 3 sentences with a player's name (e.g. “{name} has it!”).
