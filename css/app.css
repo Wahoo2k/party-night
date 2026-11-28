@@ -2826,12 +2826,12 @@ body.onstage[data-game=ducks] .gl.lose.hit{background:#ff8f7f}
 body:has(.walkbar) #joinqr,body:has(.walkbar) #vetobar{display:none!important}
 /* GOAT Toss, everyone at once: a pen per player */
 .gpens{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:8px 0 10px}
-.gpens.n5,.gpens.n9,.gpens.n10{grid-template-columns:repeat(5,minmax(0,1fr))}.gpens.n6{grid-template-columns:repeat(3,minmax(0,1fr))}
+.gpens.n9,.gpens.n10{grid-template-columns:repeat(5,minmax(0,1fr))}.gpens.n5,.gpens.n6{grid-template-columns:repeat(3,minmax(0,1fr))}
 .gpen{position:relative;display:grid;justify-items:center;gap:2px;padding:10px 10px 12px;border-radius:18px;background:linear-gradient(#3f7d4a,#2c5f39);border:4px solid #fff3;color:#fff;overflow:hidden;transition:filter .3s,opacity .3s}
 .gpen h4{margin:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:800 clamp(18px,calc(2*var(--vw,1vw)),30px)/1.1 Outfit,sans-serif}
 .gpgoats{display:flex;justify-content:center;gap:4px;width:100%;min-height:0}
 .gpgoats .gspr{width:clamp(48px,calc(6.4*var(--vw,1vw)),104px);filter:drop-shadow(0 4px 3px #0006)}
-.gpens.n4 .gpgoats .gspr,.gpens.n6 .gpgoats .gspr{width:clamp(60px,calc(8.6*var(--vw,1vw)),140px)}
+.gpens.n4 .gpgoats .gspr,.gpens.n5 .gpgoats .gspr,.gpens.n6 .gpgoats .gspr{width:clamp(60px,calc(8.6*var(--vw,1vw)),140px)}
 .gpens.n4{grid-template-columns:repeat(2,minmax(0,1fr))}.gpens.n4 .gpen{grid-template-columns:auto 1fr;align-items:center}.gpens.n4 .gpen h4{grid-column:1/-1}
 .gpgoats.idle{opacity:.55}
 .gpgoats.drop .gspr{animation:gpdrop 2.6s cubic-bezier(.3,.1,.3,1) both;animation-delay:var(--d,0ms)}
@@ -2846,3 +2846,4 @@ body:has(.walkbar) #joinqr,body:has(.walkbar) #vetobar{display:none!important}
 .gpen.banked{background:linear-gradient(#b8860b,#7a5a08);border-color:#ffd60a}.gpen.banked .gpgoats{opacity:.8}
 .gpen.bust,.gpen.pile{background:linear-gradient(#7d3f3f,#572a2a);filter:saturate(.7)}.gpen.bust .gppts,.gpen.pile .gppts{color:#ffb3b3}
 .gpen.gold{box-shadow:0 0 34px #ffd166cc;border-color:#ffd166}
+.gfseat.on .gfbooks .muted{color:#5b4a2a;opacity:.85}

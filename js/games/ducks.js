@@ -93,7 +93,7 @@ export function setup(players, rnd = Math.random, prev = null, opts = {}) {
 // choices play out together, and so on until every player has banked or butted heads. Then the next round. The game
 // ends at the end of a round in which somebody has reached the target: highest score wins, a tie plays on.
 export const TOGETHER_MIN = 4;
-export const TG = { first: 10000, choose: 10000, anim: 2600, show: 2600, roundEnd: 3800 };
+export const TG = { first: 10000, choose: 10000, anim: 2600, show: 2000, roundEnd: 3000 };
 const newPen = () => ({ pts: 0, state: 'in', choice: null, last: null, got: 0, lost: 0, kept: 0, tossed: false });
 const tgIn = s => s.order.filter(pid => s.tg.pens[pid].state === 'in');
 const tgEvent = (s, name) => { s.eventId++; s.lastEvent = name; };
