@@ -45,4 +45,12 @@ jobs:
           git add audio
           git diff --cached --quiet && echo "Nothing new to save." && exit 0
           git commit -qm "Audio: ${{ inputs.job }} ${{ inputs.options }}"
-          git pull -q --rebase && git push -q
+          # Other work may have landed while this ran. New recordings never clash, but the list of what exists can:
+          # keep ours through the rebase, then rebuild that list from the files and save it again.
+          for i in 1 2 3 4 5; do
+            git pull -q --rebase -X theirs || { git rebase --abort || true; sleep 5; continue; }
+            node tools/eleven.mjs manifest || true
+            git add audio; git diff --cached --quiet || git commit -qm "Audio: list of recordings"
+            git push -q && break
+            sleep 5
+          done
