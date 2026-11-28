@@ -91,8 +91,12 @@ export function tick(s, now = Date.now(), rnd = Math.random) {
 
 const nameOf = (s, pid) => (s.players.find(p => p.pid === pid) || {}).name || 'Someone';
 const ranking = (s, sc = s.scores) => s.players.map(p => ({ pid: p.pid, name: p.name, score: sc[p.pid] })).sort((a, b) => b.score - a.score);
+const say = (lines, k) => lines[((k % lines.length) + lines.length) % lines.length];   // the host does not say the same thing every round
+
 export function narration(s) {
-  if (s.phase === 'ready' && s.n === 1) return 'Welcome to Word Storm! Find words by tracing through letters that touch.';
+  if (s.phase === 'ready') return s.n === 1 ? 'Welcome to Word Storm! Find words by tracing through letters that touch.' : say(['A new grid. Same rules.', 'Fresh letters.', 'One more storm.'], s.n);
+  if (s.phase === 'play') return say(['Go!', 'Find them!', 'Start tracing!'], s.n);
+  if (s.phase === 'result') { const r = s.result; return `${say(['Time!', 'Pencils down.', 'And stop.'], s.n)} ${!r.found ? 'Nobody found a single word!' : r.found * 3 < r.total ? 'Plenty of words got away.' : 'A good haul.'}`; }
   if (s.phase === 'over') return 'And that is the game. Thanks for playing!';
   return '';
 }

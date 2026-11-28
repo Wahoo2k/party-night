@@ -117,14 +117,17 @@ export function tick(s, now = Date.now(), rnd = Math.random) {
 }
 
 const ranking = s => s.players.map(p => ({ pid: p.pid, name: p.name, score: s.scores[p.pid] })).sort((a, b) => b.score - a.score);
+const say = (lines, k) => lines[((k % lines.length) + lines.length) % lines.length];   // the host does not say the same thing every round
+
 export function narration(s) {
-  if (s.phase === 'order' && s.i === 0) return 'Welcome to Line Up! Put the five things in order on your phone.';
+  if (s.phase === 'order') return `${s.i === 0 ? 'Welcome to Line Up! Put the five things in order on your phone.' : say(['Next line-up.', 'Five more to sort.', 'Line them up.', 'Another one.'], s.i)} ${set(s)[0]}.`;
+  if (s.phase === 'reveal') { const rows = s.result.rows.filter(r => r.line), perfect = rows.filter(r => r.pairs === 10).length; return !rows.length ? 'Nobody lined them up in time!' : perfect ? say(['A perfect line-up!', 'Somebody got every one right.'], s.i) : say(['Nobody got it perfect.', 'Here is how it should look.', 'So close, and yet.'], s.i); }
   if (s.phase === 'over') return 'Everything is in its place. Thanks for playing!';
   return '';
 }
 export function cue(s) {
   if (s.phase === 'order') return { sound: 'join', wait: 700, title: s.i === 0 ? 'Line Up' : `Round ${s.i + 1}`, sub: s.i === 0 ? 'Put them in order' : `of ${s.order.length}` };
-  if (s.phase === 'reveal') return s.settled ? null : { sound: 'drumroll', wait: 0 };
+  if (s.phase === 'reveal') return s.settled ? null : { sound: 'drumroll', wait: Math.max(0, s.settleAt - Date.now() - 400) };
   if (s.phase === 'over') return { sound: 'win', wait: 1500, title: 'Game Over', sub: `${ranking(s)[0].name} has it all lined up`, tone: 'dawn', fx: 'confetti' };
   return null;
 }

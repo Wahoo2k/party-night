@@ -98,8 +98,12 @@ export function tick(s, now = Date.now(), rnd = Math.random) {
 
 const nameOf = (s, pid) => (s.players.find(p => p.pid === pid) || {}).name || 'Someone';
 const ranking = (s, sc = s.scores) => s.players.map(p => ({ pid: p.pid, name: p.name, score: sc[p.pid] })).sort((a, b) => b.score - a.score);
+const say = (lines, k) => lines[((k % lines.length) + lines.length) % lines.length];   // the host does not say the same thing every round
+
 export function narration(s) {
-  if (s.phase === 'ask' && s.n === 1) return 'Welcome to Gold Rush! Answer right to open a treasure chest. Watch out for thieves.';
+  if (s.phase === 'ask') return `${s.n === 1 ? 'Welcome to Gold Rush! Answer right to open a treasure chest. Watch out for thieves.' : s.n === s.max ? 'Last question. Last chests.' : say(['Next question.', 'More gold on the table.', 'Here we go.', 'For a chest.'], s.n)} ${s.q.q}`;
+  if (s.phase === 'chest') { const n = winners(s).length; return `The answer is ${s.q.options[s.q.answer]}. ${n ? say(['Pick a chest!', 'Winners, choose a chest.', 'Open one. Carefully.'], s.n) : 'Nobody got it. The chests stay shut.'}`; }
+  if (s.phase === 'reveal') { const k = s.events.map(e => e.kind); return k.includes('steal') ? say(['Thief!', 'Robbed in broad daylight!'], s.n) : k.includes('swap') ? 'A swap! Scores change hands.' : k.includes('jackpot') ? say(['Jackpot!', 'The big one!'], s.n) : k.includes('hole') ? say(['A hole in the bag. Ouch.', 'Gold everywhere but in the bag.'], s.n) : k.includes('gold') ? say(['Gold!', 'A good haul.'], s.n) : ''; }
   if (s.phase === 'over') return 'And that is the game. Thanks for playing!';
   return '';
 }

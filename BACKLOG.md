@@ -302,3 +302,8 @@ The bar for "launch worthy" and the batch order are in the road-to-launch doc. B
 - **Banks**: Fact or Fib 152 statements (was 96), Going Once 48 lots (was 24), Name That Sound 44 sounds (was 28; 16 new recordings).
 - New host lines record on eleven_v4 (Tom's choice); existing clips stay.
 - Still to do for batch one: Picture Charades, Midnight Wolves, Inside Job, Mystery Manor (already have full host lines; need a content check), tiny-text fixes, one game night each.
+
+## Polishing: batch two started, Game Show pack (28 Nov)
+- Checked and left alone: Gold Rush's small question during the chest step is deliberate (it has been answered) and reads fine at full size; Pin Drop's "5 px" was the map's own units, not screen pixels.
+- Host voice for six more: Pin Drop (asks each place, says where it is and how close the room got), Top Spot (reads each question, names the mode), Line Up (reads each set), Inner Clock (names the twist and the target), Gold Rush (reads the question, gives the answer, reacts to thieves, swaps, jackpots, holes), Word Storm.
+- The shared question bank (Million Ladder, Last One Standing, Gold Rush) is 180 questions (was 120).

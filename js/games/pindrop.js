@@ -360,14 +360,21 @@ export function tick(s, now = Date.now()) {
 }
 
 const ranking = s => s.players.map(p => ({ pid: p.pid, name: p.name, score: s.scores[p.pid] })).sort((a, b) => b.score - a.score);
+const say = (lines, k) => lines[((k % lines.length) + lines.length) % lines.length];   // the host does not say the same thing every round
+
 export function narration(s) {
-  if (s.phase === 'place' && s.i === 0) return 'Welcome to Pin Drop! Drop your pin on the map. Closest wins.';
+  const p = place(s);
+  if (s.phase === 'place') return `${s.i === 0 ? 'Welcome to Pin Drop! Drop your pin on the map. Closest wins.' : say(['Next stop.', 'On we go.', 'Where to now?', 'Pack your bags.'], s.i)} Where in the world is ${p[0]}?`;
+  if (s.phase === 'reveal') {
+    const ds = s.result.rows.map(r => r.d).filter(d => d !== null), best = ds.length ? Math.min(...ds) : null;
+    return `It is in ${p[1]}.${best === null ? ' Nobody dropped a pin!' : best < 150 ? say([' Somebody nearly hit it!', ' Right on top of it!'], s.i) : best < 1200 ? say([' Close!', ' Not far off.'], s.i) : best > 5000 ? say([' Not even the right continent.', ' Wrong side of the world!'], s.i) : ''}`;
+  }
   if (s.phase === 'over') return 'That\'s the whole world tour. Thanks for playing!';
   return '';
 }
 export function cue(s) {
   if (s.phase === 'place') return { sound: 'join', wait: 700, title: s.i === 0 ? 'Pin Drop' : `Place ${s.i + 1}`, sub: s.i === 0 ? 'Where in the world?' : `of ${s.order.length}` };
-  if (s.phase === 'reveal') return s.settled ? null : { sound: 'drumroll', wait: 0 };
+  if (s.phase === 'reveal') return s.settled ? null : { sound: 'drumroll', wait: Math.max(0, s.settleAt - Date.now() - 400) };
   if (s.phase === 'over') return { sound: 'win', wait: 1500, title: 'Game Over', sub: `${ranking(s)[0].name} knows the world`, tone: 'dawn', fx: 'confetti' };
   return null;
 }

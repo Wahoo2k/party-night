@@ -75,15 +75,20 @@ export function tick(s, now = Date.now()) {
 
 const nameOf = (s, pid) => (s.players.find(p => p.pid === pid) || {}).name || 'Someone';
 const ranking = s => s.players.map(p => ({ pid: p.pid, name: p.name, score: s.scores[p.pid] })).sort((a, b) => b.score - a.score);
+const say = (lines, k) => lines[((k % lines.length) + lines.length) % lines.length];   // the host does not say the same thing every round
+
+const SECS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty'];
 export function narration(s) {
-  if (s.phase === 'ready' && s.i === 0) return 'Welcome to Inner Clock! Stop the clock at exactly the right moment. It will not stay on screen for long.';
+  const r = cur(s);
+  if (s.phase === 'ready') return `${s.i === 0 ? 'Welcome to Inner Clock! Stop the clock at exactly the right moment. It will not stay on screen for long.' : last(s) ? 'Final round. Double points!' : r.twist === 'blind' ? 'Blind round. No clock at all.' : r.twist === 'decoy' ? 'Decoy round. The clock on screen is lying.' : say(['Next round.', 'Again.', 'Count carefully.'], s.i)} Stop at ${SECS[r.target] || r.target} seconds.`;
+  if (s.phase === 'result') { const rows = s.result.rows.filter(x => x.off !== null), spot = rows.some(x => x.spot); return !rows.length ? 'Nobody stopped the clock!' : spot ? say(['Spot on!', 'Somebody has a clock in their head.'], s.i) : say(['Here is how close you were.', 'Not bad. Not perfect.', 'Time is harder than it looks.'], s.i); }
   if (s.phase === 'over') return 'And that is the game. Thanks for playing!';
   return '';
 }
 export function cue(s) {
   if (s.phase === 'ready') return s.i === 0 ? { sound: 'fanfare', wait: 1500, title: 'Inner Clock', sub: 'Count in your head' } : { sound: 'join', wait: 900, title: last(s) ? 'Final Round' : TWISTS[cur(s).twist].name, sub: last(s) ? 'Double points' : `Round ${s.i + 1} of ${s.rounds.length}` };
   if (s.phase === 'run') return { sound: 'whoosh', wait: 0 };
-  if (s.phase === 'result') return s.settled ? null : { sound: 'drumroll', wait: 0 };
+  if (s.phase === 'result') return s.settled ? null : { sound: 'drumroll', wait: TIMES.settle - 400 };
   if (s.phase === 'over') return { sound: 'win', wait: 1500, title: 'Game Over', sub: `${ranking(s)[0].name} wins!`, tone: 'dawn', fx: 'confetti' };
   return null;
 }

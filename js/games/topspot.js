@@ -121,14 +121,20 @@ export function surveyLog(s) {
   if (s.phase === 'sweepEnd') return { key: 's' + s.i, q: Q(s).q, answers: (s.sweepLog || []).filter(g => real(g.pid)).map(g => ({ t: g.text, i: g.idx })) };
   return null;
 }
+const say = (lines, k) => lines[((k % lines.length) + lines.length) % lines.length];   // the host does not say the same thing every round
+
 export function narration(s) {
-  if (s.phase === 'guess' && s.i === 0) return 'Welcome to Top Spot! One guess each. Aim for the most popular answer.';
+  const q = Q(s), m = mode(s);
+  if (s.phase === 'guess') return `${s.i === 0 ? 'Welcome to Top Spot! One guess each. Aim for the most popular answer.' : m === 'deep' ? say(['Deep Cut. This time, aim for the answer hardly anyone gave.', 'Deep Cut. Go for the bottom of the board.'], s.i) : say(['Top Spot again. Think like everyone else.', 'Back to the top. What did most people say?'], s.i)} ${q.q}`;
+  if (s.phase === 'sweep') return `The Sweep! Everyone, find as many answers as you can. ${q.q}`;
+  if (s.phase === 'reveal') { const hit = s.result.rows.filter(r => r.idx >= 0).length, n = s.result.rows.length; return !hit ? 'Nobody is on the board!' : hit === n ? say(['Everybody is on the board.', 'A full house.'], s.i) : say(['Let us see who is on the board.', 'Some of you got there.', 'The survey says…'], s.i); }
+  if (s.phase === 'sweepEnd') return say(['Time! Here is what was left.', 'And stop. Let us see the whole board.'], s.i);
   if (s.phase === 'over') return 'And that\'s the survey. Thanks for playing!';
   return '';
 }
 export function cue(s) {
   if (s.phase === 'guess' || s.phase === 'sweep') return { sound: s.phase === 'sweep' ? 'fanfare' : 'join', wait: 800, title: MODES[mode(s)].name, sub: MODES[mode(s)].rule };
-  if (s.phase === 'reveal') return s.settled ? null : { sound: 'drumroll', wait: 0 };
+  if (s.phase === 'reveal') return s.settled ? null : { sound: 'drumroll', wait: 600 };
   if (s.phase === 'sweepEnd') return { sound: 'safe', wait: 300 };
   if (s.phase === 'over') return { sound: 'win', wait: 1500, title: 'Game Over', sub: `${ranking(s)[0].name} takes the top spot`, tone: 'dawn', fx: 'confetti' };
   return null;
