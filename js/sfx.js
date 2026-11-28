@@ -189,8 +189,12 @@ export function stopMusic() { clearInterval(music); music = null; }
 // 'hurry' is the same tune, faster and brighter, for the last ten seconds.
 let bed = null, bedKind = '';
 const BED = { think: { ms: 420, notes: [392, 0, 494, 587, 0, 494, 392, 0, 440, 0, 523, 659, 0, 523, 440, 0], bass: [98, 98, 110, 110] }, hurry: { ms: 210, notes: [523, 659, 784, 659, 523, 659, 784, 988, 587, 698, 880, 698, 587, 698, 880, 1047], bass: [131, 131, 147, 147] } };
-export function startBed(kind = 'think') {
-  if (rec.sfx.has('bed-' + kind)) { stopLoop(kind === 'think' ? 'bed-hurry' : 'bed-think'); clearInterval(bed); bed = null; bedKind = kind; startLoop('bed-' + kind); return; }
+// Each game family has its own recorded thinking music (bed-think-show, bed-think-noir…); a family without one, and
+// the last-ten-seconds hurry music, use the shared recording.
+let bedLoop = '';
+export function startBed(kind = 'think', theme = '') {
+  const name = kind === 'think' && theme && rec.sfx.has('bed-think-' + theme) ? 'bed-think-' + theme : 'bed-' + kind;
+  if (rec.sfx.has(name)) { if (bedLoop && bedLoop !== name) stopLoop(bedLoop); clearInterval(bed); bed = null; bedKind = kind; bedLoop = name; startLoop(name); return; }
   if (bedKind === kind && bed) return;
   stopBed();
   const b = BED[kind] || BED.think;
@@ -204,7 +208,7 @@ export function startBed(kind = 'think') {
     i++;
   }, b.ms);
 }
-export function stopBed() { clearInterval(bed); bed = null; bedKind = ''; stopLoop('bed-think'); stopLoop('bed-hurry'); }
+export function stopBed() { clearInterval(bed); bed = null; bedKind = ''; if (bedLoop) stopLoop(bedLoop); bedLoop = ''; stopLoop('bed-think'); stopLoop('bed-hurry'); }
 
 // Recorded music. Each loop is a file in audio/sfx/ (listed in the manifest); with no file, nothing plays, except the
 // thinking bed and night ambience, which keep their synthesized versions until recorded ones exist.
