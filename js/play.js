@@ -3,6 +3,7 @@ import { GAMES, NO_TV } from './games/index.js';
 import { openRoom } from './net.js';
 import { esc, store as localStore, uid, cleanCode, drawScene } from './ui.js';
 import { buzz } from './sfx.js';
+import { avatarUrl } from './avatars.js';
 import { newKeys, cleanPub, sharedKey, seal, unseal } from './secure.js';
 import { cleanName, isRude, funName, MAX_NAME } from './names.js';
 
@@ -100,7 +101,7 @@ let lastPhaseSeen = '';
 function render(v) {
   document.body.classList.toggle('paused', !!v._paused);
   document.body.classList.toggle('nodraw', !!v._nodraw);
-  if (v._me) { myFace = v._me; document.body.style.setProperty('--me', v._me[1]); if (statusEl.dataset.s === 'live') statusEl.textContent = `${v._me[0]} ${v._as || (v.phase === 'lobby' && v.me) || name} · ${code}`; }
+  if (v._me) { myFace = v._me; document.body.style.setProperty('--me', v._me[1]); if (statusEl.dataset.s === 'live') statusEl.textContent = `${v._me[0][0] === '~' ? '' : v._me[0] + ' '}${v._as || (v.phase === 'lobby' && v.me) || name} · ${code}`; }
   // In a game the header shrinks to one line with the game's name and art, and the phone takes the game's colors.
   const inGame = !!v.game && !['lobby', 'audience', 'kicked', 'full'].includes(v.phase) && !!GAMES[v.game];
   document.body.classList.toggle('ingame', inGame);
@@ -142,7 +143,7 @@ function render(v) {
       <p class="muted">Game: ${esc(v.game)} · ${v.players.length} playing</p>
       <div class="roster">${v.players.map(n => `<div class="chip">${esc(n)}</div>`).join('')}</div>
       ${v._teams ? `<div class="teampick"><p class="muted">Pick your team. You can switch until the game starts.</p><div class="teams2">${v._teams.map((t, k) => `<button class="teambtn tb${k} ${v._team === k ? 'on' : ''}" data-team="${k}"><b>${esc(t.name)}</b><small>${t.members.map(esc).join(', ') || 'Nobody yet'}</small></button>`).join('')}</div><form id="tnf" class="row teamname"><input id="tn" maxlength="16" autocomplete="off" placeholder="Name your team" value=""><button class="btn ghost small" type="submit">Rename</button></form></div>` : ''}
-      ${v.faces ? `<div class="facepick"><p class="muted">Pick your badge</p><div class="faces">${v.faces.map((f, i) => `<button class="facebtn ${v._me && v._me[0] === f ? 'on' : ''}" data-face="${i}" ${v.taken.includes(f) ? 'disabled' : ''}>${f}</button>`).join('')}</div><button class="btn ghost" id="wave">👋 Wave at the TV</button></div>` : ''}
+      ${v.faces ? `<div class="facepick"><p class="muted">Pick your character</p><div class="faces">${v.faces.map((f, i) => `<button class="facebtn ${v._me && v._me[0] === f ? 'on' : ''}" data-face="${i}" ${v.taken.includes(f) ? 'disabled' : ''}>${f[0] === '~' ? `<img class="av" alt="" src="${avatarUrl(+f.slice(1))}">` : f}</button>`).join('')}</div><button class="btn ghost" id="wave">👋 Wave at the TV</button></div>` : ''}
       ${v._night ? `<button class="btn" id="keepsake">📸 Save tonight's results</button>` : ''}
       ${v.canPrompt ? `<form id="pf" class="audask"><p class="muted">✍️ Add your own prompt for Funny Answers (${v.myPrompts.length}/3)</p>${v.myPrompts.map(t => `<p class="small">“${esc(t)}”</p>`).join('')}${v.myPrompts.length < 3 ? '<input id="pt" maxlength="70" placeholder="The worst thing to say at…" autocomplete="off"><button class="btn ghost">Add</button>' : ''}</form>` : ''}
       ${v._remote ? `<div class="remote"><p class="muted">👑 You're the remote</p><button class="btn" data-rm="start" ${v.canStart ? '' : 'disabled'}>Start the game</button></div>` : ''}
@@ -374,7 +375,7 @@ async function join() {
   store.set(key, pid);
   app.innerHTML = `<div class="panel"><h2>Joining ${esc(code)}…</h2><p class="muted">Make sure the TV is showing this room code.</p></div>`;
   room = await openRoom(code, onMessage, s => {
-    statusEl.textContent = s === 'live' ? `${myFace ? myFace[0] + ' ' : ''}${name} · ${code}` : s === 'connecting' ? 'Connecting…' : 'Connection lost, retrying…';
+    statusEl.textContent = s === 'live' ? `${myFace && myFace[0][0] !== '~' ? myFace[0] + ' ' : ''}${name} · ${code}` : s === 'connecting' ? 'Connecting…' : 'Connection lost, retrying…';
     statusEl.dataset.s = s;
   });
   if (!keys) { try { keys = await newKeys(); if (keys) store.set('pg-keys', keys); } catch { keys = null; } }

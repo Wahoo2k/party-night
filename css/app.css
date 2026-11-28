@@ -2767,3 +2767,10 @@ form.hosting .notv{border-top:0;margin-top:6px;padding-top:0}form.hosting #hosth
 @keyframes nspulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12) rotate(-6deg)}}
 .nsear b{font:800 clamp(28px,calc(3.6*var(--vw,1vw)),62px)/1.1 Outfit,sans-serif;color:#fff}.nsear.done b{color:#9dffc4;animation:slam .5s both}.nsear span{opacity:.8;font-weight:700}
 .panel.ns .loopt small{margin-left:auto;font-size:.6em;white-space:normal;text-align:right}
+/* Clay characters in place of emoji faces: no disc behind them, and they swell for a moment when their player scores */
+img.av{display:block;width:118%;height:118%;max-width:none;margin:-9%;object-fit:contain;pointer-events:none}
+i:has(> img.av){background:none!important;overflow:visible}
+.pface:has(> img.av){width:2.7em;height:2.7em;display:inline-grid;vertical-align:middle;margin-right:.25em;transition:transform .25s}
+.avpop{animation:avpop 2.6s cubic-bezier(.2,1.5,.4,1) both;z-index:5;position:relative}
+@keyframes avpop{0%{transform:scale(1)}12%{transform:scale(2.3) rotate(-8deg)}24%{transform:scale(2) rotate(6deg)}80%{transform:scale(2)}100%{transform:scale(1)}}
+.facebtn:has(img.av){background:none;border-radius:16px;padding:2px}.facebtn.on:has(img.av){background:#fff2;border-color:#ffcf6b}.facebtn[disabled]:has(img.av){opacity:.25}

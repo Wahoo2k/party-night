@@ -1,46 +1,69 @@
-// Player characters: odd little blobs with googly eyes, built from parts (body, eyes, mouth, something on top), so
-// every seat gets a different one and none of them is an emoji. avatar(i) returns an SVG string for character i.
-const BODIES = [
-  'M50 8c22 0 38 16 38 40 0 26-14 44-38 44S12 74 12 48C12 24 28 8 50 8z',                        // egg
-  'M22 14h56c8 0 12 6 12 14v44c0 12-8 20-20 20H30c-12 0-20-8-20-20V28c0-8 4-14 12-14z',          // loaf
-  'M50 6c10 0 16 8 20 20l16 44c4 12-4 22-16 22H30c-12 0-20-10-16-22l16-44C34 14 40 6 50 6z',     // gumdrop
-  'M30 8h40c12 0 18 8 18 18 0 8-4 12-4 20s6 14 6 24c0 14-10 22-24 22H34c-14 0-24-8-24-22 0-10 6-16 6-24s-4-12-4-20c0-10 6-18 18-18z', // peanut
-  'M50 10c26 0 42 12 42 32 0 12-6 18-6 28 0 14-14 22-36 22s-36-8-36-22c0-10-6-16-6-28 0-20 16-32 42-32z',                              // potato
-  'M36 6h28c10 0 16 6 16 16v56c0 10-6 16-16 16H36c-10 0-16-6-16-16V22c0-10 6-16 16-16z',         // pill
+// Player characters: chunky little clay figures. Each is a lump of modelling clay in a bold color, pressed into a
+// shape (a block, a star, a drop, a mitten…), with a simple face stuck on. Shape, color and face are stepped through
+// at different rates, so 20 seats get 20 plainly different characters. They have moods (happy, sad, wow) so a
+// character can react to what happens to its player. The clay look (rounded, lit from the top left, a little
+// rough) comes from SVG lighting filters, so there are no image files and it is sharp at any size.
+//   avatar(i, mood)     -> SVG markup
+//   avatarUrl(i, mood)  -> the same as a data: address for an <img>, remembered, so redrawing a screen costs nothing
+const INK = '#221a3a';
+const COLORS = ['#7b5cff', '#2f8cff', '#19b7e6', '#2fbf71', '#d8d23a', '#ff9a2e', '#ff5f52', '#e456c7', '#9aa3b2', '#a8693d', '#16b8a2', '#ffcf3f'];
+// Each shape sits in a 120-wide, 120-tall box and carries where its face goes: [path, face x, face y, face scale].
+const SHAPES = [
+  ['M30 18h60c9 0 14 6 13 15l-5 62c-1 9-7 14-16 14H36c-9 0-15-5-16-14l-4-62c-1-9 4-15 14-15z', 60, 62, 1],                                   // block
+  ['M60 12c9 0 12 14 20 18s24 0 28 10-10 18-12 28 6 26-2 32-22-6-34-6-26 12-34 6 0-22-2-32-16-18-12-28 20-6 28-10 11-18 20-18z', 60, 64, 0.82], // star
+  ['M60 10c6 0 12 10 22 28 10 17 16 30 14 46-3 18-18 28-36 28s-33-10-36-28c-2-16 4-29 14-46C48 20 54 10 60 10z', 60, 72, 0.95],               // drop
+  ['M58 12l40 22c7 4 10 10 9 18l-6 42c-1 9-8 14-17 14H38c-9 0-16-5-17-14l-6-42c-1-8 2-14 9-18l28-20c2-2 4-2 6-2z', 60, 66, 1],             // gem
+  ['M24 34l10-22 16 16h20l16-16 10 22c6 10 8 22 8 34 0 26-16 42-44 42S16 94 16 68c0-12 2-24 8-34z', 60, 68, 1],                             // eared
+  ['M78 12c-30 2-52 22-52 52s22 46 50 44c12-1 22-6 28-14-10 4-26 2-36-10s-12-30-6-44c4-10 10-18 16-28z', 52, 62, 0.72],                     // moon
+  ['M34 30c0-10 8-16 18-16s16 6 18 14c2-4 8-8 16-6 10 2 14 10 14 20v44c0 14-10 24-24 24H44c-14 0-24-10-24-24V46c0-8 6-14 14-16z', 60, 70, 0.98], // mitten
+  ['M60 10l42 24c6 3 8 8 8 14v30c0 6-2 11-8 14l-42 22-42-22c-6-3-8-8-8-14V48c0-6 2-11 8-14z', 60, 62, 0.98],                              // hexagon
+  ['M60 14c26 0 46 12 46 34 0 10-6 16-6 26 0 22-16 36-40 36s-40-14-40-36c0-10-6-16-6-26 0-22 20-34 46-34z', 60, 64, 1.02],                 // potato
+  ['M60 12c14 0 22 10 26 24 16 2 26 14 26 30 0 20-16 42-52 42S8 86 8 66c0-16 10-28 26-30 4-14 12-24 26-24z', 60, 70, 1],                   // hill
 ];
-const COLORS = ['#ff6b6b', '#4dabf7', '#51cf66', '#fcc419', '#cc5de8', '#ff922b', '#20c997', '#f06595', '#748ffc', '#94d82d'];
-const eye = (x, y, r, px = 0, py = 0) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" stroke="#1b1147" stroke-width="2.5"/><circle cx="${x + px}" cy="${y + py}" r="${r * 0.45}" fill="#1b1147"/>`;
+const eyeball = (x, y, r, px, py) => `<circle cx="${x}" cy="${y + 1.5}" r="${r}" fill="#0004"/><circle cx="${x}" cy="${y}" r="${r}" fill="#fff"/><circle cx="${x + px}" cy="${y + py}" r="${r * 0.5}" fill="${INK}"/><circle cx="${x + px - r * 0.16}" cy="${y + py - r * 0.18}" r="${r * 0.14}" fill="#fff"/>`;
+const look = m => (m === 'sad' ? [0, 2.6] : m === 'wow' ? [0, -1] : m === 'happy' ? [0, 0.5] : [1.4, 0.8]);
+// Faces are drawn around (0,0) and moved onto the shape.
 const EYES = [
-  () => eye(38, 42, 9, 2, 1) + eye(62, 42, 9, -2, 1),                                   // looking at each other
-  () => eye(36, 40, 11, 0, 3) + eye(64, 44, 7, 0, 2),                                   // one big, one small
-  () => eye(50, 40, 14, 3, 2),                                                           // one eye
-  () => `<path d="M28 42q10-9 20 0M52 42q10-9 20 0" fill="none" stroke="#1b1147" stroke-width="4" stroke-linecap="round"/>`,   // happy shut
-  () => eye(38, 42, 9, 0, -3) + eye(62, 42, 9, 0, -3) + `<path d="M27 36h22M51 36h22" stroke="#1b1147" stroke-width="5" stroke-linecap="round"/>`,   // unimpressed
-  () => `<rect x="24" y="33" width="24" height="18" rx="5" fill="#fff" stroke="#1b1147" stroke-width="3"/><rect x="52" y="33" width="24" height="18" rx="5" fill="#fff" stroke="#1b1147" stroke-width="3"/><path d="M48 41h4" stroke="#1b1147" stroke-width="3"/><circle cx="38" cy="43" r="3.5" fill="#1b1147"/><circle cx="62" cy="43" r="3.5" fill="#1b1147"/>`,   // glasses
-  () => eye(34, 44, 8, -2, 0) + eye(50, 36, 8, 0, -2) + eye(66, 44, 8, 2, 0),            // three eyes
+  m => { const [x, y] = look(m); return eyeball(-13, -8, 9, x, y) + eyeball(13, -8, 9, -x, y); },
+  m => { const [x, y] = look(m); return eyeball(-13, -9, 11, x, y) + eyeball(14, -6, 7, -x, y); },
+  m => { const [x, y] = look(m); return eyeball(0, -9, 14, x * 1.5, y); },
+  m => (m === 'happy' ? `<path d="M-22 -6q8-9 16 0M6 -6q8-9 16 0" fill="none" stroke="${INK}" stroke-width="4.5" stroke-linecap="round"/>` : `<ellipse cx="-13" cy="-8" rx="4.2" ry="${m === 'wow' ? 7.5 : 5.5}" fill="${INK}"/><ellipse cx="13" cy="-8" rx="4.2" ry="${m === 'wow' ? 7.5 : 5.5}" fill="${INK}"/>`),
+  m => { const [x, y] = look(m); return eyeball(-20, -6, 7.5, x, y) + eyeball(0, -13, 7.5, 0, y) + eyeball(20, -6, 7.5, -x, y); },
+  m => { const [x, y] = look(m); return eyeball(-13, -8, 9, x, y + 1) + eyeball(13, -8, 9, -x, y + 1) + `<path d="M-24 -13h22M2 -13h22" stroke="${INK}" stroke-width="6" stroke-linecap="round"/>`; },   // half shut
 ];
-const MOUTHS = [
-  '<path d="M36 64q14 12 28 0" fill="none" stroke="#1b1147" stroke-width="4" stroke-linecap="round"/>',
-  '<path d="M38 68h24" stroke="#1b1147" stroke-width="4" stroke-linecap="round"/>',
-  '<ellipse cx="50" cy="68" rx="8" ry="9" fill="#1b1147"/><ellipse cx="50" cy="72" rx="5" ry="4" fill="#ff8787"/>',
-  '<path d="M34 62h32v6c0 8-8 12-16 12s-16-4-16-12z" fill="#1b1147"/><path d="M38 62h24v5H38z" fill="#fff"/>',
-  '<path d="M38 68q8-6 14 0t14-2" fill="none" stroke="#1b1147" stroke-width="4" stroke-linecap="round"/>',
-  '<path d="M40 70q10-10 20 0" fill="none" stroke="#1b1147" stroke-width="4" stroke-linecap="round"/>',
-];
-const TOPS = [
-  '',
-  '<path d="M30 12h40l-4-22H34z" fill="#1b1147"/><path d="M22 12h56" stroke="#1b1147" stroke-width="6" stroke-linecap="round"/><path d="M33 4h34" stroke="#e03131" stroke-width="5"/>',   // top hat
-  '<path d="M50-14l16 28H34z" fill="#fcc419" stroke="#1b1147" stroke-width="2.5"/><circle cx="50" cy="-14" r="5" fill="#f06595"/>',   // party hat
-  '<path d="M50 10V-6" stroke="#1b1147" stroke-width="3"/><circle cx="50" cy="-9" r="6" fill="#ff6b6b" stroke="#1b1147" stroke-width="2.5"/>',   // antenna
-  '<path d="M40 10q-6-16 6-18M50 9q0-18 8-20M60 10q8-12 2-20" fill="none" stroke="#1b1147" stroke-width="4" stroke-linecap="round"/>',   // three hairs
-  '<path d="M26 56q12-10 24 0 12-10 24 0-6 10-24 4-18 6-24-4z" fill="#1b1147"/>',   // mustache (sits low, over the mouth line)
-  '<path d="M20 16q30-22 60 0l-4 6q-26-14-52 0z" fill="#1b1147"/><path d="M74 14l16 6-14 4z" fill="#1b1147"/>',   // cap
-  '<path d="M34 88l16-8 16 8-16 8z" fill="#e03131" stroke="#1b1147" stroke-width="2.5"/><circle cx="50" cy="88" r="4" fill="#1b1147"/>',   // bow tie
-];
-// Character number i: the parts are stepped through at different rates so neighbors never share more than one part.
-export function avatar(i, size = 100) {
-  const n = ((i % 240) + 240) % 240, body = BODIES[n % BODIES.length], color = COLORS[n % COLORS.length];
-  const e = EYES[(n * 3 + 1) % EYES.length](), m = MOUTHS[(n * 5 + 2) % MOUTHS.length], t = TOPS[(n * 7 + 3) % TOPS.length];
-  return `<svg class="avatar" viewBox="-4 -24 108 128" width="${size}" height="${Math.round(size * 128 / 108)}" aria-hidden="true"><path d="${body}" fill="${color}" stroke="#1b1147" stroke-width="3.5" stroke-linejoin="round"/>${e}${m}${t}</svg>`;
+const MOUTH = {
+  neutral: ['<path d="M-10 12q10 7 20 0" fill="none" stroke="#221a3a" stroke-width="4.5" stroke-linecap="round"/>', '<path d="M-9 14h18" stroke="#221a3a" stroke-width="4.5" stroke-linecap="round"/>', '<path d="M-10 13q6-4 11 0t10-3" fill="none" stroke="#221a3a" stroke-width="4.5" stroke-linecap="round"/>'],
+  happy: ['<path d="M-15 8h30c0 12-7 18-15 18s-15-6-15-18z" fill="#221a3a"/><path d="M-8 20q8-6 16 0-8 6-16 0z" fill="#ff7b8a"/>', '<path d="M-14 9q14 14 28 0" fill="none" stroke="#221a3a" stroke-width="5" stroke-linecap="round"/>', '<path d="M-15 8h30c0 12-7 18-15 18s-15-6-15-18z" fill="#221a3a"/><path d="M-12 8h24v5h-24z" fill="#fff"/>'],
+  sad: ['<path d="M-11 18q11-10 22 0" fill="none" stroke="#221a3a" stroke-width="4.5" stroke-linecap="round"/>', '<path d="M-11 16q5-5 11 0t11-1" fill="none" stroke="#221a3a" stroke-width="4.5" stroke-linecap="round"/>'],
+  wow: ['<ellipse cx="0" cy="16" rx="8" ry="10" fill="#221a3a"/>', '<ellipse cx="0" cy="15" rx="6" ry="6.5" fill="#221a3a"/>'],
+};
+const BROWS = { neutral: '', happy: '', sad: `<path d="M-24 -22l16 5M24 -22l-16 5" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>`, wow: `<path d="M-23 -24q8-5 16 0M7 -24q8-5 16 0" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>` };
+// The clay: a rounded, lit surface (soft shading from a blurred copy of the shape), a rough texture, a highlight.
+const CLAY = `<filter id="clay" x="-15%" y="-15%" width="130%" height="140%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="7" result="b"/>
+<feDiffuseLighting in="b" surfaceScale="9" diffuseConstant="1.15" lighting-color="#fff" result="d"><feDistantLight azimuth="235" elevation="52"/></feDiffuseLighting>
+<feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="3" seed="4" result="n"/>
+<feDiffuseLighting in="n" surfaceScale="1.6" diffuseConstant="1.05" lighting-color="#fff" result="t"><feDistantLight azimuth="235" elevation="62"/></feDiffuseLighting>
+<feComposite in="d" in2="t" operator="arithmetic" k1="1" k2="0" k3="0" k4="0" result="dt"/>
+<feComposite in="SourceGraphic" in2="dt" operator="arithmetic" k1="1.05" k2="0.12" k3="0" k4="0" result="lit"/>
+<feSpecularLighting in="b" surfaceScale="7" specularConstant="0.7" specularExponent="22" lighting-color="#fff" result="s"><feDistantLight azimuth="235" elevation="58"/></feSpecularLighting>
+<feComposite in="s" in2="lit" operator="arithmetic" k1="0" k2="0.5" k3="1" k4="0" result="ls"/>
+<feComposite in="ls" in2="SourceAlpha" operator="in" result="body"/>
+<feGaussianBlur in="SourceAlpha" stdDeviation="3.5" result="sh"/><feOffset in="sh" dy="6" result="sho"/><feComponentTransfer in="sho" result="shadow"><feFuncA type="linear" slope="0.45"/></feComponentTransfer>
+<feMerge><feMergeNode in="shadow"/><feMergeNode in="body"/></feMerge></filter>`;
+
+export const MOODS = ['neutral', 'happy', 'sad', 'wow'];
+export const COUNT = 120;
+const idx = i => ((Math.round(i) % COUNT) + COUNT) % COUNT;
+export const colorOf = i => COLORS[(idx(i) * 5 + 2) % COLORS.length];
+export function avatar(i, mood = 'neutral') {
+  const n = idx(i), m = MOODS.includes(mood) ? mood : 'neutral';
+  const [path, fx, fy, fs] = SHAPES[n % SHAPES.length], mouths = MOUTH[m];
+  return `<svg xmlns="http://www.w3.org/2000/svg" class="avatar ${m}" viewBox="-6 -4 132 136"><defs>${CLAY}</defs><path d="${path}" fill="${colorOf(n)}" filter="url(#clay)"/><g transform="translate(${fx} ${fy}) scale(${fs})">${EYES[(n * 7 + 1) % EYES.length](m)}${BROWS[m]}${mouths[(n * 11 + 3) % mouths.length]}</g></svg>`;
 }
-export const AVATAR_COLORS = COLORS;
+const urls = new Map();
+export function avatarUrl(i, mood = 'neutral') {
+  const k = idx(i) + mood; let u = urls.get(k);
+  if (!u) { u = 'data:image/svg+xml,' + encodeURIComponent(avatar(i, mood)); urls.set(k, u); }
+  return u;
+}

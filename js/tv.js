@@ -10,6 +10,7 @@ import { newKeys, cleanPub, samePub, sharedKey, seal, unseal } from './secure.js
 import { cleanAct, textsIn, maskView, maskLine } from './content.js';
 import { settleName, cleanName, isRude, uniqueName, funName, MAX_NAME } from './names.js';
 import { tap } from './tap.js';
+import { avatarUrl, colorOf } from './avatars.js';
 import { quip } from './quips.js';
 
 const app = document.getElementById('app');
@@ -60,8 +61,14 @@ const joinUrl = () => {
 };
 
 // Every player gets a village character and a color that follow them through every game.
-// Player badges: a plain symbol on a colored disc. (\uFE0E asks for the flat text form of a symbol, not the emoji.)
-const FACES = [['★\uFE0E', '#e2553d'], ['◆\uFE0E', '#2f7fd8'], ['▲\uFE0E', '#2fa36b'], ['●\uFE0E', '#8a4fd1'], ['■\uFE0E', '#d99a1d'], ['♠\uFE0E', '#1f8f9c'], ['♥\uFE0E', '#d1457a'], ['♣\uFE0E', '#5b6ee1'], ['♦\uFE0E', '#c0612b'], ['✚\uFE0E', '#3d9a4a'], ['♪\uFE0E', '#b24fc0'], ['⚑\uFE0E', '#2b8cc4'], ['☀\uFE0E', '#e08a1e'], ['☾\uFE0E', '#6b62d6'], ['⚓\uFE0E', '#1c9c86'], ['♛\uFE0E', '#c9a227'], ['☂\uFE0E', '#d0503f'], ['✿\uFE0E', '#c7559b'], ['⚡\uFE0E', '#e0a800'], ['✈\uFE0E', '#4a90d9']];
+// Player characters: twenty clay figures (js/avatars.js). A face is ['~<number>', its color]; older rooms may still
+// hold an emoji or symbol in the first slot, which is shown as text.
+const FACES = Array.from({ length: 20 }, (_, i) => ['~' + i, colorOf(i)]);
+const avNum = f => (typeof f?.[0] === 'string' && f[0][0] === '~' ? +f[0].slice(1) : null);
+// How a character feels right now (set when its player gains or loses points), by player name.
+const moods = {};
+const moodOf = name => (moods[name] && moods[name].until > Date.now() ? moods[name].m : 'neutral');
+const faceHtml = (f, fallback = '🙂', mood = 'neutral') => { const n = avNum(f); return n === null ? f?.[0] || fallback : `<img class="av" alt="" src="${avatarUrl(n, mood)}">`; };
 function ensureFaces() {
   const everyone = [...host.players, ...host.audience];
   for (const p of everyone) {
@@ -82,7 +89,7 @@ function standings(v) {
   if (!done || !list.some(p => p.score) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const now = [...list].sort((a, b) => b.score - a.score).slice(0, 8), before = [...now].sort((a, b) => (stand.order.indexOf(a.name) + 1 || 99) - (stand.order.indexOf(b.name) + 1 || 99));
   const max = Math.max(1, now[0].score), face = n => host.players.find(p => p.name === n)?.face;
-  const row = (p, i) => { const f = face(p.name), gain = p.score - (stand.scores[p.name] || 0); return `<div class="strow" data-n="${esc(p.name)}" style="--i:${i}"><i style="--pc:${f?.[1] || '#232a5c'}">${f?.[0] || '🙂'}</i><b>${esc(p.name)}</b><div class="stbar"><span style="width:${Math.max(3, (100 * p.score) / max)}%"></span></div><em>${p.score.toLocaleString()}</em>${gain > 0 ? `<small>+${gain.toLocaleString()}</small>` : '<small></small>'}</div>`; };
+  const row = (p, i) => { const f = face(p.name), gain = p.score - (stand.scores[p.name] || 0); return `<div class="strow" data-n="${esc(p.name)}" style="--i:${i}"><i style="--pc:${f?.[1] || '#232a5c'}">${faceHtml(f, '🙂', gain > 0 ? 'happy' : 'neutral')}</i><b>${esc(p.name)}</b><div class="stbar"><span style="width:${Math.max(3, (100 * p.score) / max)}%"></span></div><em>${p.score.toLocaleString()}</em>${gain > 0 ? `<small>+${gain.toLocaleString()}</small>` : '<small></small>'}</div>`; };
   const el = document.createElement('div'); el.className = 'standings'; el.dataset.theme = THEME_OF[host.gameId] || '';
   el.innerHTML = `<h2>After round ${done}</h2><div class="strows" style="--n:${now.length}">${before.map(row).join('')}</div>`;
   document.body.append(el);
@@ -192,7 +199,7 @@ function holdScores() {
     c.b.dataset.shown = show;
     const g = ss.gains[c.name], el = g ? now - g.at : 9e9;
     c.r.querySelector('.sgain')?.remove();
-    if (el < 2600) { const tag = document.createElement('small'); tag.className = 'sgain ' + (g.d < 0 ? 'neg' : ''); tag.textContent = (g.d > 0 ? '+' : '−') + Math.abs(g.d).toLocaleString(); tag.style.animationDelay = `-${el}ms`; c.r.append(tag); c.r.classList.add('sbump'); c.r.style.setProperty('--bump', `-${el}ms`); }
+    if (el < 2600) { const tag = document.createElement('small'); tag.className = 'sgain ' + (g.d < 0 ? 'neg' : ''); tag.textContent = (g.d > 0 ? '+' : '−') + Math.abs(g.d).toLocaleString(); tag.style.animationDelay = `-${el}ms`; c.r.append(tag); c.r.classList.add('sbump'); if (!moods[c.name] || moods[c.name].at !== g.at) { moods[c.name] = { m: g.d < 0 ? 'sad' : 'happy', until: g.at + 3200, at: g.at }; const av = c.r.querySelector('img.av'), f = host.players.find(p => p.name === c.name)?.face; if (av && avNum(f) !== null) { av.src = avatarUrl(avNum(f), moods[c.name].m); av.parentElement.classList.add('avpop'); } } c.r.style.setProperty('--bump', `-${el}ms`); }
     else c.r.classList.remove('sbump');
   }
 }
@@ -252,7 +259,7 @@ function decorate() {
     if (!p?.face) return;
     if (p.away && host.state) el.classList.add('away');
     const i = document.createElement('i');
-    i.className = 'pface'; i.textContent = p.face[0]; i.style.setProperty('--pc', p.face[1]);
+    i.className = 'pface'; i.innerHTML = faceHtml(p.face, '', moodOf(p.name)); if (avNum(p.face) !== null && moodOf(p.name) !== 'neutral') i.classList.add('avpop'); i.style.setProperty('--pc', p.face[1]);
     el.prepend(i);
   });
 }
@@ -304,7 +311,7 @@ function renderIntro() {
   app.innerHTML = `<div class="intro ${first ? 'enter' : ''}">
     <div class="introart">${art(id, ICONS[id])}</div>
     <div class="introtext"><p class="introkick">How to play</p><h2>${esc(m.name)}</h2><p class="introfacts">${m.best ? `<span>⭐ Best with ${m.best}</span>` : ''}${m.mins ? `<span>⏱ About ${m.mins} min</span>` : ''}${m.mood ? `<span>${esc(m.mood)}</span>` : ''}</p><ol class="introsteps">${rules.map((r, i) => `<li style="--i:${i}">${esc(r)}</li>`).join('')}</ol></div>
-    <div class="introready"><div class="introchips">${humans.map(p => `<span class="introchip ${host.intro.ready[p.pid] ? 'ok' : ''} ${p.away ? 'away' : ''}"><i style="--pc:${p.face?.[1] || '#232a5c'}">${p.face?.[0] || '🙂'}</i>${esc(p.name)}${host.intro.ready[p.pid] ? ' ✅' : ''}</span>`).join('')}</div>
+    <div class="introready"><div class="introchips">${humans.map(p => `<span class="introchip ${host.intro.ready[p.pid] ? 'ok' : ''} ${p.away ? 'away' : ''}"><i style="--pc:${p.face?.[1] || '#232a5c'}">${faceHtml(p.face, '🙂', host.intro.ready[p.pid] ? 'happy' : 'neutral')}</i>${esc(p.name)}${host.intro.ready[p.pid] ? ' ✅' : ''}</span>`).join('')}</div>
       <p class="introhint">Read the steps, then tap <b>✅ Ready</b> on your phone. The game starts when everyone is ready.</p>
       <div class="row"><button class="btn" data-host="start">Start now</button><button class="btn ghost" data-host="lobby">← Back</button></div></div>
   </div>`;
@@ -677,7 +684,7 @@ function ceremony() {
   const flat = tie && list.every(p => val(p) === val(list[0]));   // nobody pulled ahead at all
   const rankOf = i => list.findIndex(p => val(p) === val(list[i])) + 1;   // tied players share a step
   const top = list.slice(0, 3);
-  el.innerHTML = `<h2>${flat ? 'A dead heat!' : tie ? "It's a tie!" : 'And the winner is…'}</h2><div class="cpods">${[1, 0, 2].filter(i => top[i]).map(i => { const f = face(top[i].name); return `<div class="cpod c${i + 1} r${rankOf(i)}"><i style="--pc:${f?.[1] || '#232a5c'}">${f?.[0] || '🏅'}</i><b>${esc(top[i].name)}</b><span>${val(top[i])}</span><em>${rankOf(i)}</em></div>`; }).join('')}</div><p>Press any button to continue</p>`;
+  el.innerHTML = `<h2>${flat ? 'A dead heat!' : tie ? "It's a tie!" : 'And the winner is…'}</h2><div class="cpods">${[1, 0, 2].filter(i => top[i]).map(i => { const f = face(top[i].name); return `<div class="cpod c${i + 1} r${rankOf(i)}"><i style="--pc:${f?.[1] || '#232a5c'}">${faceHtml(f, '🏅', i === 0 ? 'happy' : i === 2 ? 'sad' : 'wow')}</i><b>${esc(top[i].name)}</b><span>${val(top[i])}</span><em>${rankOf(i)}</em></div>`; }).join('')}</div><p>Press any button to continue</p>`;
   document.body.append(el);
   tap.fn?.('ceremony', [el.className, el.dataset.theme, el.innerHTML, 3300, 11000]);
   if (sfx.on && host.settings.music) setTimeout(() => play('music-win'), 3600);
@@ -720,7 +727,7 @@ function countNight() {
 }
 // What a phone needs to draw tonight's results as a picture to keep.
 function nightCard() {
-  const t = host.tally, face = n => host.players.find(p => p.name === n)?.face?.[0] || '';
+  const t = host.tally, face = n => { const f = host.players.find(p => p.name === n)?.face; return avNum(f) === null ? f?.[0] || '' : ''; };
   const top = Object.entries(t.by).sort((a, b) => (b[1].pts || 0) - (a[1].pts || 0) || b[1].wins - a[1].wins).map(([n, r]) => [n, r.pts || 0, face(n)]);
   return { date: new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }), top, games: t.games.map(g => [g.game, g.winners.join(' & ')]), count: t.games.length };
 }
@@ -739,7 +746,7 @@ function nightAwards() {
   ceremonyOff?.();
   const el = document.createElement('div');
   el.className = 'ceremony first nightawards';
-  el.innerHTML = `<h2>Tonight's awards</h2><div class="nawards">${awards.map(([title, n, note], i) => { const f = face(n); return `<div class="naward" style="animation-delay:${0.4 + i * 0.9}s"><small>${title}</small><i style="--pc:${f?.[1] || '#232a5c'}">${f?.[0] || '🏅'}</i><b>${esc(n)}</b><span>${esc(note)}</span></div>`; }).join('')}</div><div class="nlist">${t.games.map(g => `<span><b>${esc(g.game)}</b> ${g.winners.length ? esc(g.winners.join(' & ')) : '—'}</span>`).join('')}</div><p>📸 Everyone can save tonight's results from their phone, back on the menu. Press any button to close.</p>`;
+  el.innerHTML = `<h2>Tonight's awards</h2><div class="nawards">${awards.map(([title, n, note], i) => { const f = face(n); return `<div class="naward" style="animation-delay:${0.4 + i * 0.9}s"><small>${title}</small><i style="--pc:${f?.[1] || '#232a5c'}">${faceHtml(f, '🏅', 'happy')}</i><b>${esc(n)}</b><span>${esc(note)}</span></div>`; }).join('')}</div><div class="nlist">${t.games.map(g => `<span><b>${esc(g.game)}</b> ${g.winners.length ? esc(g.winners.join(' & ')) : '—'}</span>`).join('')}</div><p>📸 Everyone can save tonight's results from their phone, back on the menu. Press any button to close.</p>`;
   document.body.append(el);
   tap.fn?.('ceremony', [el.className, '', el.innerHTML, 0, 0]);
   const t0 = Date.now();
@@ -985,7 +992,7 @@ function renderLobby() {
     if (!menuAt || !rows.some(r => r.id === menuAt.row && r.games.includes(menuAt.game))) { const r = rows.find(x => x.games.includes(host.gameId)) || rows[0]; menuAt = { row: r.id, game: r.games.includes(host.gameId) ? host.gameId : r.games[0] }; }
     const card = (id, row) => { const m = GAMES[id].meta; return `<button class="gcard ${menuAt.row === row && menuAt.game === id ? 'on' : ''}" data-game="${id}" data-row="${row}"><span class="gimg">${thumb(id, ICONS[id])}<i class="gwash" style="--t:${TINT[THEME_OF[id]] || TINT.night}"></i><em class="gname ${m.name.length > 15 ? 'long' : m.name.length > 10 ? 'mid' : ''}">${esc(m.name)}</em></span><b class="gunder">${esc(m.name)}</b><small class="gfacts">${m.min}–${m.max} · ${m.mins} min</small>${locked(id) ? '<small class="glock" title="Locked">🔒</small>' : ''}${m.kids ? '<small class="gbadge">🧒</small>' : ''}${watching() && SAME_ROOM.includes(id) ? '<small class="sameroom">🏠 same room</small>' : ''}</button>`; };
     const barHtml = `<div class="joinbox">${host.settings.streamer ? '' : `<div class="qr">${qr(joinUrl())}</div>`}<div class="jtext"><small>${n ? 'Join on your phone' : 'Scan to join, or go to'}</small><span class="jurl">${esc(joinHost())}</span><b class="code mini">${host.settings.streamer ? '••••' : host.code}</b></div></div>
-        <div class="joined">${host.players.length ? host.players.map(p => `<span class="jface ${p.away ? 'away' : ''}" style="--pc:${p.face?.[1] || '#232a5c'}"><i>${p.face?.[0] || '🙂'}</i><em>${esc(p.name)}</em></span>`).join('') : '<span class="jwait">Waiting for the first player…</span>'}</div>
+        <div class="joined">${host.players.length ? host.players.map(p => `<span class="jface ${p.away ? 'away' : ''}" style="--pc:${p.face?.[1] || '#232a5c'}"><i>${faceHtml(p.face)}</i><em>${esc(p.name)}</em></span>`).join('') : '<span class="jwait">Waiting for the first player…</span>'}</div>
         <div class="herobtns"><button class="btn ghost small" data-host="settings">⚙ Settings</button>${tq.has('local') || host.players.some(p => p.bot) ? '<button class="btn ghost small" data-host="addbot">🤖 Add a bot</button>' : ''}${host.tally?.games.length ? '<button class="btn ghost small" data-host="awards">🏆 Awards</button>' : ''}</div>`;
     const rowsHtml = `${rows.map(r => `<div class="grow" data-row="${r.id}"><h3>${esc(r.name)}</h3><div class="rail">${r.games.map(id => card(id, r.id)).join('')}</div></div>`).join('')}
       <div class="grow" data-row="nights"><h3>🌙 Ready-made nights</h3><div class="rail">${NIGHTS.map(x => `<button class="gcard night" data-host="night:${x.id}"><span class="gimg nightimg"><i>${x.icon}</i></span><b>${esc(x.name)}</b><small class="nightsub">${esc(x.blurb)}</small></button>`).join('')}</div></div>`;
@@ -1114,7 +1121,7 @@ function renderLobby() {
         return `<div class="ring n${Math.min(total, 12)}"><div class="fireflies">${Array.from({ length: 14 }, (_, k) => `<i style="left:${(k * 37) % 100}%;top:${(k * 53) % 100}%;animation-delay:${-(k * 0.9)}s"></i>`).join('')}</div>
           <div class="ringmid">${art(host.gameId, ICONS[host.gameId])}<h2>${esc(g.meta.name)}</h2><p>${n ? `${n} player${n === 1 ? '' : 's'} in` : 'Grab a seat!'}${need ? ` · need ${need} more` : ''}</p><button class="btn" data-host="start" ${need ? 'disabled' : ''}>${need ? 'Waiting…' : g.meta.teams ? 'Lock teams and start' : "Everybody's in!"}</button>${g.meta.teams && n ? `<div class="teamline">${TEAM_NAMES.map((nm, k) => `<span class="tl${k}">${esc(nm)} <b>${host.players.filter(p => teamPick()[p.pid] === k).length}</b></span>`).join('')}<small>Pick your team on your phone</small></div>` : ''}</div>
           ${Array.from({ length: total }, (_, i) => { const p = host.players[i]; return p
-            ? seat(i, `<i style="--pc:${p.face?.[1] || '#232a5c'}">${p.face?.[0] || '🙂'}</i><b>${esc(p.name)}</b>${i === 0 ? '<em>👑</em>' : ''}`, `taken ${g.meta.teams ? 'tm' + teamPick()[p.pid] : ''} ${p.bot ? 'bot' : ''} ${p.away ? 'away' : ''} ${seen.has(p.pid) ? '' : 'pop'} ${editing === p.pid ? 'on' : ''}`, `data-host="edit:${esc(p.pid)}" title="Rename or remove"`)
+            ? seat(i, `<i style="--pc:${p.face?.[1] || '#232a5c'}">${faceHtml(p.face)}</i><b>${esc(p.name)}</b>${i === 0 ? '<em>👑</em>' : ''}`, `taken ${g.meta.teams ? 'tm' + teamPick()[p.pid] : ''} ${p.bot ? 'bot' : ''} ${p.away ? 'away' : ''} ${seen.has(p.pid) ? '' : 'pop'} ${editing === p.pid ? 'on' : ''}`, `data-host="edit:${esc(p.pid)}" title="Rename or remove"`)
             : seat(i, '<i>Join!</i>', 'open'); }).join('')}</div>`;
       })()}
       <div class="row gfoot"><button class="btn ghost small" data-host="menu">← Games</button><button class="btn ghost small" data-host="addbot">🤖 Add a bot</button>${host.players.some(p => p.bot) ? '<button class="btn ghost small" data-host="clearbots">Remove bots</button>' : ''}<span class="muted small">Tap a seat to rename or remove.</span></div>
