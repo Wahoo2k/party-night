@@ -210,7 +210,12 @@ let ducked = false;
 const level = name => (name.startsWith('bed-') ? 0.35 : 0.5) * (ducked ? 0.35 : 1);
 export function startLoop(name) {
   if (!ready() || !rec.sfx.has(name) || loops[name]) return !!loops[name];
-  try { const a = new Audio(`audio/sfx/${name}.mp3`); a.loop = true; a.volume = level(name); a.play().catch(() => {}); loops[name] = a; return true; } catch { return false; }
+  // Music can have extra takes on file too (music-lobby-2, bed-think-3…): each time a loop starts it is a different one.
+  const takes = [name]; for (let i = 2; rec.sfx.has(`${name}-${i}`); i++) takes.push(`${name}-${i}`);
+  let pick = takes[Math.floor(Math.random() * takes.length)];
+  if (takes.length > 1 && pick === lastTake['loop:' + name]) pick = takes[(takes.indexOf(pick) + 1) % takes.length];
+  lastTake['loop:' + name] = pick;
+  try { const a = new Audio(`audio/sfx/${pick}.mp3`); a.loop = true; a.volume = level(name); a.play().catch(() => {}); loops[name] = a; return true; } catch { return false; }
 }
 export function stopLoop(name) { const a = loops[name]; if (a) { try { a.pause(); } catch {} delete loops[name]; } }
 // Music drops under the narrator while a line is spoken.
