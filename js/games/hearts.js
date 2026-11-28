@@ -4,6 +4,13 @@ import { esc } from '../ui.js';
 import { makeStd, face, SUITS, shuffle } from './cards.js';
 
 export const meta = {
+  walk: [
+    { text: 'Here is how Hearts works. It takes one minute.' },
+    { phase: 'pass', text: 'Four players, thirteen cards each. First, pass three cards you do not want to another player.' },
+    { phase: 'play', text: 'Each turn everyone plays one card. Follow the suit that was led if you can. The highest card of that suit takes the trick.' },
+    { phase: 'trick', text: 'Every heart you take is a point, and the Queen of Spades is thirteen. Points are bad.' },
+    { phase: 'play', text: 'Lowest score wins. One twist: take every point card in a hand, and the points go to everyone else instead.' },
+  ],
   standings: false,   // lowest score wins here, so the shared standings screen would read upside down
   id: 'hearts',
   name: 'Hearts',

@@ -5,6 +5,14 @@ import { esc } from '../ui.js';
 import { isRude } from '../names.js';
 
 export const meta = {
+  walk: [
+    { text: 'Here is how Imposter works. It takes one minute.' },
+    { phase: 'roles', text: 'Everyone gets the same secret word on their phone. Everyone except one player. The imposter only sees the category.' },
+    { phase: 'clues', text: 'Take turns typing a one-word clue. Show you know the word, without giving it away to the imposter.' },
+    { phase: 'discuss', text: 'Then talk it over. Whose clue sounded like a guess?' },
+    { phase: 'vote', text: 'Everyone votes for who they think is faking.' },
+    { text: 'If the imposter is caught, they get one guess at the secret word to steal the win.' },
+  ],
   id: 'imposter',
   name: 'Imposter',
   min: 4,

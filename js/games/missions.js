@@ -5,6 +5,14 @@
 import { esc } from '../ui.js';
 
 export const meta = {
+  walk: [
+    { text: 'Here is how Inside Job works. It takes one minute.' },
+    { phase: 'roles', text: 'Your phone shows your side. Most of you are loyal crew. A few are secret traitors, and the traitors know each other.' },
+    { phase: 'pick', text: 'Each job has a leader. The leader picks who goes on the team.' },
+    { phase: 'vote', text: 'Everyone votes to approve the team or turn it down. Turn down five teams in a row and the traitors win.' },
+    { phase: 'mission', text: 'The team secretly plays Success or Fail. Crew can only play Success. A single Fail ruins the job.' },
+    { phase: 'result', text: 'Three successful jobs and the crew wins. Three failed jobs and the traitors win. Trust nobody.' },
+  ],
   id: 'missions',
   name: 'Inside Job',
   min: 5,

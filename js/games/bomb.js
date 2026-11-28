@@ -4,6 +4,13 @@
 import { esc } from '../ui.js';
 
 export const meta = {
+  walk: [
+    { text: 'Here is how Bomb Squad works. It takes one minute.' },
+    { phase: 'brief', text: 'You are all on one team. The bomb is on the TV, and each phone holds a few pages of the manual.' },
+    { phase: 'defuse', text: 'Read your rules out loud. The first rule that fits the bomb is the one to follow.' },
+    { phase: 'defuse', text: 'Only the cutter can cut a wire, and the cutter changes with every bomb. So talk fast.' },
+    { phase: 'result', text: 'Cut the right wire and you move on to a harder bomb. Three mistakes and it is all over.' },
+  ],
   id: 'bomb',
   name: 'Bomb Squad',
   min: 2,

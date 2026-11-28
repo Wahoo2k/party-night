@@ -4,6 +4,14 @@
 import { esc } from '../ui.js';
 
 export const meta = {
+  walk: [
+    { text: 'Here is how Mystery Manor works. It takes one minute.' },
+    { phase: 'roles', text: 'Everyone plays a character at the manor. One of you is secretly the thief.' },
+    { phase: 'act', text: 'There are three acts. In each one the TV shows clues for everyone, and your phone shows clues only you know.' },
+    { phase: 'act', text: 'Share what you know out loud. Careful. The thief will lie.' },
+    { phase: 'accuse', text: 'At the end, everyone accuses on their phone: who did it, where, and how.' },
+    { phase: 'reveal', text: 'Get it right and the guests win. Get it wrong and the thief gets away.' },
+  ],
   id: 'mystery',
   name: 'Mystery Manor',
   min: 4,

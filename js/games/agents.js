@@ -5,6 +5,13 @@ import { esc } from '../ui.js';
 import { isRude } from '../names.js';
 
 export const meta = {
+  walk: [
+    { text: 'Here is how Secret Agents works. It takes one minute.' },
+    { phase: 'clue', text: 'There are two teams. Each team has a spymaster, who can see on their phone which words belong to their team.' },
+    { phase: 'clue', text: 'The spymaster gives one word and a number. Ocean, two, means two of our words have to do with the ocean.' },
+    { phase: 'guess', text: 'Teammates talk it over and tap the words they think the clue means. A right word keeps your turn going.' },
+    { text: 'The first team to find all its words wins. But tap the trap word, and your team loses on the spot.' },
+  ],
   id: 'agents',
   teams: true,   // players choose their side on the join screen
   name: 'Secret Agents',
