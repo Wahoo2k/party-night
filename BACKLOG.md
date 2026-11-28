@@ -240,3 +240,5 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Music now runs under the whole game (was only while a clock counted, so turn-based games were silent).
 - Brain Teasers: puzzle drawn about four times larger on the TV. Removed the "Phones down" time's-up joke.
 - GOAT Toss: cup rattle, table knocks on each bounce and goat bleats (audio/SFX.md: cup-shake, thud, bleat), varied in pitch.
+- Survey bank (js/games/crowd-bank.js): 16 to 60 questions; the 44 new ones have eight answers each. Still our own judgment, not poll data.
+- New game: Top Spot (js/games/topspot.js). Everyone answers a survey question at once. Rounds: Top Spot (one guess, popular pays), Deep Cut (one guess, obscure pays), Top Spot, Deep Cut, then Sweep (45-second race to find answers; first finder 150, later 50). Board of big colour tiles that flip. Not in the launch list until people have played it; narration not recorded; cover is rendered, not painted.

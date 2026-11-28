@@ -2524,3 +2524,38 @@ body.onstage[data-game=rebus] .rbbox .rb-say{font-size:.9em}
 body.onstage[data-game=rebus] .rbask{font-size:34px}
 body.onstage[data-game=rebus] .rbhint{font-size:40px}
 body.onstage[data-game=rebus] .rbbox~p.center .clock,body.onstage[data-game=rebus] .rbhint+p .clock{font-size:46px;padding:6px 22px}
+/* Top Spot: a survey board in big flat colour blocks. Each row keeps its colour; tiles flip to show their answer. */
+.tshead{display:flex;align-items:center;gap:16px;margin:4px 0 10px;padding:12px 20px;border-radius:20px;background:#fff;color:#1b1147;box-shadow:8px 8px 0 #1b1147;text-align:left}
+.tshead b{flex:1;min-width:0;font:800 clamp(26px,calc(3.4*var(--vw,1vw)),54px)/1.08 Outfit,sans-serif}
+.tsmode{flex:0 0 auto;padding:6px 14px;border-radius:12px;background:#1b1147;color:#ffd60a;font:800 clamp(14px,calc(1.5*var(--vw,1vw)),24px)/1 Outfit,sans-serif;text-transform:uppercase;letter-spacing:.06em}
+.tm-deep .tsmode{color:#4cc9f0}.tm-sweep .tsmode{color:#06d6a0}
+.tshead .clock{font:800 clamp(32px,calc(4*var(--vw,1vw)),62px)/1 Outfit,sans-serif;font-style:normal;color:#ff4d6d}
+.tsrule{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:4px 14px;margin:0 0 10px;color:#fff;text-shadow:0 2px 0 #1b1147}
+.tsrule b{font:800 clamp(20px,calc(2.3*var(--vw,1vw)),36px)/1.1 Outfit,sans-serif}.tsrule span{font-weight:700;opacity:.92}
+.tsboard{display:grid;gap:10px;margin:8px 0 12px}
+.tsboard.cols2{grid-template-columns:1fr 1fr;grid-auto-flow:column;grid-template-rows:repeat(4,auto)}
+.tstile{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:4px 14px;min-height:74px;padding:8px 16px 8px 10px;border-radius:16px;background:var(--c);color:#1b1147;box-shadow:6px 6px 0 #1b1147;text-align:left}
+.tstile i{font:800 26px/1 Outfit,sans-serif;font-style:normal;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#1b1147;color:#fff}
+.tstile b{font:800 clamp(22px,calc(2.6*var(--vw,1vw)),40px)/1.05 Outfit,sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tstile em{font:800 clamp(18px,calc(2*var(--vw,1vw)),30px)/1 Outfit,sans-serif;font-style:normal;opacity:.75}
+.tstile.back{background:#1b1147;color:#ffffff66;box-shadow:6px 6px 0 #0006}.tstile.back i{background:var(--c);color:#1b1147}
+.tstile.missed{background:#cfd2e6;color:#1b114799;box-shadow:6px 6px 0 #0004}
+.tshits{grid-column:2/-1;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.tshits u{text-decoration:none;padding:3px 12px;border-radius:99px;background:#1b1147;color:#fff;font:700 18px/1.2 Outfit,sans-serif}
+.tshits strong{margin-left:auto;font:800 30px/1 Outfit,sans-serif}
+.tstile.hit{outline:5px solid #fff;outline-offset:-5px}
+/* a tile turns over: first its dark back, then its colour */
+@keyframes tsflip{0%{transform:rotateX(0);background:#1b1147;color:#0000}49%{transform:rotateX(90deg);background:#1b1147;color:#0000}51%{transform:rotateX(90deg)}100%{transform:none}}
+@keyframes tshide{from{opacity:0}to{opacity:0}}
+.tstile.flip{animation:tsflip .6s var(--d) cubic-bezier(.3,1.3,.5,1) backwards}
+.tstile.flip b,.tstile.flip em,.tstile.flip .tshits{animation:fadein .2s calc(var(--d) + .3s) backwards}
+.tstile.flip .tshits strong{animation:slam .5s calc(var(--d) + .55s) backwards}
+.tstile.pop{animation:tsflip .5s cubic-bezier(.3,1.3,.5,1)}
+.tsmiss{margin:0 0 10px;color:#fff;font-weight:700;animation:fadein .4s backwards;text-shadow:0 2px 0 #1b1147}
+.tsmiss span{display:inline-block;margin:3px 4px;padding:3px 12px;border-radius:99px;background:#1b1147cc}
+.tsnote{font-weight:800;margin:8px 0}
+body.onstage[data-game=topspot] .panel.ts{background:none;box-shadow:none;border:0;padding:0}
+.tstile.hit{outline:none}
+.tstile.hit::after{content:'';position:absolute;inset:0;border:5px solid #fff;border-radius:16px;pointer-events:none}
+.tstile.flip.hit::after{animation:fadein .2s calc(var(--d) + .3s) backwards}
+.tsrule{padding:6px 16px;border-radius:14px;background:#1b1147d9;text-shadow:none;width:fit-content;margin-inline:auto}
