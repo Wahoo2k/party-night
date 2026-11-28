@@ -15,6 +15,7 @@ export const CATEGORIES = [
   'Name a country', 'Name a vegetable', 'Name something you wear', 'Name a breakfast food', 'Name a song', 'Name an ocean animal', 'Name a superhero',
   'Name a board game', 'Name a dessert', 'Name a job', 'Name something with wheels', 'Name a holiday', 'Name a bird', 'Name something cold',
   'Name a city', 'Name a candy', 'Name a musical instrument', 'Name a body part', 'Name something at the beach', 'Name a movie', 'Name a drink',
+  'Name a flavor of ice cream', 'Name a farm animal', 'Name something in a classroom', 'Name a kind of sandwich', 'Name something that flies', 'Name a cereal', 'Name a zoo animal', 'Name something in a bathroom', 'Name a US state', 'Name a snack', 'Name something round', 'Name a kind of tree', 'Name a TV show', 'Name something in the sky', 'Name a fast food restaurant', 'Name a toy', 'Name something you plug in', 'Name a kind of dog', 'Name something green', 'Name a thing in a backpack', 'Name a kind of soup', 'Name something loud', 'Name a bug', 'Name a planet', 'Name something in a garage', 'Name a kind of cookie', 'Name a card game', 'Name something that melts',
 ];
 export const ROUNDS = 8;
 export const MIN_HOLD = 1200;   // you have to hold it long enough to say something

@@ -27,6 +27,7 @@ export const TITLES = [
   'A toaster in love', 'A squirrel robbing a bank', 'The moon wearing sunglasses', 'A duck doing taxes', 'A sandwich running away', 'A wizard stuck in a revolving door',
   'A zombie on a diet', 'A whale in a bathtub', 'A grumpy rainbow', 'A turtle with a jetpack', 'A scarecrow on a date', 'A bored frog king',
   'A yeti at a pool party', 'A lighthouse that is afraid of the dark', 'A unicorn stuck in a sweater', 'A chicken crossing the road, finally',
+  'A dentist for sharks', 'The world\'s smallest giant', 'A sheep counting people', 'A haunted sandwich shop', 'A raccoon running for mayor', 'Two snowmen arguing', 'A kangaroo with too many groceries', 'The sun forgetting to rise', 'A robot\'s first sneeze', 'A mouse lifting an elephant', 'A spooky birthday cake', 'A camel at a water park', 'An owl who hates nights', 'A goldfish with big dreams', 'A dragon afraid of candles', 'A flamingo on roller skates', 'The slowest superhero', 'A pumpkin\'s bad day', 'A moose in a canoe', 'A lobster giving a haircut', 'A piano on a diet', 'An astronaut who lost the keys', 'A llama at a fancy dinner', 'A crab directing traffic', 'The tooth that got away', 'A hedgehog blowing up balloons', 'A castle made of waffles', 'A parrot keeping a secret', 'A walrus at the opera', 'A broom on its day off',
 ];
 export const TIMES = { draw: 75000, fake: 45000, pick: 30000, reveal: 9000 };
 const shuffle = (a, rnd) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };

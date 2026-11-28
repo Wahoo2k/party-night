@@ -23,6 +23,7 @@ export const PROMPTS = [
   'A cupcake with angry eyes', 'A whale in a bathtub', 'A sleepy sun', 'A chicken crossing a river', 'A unicorn stuck in a tree', 'A pumpkin with braces',
   'A fish riding a bicycle', 'A vampire at the beach', 'A baby running a meeting', 'A potato on a throne', 'A tornado of socks', 'A bee wearing boots',
   'A crocodile brushing its teeth', 'A rocket made of cheese', 'A cat stuck in a box', 'A mummy at the spa', 'A turtle in a hurry', 'A broccoli superhero',
+  'A llama in a limousine', 'A dragon at the dentist', 'A squirrel on a surfboard', 'A ghost eating spaghetti', 'A penguin delivering pizza', 'A robot walking a dog', 'A flamingo playing soccer', 'A hot dog at the gym', 'A dinosaur on roller skates', 'A wizard at the grocery store', 'A cat conducting an orchestra', 'A shark in a swimming pool', 'A cow doing ballet', 'A snowman in a sauna', 'A raccoon in a business suit', 'A pirate at a water park', 'An owl drinking coffee', 'A moose on a trampoline', 'A zombie mowing the lawn', 'A goat on a rooftop', 'A crab getting a manicure', 'A bear at a picnic', 'A kangaroo boxing a pillow', 'A taco with sunglasses', 'A walrus on a waterslide', 'A mouse riding an elephant', 'A knight on a pogo stick', 'A parrot on a pirate\'s hat', 'An astronaut walking a cat', 'A camel in the snow',
 ];
 export const COLORS = ['#fffdf6', '#1d1f2e', '#e2473b', '#f2a81d', '#3fa34d', '#2f6fd8', '#8a4fd1', '#8b5a2b'];
 export const WIDTHS = [3, 7, 16];
