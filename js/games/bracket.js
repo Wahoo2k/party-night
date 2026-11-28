@@ -11,6 +11,16 @@ export const PROMPTS = [
   'The most useless invention', 'The best thing about Mondays', 'The worst gift to get twice', 'The best name for a band of grandparents', 'The silliest thing to be afraid of',
   'The best way to wake someone up', 'The worst ice cream flavor', 'The best rule for a treehouse', 'The most annoying sound', 'The best thing to yell when you win',
   'The worst place to lose your phone', 'The best movie snack that is not popcorn', 'The weirdest thing to collect', 'The best secret talent', 'The worst theme for a wedding',
+  'The worst thing to say on a first date', 'The best name for a pet rock', 'The worst superhero weakness', 'The best thing to find in your pocket', 'The worst song to get stuck in your head',
+  'The best use for a cardboard box', 'The worst advice for a job interview', 'The best thing to put on toast', 'The worst place to fall asleep', 'The best excuse for not doing the dishes',
+  'The worst flavor of toothpaste', 'The best title for your life story', 'The worst thing to forget on vacation', 'The best animal to ride to work', 'The worst slogan for an airline',
+  'The best thing to say after a burp', 'The worst name for a restaurant', 'The best invention for lazy mornings', 'The worst thing to step on barefoot', 'The best reason to cancel plans',
+  'The worst thing to hear from a pilot', 'The best snack at midnight', 'The worst mascot for a sports team', 'The best thing to do in an elevator', 'The worst item to bring to a potluck',
+  'The best new rule for the office', 'The worst thing to say at a haircut', 'The best name for a grumpy cat', 'The worst smell to wake up to', 'The best thing to shout from a mountain top',
+  'The worst costume for a wedding guest', 'The best cure for boredom', 'The worst thing to write on a birthday cake', 'The best thing to train a parrot to say', 'The worst thing to autocorrect',
+  'The best dance move name', 'The worst prize on a game show', 'The best sandwich nobody has invented yet', 'The worst thing to whisper in a library', 'The best job title to put on a business card',
+  'The worst thing a GPS could say', 'The best name for a boat owned by a dentist', 'The worst ride at a theme park', 'The best thing about being a grown-up', 'The worst thing about being a grown-up',
+  'The best warning label', 'The worst New Year\'s resolution', 'The best thing to bury in a time capsule', 'The worst holiday to invent', 'The best last words in a movie',
 ];
 export const TIMES = { write: 60000, predict: 30000, vote: 22000, result: 8000, champ: 9000 };
 const shuffle = (a, rnd) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
