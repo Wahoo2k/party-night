@@ -2291,3 +2291,39 @@ body.lite .hero::before{transition:none}
 body.lite .gcard{transition:none}
 body.lite .gcard .gimg img{transition:none}
 .gcard .gimg img{content-visibility:auto}
+
+/* GOAT Toss, smoother: the tabletop is clipped by a plain box (cheap) instead of a clip-path on the whole scene
+   (which made the TV redraw everything through a mask every frame). Pieces sit outside that box, free to rise above it. */
+.gtable.g3d{clip-path:none;overflow:visible;background:none;box-shadow:none}
+.g3d .gclip{position:absolute;inset:0;overflow:hidden;border-radius:26px;perspective:1050px;perspective-origin:50% -85%;background:radial-gradient(120% 90% at 50% 0,#3b2a20,#120b08 75%);box-shadow:inset 0 0 0 5px #e3b26a66,0 14px 30px #0006}
+.g3d .gclip>.gtop{left:50%;top:calc(95% - 900px);bottom:auto;margin-left:-850px;transform:translateZ(-120px) rotateX(90deg)}
+.g3d .gclip>.glip{left:50%;top:95%;margin-left:-850px;transform:translateZ(-120px)}
+.g3d .gworld{z-index:1}
+.g3d .g3,.g3d .g3 .gspr,.g3d .gcup,.g3d .gsh{will-change:transform;backface-visibility:hidden}
+body.lite .g3d .gclip{box-shadow:inset 0 0 0 5px #e3b26a66}
+body.lite .g3d .gtop{background:repeating-linear-gradient(90deg,#0000 0 168px,#2a160b55 168px 171px),repeating-linear-gradient(92deg,#8a5a34 0 23px,#7d5230 23px 41px,#946238 41px 70px,#805331 70px 96px),#7a4f2d}
+
+/* The menu on a short screen (a TV box's web view is 960x540): everything in the top panel fits, nothing overlaps.
+   The game name, its one-line pitch and the play button sit above; the join box, who's in and the buttons below. */
+@media (max-height:700px){
+  .hub{grid-template-rows:minmax(0,54fr) minmax(0,46fr);gap:8px}
+  .hero{padding:12px 18px;gap:6px 18px;grid-template-rows:minmax(0,1fr) auto}
+  .hero .heroinfo{align-self:center;gap:4px;align-content:center}
+  .heroinfo h2{font-size:clamp(26px,calc(5.6*var(--vh,1vh)),40px);line-height:1}
+  .heroinfo p{font-size:14px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+  .heroinfo .pvtags{display:flex;flex-wrap:nowrap;gap:6px;overflow:hidden}
+  .heroinfo .pvtags span{font-size:11.5px;padding:2px 8px;white-space:nowrap}
+  .heroinfo .btn{min-height:30px;padding:3px 14px;font-size:14px;justify-self:start}
+  .herobar{gap:10px}
+  .joinbox{padding:5px 12px 5px 5px;gap:9px;border-radius:13px}
+  .joinbox .qr{width:54px;padding:3px}
+  .joinbox .jtext small,.joinbox .jurl{font-size:11px}
+  .joinbox .code.mini{font-size:22px}
+  .joined{flex-wrap:nowrap;gap:5px}
+  .jface{padding:3px 9px 3px 3px;gap:5px;flex:0 0 auto}
+  .jface i{width:24px;font-size:15px}
+  .jface em{font-size:12px;max-width:6.5em}
+  .herobtns{flex-wrap:nowrap}
+  .herobtns .btn{min-height:30px;padding:3px 10px;font-size:13px;white-space:nowrap}
+  .grows h3{font-size:16px;margin:4px 0}
+}
