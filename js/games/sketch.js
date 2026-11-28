@@ -237,7 +237,7 @@ function showList(s) {
 export function tvView(s, now = Date.now()) {
   const v = { phase: s.phase, step: s.step, steps: s.steps, left: Math.max(0, Math.ceil((s.deadline - now) / 1000)) };
   if (['write', 'draw', 'guess'].includes(s.phase)) v.players = s.players.map(p => ({ name: p.name, done: done(s, p.pid) }));
-  if (s.phase === 'reveal') { v.c = s.show.c; v.chains = n(s); v.owner = nameOf(s, s.chains[s.show.c][0].by); v.entries = showList(s).map(({ by, ...e }) => e); }
+  if (s.phase === 'reveal') { v.c = s.show.c; v.chains = n(s); v.owner = nameOf(s, s.chains[s.show.c][0].by); v.entries = showList(s).map(({ by, ...e }) => e); v.len = s.chains[s.show.c].length; }
   if (s.phase === 'over') {
     v.scores = scores(s);
     let best = null;
@@ -299,7 +299,7 @@ export function renderTV(v, el) {
     h += `<div class="how"><h3>How it works</h3><ol><li>Everyone writes something.</li><li>The next person draws it.</li><li>The next person guesses the drawing.</li><li>Then it's drawn again… and again.</li><li>At the end, the TV replays how each one fell apart. Tap ❤️ for your favorites.</li></ol></div>`;
   }
   if (v.phase === 'reveal') {
-    h = `<p class="cat">Chain ${v.c + 1} of ${v.chains} · started by ${esc(v.owner)}</p><div class="chainrow">${v.entries.map((e, i) => `<div class="link ${i === v.entries.length - 1 ? 'newest' : ''} ${e.kind}">${e.kind === 'draw' ? svgFor(e.strokes, '', replay && i === v.entries.length - 1) : `<div class="sktext">${esc(e.text)}</div>`}<small>${e.kind === 'draw' ? 'drawn' : i === 0 ? 'written' : 'guessed'} by <b>${esc(e.name)}</b>${e.late ? ' (ran out of time)' : ''}${e.hearts ? ` · ❤️ ${e.hearts}` : ''}</small></div>`).join('<span class="arrow">→</span>')}</div><p class="muted center">Tap ❤️ on your phone for your favorites</p><button class="btn ghost" data-host="next">Next</button>`;
+    h = `<p class="cat">Chain ${v.c + 1} of ${v.chains} · started by ${esc(v.owner)}</p><div class="chainrow">${v.entries.map((e, i) => `<div class="link ${i === v.entries.length - 1 ? 'newest' : ''} ${e.kind}">${e.kind === 'draw' ? svgFor(e.strokes, '', replay && i === v.entries.length - 1) : `<div class="sktext">${esc(e.text)}</div>`}<small>${e.kind === 'draw' ? 'drawn' : i === 0 ? 'written' : 'guessed'} by <b>${esc(e.name)}</b>${e.late ? ' (ran out of time)' : ''}${e.hearts ? ` · ❤️ ${e.hearts}` : ''}</small></div>`).concat(Array.from({ length: Math.max(0, (v.len || 0) - v.entries.length) }, () => '<div class="link slot"><div class="sktext">&nbsp;</div><small>&nbsp;</small></div>')).join('<span class="arrow">→</span>')}</div><p class="muted center">Tap ❤️ on your phone for your favorites</p><button class="btn ghost" data-host="next">Next</button>`;
   }
   if (v.phase === 'over') {
     h = `<h2 class="win">${v.scores[0].hearts ? `${esc(v.scores[0].name)} is the most loved artist!` : 'What a masterpiece of chaos!'}</h2>${v.best ? `<div class="skbest">${svgFor(v.best.strokes)}<div><p class="cat">Most loved drawing</p><p class="say">${v.best.from ? `“${esc(v.best.from)}”` : ''}</p><p>by <b>${esc(v.best.name)}</b> · ❤️ ${v.best.hearts}</p></div></div>` : ''}<div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;

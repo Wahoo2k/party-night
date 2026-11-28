@@ -115,7 +115,8 @@ export function renderTV(v, el) {
   if (v.phase === 'show' && v.fresh !== false) {
     // Light up each pad in turn and play its note.
     const btns = el.querySelectorAll('.ccpad'), step = stepFor(v.pattern.length);
-    import('../sfx.js').then(m => v.pattern.forEach((k, i) => { m.note(PADS[k].f, 0.45, 1 + (i * step) / 1000); setTimeout(() => { btns[k]?.classList.add('lit'); setTimeout(() => btns[k]?.classList.remove('lit'), step * 0.7); }, 1000 + i * step); })).catch(() => {});
+    const lead = 2900;   // the "Round N" title covers the screen for the first 2.6 s; the pattern starts once it has gone
+    import('../sfx.js').then(m => v.pattern.forEach((k, i) => { m.note(PADS[k].f, 0.45, (lead + i * step) / 1000); setTimeout(() => { const pad = () => el.querySelectorAll('.ccpad')[k]; pad()?.classList.add('lit'); setTimeout(() => pad()?.classList.remove('lit'), step * 0.7); }, lead + i * step); })).catch(() => {});   // the pad is looked up when it lights, because the screen may have been redrawn since
   }
 }
 export function renderPhone(v, el, send) {

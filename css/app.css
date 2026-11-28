@@ -2327,3 +2327,6 @@ body.lite .g3d .gtop{background:repeating-linear-gradient(90deg,#0000 0 168px,#2
   .herobtns .btn{min-height:30px;padding:3px 10px;font-size:13px;white-space:nowrap}
   .grows h3{font-size:16px;margin:4px 0}
 }
+/* Sketch Telephone reveal: empty slots hold the room for cards still to come, so the strip never changes size. */
+.chainrow .link.slot{visibility:hidden;animation:none}
+.chainrow .link.slot .sktext{aspect-ratio:1}

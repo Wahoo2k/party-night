@@ -189,3 +189,9 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Sounds and music loops can have several takes on file (name-2, name-3…), picked at random; `node tools/eleven.mjs sfx|music --takes fanfare:3,…` makes them. None made yet.
 - GOAT Toss smoothness: the screen is not redrawn while a toss is in the air; the tabletop is clipped by a plain box instead of a clip-path over the whole scene; moving pieces are on their own layers.
 - Menu at the TV app's size (960x540): the top panel was too short, so the game name was cut off and the join box covered the play button. Under 700 px tall the panel is now taller with smaller type, one row of joined players, and nothing overlapping.
+
+## 27 Nov, evening: Copy Cat pattern, bot clues, self-update
+- Copy Cat: the pattern now starts after the "Round N" title has gone (it was flashing behind it), and each flash finds its pad when it fires, so a redraw cannot lose the rest of the pattern.
+- Mind Meld: bots give a real clue for every scale (js/games/meld-clues.js, five per scale), never "pretty far left".
+- Menu: a row scrolling under a resting mouse pointer no longer changes the game shown.
+- js/fresh.js: on the menu the TV page checks every 3 minutes for a new version and reloads itself.

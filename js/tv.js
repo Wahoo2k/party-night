@@ -40,6 +40,7 @@ const lastActN = {};
 let viewSeq = Date.now();
 let lastPhase = '';
 
+import('./fresh.js').then(m => m.watchFresh(() => !!document.querySelector('.hub'))).catch(() => {});
 const game = () => GAMES[host.gameId];
 // A host line for a moment, in the right voice for the game on screen (kids' games get the gentle set).
 const hostLine = m => quip(m, { game: host.gameId, kids: !!host.settings.kids || !!game()?.meta.kids });
@@ -878,7 +879,7 @@ function renderLobby() {
     const pick = (id, now) => { clearTimeout(pickTimer); if (now) return pickNow(id); if (pv && pv.id !== id && sfx.on) play('pop'); pickTimer = setTimeout(() => { if (app.contains(hero)) pickNow(id); }, 240); };
     app.querySelectorAll('.gcard[data-game]').forEach(c => {
       c.onfocus = () => { menuAt = { row: c.dataset.row, game: c.dataset.game }; app.querySelectorAll('.gcard.on').forEach(x => x.classList.remove('on')); c.classList.add('on'); show(c, true); pick(c.dataset.game); };
-      c.onmouseenter = () => pick(c.dataset.game);
+      c.onmousemove = () => { if (pv?.id !== c.dataset.game) pick(c.dataset.game); };   // a real mouse move only: a row scrolling under a resting pointer must not change the game shown
     });
     app.querySelectorAll('.gcard.night').forEach(c => (c.onfocus = () => show(c, true)));
     pick(menuAt.game, true);
@@ -911,7 +912,7 @@ function renderLobby() {
       </div>
       <details class="settest" ${host.players.some(p => p.bot) ? 'open' : ''}><summary>Testing tools</summary><div class="row">
         <button class="btn ghost" data-host="testvoice">Test voice</button>
-        <button class="btn ghost" data-host="addbot">Add a bot player</button>
+        <button class="btn ghost" data-host="addbot">Add a test bot</button><p class="muted small">Bots fill seats so you can try a game alone. They can't really draw or think, so leave them out of a real game night.</p>
         ${host.players.some(p => p.bot) ? '<button class="btn ghost" data-host="clearbots">Remove bots</button>' : ''}
         <span class="muted">Bots fill empty seats for testing. They play at random.</span>
       </div></details>

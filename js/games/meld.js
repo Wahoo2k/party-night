@@ -2,6 +2,7 @@
 // Everyone else sets a dial on their phone at the same time. Closer = more points. (Wavelength-style.)
 import { esc } from '../ui.js';
 import { isRude } from '../names.js';
+import { botClue } from './meld-clues.js';
 
 export const meta = {
   id: 'meld',
@@ -131,7 +132,7 @@ export function cue(s) {
 
 // Bots know the target (they're for testing) and miss by a bit.
 export function botAct(v, rnd = Math.random) {
-  if (v.phase === 'clue' && v.isPsychic) return { type: 'clue', text: ['Way over left', 'Pretty far left', 'A bit left', 'Right in the middle', 'A bit right', 'Pretty far right', 'Way over right'][Math.min(6, Math.floor(v.target / 14.3))] };
+  if (v.phase === 'clue' && v.isPsychic) return { type: 'clue', text: botClue(v.scale, v.target) || 'Somewhere in the middle' };
   if (v.phase === 'guess' && !v.isPsychic && !v.locked && v._t !== undefined) return { type: 'lock', v: Math.max(0, Math.min(100, v._t + Math.round((rnd() - 0.5) * 40))) };
   return null;
 }
