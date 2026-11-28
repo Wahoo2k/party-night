@@ -517,7 +517,7 @@ export function renderPhone(v, el, send) {
     else h = `<h2>${t.wave === 1 ? 'Toss your goats!' : 'Toss again, or bank?'}</h2>${dbl}${t.last ? `<p class="say">${esc(t.last.name)}${t.last.pts ? ` +${t.last.pts}` : ''}</p>` : ''}
       <div class="swipe" id="swipe" data-pad><div class="ducks-mini">${goatImg('stand')}${goatImg('stand')}</div><b>Swipe up to toss</b><small>or tap</small></div>${bar}
       ${t.wave > 1 ? `<button class="btn" data-bank>Bank ${t.pts * mult} points</button>` : ''}
-      <p class="muted">Everyone tosses at once. Two goats on different sides butt heads: you lose this round's points.</p>`;
+      ${t.wave === 1 ? `<p class="muted">Everyone tosses at once. Two goats on different sides butt heads: you lose this round's points.</p>` : ''}`;
   }
   else if (!v.myTurn) h = `<h2>${esc(v.who)} is tossing</h2><p class="say">Their turn so far: <b>${v.theirTurnPts}</b>${v.twist === 'double' ? ' · double or nothing' : ''}</p>${v.forcedBy ? `<p class="say">😈 ${esc(v.forcedBy)} made them toss again!</p>` : ''}<p class="muted">Your score: ${v.score} of ${v.target}</p>${v.daresLeft ? `<button class="btn ghost" data-dare ${v.canDare ? '' : 'disabled'}>😈 One more! Make them toss again</button><p class="muted small">Once a game. They cannot bank until they toss again.</p>` : ''}`;
   else {

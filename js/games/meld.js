@@ -158,7 +158,7 @@ export function phoneView(s, pid) {
 // ---------- the scale bar ----------
 function bar(scaleLR, { target, marks = [], big = false } = {}) {
   const bands = target === undefined ? '' : BANDS.slice().reverse().map(([n, p]) => `<div class="mband b${p}" style="left:${Math.max(0, target - n)}%;width:${Math.min(100, target + n) - Math.max(0, target - n)}%"><span>${p}</span></div>`).join('') + `<div class="mtarget" style="left:${target}%"></div>`;
-  const pins = [...marks].sort((x, y) => x.g - y.g).map((m, i) => `<div class="mpin ${m.cls || ''}" style="left:${m.g}%;--d:${i * 0.12}s;margin-top:${(i % 3) * 26}px"><b>${esc(m.label)}</b></div>`).join('');
+  const pins = [...marks].sort((x, y) => x.g - y.g).map((m, i) => `<div class="mpin ${m.cls || ''}" style="left:${m.g}%;--d:${i * 0.12}s;margin-top:${(i % 3) * 34}px"><b>${esc(m.label)}</b></div>`).join('');
   return `<div class="mscale ${big ? 'mbig' : ''}"><div class="mlabels"><span>${esc(scaleLR[0])}</span><span>${esc(scaleLR[1])}</span></div><div class="mbar">${bands}${pins}</div></div>`;
 }
 

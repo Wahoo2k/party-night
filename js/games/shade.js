@@ -141,7 +141,7 @@ function grid({ target, marks = [], pickable = false, zoom = null } = {}) {
     const here = marks.filter(m => m.x === x && m.y === y);
     const isT = target && target.x === x && target.y === y;
     const near = target && dist({ x, y }, target) === 1;
-    return `<div class="shc ${isT ? 'target' : ''} ${near ? 'near' : ''}" style="background:${colorAt(x, y)}" ${pickable ? `data-x="${x}" data-y="${y}"` : ''}>${zoom ? `<small>${cellName(x, y)}</small>` : ''}${here.map(m => `<b class="shm" title="${esc(m.label)}">${esc(m.label.slice(0, 2))}</b>`).join('')}</div>`;
+    return `<div class="shc ${isT ? 'target' : ''} ${near ? 'near' : ''}" style="background:${colorAt(x, y)}" ${pickable ? `data-x="${x}" data-y="${y}"` : ''}>${zoom ? `<small>${cellName(x, y)}</small>` : ''}${here.map(m => `<b class="shm" title="${esc(m.label)}">${esc(m.label.length <= 8 ? m.label : m.label.slice(0, 7) + '…')}</b>`).join('')}</div>`;
   }).join('')).join('');
   return `<div class="shgrid ${zoom ? 'zoom' : ''}" style="--cols:${xs.length}">${cells}</div>`;
 }
