@@ -17,7 +17,7 @@ const tabStore = {
   set(k, v) { try { sessionStorage.setItem(k, JSON.stringify(v)); } catch {} },
   del(k) { try { sessionStorage.removeItem(k); } catch {} },
 };
-const store = params.has('local') ? tabStore : localStore;
+const store = params.has('local') || params.has('tab') ? tabStore : localStore;   // ?tab: on the live site too, each browser tab is its own player (for testing)
 let code = cleanCode(params.get('code') || store.get('pg-code'));
 let name = store.get('pg-name') || '';
 let pid = null;
