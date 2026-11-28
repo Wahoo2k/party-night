@@ -211,3 +211,12 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Tall Tales reveal resumes mid-card on a redraw.
 - Seen, not fixed: menu top panel clips in a wide, short desktop window (about 1900×870); hidden browser tabs show as "away" (expected).
 - Menu no longer jumps to the top: a player joining, leaving or going "away" now swaps only the top bar (rows, pictures and highlight stay put); non-animated scrolls are instant; the highlighted game survives the page reloading itself.
+
+## 27 Nov, night: gameplay polish from TV play
+- Stage fit measures layout height, not scroll height: a stamp slamming in or a score chip changing places no longer makes the whole picture shrink and jump for a frame (seen in GOAT Toss; likely the cause in other games too).
+- GOAT Toss: big call over the table for every scoring toss, bank, bust and pile; "Up next" banner when the turn changes hands; banked points shown on the player's score; sounds rotate.
+- Funny Answers: cards no longer rebuild on every vote; the result builds (names, voter chips, then the winner pops with big points); sounds rotate; result lasts 8.5 s.
+- Still to do: hold score rows at their old values until the reveal ends in Funny Answers; same treatment for the remaining games; extra recorded takes for sounds (needs credits).
+- "Who has finished" is a tick or pencil on each score chip instead of a list of names mid-screen (any game with a score row); other name lists are a row of small chips. Who Said That shows its questions large.
+- Back on the remote during a game: first press arms ("Press Back or OK again to end"), second ends. Back on the how-to-play screen returns to the join screen.
+- Short sound effects vary a little in pitch and speed each time they play.

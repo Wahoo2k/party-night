@@ -261,7 +261,9 @@ export function stageFit(app, on) {
   const want = +getComputedStyle(app.firstElementChild || app).getPropertyValue('--stage-w') || 0;
   for (const w of want ? [want] : [1040, 1260, 1500]) {
     setUnits(w); st.width = w + 'px';
-    const h = Math.max(app.scrollHeight, 1), z = Math.min(availW / w, availH / h, 2.6);
+    // Layout height, not scroll height: something flying or popping in (a scaled-up stamp, a score chip changing places)
+    // sticks out for a moment and must not make the whole stage shrink and jump for a frame.
+    const h = Math.max(app.offsetHeight, 1), z = Math.min(availW / w, availH / h, 2.6);
     if (!best || z > best.z * 1.04) best = { w, h, z };   // biggest on screen wins; ties go to the narrower layout
   }
   setUnits(best.w); st.width = best.w + 'px';

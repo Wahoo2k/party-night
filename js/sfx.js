@@ -121,6 +121,7 @@ const SOUNDS = {
 };
 
 const lastTake = {};
+const VARY = new Set(['pop', 'stamp', 'tick', 'lockin', 'points', 'vote', 'join', 'safe', 'whoosh', 'lose', 'death']);
 export function play(name) {
   if (!quiet.on) tap.fn?.('play', [name]);
   if (!ready()) return;
@@ -131,7 +132,9 @@ export function play(name) {
     let pick = takes[Math.floor(Math.random() * takes.length)];
     if (takes.length > 1 && pick === lastTake[name]) pick = takes[(takes.indexOf(pick) + 1) % takes.length];
     lastTake[name] = pick;
-    try { const a = new Audio(`audio/sfx/${pick}.mp3`); a.volume = 0.8; a.play().catch(() => {}); return; } catch {}
+    // Short effects also shift a little in pitch and speed each time, so a pop heard twenty times is never quite
+    // the same pop. Longer, musical pieces (fanfares, stings, crowd sounds) are left as recorded.
+    try { const a = new Audio(`audio/sfx/${pick}.mp3`); a.volume = 0.8; if (VARY.has(name)) { a.preservesPitch = false; a.playbackRate = 0.9 + Math.random() * 0.22; } a.play().catch(() => {}); return; } catch {}
   }
   if (!SOUNDS[name]) return;
   try { SOUNDS[name](); } catch {}

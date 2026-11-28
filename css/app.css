@@ -2382,3 +2382,55 @@ body.onstage[data-game=doodle] .stage .dbopt.beat .dbtag{font-size:17px}
 .dbartist{font-weight:700;animation:rise .5s both}.dbartist b{color:#11693a;font-size:1.4em}
 /* Intro screen: the game name is always white on the dark card, whatever the game's theme does to headings. */
 body .intro .introtext h2{color:#fff}
+/* GOAT Toss: big moments over the table (what a toss scored, banked or lost, and whose turn is next). They float
+   above the layout, so nothing moves or resizes when they appear. */
+body[data-game=ducks] .stage .panel{position:relative}
+.gover{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;z-index:6}
+.gcall,.gturn{display:grid;justify-items:center;gap:2px;padding:10px 34px 14px;border-radius:22px;background:#12203cee;color:#fff;box-shadow:0 14px 40px #0008,0 0 0 4px #ffffff30;transform:translateY(-34%)}
+.gcall small,.gturn small{font:800 clamp(16px,calc(1.6*var(--vw,1vw)),26px)/1.1 Outfit,sans-serif;letter-spacing:.08em;text-transform:uppercase;opacity:.85}
+.gcall b,.gturn b{font:800 clamp(54px,calc(7*var(--vw,1vw)),120px)/1 Outfit,sans-serif;color:#ffd75e}
+.gcall.big b{font-size:clamp(70px,calc(9*var(--vw,1vw)),150px)}
+.gcall.win{background:#0f5a35f2}.gcall.win b{color:#9dffc4}
+.gcall.lose{background:#8f1d1df2}.gcall.lose b{color:#ffd0d0}
+.gturn b{font-size:clamp(44px,calc(5.4*var(--vw,1vw)),96px);color:#fff}
+/* A scoring call slams in, holds, then steps back so the goats are in view again. */
+@keyframes gcallin{0%{opacity:0;transform:translateY(-34%) scale(2.4) rotate(-5deg)}14%{opacity:1;transform:translateY(-34%) scale(.94) rotate(1deg)}22%,62%{opacity:1;transform:translateY(-34%) scale(1)}100%{opacity:.96;transform:translate(0,-128%) scale(.5)}}
+.gcall{transform:translate(0,-128%) scale(.5);opacity:.96}
+.gcall.in{animation:gcallin 2.2s cubic-bezier(.2,.9,.3,1) both}
+.gcall.lose.in{animation:gcallin 2.2s cubic-bezier(.2,.9,.3,1) both,shakex .5s .3s}
+@keyframes shakex{20%{margin-left:-14px}40%{margin-left:14px}60%{margin-left:-8px}80%{margin-left:8px}}
+@keyframes gturnin{0%{opacity:0;transform:translate(-60vw,-34%) skewX(-12deg)}18%{opacity:1;transform:translate(0,-34%)}70%{opacity:1;transform:translate(0,-34%)}100%{opacity:0;transform:translate(50vw,-34%) skewX(-12deg)}}
+.gturn.in{animation:gturnin 1.9s cubic-bezier(.2,.8,.3,1) both}
+.ggain{display:inline-block;margin-left:8px;color:#9dffc4;font-weight:800;animation:slam .5s both}
+/* Funny Answers result, in beats: who wrote each, who voted for each (chips), then the winner pops with its points. */
+.fa-voters{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:8px}
+.fa-voters .chip{background:#1b1147;color:#fff;font:700 17px Outfit,sans-serif;padding:4px 12px}
+.fa-voters .chip.none{background:none;color:inherit;opacity:.6}
+.fa-voters.beat-in .chip{animation:pop .35s cubic-bezier(.3,1.6,.5,1) both}
+.fa-voters.beat-in .chip:nth-child(2){animation-delay:.12s}.fa-voters.beat-in .chip:nth-child(3){animation-delay:.24s}.fa-voters.beat-in .chip:nth-child(4){animation-delay:.36s}.fa-voters.beat-in .chip:nth-child(n+5){animation-delay:.48s}
+.fa-votes b{font-size:1.5em}.fa-votes i{font-style:normal;margin-left:10px;padding:2px 10px;border:3px solid currentColor;border-radius:8px;display:inline-block;transform:rotate(-6deg)}
+.fa-votes.beat-in{animation:slam .55s both}
+body .faceoff.result .fa:not(.won){opacity:1;filter:none}
+body .faceoff.result .fa.lost{filter:saturate(.45) brightness(.86);transition:filter .5s}
+body .stage .faceoff.result .fa.won{animation:fwin .7s cubic-bezier(.2,1.5,.4,1) both}
+body.onstage[data-game=funny] .fa-votes{font-size:34px;padding:6px 22px}
+body.onstage[data-game=funny] .fa-voters .chip{font-size:20px}
+/* Tall Tales, picking: small name chips in a row; a lock shows on each as they choose. */
+.pickrow{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.pickrow .chip{padding:5px 14px;border-radius:99px;background:#22323a;color:#fff;font:700 18px Outfit,sans-serif;opacity:.55}
+.pickrow .chip.locked{opacity:1;background:#2fbf71;animation:pop .3s both}
+/* Who has finished: shown as a tick on each score chip instead of a list of names in the middle of the screen. */
+.asbadge{display:none!important}
+.scores .srow{position:relative}
+.scores .srow.sdone::after,.scores .srow.swait::after{position:absolute;top:-9px;right:-9px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font:800 16px/1 system-ui,sans-serif;box-shadow:0 2px 8px #0006}
+.scores .srow.sdone::after{content:'✓';background:#2fbf71;color:#fff;animation:pop .35s cubic-bezier(.3,1.6,.5,1) both}
+.scores .srow.swait::after{content:'✏️';background:#fff;font-size:14px}
+.scores .srow.sdone{box-shadow:0 0 0 3px #2fbf71,0 6px 18px #0005}
+.scores .srow.swait{opacity:.72}
+/* Who Said That: with the name list gone, the questions get the room and can be read from the couch. */
+body.onstage[data-game=whosaid] .qlist{list-style:none;counter-reset:q;padding:0;margin:14px auto 18px;gap:12px;max-width:900px}
+body.onstage[data-game=whosaid] .qlist li{counter-increment:q;display:flex;gap:16px;align-items:center;padding:16px 24px;border-radius:18px;background:#17324af2;color:#fff;font:700 34px/1.2 Outfit,sans-serif;text-align:left;box-shadow:0 8px 20px #0004}
+body.onstage[data-game=whosaid] .qlist li::before{content:counter(q);flex:0 0 auto;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:#ffd75e;color:#17324a;font-weight:800}
+/* Name lists inside a game panel are a row of small chips, not a stack of full-width bars: the room goes to the question. */
+body.onstage .stage .panel .roster{flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px}
+body.onstage .stage .panel .roster .chip{flex:0 0 auto;width:auto;border-radius:99px}

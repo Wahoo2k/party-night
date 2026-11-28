@@ -161,13 +161,14 @@ export function cue(s) {
 // Sounds and lines for moments inside a turn (tosses, banks). The TV plays these as they happen.
 export function cueEvent(s) {
   if (!s.eventId) return null;
-  if (s.lastEvent === 'bank') return { id: s.eventId, sound: 'safe', say: `${nameOf(s, current(s))} banks ${s.banked}.`, delay: 0 };
+  const pickOf = (...a) => a[(+s.eventId || 0) % a.length];   // the same moment does not sound the same twice running
+  if (s.lastEvent === 'bank') return { id: s.eventId, sound: pickOf('points', 'safe', 'lockin'), react: s.banked >= 20 ? 'cheer' : null, say: `${nameOf(s, current(s))} banks ${s.banked}.`, delay: 0 };
   const r = s.last;
   if (!r) return null;
-  if (r.pile) return { id: s.eventId, sound: 'lose', react: 'groan', fx: 'shake', say: 'Goat pile! There goes your whole score!', delay: TIMES.anim };
-  if (r.bust) return { id: s.eventId, sound: 'death', react: 'groan', fx: 'shake', say: s.kept ? `They butt heads! But the underdog keeps ${s.kept}.` : 'They butt heads! Turn over.', delay: TIMES.anim };
+  if (r.pile) return { id: s.eventId, sound: pickOf('lose', 'death'), react: 'groan', fx: 'shake', say: 'Goat pile! There goes your whole score!', delay: TIMES.anim };
+  if (r.bust) return { id: s.eventId, sound: pickOf('death', 'lose', 'sting-comic'), react: pickOf('groan', 'laugh', 'gasp'), fx: 'shake', say: s.kept ? `They butt heads! But the underdog keeps ${s.kept}.` : 'They butt heads! Turn over.', delay: TIMES.anim };
   if (r.double) return { id: s.eventId, sound: 'win', react: 'cheer', fx: 'gold', say: `${r.name}! ${r.pts} points!`, delay: TIMES.anim };
-  return { id: s.eventId, sound: r.pts >= 10 ? 'safe' : 'tick', say: r.pts >= 10 ? `${r.name}! ${r.pts}!` : '', delay: TIMES.anim };
+  return { id: s.eventId, sound: r.pts >= 10 ? pickOf('points', 'safe', 'win') : pickOf('pop', 'stamp', 'lockin', 'points'), react: r.pts >= 15 ? 'cheer' : null, say: r.pts >= 10 ? `${r.name}! ${r.pts}!` : '', delay: TIMES.anim };
 }
 
 export function botAct(v, rnd = Math.random) {
@@ -302,13 +303,14 @@ function tossScene(v) {
 }
 
 // ---------- renderers ----------
+const shown = { land: '', landAt: 0, turn: '', turnAt: 0 }; let turnCount = 0;
 export function renderTV(v, el) {
   document.body.classList.toggle('day', true);
   // While a toss is in the air, the screen is left alone: redrawing it (the clock does, every second) would rebuild
   // the scene mid-flight and cost frames. The same toss keeps animating; the full redraw comes when it lands.
   const live = el.querySelector('.g3d');
   if (v.phase === 'turn' && v.animating && live && live.dataset.anim === '1' && live.dataset.e === String(v.eventId)) return;
-  const board = `<div class="scores"><h3>First to ${v.target}</h3>${v.board.map(p => `<div class="srow ${p.now ? 'now' : ''}"><span>${esc(p.name)}</span><b>${p.score}</b></div>`).join('')}</div>`;
+  const board = `<div class="scores"><h3>First to ${v.target}</h3>${v.board.map(p => `<div class="srow ${p.now ? 'now' : ''}"><span>${esc(p.name)}</span><b>${p.score}${p.now && v.ending && !v.animating && v.endReason === 'bank' && v.banked ? `<small class="ggain">+${v.banked}</small>` : ''}</b></div>`).join('')}</div>`;
   let h = '';
   if (v.phase === 'turn') {
     const last = v.last;
@@ -321,7 +323,25 @@ export function renderTV(v, el) {
     h = `<div class="ghead"><h2>${esc(v.who)}'s turn</h2>${result}</div>${table}<div class="gfoot">${status}<div class="history">${v.tosses.map(t => `<span class="${t.bust || t.pile ? 'lose' : ''}">${esc(t.name)}${t.pts ? ' +' + t.pts : ''}</span>`).join('')}</div></div>${legend}<button class="btn ghost" data-host="next" ${v.animating ? 'style="visibility:hidden"' : ''}>${v.ending ? 'Next player' : 'Skip / bank for them'}</button>`;
   }
   if (v.phase === 'over') h = `<h2 class="win">${esc(v.winner)} is the G.O.A.T.!</h2><p class="say">Greatest Of All Time, at least until the next game.</p><div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
-  el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel">${h}</div>${board}</div>`;
+  // Big moments, drawn over the table so they never change the layout: whose turn it is when it changes hands,
+  // what a toss scored once it lands, and what a turn banked or lost. Each one animates once.
+  let over = '';
+  if (v.phase === 'turn') {
+    const turnKey = v.who, landKey = `${v.eventId}.${v.ending ? v.endReason : ''}`, last = v.last, now = Date.now();
+    // A redraw while one of these is still playing carries on from where it was.
+    const land = () => { if (landKey !== shown.land) { shown.land = landKey; shown.landAt = now; } const el = now - shown.landAt; return el < 2200 ? `in" style="animation-delay:-${el}ms` : ''; };
+    if (!v.animating && v.ending) {
+      const t = v.endReason === 'bank' ? ['win', `Banked`, `+${v.banked}`] : v.endReason === 'bust' ? ['lose', 'Butt heads!', v.lost ? `−${v.lost}` : ''] : v.endReason === 'pile' ? ['lose', 'Goat pile!', 'Back to 0'] : null;
+      if (t) over = `<div class="gcall ${t[0]} ${land()}"><small>${t[1]}</small><b>${t[2]}</b></div>`;
+    } else if (!v.animating && last && last.pts) {
+      over = `<div class="gcall ${last.double ? 'win big' : last.pts >= 10 ? 'big' : ''} ${land()}"><small>${esc(last.name)}</small><b>+${last.pts}</b></div>`;
+    } else if (!v.animating && !last) {
+      if (turnKey !== shown.turn) { shown.turn = turnKey; shown.turnAt = now; import('../sfx.js').then(m => m.play(['whoosh', 'join', 'lockin'][turnCount++ % 3])).catch(() => {}); }
+      const el = now - shown.turnAt;
+      if (el < 1900) over = `<div class="gturn in" style="animation-delay:-${el}ms"><small>Up next</small><b>${esc(v.who)}</b></div>`;
+    }
+  }
+  el.innerHTML = `<div class="stage ${v.fresh ? 'enter' : ''}"><div class="panel">${h}${over ? `<div class="gover">${over}</div>` : ''}</div>${board}</div>`;
   const scene = el.querySelector('.g3d'); if (scene && v.last) tossRun(scene, v);
 }
 

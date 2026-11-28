@@ -66,7 +66,7 @@ export const BOT_LINES = [
 
 const ROUNDS = 2;              // matchup rounds; then the final
 const PTS = 100;
-export const TIMES = { write: 90000, vote: 20000, result: 6000, finalWrite: 60000, finalVote: 30000, finalResult: 9000 };
+export const TIMES = { write: 90000, vote: 20000, result: 8500, finalWrite: 60000, finalVote: 30000, finalResult: 9000 };
 
 const shuffle = (a, rnd) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
@@ -218,8 +218,10 @@ export function narration(s) {
 export function cue(s) {
   switch (s.phase) {
     case 'write': return { sound: 'join', wait: 800, title: s.round === 0 ? 'Funny Answers' : 'Round 2', sub: s.round === 0 ? 'Answer your prompts' : 'Double points!' };
-    case 'vote': return { sound: 'stamp', after: 'stamp', wait: 750 };
-    case 'result': { const m = s.matchups[s.m]; return { sound: m.sweep ? 'win' : 'safe', wait: 300, fx: m.sweep ? 'confetti' : null, react: m.sweep ? 'cheer' : 'laugh', flash: m.sweep ? 'gold' : null }; }
+    case 'vote': { const k = s.m % 4; return { sound: ['stamp', 'whoosh', 'pop', 'join'][k], after: ['stamp', 'lockin', 'stamp', 'pop'][k], wait: 750 }; }   // each matchup opens with a different pair of sounds
+    // The result builds: names, then who voted for what, and only then the winner (about 3 s in). The win sound and
+    // the crowd land on that last beat, and they change from matchup to matchup.
+    case 'result': { const m = s.matchups[s.m], k = s.m % 3; return { sound: 'drumroll', after: m.sweep ? 'win' : ['points', 'safe', 'win'][k], wait: 3600, fx: m.sweep ? 'confetti' : null, react: m.sweep ? 'cheer' : ['laugh', 'cheer', 'gasp'][k], flash: m.sweep ? 'gold' : null, flashAt: 3100 }; }
     case 'finalWrite': return { sound: 'drumroll', wait: 1800, title: 'Final Round', sub: 'Everyone answers one prompt', tone: 'night' };
     case 'finalVote': return { sound: 'vote', wait: 400 };
     case 'finalResult': return { sound: 'win', wait: 900 };
@@ -290,13 +292,19 @@ export function phoneView(s, pid) {
 }
 
 // ---------- renderers ----------
+let drawnVote = '';
 export function renderTV(v, el) {
   document.body.classList.toggle('day', ['result', 'finalResult', 'over'].includes(v.phase));
   const scores = `<div class="scores"><h3>Scores</h3>${v.scores.map(p => `<div class="srow"><span>${esc(p.name)}</span><b>${p.score.toLocaleString()}</b></div>`).join('')}</div>`;
   let h = '';
   if (v.phase === 'write') h = `<p class="cat">Round ${v.round}${v.round > 1 ? ' · double points' : ''}</p><h2>Answer your prompts</h2><p class="say">Check your phone. Each prompt goes head-to-head against one other player.</p><p class="clock ${v.left <= 10 ? 'hurry' : ''}">${Math.floor(v.left / 60)}:${String(v.left % 60).padStart(2, '0')}</p>${v.waiting.length ? `<p class="muted">Still writing: ${v.waiting.map(esc).join(', ')}</p>` : ''}<button class="btn ghost" data-host="next">Stop writing</button>`;
   if (v.phase === 'vote' || v.phase === 'result') {
-    h = `<p class="cat">Matchup ${v.n} of ${v.of} · Round ${v.round}</p><div class="cq">${esc(v.prompt)}</div><div class="faceoff ${v.phase} ${v.phase === 'result' && v.answers[0].votes === v.answers[1].votes ? 'tied' : ''}">${v.answers.map((a, i) => `<div class="fa ${v.phase === 'result' && a.votes > v.answers[1 - i].votes ? 'won' : ''}" style="animation-delay:${i * 0.25}s"><div class="fa-text">${esc(a.text)}</div>${v.phase === 'result' ? `<div class="fa-by" data-beat="1">${esc(a.name)}${a.crowd ? ' · 👏 crowd favorite' : ''}${a.sweep ? ' · <b class="win">SWEEP!</b>' : ''}</div><div class="fa-votes" data-beat="2">${a.votes} vote${a.votes === 1 ? '' : 's'} · +${a.gained}</div><small class="muted" data-beat="3">${a.voters.map(esc).join(', ')}</small>` : ''}</div>`).join('<b class="vs">vs</b>')}</div>`;
+    // While votes come in, only the progress bar changes: rebuilding the cards made them jump every time someone voted.
+    const vkey = `${v.round}.${v.n}`, bar = el.querySelector('.faceoff.vote ~ .meter span');
+    if (v.phase === 'vote' && bar && drawnVote === vkey) { bar.style.width = `${v.need ? (100 * v.votesIn) / v.need : 0}%`; return; }
+    drawnVote = v.phase === 'vote' ? vkey : '';
+    const res = v.phase === 'result', tie = res && v.answers[0].votes === v.answers[1].votes;
+    h = `<p class="cat">Matchup ${v.n} of ${v.of} · Round ${v.round}</p><div class="cq">${esc(v.prompt)}</div><div class="faceoff ${v.phase} ${tie ? 'tied' : ''}">${v.answers.map((a, i) => `<div class="fa" ${res && !tie ? `data-beat="3" data-beat-class="${a.votes > v.answers[1 - i].votes ? 'won' : 'lost'}"` : ''} style="animation-delay:${i * 0.25}s"><div class="fa-text">${esc(a.text)}</div>${res ? `<div class="fa-by" data-beat="1">${esc(a.name)}${a.crowd ? ' · 👏 crowd favorite' : ''}</div><div class="fa-voters" data-beat="2">${a.voters.length ? a.voters.map(n => `<span class="chip">${esc(n)}</span>`).join('') : '<span class="chip none">no votes</span>'}</div>${a.gained ? `<div class="fa-votes" data-beat="3"><b>+${a.gained.toLocaleString()}</b>${a.sweep ? '<i>SWEEP!</i>' : ''}</div>` : ''}` : ''}</div>`).join('<b class="vs">vs</b>')}</div>`;
     h += v.phase === 'vote' ? `<p class="say center">Vote for the funnier answer on your phone!</p><div class="meter"><span style="width:${v.need ? (100 * v.votesIn) / v.need : 0}%"></span></div><button class="btn ghost" data-host="next">Close voting</button>` : '<button class="btn" data-host="next">Next</button>';
   }
   if (v.phase === 'finalWrite') h = `<p class="cat">Final round · triple points</p><div class="cq">${esc(v.prompt)}</div><p class="say">Everyone answers on their phone.</p><div class="meter"><span style="width:${(100 * v.answersIn) / v.total}%"></span></div><button class="btn ghost" data-host="next">Stop writing</button>`;

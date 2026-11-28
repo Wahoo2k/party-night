@@ -154,6 +154,18 @@ setInterval(() => { if (host.state && !host.paused) autoNext(); }, 500);
 
 function decorate() {
   const list = [...host.players].sort((a, b) => b.name.length - a.name.length);
+  // A list of names that only says who has finished does not need the middle of the screen: on the stage, each
+  // player's score chip at the bottom gets a tick (or a pencil while they are still busy) and the list is hidden.
+  const sc = app.querySelector('.stage > .scores');
+  if (sc && host.state) app.querySelectorAll('.stage .roster, .stage .pickrow').forEach(r => {
+    const chips = [...r.querySelectorAll('.chip')], nm = el => el.textContent.replace(/[✓🔒]|✏️?/gu, '').replace(/^[^\p{L}\p{N}]+/u, '').trim();
+    if (!chips.length || r.closest('.mwwin')) return;
+    const info = chips.map(c => { const t = c.textContent, done = /[✓🔒]/u.test(t) || c.classList.contains('skdone') || c.classList.contains('locked'); return { name: nm(c), done, mark: done || /✏/u.test(t) || c.classList.contains('waiting') }; });
+    const rows = [...sc.querySelectorAll('.srow')], find = n => rows.find(x => nm(x.querySelector('span') || x) === n);
+    if (!info.some(x => x.mark) || !info.every(x => find(x.name))) return;
+    info.forEach(x => find(x.name).classList.add(x.done ? 'sdone' : 'swait'));
+    r.classList.add('asbadge');
+  });
   app.querySelectorAll('.srow > span:first-child, .pod > b, .roster .chip, .ccseat > b, .gfseat > b, .hseat > b, .bjseat > b, .mmcast b, .ccplayers b').forEach(el => {
     if (el.querySelector('.pface')) return;
     const text = el.textContent.replace(/^[^\p{L}\p{N}]+/u, '');
@@ -271,7 +283,7 @@ let endArmed = 0;
 function vetoExtras() {
   const vbar = document.getElementById('vetobar');
   if (!vbar || !host.state) return;
-  if (!vbar.querySelector('[data-host=endgame]')) vbar.insertAdjacentHTML('afterbegin', `<button class="btn ghost small" data-host="endgame">${Date.now() - endArmed < 4000 ? 'Press again to end' : '✕ End game'}</button>`);
+  if (!vbar.querySelector('[data-host=endgame]')) vbar.insertAdjacentHTML('afterbegin', `<button class="btn ghost small" data-host="endgame">${Date.now() - endArmed < 4000 ? 'Press Back or OK again to end' : '✕ End game'}</button>`);
   if (['sketch', 'doodle'].includes(host.gameId) && !vbar.querySelector('[data-host=blurdraw]')) vbar.insertAdjacentHTML('afterbegin', `<button class="btn ghost small" data-host="blurdraw">🙈 ${host.blurDraw ? 'Show' : 'Hide'} drawing</button>`);
 }
 // The phone remote: one player's phone (the first to join, unless turned off) can press Next, Pause and Start for the TV.
@@ -1174,6 +1186,9 @@ if (SHOP) refreshOwn().then(() => { if (!host.state) render(); });
 window.partyBack = () => {
   if (vetoOpen) { hostAction('veto'); return true; }
   if (!host.state && !host.intro && host.screen && host.screen !== 'menu') { hostAction('menu'); return true; }
+  // In a game, Back is the way out: the first press asks ("Press Back again to end"), a second within four seconds ends it.
+  if (host.state) { hostAction('endgame'); return true; }
+  if (host.intro) { hostAction('lobby'); return true; }
   return false;
 };
 
