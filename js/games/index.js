@@ -65,9 +65,11 @@ import * as gold from './gold.js';
 import * as rps from './rps.js';
 import * as auction from './auction.js';
 import * as grid from './grid.js';
+import * as sound from './sound.js';
+import * as caption from './caption.js';
 import * as rebus from './rebus.js';
 
-export const GAMES = { pindrop, topspot, lineup, oneword, story, survive, shake, fib, clock, dash, gold, rps, auction, grid, werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards, hearts, shade, estimate, truths, wordhunt, midnight, missions, dares, split, doodle, memory, copycat, hunt, freeze, haunted, bomb, potato, mystery , bracket, faker, meter, rebus};
+export const GAMES = { pindrop, topspot, lineup, oneword, story, survive, shake, fib, clock, dash, gold, rps, auction, grid, sound, werewolf, imposter, bluff, whosaid, ducks, trivia, spin, crowd, bingo, quick, ladder, cases, funny, letters, taboo, agents, sketch, meld, bowl, crew, charades, clash, blackjack, gofish, bluffcards, hearts, shade, estimate, truths, wordhunt, midnight, missions, dares, split, doodle, memory, copycat, hunt, freeze, haunted, bomb, potato, mystery , bracket, faker, meter, rebus};
 
 // Intro steps and card facts live in one file (guide.js) and are folded into each game's meta here.
 for (const [id, G] of Object.entries(GAMES)) {
@@ -85,7 +87,7 @@ export const SHELVES = [
   { id: 'featured', name: '⭐ Start here', games: ['funny', 'ducks', 'bluff', 'whosaid', 'werewolf', 'sketch', 'trivia', 'faker', 'doodle', 'agents', 'taboo', 'spin'] },
   { id: 'all', name: 'All games' },
   { id: 'party', name: '🎉 Party', games: ['quick', 'potato', 'bracket', 'truths', 'meld', 'meter', 'bowl', 'funny', 'bluff', 'whosaid', 'faker', 'oneword', 'story', 'auction'] },
-  { id: 'trivia', name: '🧠 Game shows & puzzles', games: ['trivia', 'spin', 'crowd', 'rebus', 'pindrop', 'topspot', 'lineup', 'survive', 'fib', 'clock', 'gold', 'grid'] },
+  { id: 'trivia', name: '🧠 Game shows & puzzles', games: ['trivia', 'spin', 'crowd', 'rebus', 'pindrop', 'topspot', 'lineup', 'survive', 'fib', 'clock', 'gold', 'grid', 'sound'] },
   { id: 'secret', name: '🕵️ Secret roles', games: ['werewolf', 'imposter', 'agents', 'faker'] },
   { id: 'family', name: '👨‍👩‍👧 Family & all ages', games: ['ducks', 'memory', 'clash', 'sketch', 'doodle', 'bowl', 'crowd', 'shake', 'dash', 'rps'] },
   { id: 'kids', name: '👶 Little kids', games: ['ducks', 'memory', 'charades', 'bingo', 'gofish', 'copycat', 'hunt', 'freeze'] },
