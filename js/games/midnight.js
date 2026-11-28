@@ -9,6 +9,15 @@ export const meta = {
   min: 3,
   max: 10,
   blurb: 'One night, one vote, ten minutes. Who is the wolf?',
+  // The walkthrough: a sample game on the real screens (see walkStart in js/tv.js).
+  walk: [
+    { text: 'Midnight Wolves is one night and one vote. Here is the whole game in a minute.' },
+    { phase: 'look', text: 'Everyone gets one role card on their phone. Three more cards sit face down in the middle. Remember yours.' },
+    { phase: 'night', text: 'There is only one night. Some roles peek at a card. Some swap cards around. Your own card might be swapped without you knowing.' },
+    { phase: 'morning', text: 'In the morning your phone tells you only what you did or saw. Not what happened to your card afterwards.' },
+    { phase: 'day', text: 'Now talk it out. Say what you were and what you did. Stories that do not fit together are the clues. Wolves will lie.' },
+    { phase: 'vote', text: 'Everyone votes at once. If a wolf gets the most votes, the village wins. If not, the wolves do.' },
+  ],
 };
 
 export const ROLES = {

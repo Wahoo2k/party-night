@@ -8,11 +8,14 @@ export const meta = {
   name: 'Fact or Fib',
   min: 1,
   max: 20,
-  blurb: 'True or false? Everyone answers at once. Keep a streak going for double and triple points.',
+  blurb: 'True or false? Everyone answers at once. Keep a streak going for double and triple points. Twice a game you can double down: right pays double, wrong costs 100.',
   ownReveal: true,   // this game holds its scores back itself until its reveal has played
 };
 
 export const TIMES = { ask: 14000, settle: 3600, after: 5500 };
+// Twists. Double down: twice a game a player can stake their answer: right pays double, wrong costs 100.
+// Double round: now and then (never the first statement) a statement is worth double to everyone.
+export const RISKS = 2, RISK_COST = 100, DOUBLE_CHANCE = 0.2;
 export const multOf = streak => Math.min(3, Math.max(1, streak));
 const shuffle = (a, rnd) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
@@ -24,26 +27,31 @@ export function setup(players, rnd = Math.random, prev = null, opts = {}) {
     game: 'fib', players: players.map(p => ({ pid: p.pid, name: p.name })), round: 0,
     scores: Object.fromEntries(players.map(p => [p.pid, 0])), streak: Object.fromEntries(players.map(p => [p.pid, 0])),
     deck, max, n: 0, q: null, picks: {}, result: null, settled: false, settleAt: 0, phase: 'ask', deadline: 0,
+    risks: Object.fromEntries(players.map(p => [p.pid, RISKS])), risked: {}, twist: null, doubles: Array.from({ length: max }, (_, i) => i + 1).filter(n => n > 1 && rnd() < DOUBLE_CHANCE),
   };
   ask(s, Date.now());
   return s;
 }
 function ask(s, now) {
-  s.n++; s.q = s.deck.shift(); s.picks = {}; s.result = null; s.settled = false;
+  s.n++; s.q = s.deck.shift(); s.picks = {}; s.risked = {}; s.result = null; s.settled = false;
+  s.twist = s.doubles?.includes(s.n) ? 'double' : null;
   s.phase = 'ask'; s.round++; s.deadline = now + TIMES.ask;
 }
 function reveal(s, now) {
   const truth = STATEMENTS[s.q][1], before = { ...s.scores }, was = { ...s.streak }, got = {};
   s.players.forEach(({ pid }) => {
-    if (s.picks[pid] === truth) { s.streak[pid]++; got[pid] = 100 * multOf(s.streak[pid]); s.scores[pid] += got[pid]; } else { s.streak[pid] = 0; got[pid] = 0; }
+    const k = (s.twist === 'double' ? 2 : 1) * (s.risked[pid] ? 2 : 1);
+    if (s.picks[pid] === truth) { s.streak[pid]++; got[pid] = 100 * multOf(s.streak[pid]) * k; s.scores[pid] += got[pid]; }
+    else { s.streak[pid] = 0; got[pid] = s.risked[pid] && s.picks[pid] !== undefined ? -Math.min(RISK_COST, s.scores[pid]) : 0; s.scores[pid] += got[pid]; }
   });
-  s.result = { before, was, got, picks: { ...s.picks } };
+  s.result = { before, was, got, picks: { ...s.picks }, risked: { ...s.risked } };
   s.settled = false; s.settleAt = now + TIMES.settle;
   s.phase = 'reveal'; s.round++; s.deadline = s.settleAt + TIMES.after;
 }
 export function act(s, pid, a, now = Date.now()) {
   if (!a || s.phase !== 'ask' || a.type !== 'pick' || typeof a.v !== 'boolean' || !s.players.some(p => p.pid === pid) || s.picks[pid] !== undefined) return s;
   s.picks[pid] = a.v;
+  if (a.risk && s.risks?.[pid] > 0) { s.risks[pid]--; s.risked[pid] = true; }
   if (s.players.every(p => s.picks[p.pid] !== undefined)) reveal(s, now);
   return s;
 }
@@ -63,13 +71,14 @@ const say = (lines, k) => lines[((k % lines.length) + lines.length) % lines.leng
 
 export function narration(s) {
   if (s.phase === 'ask') {
-    const lead = s.n === 1 ? 'Welcome to Fact or Fib! True or false? Keep getting them right to build a streak.' : s.n === s.max ? 'Last one. Streaks still count.' : say(['Next one.', 'Try this.', 'How about this one?', 'Here we go.', 'True or false?'], s.n);
+    const lead = s.n === 1 ? 'Welcome to Fact or Fib! True or false? Keep getting them right to build a streak.' : s.twist === 'double' ? 'Double points on this one!' : s.n === s.max ? 'Last one. Streaks still count.' : say(['Next one.', 'Try this.', 'How about this one?', 'Here we go.', 'True or false?'], s.n);
     return `${lead} ${STATEMENTS[s.q][0]}`;
   }
   if (s.phase === 'reveal') {
     const [, truth, note] = STATEMENTS[s.q], got = Object.values(s.result.got), right = got.filter(x => x > 0).length;
     const verdict = truth ? say(['Fact!', 'True!', 'That is a fact.'], s.n) : say(['Fib!', 'False!', 'Nope. A fib.'], s.n);
-    return `${verdict} ${note}${got.length > 2 && !right ? ' Nobody got that one.' : got.length > 2 && right === got.length ? ' Too easy.' : ''}`;
+    const risk = Object.keys(s.result.risked || {}).length ? (got.some(x => x < 0) ? ' Somebody doubled down and paid for it.' : ' The double down pays off!') : '';
+    return `${verdict} ${note}${risk}${got.length > 2 && !right ? ' Nobody got that one.' : got.length > 2 && right === got.length ? ' Too easy.' : ''}`;
   }
   if (s.phase === 'over') return 'And that is the game. Thanks for playing!';
   return '';
@@ -82,17 +91,17 @@ export function cue(s) {
 }
 export function botAct(v, rnd = Math.random) {
   if (v.phase !== 'ask' || v.pick !== null) return null;
-  return { type: 'pick', v: rnd() < 0.68 ? v.hint : !v.hint };
+  return { type: 'pick', v: rnd() < 0.68 ? v.hint : !v.hint, risk: v.risks > 0 && rnd() < 0.15 };
 }
 
 export function tvView(s, now = Date.now()) {
   const held = s.phase === 'reveal' && !s.settled;
   const sc = held ? s.result.before : s.scores, st = held ? s.result.was : s.streak;
   const v = { phase: s.phase, n: s.n, max: s.max, left: Math.max(0, Math.ceil((s.deadline - now) / 1000)), scores: s.players.map(p => ({ pid: p.pid, name: p.name, score: sc[p.pid] })).sort((a, b) => b.score - a.score) };
-  if (s.phase !== 'over') { v.text = STATEMENTS[s.q][0]; v.players = s.players.map(p => ({ name: p.name, done: s.picks[p.pid] !== undefined, streak: st[p.pid] })); }
+  if (s.phase !== 'over') { v.twist = s.twist || null; v.text = STATEMENTS[s.q][0]; v.players = s.players.map(p => ({ name: p.name, done: s.picks[p.pid] !== undefined, streak: st[p.pid] })); }
   if (s.phase === 'reveal') {
     const r = s.result; v.truth = STATEMENTS[s.q][1]; v.note = STATEMENTS[s.q][2]; v.settled = !!s.settled;
-    const side = val => s.players.filter(p => r.picks[p.pid] === val).map(p => ({ name: p.name, got: r.got[p.pid], streak: s.streak[p.pid] }));
+    const side = val => s.players.filter(p => r.picks[p.pid] === val).map(p => ({ name: p.name, got: r.got[p.pid], streak: s.streak[p.pid], risked: !!r.risked?.[p.pid] }));
     v.yes = side(true); v.no = side(false); v.none = s.players.filter(p => r.picks[p.pid] === undefined).map(p => p.name);
   }
   return v;
@@ -100,10 +109,10 @@ export function tvView(s, now = Date.now()) {
 export function phoneView(s, pid) {
   if (!s.players.some(p => p.pid === pid)) return { phase: 'spectate' };
   const v = { phase: s.phase, n: s.n, max: s.max, score: s.scores[pid], streak: s.streak[pid] };
-  if (s.phase === 'ask') { v.text = STATEMENTS[s.q][0]; v.pick = s.picks[pid] ?? null; v.worth = 100 * multOf(s.streak[pid] + 1); if (String(pid).startsWith('bot-')) v.hint = STATEMENTS[s.q][1]; }
+  if (s.phase === 'ask') { v.text = STATEMENTS[s.q][0]; v.pick = s.picks[pid] ?? null; v.worth = 100 * multOf(s.streak[pid] + 1) * (s.twist === 'double' ? 2 : 1); v.twist = s.twist || null; v.risks = s.risks?.[pid] || 0; v.risked = !!s.risked[pid]; if (String(pid).startsWith('bot-')) v.hint = STATEMENTS[s.q][1]; }
   if (s.phase === 'reveal') {
     v.settled = !!s.settled; v.pick = s.result.picks[pid] ?? null;
-    if (!s.settled) { v.score = s.result.before[pid]; v.streak = s.result.was[pid]; } else { v.truth = STATEMENTS[s.q][1]; v.note = STATEMENTS[s.q][2]; v.got = s.result.got[pid]; v.lost = s.result.was[pid] >= 2 && !v.got; }
+    if (!s.settled) { v.score = s.result.before[pid]; v.streak = s.result.was[pid]; } else { v.truth = STATEMENTS[s.q][1]; v.note = STATEMENTS[s.q][2]; v.got = s.result.got[pid]; v.lost = s.result.was[pid] >= 2 && !(v.got > 0); v.risked = !!s.result.risked?.[pid]; }
   }
   if (s.phase === 'over') { const r = ranking(s); v.place = r.findIndex(x => x.pid === pid) + 1; v.winner = r[0].name; }
   return v;
@@ -124,9 +133,9 @@ export function renderTV(v, el) {
       import('../sfx.js').then(m => { setTimeout(() => m.play('stamp'), 1900); const right = v.truth ? v.yes : v.no; setTimeout(() => m.play(right.length ? (right.some(p => p.streak >= 3) ? 'cheer' : 'points') : 'buzzer'), 2500); }).catch(() => {});
     }
     const el0 = rev ? Date.now() - revAt : 0;   // a redraw part-way through carries on where it was
-    const names = (list, right) => list.map((p, i) => `<span class="${right ? 'ok' : 'bad'}" style="animation-delay:${300 + i * 180 - el0}ms">${esc(p.name)}${right && p.streak >= 2 ? ` <i>🔥${p.streak}</i>` : ''}${right ? `<b style="animation-delay:${2500 - el0}ms">+${p.got}</b>` : ''}</span>`).join('');
+    const names = (list, right) => list.map((p, i) => `<span class="${right ? 'ok' : 'bad'}" style="animation-delay:${300 + i * 180 - el0}ms">${p.risked ? '⚡ ' : ''}${esc(p.name)}${right && p.streak >= 2 ? ` <i>🔥${p.streak}</i>` : ''}${right ? `<b style="animation-delay:${2500 - el0}ms">+${p.got}</b>` : p.got < 0 ? `<b class="neg" style="animation-delay:${2500 - el0}ms">${p.got}</b>` : ''}</span>`).join('');
     const tile = val => `<div class="fbtile ${val ? 'yes' : 'no'} ${rev ? (v.truth === val ? 'right' : 'wrong') : ''}" style="--at:${1900 - el0}ms"><h3>${val ? 'TRUE' : 'FALSE'}</h3>${rev ? `<div class="fbnames">${names(val ? v.yes : v.no, v.truth === val)}</div>` : ''}</div>`;
-    h = `<p class="cat">Statement ${v.n} of ${v.max} ${!rev ? `<span class="clock small ${v.left <= 5 ? 'hurry' : ''}">${v.left}</span>` : ''}</p><div class="fbq">${esc(v.text)}</div>
+    h = `<p class="cat">Statement ${v.n} of ${v.max} ${v.twist === 'double' ? '<span class="gtwist dbl">✨ Double points</span> ' : ''}${!rev ? `<span class="clock small ${v.left <= 5 ? 'hurry' : ''}">${v.left}</span>` : ''}</p><div class="fbq">${esc(v.text)}</div>
       <div class="fbtiles ${rev ? 'rev' : ''}">${tile(true)}${tile(false)}</div>
       ${rev ? `<p class="fbnote" style="animation-delay:${2300 - el0}ms"><b>${v.truth ? 'Fact.' : 'Fib!'}</b> ${esc(v.note)}</p>` : `<div class="roster">${v.players.map(p => `<div class="chip ${p.done ? '' : 'waiting'}">${esc(p.name)}${p.done ? ' ✓' : ''}${fire(p.streak)}</div>`).join('')}</div>`}
       <button class="btn ghost" data-host="next">${rev ? (v.n >= v.max ? 'Finish' : 'Next') : 'Show the answer'}</button>`;
@@ -138,10 +147,10 @@ export function renderPhone(v, el, send) {
   if (v.phase === 'over') { el.innerHTML = `<h2 class="${v.place === 1 ? 'win' : ''}">${v.place === 1 ? 'You won! 🏆' : `${esc(v.winner)} wins`}</h2><p class="say">You finished ${['1st', '2nd', '3rd'][v.place - 1] || v.place + 'th'} with ${v.score.toLocaleString()} points.</p>`; return; }
   const streak = v.streak >= 1 ? `<p class="muted">🔥 ${v.streak} in a row</p>` : '';
   if (v.phase === 'ask') {
-    el.innerHTML = `${streak}<p class="tq small">${esc(v.text)}</p>${v.pick === null ? `<div class="fbbtns"><button class="btn fbyes" data-v="1">TRUE</button><button class="btn fbno" data-v="0">FALSE</button></div><p class="muted">Worth ${v.worth}. One tap, no changing.</p>` : `<h2>You said ${v.pick ? 'TRUE' : 'FALSE'}</h2><p class="say">Watch the TV.</p>`}`;
-    el.querySelectorAll('[data-v]').forEach(b => (b.onclick = () => send({ type: 'pick', v: b.dataset.v === '1' })));
+    el.innerHTML = `${streak}<p class="tq small">${esc(v.text)}</p>${v.pick === null ? `${v.twist === 'double' ? '<p class="say win">✨ Double points on this one!</p>' : ''}<div class="fbbtns"><button class="btn fbyes" data-v="1">TRUE</button><button class="btn fbno" data-v="0">FALSE</button></div><p class="muted">Worth ${v.worth}. One tap, no changing.</p>${v.risks ? `<label class="fbrisk"><input type="checkbox" id="fbrisk"> ⚡ Double down (${v.risks} left): right pays double, wrong costs 100</label>` : ''}` : `<h2>You said ${v.pick ? 'TRUE' : 'FALSE'}${v.risked ? ' ⚡' : ''}</h2><p class="say">${v.risked ? 'Doubled down! ' : ''}Watch the TV.</p>`}`;
+    el.querySelectorAll('[data-v]').forEach(b => (b.onclick = () => send({ type: 'pick', v: b.dataset.v === '1', risk: !!el.querySelector('#fbrisk')?.checked })));
     return;
   }
   if (!v.settled) { el.innerHTML = `${streak}<h2>Watch the TV…</h2><p class="say">${v.pick === null ? 'You did not answer in time.' : `You said ${v.pick ? 'TRUE' : 'FALSE'}.`}</p>`; return; }
-  el.innerHTML = `${streak}<h2 class="${v.got ? 'win' : 'lose'}">${v.got ? `Right! +${v.got}` : v.lost ? 'Wrong. Streak gone!' : v.pick === null ? 'Too slow' : 'Wrong'}</h2><p class="say"><b>${v.truth ? 'Fact.' : 'Fib!'}</b> ${esc(v.note)}</p><p class="muted">${v.score.toLocaleString()} points</p>`;
+  el.innerHTML = `${streak}<h2 class="${v.got > 0 ? 'win' : 'lose'}">${v.got > 0 ? `Right! +${v.got}${v.risked ? ' ⚡' : ''}` : v.got < 0 ? `Wrong. Double down costs ${-v.got}` : v.lost ? 'Wrong. Streak gone!' : v.pick === null ? 'Too slow' : 'Wrong'}</h2><p class="say"><b>${v.truth ? 'Fact.' : 'Fib!'}</b> ${esc(v.note)}</p><p class="muted">${v.score.toLocaleString()} points</p>`;
 }

@@ -30,5 +30,12 @@ G.act(s, s.picker, { type: 'pick', c: 0, r: 0 }, 0);
 assert.equal(G.phoneView(s, 'abc')._a, undefined);
 // buzz during reading is ignored; first buzz wins after
 if (s.phase === 'read') { G.act(s, 'abc', { type: 'buzz' }, 10); assert.equal(s.buzzer, null); G.tick(s, 99999); G.act(s, 'abc', { type: 'buzz' }, 100000); G.act(s, 'bot-1', { type: 'buzz' }, 100001); assert.equal(s.buzzer, 'abc'); G.act(s, 'abc', { type: 'answer', text: 'lion?' }, 100002); console.log('judged', s.lastAnswer); }
+// twist: the hidden double tile pays twice for a right answer, a miss costs face value
+{
+  const b = G.setup([{ pid: 'x', name: 'X' }, { pid: 'y', name: 'Y' }]); b.wager = { c: 3, r: 3 }; b.bonus = { c: 1, r: 2 };
+  G.act(b, b.picker, { type: 'pick', c: 1, r: 2 }, 0); assert.equal(b.phase, 'read'); assert.equal(b.lastEvent, 'bonusTile'); assert.ok(G.tvView(b, 0).bonus);
+  G.tick(b, 99999); G.act(b, 'x', { type: 'buzz' }, 100000); G.act(b, 'x', { type: 'answer', text: 'zzzz nope' }, 100001); assert.equal(b.scores.x, -300);
+  G.act(b, 'y', { type: 'buzz' }, 100002); G.act(b, 'y', { type: 'answer', text: CATEGORIES[b.cats[1]].clues[2].a[0] }, 100003); assert.equal(b.scores.y, 600);
+}
 console.log('fails', fails, 'avg game minutes (bot pace)', (total / 1500 / 60000).toFixed(1));
 process.exit(fails ? 1 : 0);

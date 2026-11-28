@@ -50,6 +50,8 @@ export function setup(players, rnd = Math.random, prev = null) {
   const tiles = cats.map(() => VALUES.map(() => true));                   // true = still on the board
   // The wager tile hides somewhere outside the cheapest row.
   const wager = { c: Math.floor(rnd() * COLS), r: 1 + Math.floor(rnd() * (VALUES.length - 1)) };
+  // Twist: one more hidden tile pays double for a right answer (a miss still costs only the face value).
+  let bonus = wager; while (bonus.c === wager.c && bonus.r === wager.r) bonus = { c: Math.floor(rnd() * COLS), r: Math.floor(rnd() * VALUES.length) };
   const finalsLeft = FINALS.map((f, i) => i).filter(i => i !== prev?.finalIdx);
   const scores = {};
   players.forEach(p => (scores[p.pid] = 0));
@@ -57,7 +59,7 @@ export function setup(players, rnd = Math.random, prev = null) {
     game: 'trivia',
     phase: 'pick',
     players: players.map(p => ({ pid: p.pid, name: p.name })),
-    cats, tiles, wager,
+    cats, tiles, wager, bonus,
     finalIdx: finalsLeft[Math.floor(rnd() * finalsLeft.length)],
     picker: players[Math.floor(rnd() * players.length)].pid,
     cur: null,              // {c, r}
@@ -78,6 +80,7 @@ const nameOf = (s, pid) => (P(s, pid) || {}).name || 'Someone';
 const clue = s => s.cur && CATEGORIES[s.cats[s.cur.c]].clues[s.cur.r];
 const value = s => (s.cur ? VALUES[s.cur.r] : 0);
 const isWager = (s, c, r) => s.wager.c === c && s.wager.r === r;
+const isBonus = s => !!s.cur && !!s.bonus && s.bonus.c === s.cur.c && s.bonus.r === s.cur.r;
 const left = s => s.tiles.flat().filter(Boolean).length;
 const final = s => FINALS[s.finalIdx];
 const readTime = text => Math.max(TIMES.readMin, text.length * TIMES.perChar);
@@ -96,7 +99,7 @@ function choose(s, c, r, now) {
   s.cur = { c, r };
   s.locked = []; s.buzzer = null; s.lastAnswer = null; s.attempts = [];
   if (isWager(s, c, r)) { s.phase = 'wager'; s.deadline = now + TIMES.wager; event(s, 'wagerTile'); }
-  else { s.phase = 'read'; s.deadline = now + readTime(clue(s).q); }
+  else { s.phase = 'read'; s.deadline = now + readTime(clue(s).q) + (isBonus(s) ? 1800 : 0); if (isBonus(s)) event(s, 'bonusTile'); }
 }
 
 function reveal(s, now, right) {
@@ -107,7 +110,7 @@ function reveal(s, now, right) {
 
 function judge(s, pid, text, now) {
   const right = isRight(text, clue(s).a);
-  const amt = s.bet || value(s);
+  const amt = s.bet || value(s) * (right && isBonus(s) ? 2 : 1);
   s.scores[pid] += right ? amt : -amt;
   s.lastAnswer = { pid, text: String(text || '').slice(0, 40), right, amt };
   s.attempts = [...(s.attempts || []), s.lastAnswer];
@@ -252,6 +255,7 @@ export function cueEvent(s) {
   if (!s.eventId) return null;
   if (s.lastEvent === 'buzz') return { id: s.eventId, sound: 'join', say: nameOf(s, s.buzzer) };
   if (s.lastEvent === 'right') return { id: s.eventId, sound: 'safe', say: s.phase === 'finalReveal' ? '' : 'Correct!' };
+  if (s.lastEvent === 'bonusTile') return { id: s.eventId, sound: 'win', say: 'Double value!' };
   if (s.lastEvent === 'wrong') return { id: s.eventId, sound: 'death', say: '' };
   return null;
 }
@@ -280,7 +284,7 @@ export function tvView(s, now = Date.now()) {
     scores: board(s),
     left: Math.max(0, Math.ceil((s.deadline - now) / 1000)),
   };
-  if (s.cur) Object.assign(v, { cur: s.cur, cat: CATEGORIES[s.cats[s.cur.c]].name, value: s.bet || value(s), q: s.phase === 'wager' ? null : clue(s).q, wagerTile: isWager(s, s.cur.c, s.cur.r) });
+  if (s.cur) Object.assign(v, { cur: s.cur, cat: CATEGORIES[s.cats[s.cur.c]].name, value: s.bet || value(s), q: s.phase === 'wager' ? null : clue(s).q, wagerTile: isWager(s, s.cur.c, s.cur.r), bonus: isBonus(s) });
   if (s.phase === 'buzz' || s.phase === 'answer') v.lockedNames = s.locked.map(p => nameOf(s, p));
   if (s.phase === 'answer') v.buzzer = nameOf(s, s.buzzer);
   if (s.phase === 'reveal') Object.assign(v, { attempts: (s.attempts || []).slice(0, -1).map(a => ({ ...a, name: nameOf(s, a.pid) })), answer: clue(s).a[0], last: s.lastAnswer ? { ...s.lastAnswer, name: nameOf(s, s.lastAnswer.pid) } : null, right: s.revealRight });
@@ -304,7 +308,7 @@ export function phoneView(s, pid) {
     v.tiles = s.tiles; v.values = VALUES;
     v.open = []; s.tiles.forEach((col, c) => col.forEach((on, r) => on && v.open.push({ c, r })));
   }
-  if (s.cur) { v.cat = CATEGORIES[s.cats[s.cur.c]].name; v.value = s.bet || value(s); v.row = s.cur.r; if (s.phase !== 'wager') v.q = clue(s).q; }
+  if (s.cur) { v.cat = CATEGORIES[s.cats[s.cur.c]].name; v.value = s.bet || value(s); v.row = s.cur.r; v.bonus = isBonus(s); if (s.phase !== 'wager') v.q = clue(s).q; }
   if (s.phase === 'buzz' || s.phase === 'read') v.locked = s.locked.includes(pid);
   if (s.phase === 'answer') { v.isBuzzer = s.buzzer === pid; v.buzzer = nameOf(s, s.buzzer); }
   if (s.phase === 'wager') v.maxBet = Math.max(s.scores[pid], VALUES[VALUES.length - 1]);
@@ -338,7 +342,7 @@ export function renderTV(v, el) {
   document.body.classList.toggle('day', false);
   const scores = `<div class="scores"><h3>Scores</h3>${v.scores.map(p => `<div class="srow"><span>${esc(p.name)}</span><b class="${p.score < 0 ? 'lose' : ''}">${pts(p.score)}</b></div>`).join('')}</div>`;
   let h = '';
-  const card = (inner, cls = '') => `<div class="tclue ${cls}"><p class="tcl-cat">${esc(v.cat || '')} · ${v.wagerTile ? `Wager ${pts(v.value)}` : pts(v.value)}</p>${inner}</div>`;
+  const card = (inner, cls = '') => `<div class="tclue ${cls}"><p class="tcl-cat">${esc(v.cat || '')} · ${v.wagerTile ? `Wager ${pts(v.value)}` : pts(v.value)}${v.bonus ? ' <span class="gtwist dbl">✨ Double if right</span>' : ''}</p>${inner}</div>`;
   if (v.phase === 'pick') h = `<h2>${esc(v.picker)}, pick a clue</h2><p class="muted">Choose on your phone.</p>${boardHtml(v)}`;
   if (v.phase === 'read') h = card(`<div class="tq">${esc(v.q)}</div><p class="muted">Get ready to buzz…</p>`, 'zoom');
   if (v.phase === 'buzz') h = card(`<div class="tq">${esc(v.q)}</div><p class="say buzzopen">Buzz in now! <span class="clock ${v.left <= 3 ? 'hurry' : ''}">${v.left}</span></p>${v.lockedNames.length ? `<p class="muted">Out on this one: ${v.lockedNames.map(esc).join(', ')}</p>` : ''}`);

@@ -105,6 +105,8 @@ export function say(text, force, low) {
   }
   pump();
 }
+// Stops the narrator mid-sentence (skipping a walkthrough).
+export function hushVoice() { queue.length = 0; if (current) stopCurrent(); }
 // Host banter: said only when the narrator is free.
 export const sayLow = text => say(text, false, true);
 

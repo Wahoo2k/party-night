@@ -8,6 +8,15 @@ export const meta = {
   min: 5,
   max: 16,
   blurb: 'Secret roles, night attacks and a village vote. Find the wolves before they find you.',
+  // The walkthrough: a sample round on the real screens (see walkStart in js/tv.js). Each step stops at a phase.
+  walk: [
+    { text: 'Here is how a round of Werewolf goes. It takes one minute.' },
+    { phase: 'roles', text: 'Everyone gets a secret role on their phone. Most of you are villagers. A few are werewolves. Tell nobody.' },
+    { phase: 'night', text: 'At night, everyone looks at their own phone. The wolves quietly choose a villager. The Seer checks one player. The Doctor protects one.' },
+    { phase: 'day', text: 'In the morning the village learns who the wolves got. Now talk. Who is acting strange?' },
+    { phase: 'vote', text: 'Then everyone votes on their phone. Whoever gets the most votes leaves the village, wolf or not.' },
+    { phase: 'verdict', text: 'Night falls again, and round it goes. The village wins by voting out every wolf. The wolves win when they match the villagers in number.' },
+  ],
 };
 
 export const ROLES = {

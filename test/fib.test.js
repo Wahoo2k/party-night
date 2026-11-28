@@ -11,7 +11,7 @@ for (let g = 0; g < 200; g++) {
   while (s.phase !== 'over' && n++ < 2000) { if (s.phase === 'ask') assert.ok(!/"truth"|"note"|"hint"/.test(JSON.stringify(G.tvView(s, now)))); for (const p of ps) { const a = G.botAct(G.phoneView(s, p.pid)); if (a) G.act(s, p.pid, a, now); } now += 800; G.tick(s, now); }
   assert.equal(s.phase, 'over'); assert.equal(s.n, s.max);
 }
-const ps = ['a', 'b'].map(p => ({ pid: p, name: p })), s = G.setup(ps); let now = Date.now();
+const ps = ['a', 'b'].map(p => ({ pid: p, name: p })), s = G.setup(ps); let now = Date.now(); s.doubles = [];
 const truth = () => STATEMENTS[s.q][1];
 assert.equal(G.phoneView(s, 'a').hint, undefined);
 // a is right three times running: 100, 200, 300. b is right, wrong, right: 100, 0, 100.
@@ -24,4 +24,17 @@ assert.equal(G.phoneView(s, 'a').hint, undefined);
 assert.equal(s.scores.a, 600); assert.equal(s.scores.b, 200); assert.equal(s.streak.a, 3); assert.equal(s.streak.b, 1);
 // no answer in time breaks the streak
 G.act(s, 'b', { type: 'pick', v: truth() }, now); G.hostAct(s, 'next', now); assert.equal(s.streak.a, 0); assert.equal(s.streak.b, 2);
+// twists: a double round doubles the pay; a double down doubles a right answer and costs 100 for a wrong one, twice a game
+{
+  const s2 = G.setup(ps); s2.doubles = [2]; let t2 = Date.now(); const tr = () => STATEMENTS[s2.q][1];
+  const settle = () => assert.equal(s2.phase, 'reveal');
+  G.act(s2, 'a', { type: 'pick', v: tr(), risk: true }, t2); G.act(s2, 'b', { type: 'pick', v: !tr(), risk: true }, t2); settle();
+  assert.equal(s2.scores.a, 200); assert.equal(s2.scores.b, 0); assert.equal(s2.risks.a, G.RISKS - 1);   // b had nothing to lose
+  G.hostAct(s2, 'next', t2); assert.equal(s2.twist, 'double'); assert.equal(G.tvView(s2, t2).twist, 'double');
+  G.act(s2, 'a', { type: 'pick', v: !tr(), risk: true }, t2); G.act(s2, 'b', { type: 'pick', v: tr() }, t2); settle();
+  assert.equal(s2.scores.a, 100); assert.equal(s2.scores.b, 200); assert.equal(s2.risks.a, 0);
+  G.hostAct(s2, 'next', t2); assert.equal(s2.twist, null);
+  G.act(s2, 'a', { type: 'pick', v: tr(), risk: true }, t2); assert.ok(!s2.risked.a, 'no double downs left');
+  assert.equal(G.phoneView(s2, 'a', t2).risks, 0);
+}
 console.log('ok fib');

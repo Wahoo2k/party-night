@@ -3,7 +3,7 @@ import { GAMES, COMING_SOON, SHELVES, NIGHTS, NO_TV } from './games/index.js';
 import { openRoom } from './net.js';
 import { SHOP, locked, canTry, markTried, ownedGames, refreshOwn, owned, accountUrl, PARTY_FN, PARTY_KEY } from './own.js';
 import { PACKS, PRICES, packOf } from './packs.js';
-import { esc, store, DEMO, newCode, say, sayLow, voiceContext, fitScreen, stageFit, keepFitted, voice, voices, enableDpad, autofocus, drawScene, titleCard, confetti, clawMarks } from './ui.js';
+import { esc, store, DEMO, newCode, say, sayLow, hushVoice, voiceContext, fitScreen, stageFit, keepFitted, voice, voices, enableDpad, autofocus, drawScene, titleCard, confetti, clawMarks } from './ui.js';
 import { art, thumb } from './art.js';
 import { play, sfx, startAmbient, stopAmbient, startBed, stopBed, startLoop, stopLoop, quiet } from './sfx.js';
 import { newKeys, cleanPub, samePub, sharedKey, seal, unseal } from './secure.js';
@@ -396,7 +396,62 @@ function rulesFor(id) {
 // The intro: before the first game of a title, the TV explains it and waits for every phone to tap Ready.
 const wantsIntro = () => host.settings.howto && !host.played?.[host.gameId] && host.players.some(p => !p.bot) && (!tq.has('local') || tq.has('intro'));
 const introReady = () => host.players.filter(p => !p.bot && !p.away).every(p => host.intro?.ready[p.pid]);
+// A walkthrough for the games that are hard to explain in words (Werewolf and friends). It shows a sample round on
+// the real game screens: a made-up group of players is run through the real rules by the bots, and the TV stops at
+// each step the game's `meta.walk` names, with a caption the narrator reads. Because it runs the real game, it stays
+// right when the game changes. It plays once, before a room's first game of that title, and any button skips it.
+let walk = { on: false, i: -1, s: null, t: 0, timer: 0, players: [] };
+const WALK_NAMES = ['Ava', 'Ben', 'Cleo', 'Dax', 'Eli', 'Fay', 'Gus', 'Hana'];
+function walkStart() {
+  const G = game(), n = Math.max(G.meta.min, Math.min(G.meta.max, 6));
+  walk = { on: true, i: -1, t: Date.now(), timer: 0, players: WALK_NAMES.slice(0, n).map((name, k) => ({ pid: 'bot-w' + k, name })) };
+  try { walk.s = G.setup(walk.players, Math.random, null, {}); } catch { walk.on = false; return false; }
+  walkNext(); return true;
+}
+function walkTo(phase) {
+  const G = game(), s = walk.s; let guard = 0, last = '', stuck = 0;
+  try {
+    while (s.phase !== phase && s.phase !== 'over' && guard++ < 4000) {
+      const key = s.phase + s.round; if (key !== last) { last = key; stuck = 0; } else stuck++;
+      for (const p of walk.players) { const a = G.botAct?.(G.phoneView(s, p.pid, walk.t), Math.random); if (a) { const { _now, ...act } = a; G.act(s, p.pid, act, walk.t, Math.random); } }
+      walk.t += 1500; G.tick?.(s, walk.t, Math.random); if (stuck > 40) { G.hostAct?.(s, 'next', walk.t, Math.random); stuck = 0; }
+    }
+  } catch { return false; }
+  return s.phase === phase;
+}
+function walkNext() {
+  clearTimeout(walk.timer);
+  const W = game().meta.walk || [];
+  walk.i++;
+  if (!walk.on || walk.i >= W.length) return walkEnd();
+  const b = W[walk.i];
+  if (b.phase && !walkTo(b.phase)) return walkNext();   // that step did not come up in this sample game: move on
+  render();
+  if (sfx.on) play(walk.i ? 'whoosh' : 'join');
+  say(b.text);
+  walk.timer = setTimeout(walkNext, b.ms || Math.max(5000, 2200 + b.text.length * 62));
+}
+function walkEnd() {
+  clearTimeout(walk.timer);
+  const was = walk.on; walk.on = false; walk.s = null;
+  document.querySelector('.walkbar')?.remove();
+  if (host.intro) { host.intro.walked = true; host.intro.at = Date.now(); }
+  if (was) { hushVoice(); render(); }
+}
+function renderWalk() {
+  const G = game(), W = G.meta.walk, b = W[walk.i];
+  if (b.phase) { try { const v = G.tvView(walk.s, walk.t); v.fresh = true; G.renderTV(v, app); } catch { return walkEnd(); } }
+  else app.innerHTML = `<div class="stage"><div class="panel walkcard">${art(host.gameId, ICONS[host.gameId])}<h2>${esc(G.meta.name)}</h2><p class="say">${esc(b.title || 'A quick look at how a round goes')}</p></div></div>`;
+  app.querySelectorAll('[data-host]').forEach(x => x.remove());   // the sample game's own buttons do nothing here
+  let bar = document.querySelector('.walkbar');
+  if (!bar) { bar = document.createElement('div'); bar.className = 'walkbar'; document.body.append(bar); }
+  bar.innerHTML = `<small>How to play · ${walk.i + 1} of ${W.length}</small><p></p><button class="btn small" data-host="skipwalk">Skip ▶</button>`;
+  bar.querySelector('p').textContent = b.text;
+  const sk = bar.querySelector('button'); sk.onclick = () => hostAction('skipwalk'); sk.focus?.();
+}
 function renderIntro() {
+  if (game().meta.walk && !host.intro.walked && !walk.on) { if (walkStart()) return; host.intro.walked = true; }
+  if (walk.on) return renderWalk();
   const id = host.intro.id, m = GAMES[id].meta, rules = rulesFor(id), first = !host.intro.shown;
   host.intro.shown = true;
   const humans = host.players.filter(p => !p.bot);
@@ -865,6 +920,7 @@ function teamPick() {
 }
 function startGame(again) {
   stand.game = '';
+  if (walk.on) { clearTimeout(walk.timer); walk.on = false; walk.s = null; document.querySelector('.walkbar')?.remove(); }
   if (locked(host.gameId)) { host.screen = 'gather'; return changed(); }   // not bought: the join screen shows how to unlock it
   // First time this room plays the game: explain it and wait for everyone before anything starts.
   if (!host.intro && !again && wantsIntro()) { host.intro = { id: host.gameId, ready: {}, at: Date.now() }; if (sfx.on) play('whoosh'); return changed(); }   // the game's own theme sting plays when it actually starts
@@ -886,11 +942,13 @@ function startGame(again) {
 
 let standPass = false;
 function hostAction(a) {
+  if (a === 'skipwalk') return walkEnd();
+  if (walk.on && (a === 'next' || a === 'start')) return walkEnd();   // any go-ahead button skips the walkthrough
   if (a === 'start') return startGame();
   if (a === 'again') return startGame(true);
   if (a.startsWith('night:')) { const nt = NIGHTS.find(x => x.id === a.slice(6)); if (nt) { host.queue = nt.games.slice(1); host.night = nt.id; host.gameId = nt.games[0]; host.screen = 'gather'; save(); } return changed(); }
   if (a === 'endnight') { host.queue = []; host.night = null; save(); return render(); }
-  if (a === 'lobby' && host.intro && !host.state) { host.intro = null; host.screen = 'gather'; save(); return changed(); }
+  if (a === 'lobby' && host.intro && !host.state) { if (walk.on) { clearTimeout(walk.timer); walk.on = false; document.querySelector('.walkbar')?.remove(); } host.intro = null; host.screen = 'gather'; save(); return changed(); }
   if (a.startsWith('playnext:') && GAMES[a.slice(9)]) { host.lastByGame = { ...(host.lastByGame || {}), [host.gameId]: host.state }; host.state = null; ceremonyOff?.(); if (host.queue?.[0] === a.slice(9)) host.queue.shift(); host.gameId = a.slice(9); host.screen = 'gather'; stopAmbient(); document.body.classList.remove('day'); return changed(); }
   if (a === 'lobby') { menuAt = null; host.lastByGame = { ...(host.lastByGame || {}), [host.gameId]: host.state }; host.state = null; ceremonyOff?.(); if (host.queue?.length) { host.gameId = host.queue.shift(); host.screen = 'gather'; } else { host.night = null; host.screen = 'menu'; } stopAmbient(); document.body.classList.remove('day'); return changed(); }
   if (a === 'newcode') {
@@ -1456,7 +1514,7 @@ if (DEMO && GAMES[DEMO]) {
 setInterval(() => { const now = Date.now(); if (!host.state && host.players.length && now - lastInput > 90000 && now - lastIdle > 240000) { lastIdle = now; banter('lobby'); } }, 20000);
 
 // The intro never holds a room hostage: after 75 seconds the game starts anyway.
-setInterval(() => { if (host.intro && !host.state && Date.now() - host.intro.at > 75000) startGame(); }, 3000);
+setInterval(() => { if (host.intro && !host.state && !walk.on && Date.now() - host.intro.at > 75000) startGame(); }, 3000);
 
 // A tablet or phone standing in for the TV: keep its screen on, where the browser allows it (TVs never sleep mid-app).
 let wake = null;

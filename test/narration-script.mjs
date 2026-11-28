@@ -44,6 +44,8 @@ for (const [id, G] of Object.entries(GAMES)) {
   // "Core" sentences turn up in most games; the rest are the game's bank of questions, words and answers.
   perGame[id] = { name: G.meta.name, voice, core: good.filter(s => seen.get(s) >= RUNS / 3), bank: good.filter(s => seen.get(s) < RUNS / 3), named: named.length, typed: typed.length, typedSample: typed.slice(0, 2), namedSample: named.slice(0, 3) };
 }
+// The walkthroughs' captions, read by each game's own narrator.
+for (const [id, G] of Object.entries(GAMES)) for (const b of G.meta.walk || []) for (const s of sentences(b.text, [])) add(voiceFor(id), s, id);
 // Host banter and the platform's own lines.
 for (const [set, moments] of Object.entries(QUIPS)) for (const pool of Object.values(moments)) for (const line of pool) for (const s of sentences(line, [])) add(set === 'night' ? 'night' : 'host', s, 'quips');
 for (const line of ["Time's up!", 'And the winner is…', "It's a tie!", "Tonight's awards."]) for (const s of sentences(line, [])) add('host', s, 'shared');

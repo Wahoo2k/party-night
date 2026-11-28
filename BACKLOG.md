@@ -317,3 +317,8 @@ The bar for "launch worthy" and the batch order are in the road-to-launch doc. B
 - The key to the landings is a row of eight tall tiles (picture, name, points) and the tiles that just happened light up once the goats land. Names match what the game calls: "Butt heads" (was "Different sides"), "Nap time" (was "Same side"); "Goat pile: back to 0" was missing and is added.
 - Twists: **Double or nothing** (22% of turns, never a player's first): banking doubles the turn, butting heads also costs 10 from the bank. **One more!**: once a game, any other player can make the thrower toss again before they may bank (button on the watchers' phones; a dared thrower who walks away has the toss made for them). Bots use both. Tests in test/ducks.test.js.
 - Tom's idea to carry twists into other games is not started: candidates are a double-points round, a steal token and a "swap scores" token in the quiz games.
+
+## Walkthroughs and more twists (28 Nov)
+- **Skippable walkthrough** before the first game of Werewolf and Midnight Wolves: the TV plays a sample round with made-up players while the host explains six beats ("How to play · n of 6", Skip button on the TV; the host's Start also skips). Scripts live in each game's `meta.walk`; test in test/walk-e2e.mjs. Captions are not recorded yet. Not done: Inside Job, Secret Agents, Mystery Manor, Imposter, Bomb Squad, Hearts (waiting for Tom's view of the format).
+- **Fact or Fib twists**: about one statement in five is worth double (never the first); each player gets two "double downs" a game (tick the box before answering: right pays double, wrong costs 100).
+- **Trivia Board twist**: one more hidden tile pays double for a right answer (a miss costs face value); the wager tile is unchanged.
