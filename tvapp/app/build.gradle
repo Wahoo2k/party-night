@@ -1,0 +1,27 @@
+// Party Night for Google TV / Android TV (and Fire TV): a thin shell that shows the web game full-screen.
+// The game itself lives on the website, so game updates reach the TV without a new app version.
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'com.toolshedapps.partynight'
+    compileSdk 34
+    defaultConfig {
+        applicationId 'com.toolshedapps.partynight'
+        minSdk 24
+        targetSdk 34
+        versionCode((System.getenv('GITHUB_RUN_NUMBER') ?: '1') as int)
+        versionName '0.1.' + (System.getenv('GITHUB_RUN_NUMBER') ?: '0')
+        buildConfigField 'String', 'START_URL', '"https://wahoo2k.github.io/party-night/tv.html?app=android"'
+    }
+    signingConfigs {
+        // Test builds are all signed with the same key kept in this folder, so a new build installs over the old
+        // one. It is not secret and is never used for a store release; the store release gets its own key.
+        test { storeFile file('../test-signing.jks'); storePassword 'partynight-test'; keyAlias 'test'; keyPassword 'partynight-test' }
+    }
+    buildTypes {
+        debug { signingConfig signingConfigs.test }
+        release { signingConfig signingConfigs.test; minifyEnabled false }
+    }
+    buildFeatures { buildConfig true }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}

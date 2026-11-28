@@ -1,0 +1,31 @@
+# Builds the Google TV / Android TV test app and publishes it as a download.
+# Runs when anything under tvapp/ changes, or by hand from the Actions tab.
+name: TV app
+on:
+  push:
+    branches: [main]
+    paths: ['tvapp/**', '.github/workflows/tvapp.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: '8.9' }
+      - name: Build
+        working-directory: tvapp
+        run: gradle --no-daemon assembleDebug
+      - name: Publish the download
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: |
+          cp tvapp/app/build/outputs/apk/debug/app-debug.apk party-night-tv.apk
+          ls -la party-night-tv.apk
+          gh release view tv-test >/dev/null 2>&1 || gh release create tv-test --prerelease --title "Party Night TV: test build" --notes "Test build of the Google TV app. Install it on an Android TV or Google TV box. Rebuilt automatically; the newest file replaces the old one."
+          gh release upload tv-test party-night-tv.apk --clobber
+          gh release edit tv-test --notes "Test build 0.1.${GITHUB_RUN_NUMBER} of the Google TV app, built $(date -u +'%Y-%m-%d %H:%M UTC'). Install it on an Android TV or Google TV box. Rebuilt automatically; the newest file replaces the old one."

@@ -1140,6 +1140,14 @@ function watchUnlock() {
 }
 if (SHOP) refreshOwn().then(() => { if (!host.state) render(); });
 
+// The TV app's Back button asks this first. True means "handled": we stepped back a screen. During a game, and on the
+// menu, it answers false and the app shows its own "press Back again to leave".
+window.partyBack = () => {
+  if (vetoOpen) { hostAction('veto'); return true; }
+  if (!host.state && !host.intro && host.screen && host.screen !== 'menu') { hostAction('menu'); return true; }
+  return false;
+};
+
 connect();
 
 // Demo mode for the website: bots play one game on a loop, with no host. See DEMO in ui.js.
