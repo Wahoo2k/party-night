@@ -105,7 +105,7 @@ export function narration(s) {
 }
 export function cue(s) {
   if (s.phase === 'ask') return s.n === 1 ? { sound: 'fanfare', wait: 1500, title: 'Gold Rush', sub: 'Answer right. Open a chest.' } : { sound: 'vote', wait: 300 };
-  if (s.phase === 'chest') return { sound: 'safe', wait: 0 };
+  if (s.phase === 'chest') return { sound: 'chest', wait: 0 };
   if (s.phase === 'reveal') return s.settled ? null : { sound: winners(s).length ? 'drumroll' : 'groan', wait: 0 };
   if (s.phase === 'over') return { sound: 'win', wait: 1500, title: 'Game Over', sub: `${ranking(s)[0].name} is the richest!`, tone: 'dawn', fx: 'confetti' };
   return null;
@@ -161,7 +161,7 @@ export function renderTV(v, el) {
     if (v.phase === 'ask') body = `<div class="roster">${v.players.map(p => `<div class="chip ${p.done ? '' : 'waiting'}">${esc(p.name)}${p.done ? ' ✓' : ''}</div>`).join('')}</div>`;
     if (v.phase === 'chest') body = `<div class="grchests"><i>🧰</i><i>🧰</i><i>🧰</i></div><p class="tsrule"><b>${v.right.map(esc).join(', ')}: pick a chest on your phone!</b><span class="clock">${v.left}</span></p><div class="roster">${v.players.map(p => `<div class="chip ${p.done ? '' : 'waiting'}">${esc(p.name)}${p.done ? ' ✓' : p.opened ? ' …' : ''}</div>`).join('')}</div>`;
     if (v.phase === 'reveal') {
-      const key = 'q' + v.n; if (revKey !== key) { revKey = key; revAt = Date.now(); import('../sfx.js').then(m => v.events.forEach((e, i) => setTimeout(() => m.play({ gold: 'points', jackpot: 'win', hole: 'groan', steal: 'gasp', swap: 'gasp', keep: 'pop', none: 'pop' }[e.kind]), 1500 + i * 1500))).catch(() => {}); }
+      const key = 'q' + v.n; if (revKey !== key) { revKey = key; revAt = Date.now(); import('../sfx.js').then(m => v.events.forEach((e, i) => setTimeout(() => m.play({ gold: 'coins', jackpot: 'win', hole: 'groan', steal: 'swoosh-steal', swap: 'gasp', keep: 'pop', none: 'pop' }[e.kind]), 1500 + i * 1500))).catch(() => {}); }
       const el0 = Date.now() - revAt;
       body = v.events.length ? `<div class="grevents">${v.events.map((e, i) => `<div class="grev ${e.kind}" style="animation-delay:${1500 + i * 1500 - el0}ms"><i>${ICON[e.kind]}</i><span>${line(e)}</span></div>`).join('')}</div>` : '<p class="tsrule"><b>Nobody got it. No chests this time.</b></p>';
     }

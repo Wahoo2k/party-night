@@ -160,7 +160,7 @@ export function renderTV(v, el) {
       import('../sfx.js').then(m => {
         setTimeout(() => m.play('safe'), 900);
         if (v.mercy) setTimeout(() => m.play('laugh'), 2000);
-        else { v.players.filter(p => p.lost).forEach((p, i) => setTimeout(() => m.play(p.out ? 'death' : 'groan'), 2000 + i * 350)); if (!v.players.some(p => p.lost)) setTimeout(() => m.play('cheer'), 2000); }
+        else { v.players.filter(p => p.lost).forEach((p, i) => setTimeout(() => m.play(p.out ? 'death' : 'heartbreak'), 2000 + i * 350)); if (!v.players.some(p => p.lost)) setTimeout(() => m.play('cheer'), 2000); }
       }).catch(() => {});
     }
     const el0 = rev ? Date.now() - revAt : 0;   // a redraw part-way through carries on where it was

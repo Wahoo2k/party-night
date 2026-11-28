@@ -109,7 +109,7 @@ export function narration(s) {
 }
 export function cue(s) {
   if (s.phase === 'pick') return s.i === 0 ? { sound: 'fanfare', wait: 1500, title: 'Doodle Dash', sub: 'Draw it. Guess it. Fast.' } : { sound: 'join', wait: 600 };
-  if (s.phase === 'draw') return { sound: 'whoosh', wait: 0 };
+  if (s.phase === 'draw') return { sound: 'scribble', wait: 0 };
   if (s.phase === 'result') return s.settled ? null : { sound: 'stamp', wait: 0 };
   if (s.phase === 'over') return { sound: 'win', wait: 1500, title: 'Game Over', sub: `${ranking(s)[0].name} wins!`, tone: 'dawn', fx: 'confetti' };
   return null;

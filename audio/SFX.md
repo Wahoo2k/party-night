@@ -29,6 +29,18 @@ Every sound today is synthesized in `js/sfx.js`. Each row is one recorded file t
 | points | 2 | Points landing on a phone | Quick ascending coin-collect sparkle, under 1 second |
 | lockin | 2 | An answer locked in | Soft satisfying click with a tiny chime, very short |
 
+## Game-specific effects
+| Name | Uses | What it is for | Prompt to generate |
+|---|---|---|---|
+| gavel | 1 | Going Once: a lot is sold | A wooden auction gavel banging twice on a block, sharp and dry, 1 second |
+| coins | 2 | Gold Rush: gold found | A handful of gold coins pouring and jingling into a pile, bright, 1.5 seconds |
+| chest | 1 | Gold Rush: chests appear | A heavy wooden treasure chest lid creaking open with a soft magical shimmer, 2 seconds |
+| buzzer | 3 | A wrong answer | A short low game-show wrong-answer buzzer, single hit, under 1 second |
+| scribble | 1 | Doodle Dash: drawing starts | A pencil scribbling quickly on paper, 1.5 seconds |
+| heartbreak | 1 | Last One Standing: a life is lost | A short cartoon glass crack with a sad descending two-note tone, 1 second |
+| swoosh-steal | 1 | Gold Rush: someone is robbed | A quick cartoon swipe whoosh followed by a cheeky cash-register ding, 1 second |
+| splat | 1 | Rock Paper Showdown: throws land | Three quick hand slaps on a table in a row, 1 second |
+
 ## Name That Sound
 Everyday sounds the players have to recognize. Plain, dry recordings with no music.
 
