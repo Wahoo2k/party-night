@@ -668,7 +668,7 @@ function hostAction(a) {
   if (a === 'endnight') { host.queue = []; host.night = null; save(); return render(); }
   if (a === 'lobby' && host.intro && !host.state) { host.intro = null; host.screen = 'gather'; save(); return changed(); }
   if (a.startsWith('playnext:') && GAMES[a.slice(9)]) { host.lastByGame = { ...(host.lastByGame || {}), [host.gameId]: host.state }; host.state = null; ceremonyOff?.(); if (host.queue?.[0] === a.slice(9)) host.queue.shift(); host.gameId = a.slice(9); host.screen = 'gather'; stopAmbient(); document.body.classList.remove('day'); return changed(); }
-  if (a === 'lobby') { host.lastByGame = { ...(host.lastByGame || {}), [host.gameId]: host.state }; host.state = null; ceremonyOff?.(); if (host.queue?.length) { host.gameId = host.queue.shift(); host.screen = 'gather'; } else { host.night = null; host.screen = 'menu'; } stopAmbient(); document.body.classList.remove('day'); return changed(); }
+  if (a === 'lobby') { menuAt = null; host.lastByGame = { ...(host.lastByGame || {}), [host.gameId]: host.state }; host.state = null; ceremonyOff?.(); if (host.queue?.length) { host.gameId = host.queue.shift(); host.screen = 'gather'; } else { host.night = null; host.screen = 'menu'; } stopAmbient(); document.body.classList.remove('day'); return changed(); }
   if (a === 'newcode') {
     // Same players again: tell every phone the new code so nobody has to rejoin by hand.
     const next = newCode(), keep = { settings: host.settings, tally: host.tally, played: host.played, opts: host.opts, lastByGame: host.lastByGame, shelf: host.shelf };
@@ -949,7 +949,7 @@ function renderLobby() {
   app.innerHTML = `<div class="lobby gather">
     <section class="panel join">
       <h2>Join on your phone</h2>
-      <p class="muted">Go to <b class="url">${esc(url.replace(/\?.*/, '').replace(/^https?:\/\//, ''))}</b><br>and enter room code</p>
+      <p class="muted">Go to <b class="url">${esc(url.replace(/\?.*/, '').replace(/^https?:\/\//, '').replace(/\/play\.html$/, ''))}</b><br>and enter room code</p>
       <div class="code">${host.code}</div>
       <p class="muted">or scan</p>
       <div class="qr">${qr(url)}</div>

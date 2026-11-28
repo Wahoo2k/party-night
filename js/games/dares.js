@@ -136,9 +136,9 @@ export function renderTV(v, el) {
 
 export function renderPhone(v, el, send) {
   if (v.phase === 'spectate') { el.innerHTML = '<h2>Game in progress</h2>'; return; }
-  if (v.phase === 'over') { el.innerHTML = `<h2 class="${v.place === 1 ? 'win' : ''}">${v.place === 1 ? 'Top secret agent!' : `You came #${v.place}`}</h2><p class="muted">${v.score} points</p>`; return; }
+  if (v.phase === 'over') { el.innerHTML = `<h2 class="${v.place === 1 ? 'win' : ''}">${v.place === 1 ? 'Top secret agent!' : `You came #${v.place}`}</h2><p class="muted">${v.score} point${v.score === 1 ? "" : "s"}</p>`; return; }
   const others = v.claims.filter(c => !c.mine);
-  el.innerHTML = `<p class="muted">${v.score} points · ${v.swaps} swap${v.swaps === 1 ? '' : 's'} left · keep this screen hidden!</p>
+  el.innerHTML = `<p class="muted">${v.score} point${v.score === 1 ? "" : "s"} · ${v.swaps} swap${v.swaps === 1 ? '' : 's'} left · keep this screen hidden!</p>
     ${others.map(c => `<div class="dclaim"><b>${esc(c.name)}</b>: ${esc(c.text)}${c.fouled ? '<p class="muted">You called foul.</p>' : `<button class="btn ghost" data-foul="${c.id}">👎 That didn't happen</button>`}</div>`).join('')}
     <h2>Your secret missions</h2>${v.missions.map(m => `<div class="dmission"><span class="dpts">${'★'.repeat(m.pts)}</span><p>${esc(m.text)}</p><div class="row"><button class="btn" data-done="${m.m}">Done!</button>${v.swaps ? `<button class="btn ghost" data-swap="${m.m}">Swap</button>` : ''}</div></div>`).join('')}`;
   el.querySelectorAll('[data-done]').forEach(b => (b.onclick = () => { b.disabled = true; try { navigator.vibrate?.(40); } catch {} send({ type: 'done', m: Number(b.dataset.done) }); }));

@@ -166,7 +166,7 @@ export function renderTV(v, el) {
 }
 export function renderPhone(v, el, send) {
   if (v.phase === 'spectate') { el.innerHTML = '<h2>Game in progress</h2>'; return; }
-  let h = `<p class="muted">${v.ghost ? '👻 Ghost · ' : ''}${v.score} points</p>`;
+  let h = `<p class="muted">${v.ghost ? '👻 Ghost · ' : ''}${v.score} point${v.score === 1 ? "" : "s"}</p>`;
   if (v.phase === 'question') h += v.mine !== null ? '<h2>Locked in!</h2>' : `<div class="hqbtns">${v.opts.map((o, i) => `<button class="hqbtn" data-i="${i}"><b>${LETTERS[i]}</b>${esc(o)}</button>`).join('')}</div>`;
   else if (v.phase === 'reveal') h += `<h2 class="${v.right ? 'win' : 'lose'}">${v.right ? 'Correct!' : v.ghost ? 'Wrong, but you\'re already a ghost 👻' : 'Wrong! To the basement…'}</h2>`;
   else if (v.phase === 'basement' && v.inBasement && v.picked === null) h += v.kind === 'doors' ? `<h2>Pick a door…</h2><div class="hqdoors">${Array.from({ length: DOORS }, (_, i) => `<button class="hqdoor" data-v="${i}">🚪<b>${i + 1}</b></button>`).join('')}</div>` : `<h2>${v.sum.x} + ${v.sum.y} = ?</h2><div class="hqbtns">${v.sum.opts.map(o => `<button class="hqbtn" data-v="${o}">${o}</button>`).join('')}</div>`;

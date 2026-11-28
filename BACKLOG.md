@@ -201,3 +201,12 @@ Things decided to do later, in rough priority order within each group. Updated 2
 - Menu: returning from a game lands on that game's card (was Settings); player names that don't fit become "+N".
 - Settings: bots labelled as test bots.
 - To do: same reveal treatment for Doodle Bluff and Two Truths; Back on the remote during a game should open pause, not exit.
+
+## 27 Nov, late: live play-through in Chrome (Doodle Bluff, Two Truths)
+- play.html?tab=1: each browser tab is its own player on the live site (testing).
+- Doodle Bluff reveal in beats (pickers pop in, stamp, points); scores and phones wait for the end; phones no longer receive which option is real or who wrote which fake (option ids are positions now).
+- Two Truths: scores, the "fooled" caption and phone results wait until the lie is out; each card names who picked it; the player on show no longer sees "Nothing to do" above "Your turn".
+- "1 point" (was "1 points") on every phone.
+- Intro title readable in the sketch theme; join screen shows the short address; returning to the menu always lands on the game just played.
+- Tall Tales reveal resumes mid-card on a redraw.
+- Seen, not fixed: menu top panel clips in a wide, short desktop window (about 1900×870); hidden browser tabs show as "away" (expected).

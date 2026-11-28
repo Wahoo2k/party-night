@@ -276,7 +276,7 @@ export function renderPhone(v, el, send) {
     else if (v.picked === null) h += `<h2>Your pick</h2>${opts('pick', null)}`;
     else if (v.guessed === null) h += `<p class="muted">You picked <b>${esc(v.options[v.picked])}</b></p><h2>What did most people pick?</h2>${opts('guess', null)}`;
     else h += `<h2>Locked in</h2><p class="muted">You: <b>${esc(v.options[v.picked])}</b> · Room: <b>${esc(v.options[v.guessed])}</b></p>`;
-  } else if (v.phase === 'reveal') h = `<p class="tq small">${esc(v.q)}</p><h2 class="${v.gained ? 'win' : ''}">${v.gained ? `+${v.gained}! You read the room.` : 'Not this time'}</h2><p class="say">${v.winners.map(i => esc(v.options[i])).join(' & ') || 'No votes'}</p><p class="muted">${v.score} points</p>`;
+  } else if (v.phase === 'reveal') h = `<p class="tq small">${esc(v.q)}</p><h2 class="${v.gained ? 'win' : ''}">${v.gained ? `+${v.gained}! You read the room.` : 'Not this time'}</h2><p class="say">${v.winners.map(i => esc(v.options[i])).join(' & ') || 'No votes'}</p><p class="muted">${v.score} point${v.score === 1 ? "" : "s"}</p>`;
   else if (v.phase === 'over') h = `<h2 class="${v.rank === 1 ? 'win' : ''}">${v.rank === 1 ? 'You read the room best!' : `You came ${v.rank} of ${v.of}`}</h2>${v.titles.length ? `<p class="say">The room says you're most likely ${esc(v.titles[v.titles.length - 1].replace(/^most likely /, ''))}.</p>` : ''}`;
   el.innerHTML = h;
   el.querySelectorAll('[data-pick]').forEach(b => (b.onclick = () => send({ type: 'pick', i: Number(b.dataset.pick) })));

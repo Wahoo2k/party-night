@@ -2354,8 +2354,8 @@ body.onstage[data-game=bluff] .rv.truth.now:not(.play){animation:none}
 /* Until the stamp lands nobody can tell a lie from the truth: the card stays plain. */
 @keyframes rvlie{from{border-top-color:#8a97a0}to{border-top-color:#c0392b}}
 @keyframes rvtruth{from{background:#fdf6e3;border-top-color:#8a97a0;box-shadow:0 8px 18px #0005}to{background:#e6f7ec;border-top-color:#1e9e5a;box-shadow:0 0 0 5px #1e9e5a,0 0 50px #7fe0a888}}
-body.onstage[data-game=bluff] .rv.lie.play{animation:cardflip .6s cubic-bezier(.2,1.2,.4,1),rvlie .3s var(--stamp) both}
-body.onstage[data-game=bluff] .rv.truth.play{animation:cardflip .6s cubic-bezier(.2,1.2,.4,1),rvtruth .4s var(--stamp) both}
+body.onstage[data-game=bluff] .rv.lie.play{animation:cardflip .6s cubic-bezier(.2,1.2,.4,1) calc(0ms - var(--el,0ms)),rvlie .3s var(--stamp) both}
+body.onstage[data-game=bluff] .rv.truth.play{animation:cardflip .6s cubic-bezier(.2,1.2,.4,1) calc(0ms - var(--el,0ms)),rvtruth .4s var(--stamp) both}
 body.onstage[data-game=bluff] .rv:not(.play){animation:none}
 /* Picking: a lock appears on each name as they choose. */
 .roster .chip.locked{background:#2fbf71;color:#fff;animation:pop .3s both}
@@ -2366,3 +2366,19 @@ body[data-game=bluff] .scores .srow b small{display:inline-block;font-size:1em;f
 .joined [hidden]{display:none!important}
 /* Empty places for the cards still to come, so the reveal stays one size from the first card to the last. */
 .rv.slot{visibility:hidden;animation:none!important}
+/* Doodle Bluff reveal in beats: pickers pop in under a title, then its stamp (fake or real) and the points. */
+body .stage .dbopt.beat{animation:none}
+.dbopt .dbpick{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.dbopt .dbpick .chip{background:#22323a;color:#fff;font:700 15px Outfit,sans-serif;padding:3px 11px;animation:pop .35s cubic-bezier(.3,1.6,.5,1) both}
+body .stage .dbopt.beat .dbtag{display:flex;align-items:baseline;gap:10px;margin-top:8px;font:800 15px Outfit,sans-serif;letter-spacing:.06em;text-transform:uppercase;opacity:1;color:#b3261e;animation:stampin .45s var(--stamp) both}
+.dbopt.beat .dbtag b{font-size:1.9em;letter-spacing:0}
+body .stage .dbopt.beat.real .dbtag{color:#11693a}
+@keyframes dbreal{from{background:#f4e9c1;box-shadow:none}50%{transform:scale(1.05)}}
+@keyframes dbrealstage{from{background:linear-gradient(135deg,#e9cf86,#b88f3a 45%,#f3e2a8 60%,#a67c2c);box-shadow:0 4px 10px #0005}50%{transform:scale(1.05)}}
+body .stage .dbopt.beat.real{animation:dbreal .5s var(--stamp) both}
+body.onstage[data-game=doodle] .stage .dbopt.beat.real{animation:dbrealstage .5s var(--stamp) both}
+body.onstage[data-game=doodle] .dbopt .dbpick .chip{font-size:18px}
+body.onstage[data-game=doodle] .stage .dbopt.beat .dbtag{font-size:17px}
+.dbartist{font-weight:700;animation:rise .5s both}.dbartist b{color:#11693a;font-size:1.4em}
+/* Intro screen: the game name is always white on the dark card, whatever the game's theme does to headings. */
+body .intro .introtext h2{color:#fff}

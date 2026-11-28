@@ -209,7 +209,7 @@ let sel = { round: -1, ids: [] };
 export function renderPhone(v, el, send) {
   if (v.phase === 'spectate') { el.innerHTML = '<h2>Game in progress</h2>'; return; }
   if (sel.round !== v.round) sel = { round: v.round, ids: [] };
-  const head = `<p class="muted">${v.score} points · +${v.taken} this hand</p>`;
+  const head = `<p class="muted">${v.score} point${v.score === 1 ? "" : "s"} · +${v.taken} this hand</p>`;
   if (v.phase === 'handEnd' || v.phase === 'over') { el.innerHTML = `${head}<h2 class="${v.place === 1 ? 'win' : ''}">${v.phase === 'over' ? (v.place === 1 ? 'You won!' : `You came #${v.place}`) : 'Check the TV'}</h2>`; return; }
   const hand = mode => `<div class="pcrow bchand hhand">${v.hand.map(c => {
     const can = mode === 'pass' ? !v.passed : mode === 'play' && v.legal.includes(c.id);

@@ -243,7 +243,7 @@ const blank = q => esc(q).replace('____', '<span class="blank">_____</span>');
 const mmss = n => `${Math.floor(n / 60)}:${String(n % 60).padStart(2, '0')}`;
 const pts = n => n.toLocaleString();
 
-let revealKey = '', revealTimers = [], fooledTurn = 0;
+let revealKey = '', revealAt = 0, revealTimers = [], fooledTurn = 0;
 const FOOLED_SOUNDS = ['laugh', 'gasp', 'groan', 'sting-comic'];   // a different reaction each time someone is fooled
 export function renderTV(v, el) {
   document.body.classList.toggle('day', ['reveal', 'scores', 'over'].includes(v.phase));
@@ -257,11 +257,12 @@ export function renderTV(v, el) {
     // Each card plays out in beats: the answer lands, the people who picked it pop in one by one, and only then
     // the stamp says whether they were fooled or right, with the points it paid. A redraw of the same step shows it finished.
     const key = `${v.n}.${v.current}`, playing = v.current >= 0 && key !== revealKey;
-    revealKey = key; revealTimers.forEach(clearTimeout); revealTimers = [];
+    if (key !== revealKey) { revealKey = key; revealAt = Date.now(); revealTimers.forEach(clearTimeout); revealTimers = []; }
+    const el = Date.now() - revealAt;   // a redraw part-way through a card picks up where it was, instead of starting over or jumping to the end
     const cur = v.items[v.current], gap = cur ? Math.min(380, 2400 / Math.max(1, cur.fooled.length)) : 0, stamp = cur ? 900 + cur.fooled.length * gap + 900 : 0;
-    h = `${head}<div class="reveals">${v.items.map((it, i) => `<div class="rv ${it.truth ? 'truth' : 'lie'} ${i === v.current ? 'now' : ''} ${i === v.current && playing ? 'play' : ''}" style="--stamp:${stamp}ms">
+    h = `${head}<div class="reveals">${v.items.map((it, i) => `<div class="rv ${it.truth ? 'truth' : 'lie'} ${i === v.current ? 'now' : ''} ${i === v.current ? 'play' : ''}" style="--stamp:${stamp - el}ms;--el:${el}ms">
         <div class="rv-text">${esc(it.text)}</div>
-        <div class="rv-votes">${it.fooled.length ? `<small>Picked by</small>${it.fooled.map((n, k) => `<span class="chip" style="animation-delay:${900 + k * gap}ms">${esc(n)}</span>`).join('')}` : '<small>Nobody picked it!</small>'}</div>
+        <div class="rv-votes">${it.fooled.length ? `<small>Picked by</small>${it.fooled.map((n, k) => `<span class="chip" style="animation-delay:${900 + k * gap - el}ms">${esc(n)}</span>`).join('')}` : '<small>Nobody picked it!</small>'}</div>
         <div class="rv-tag">${it.truth ? 'THE TRUTH' : it.house ? 'Our lie' : `Lie by ${it.authors.map(esc).join(' & ')}`}</div>
         ${it.pts && it.fooled.length ? `<div class="rv-pts">+${pts(it.pts)}<small>${it.truth ? (it.fooled.length > 1 ? 'each' : `for ${esc(it.fooled[0] || '')}`) : `for ${it.authors.map(esc).join(' & ')}`}</small></div>` : ''}
       </div>`).concat(Array.from({ length: Math.max(0, (v.slots || 0) - v.items.length) }, () => '<div class="rv slot"><div class="rv-text">&nbsp;</div><div class="rv-votes"><small>&nbsp;</small><span class="chip">&nbsp;</span></div><div class="rv-tag">&nbsp;</div><div class="rv-pts">&nbsp;</div></div>')).join('')}</div>${v.phase === 'scores' ? '<button class="btn" data-host="next">Next fact</button>' : ''}`;

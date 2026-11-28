@@ -161,7 +161,7 @@ let ui = { round: -1, opt: 0, zoom: null };
 export function renderPhone(v, el, send) {
   if (v.phase === 'spectate') { el.innerHTML = '<h2>Game in progress</h2>'; return; }
   if (ui.round !== v.round) ui = { round: v.round, opt: 0, zoom: null };
-  let h = `<p class="muted">${v.score} points</p>`;
+  let h = `<p class="muted">${v.score} point${v.score === 1 ? "" : "s"}</p>`;
   if (v.phase === 'pick' && v.isGiver) {
     const o = v.options[ui.opt];
     h += `<h2>Pick a secret shade</h2><div class="shopts">${v.options.map((c, i) => `<button class="shopt ${ui.opt === i ? 'on' : ''}" data-o="${i}" style="background:${colorAt(c.x, c.y)}"></button>`).join('')}</div><p class="muted">Your shade: <b>${cellName(o.x, o.y)}</b></p><form id="shf"><input id="shc" maxlength="30" autocomplete="off" placeholder="A thing that's this color"><p class="lose" id="err"></p><button class="btn" type="submit">Send clue</button></form><p class="muted small">One or two words. No color names!</p>`;

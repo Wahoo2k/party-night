@@ -195,8 +195,8 @@ export function renderPhone(v, el, send) {
     el.querySelector('#lock').onclick = e => { clearTimeout(dialTimer); e.target.disabled = true; send({ type: 'lock', v: dial.v }); };
     return;
   }
-  if (v.phase === 'reveal') { el.innerHTML = `<h2 class="${v.pts ? 'win' : ''}">+${v.pts}</h2>${bar(v.scale, { target: v.target, marks: v.mine !== undefined ? [{ g: v.mine, label: 'You' }] : [] })}<p class="muted">${v.score} points</p>`; return; }
-  if (v.phase === 'over') el.innerHTML = `<h2 class="${v.place === 1 ? 'win' : ''}">${v.place === 1 ? 'You read minds best!' : `You came #${v.place}`}</h2><p class="muted">${v.score} points</p>`;
+  if (v.phase === 'reveal') { el.innerHTML = `<h2 class="${v.pts ? 'win' : ''}">+${v.pts}</h2>${bar(v.scale, { target: v.target, marks: v.mine !== undefined ? [{ g: v.mine, label: 'You' }] : [] })}<p class="muted">${v.score} point${v.score === 1 ? "" : "s"}</p>`; return; }
+  if (v.phase === 'over') el.innerHTML = `<h2 class="${v.place === 1 ? 'win' : ''}">${v.place === 1 ? 'You read minds best!' : `You came #${v.place}`}</h2><p class="muted">${v.score} point${v.score === 1 ? "" : "s"}</p>`;
 }
 
 // First-game coach lines, one per step.

@@ -199,8 +199,8 @@ export function renderPhone(v, el, send) {
   }
   if (v.phase === 'write') h = `<div class="phoneletter">${esc(v.letter)}</div><h2>Done!</h2><p class="say">Waiting for everyone…</p>`;
   else if (v.phase === 'review') h = `<p class="muted">Letter ${esc(v.letter)}</p><p class="tq small">${esc(v.cat)}</p><p>Yours: <b>${esc(v.mine[v.categories.indexOf(v.cat)] || '—')}</b> <span class="muted">${STATUS[v.myStatus]}</span></p><p class="muted">Tap 👎 if an answer doesn't fit:</p><div class="opts">${v.others.map(o => `<button class="opt ${o.vetoed ? 'on' : ''}" data-veto="${esc(o.pid)}">${esc(o.name)}: <b>${esc(o.text)}</b> ${o.vetoed ? '👎' : ''} <small class="muted">${STATUS[o.status]}</small></button>`).join('') || '<p class="muted">No other answers.</p>'}</div>`;
-  else if (v.phase === 'scores') h = `<h2 class="win">+${v.gained}</h2><p class="say">${v.score} points</p>`;
-  else if (v.phase === 'over') h = `<h2 class="${v.rank === 1 ? 'win' : ''}">${v.rank === 1 ? 'You won!' : `You came ${v.rank} of ${v.of}`}</h2><p class="say">${v.score} points</p>`;
+  else if (v.phase === 'scores') h = `<h2 class="win">+${v.gained}</h2><p class="say">${v.score} point${v.score === 1 ? "" : "s"}</p>`;
+  else if (v.phase === 'over') h = `<h2 class="${v.rank === 1 ? 'win' : ''}">${v.rank === 1 ? 'You won!' : `You came ${v.rank} of ${v.of}`}</h2><p class="say">${v.score} point${v.score === 1 ? "" : "s"}</p>`;
   el.innerHTML = h;
   el.querySelectorAll('[data-veto]').forEach(b => (b.onclick = () => send({ type: 'veto', who: b.dataset.veto })));
 }

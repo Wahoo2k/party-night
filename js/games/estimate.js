@@ -170,7 +170,7 @@ export function renderTV(v, el) {
 
 export function renderPhone(v, el, send) {
   if (v.phase === 'spectate') { el.innerHTML = '<h2>Game in progress</h2>'; return; }
-  let h = `<p class="muted">${v.score} points</p>`;
+  let h = `<p class="muted">${v.score} point${v.score === 1 ? "" : "s"}</p>`;
   if (v.phase === 'answer') h += v.guessed ? '<h2>Guess locked in!</h2><p class="say">Waiting for the others…</p>' : `<p class="tq small">${esc(v.question)}</p><form id="ef"><input id="en" type="number" inputmode="numeric" step="1" placeholder="Your guess" autocomplete="off"><button class="btn" type="submit">Lock in</button></form>`;
   if (v.phase === 'bet') h += `<p class="tq small">${esc(v.question)}</p><p class="muted">Your guess: <b>${fmt(v.mine)}</b>. Bet on the closest without going over:</p><div class="opts">${v.slots.map(x => `<button class="opt ${v.bet === x.id ? 'on' : ''}" data-b="${esc(x.id)}"><b>${x.id === 'low' ? 'All too high' : fmt(x.n)}</b> <small class="muted">pays ${x.odds}</small></button>`).join('')}</div>`;
   if (v.phase === 'reveal') h += `<h2 class="${v.pts ? 'win' : ''}">+${v.pts}</h2><p class="say">The answer was <b>${fmt(v.answer)}</b>.${v.closest ? ' Your guess was the closest!' : ''}</p>`;

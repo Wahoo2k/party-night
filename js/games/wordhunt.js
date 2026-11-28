@@ -150,7 +150,7 @@ let picking = false;
 export function renderPhone(v, el, send) {
   if (v.phase === 'spectate') { el.innerHTML = '<h2>Game in progress</h2>'; return; }
   if (v.phase !== 'ask') picking = false;
-  let h = `<p class="muted">${v.score} points</p>`;
+  let h = `<p class="muted">${v.score} point${v.score === 1 ? "" : "s"}</p>`;
   if (v.phase === 'pick') h += v.role === 'host' ? `<h2>You're the Host! Pick a secret word</h2><div class="opts">${v.options.map((o, i) => `<button class="opt" data-w="${i}"><b>${esc(o.word)}</b> <small class="muted">${esc(o.cat)}</small></button>`).join('')}</div>` : v.role === 'insider' ? '<div class="role insider"><h2>🤫 You are the Insider</h2><p>You\'ll see the secret word. Help the group find it, but don\'t get caught!</p></div>' : `<h2>${esc(v.host)} is picking a word…</h2><p class="say">You're a regular player. Get ready to ask questions.</p>`;
   else if (v.phase === 'ask' && v.role === 'host') h += picking ? `<h2>Who said it?</h2><div class="opts">${v.others.map(o => `<button class="opt" data-by="${esc(o.pid)}">${esc(o.name)}</button>`).join('')}</div><button class="btn ghost" id="back">Back</button>` : `<p class="muted">Secret word</p><div class="tcard2"><div class="tword">${esc(v.word)}</div></div><div class="whbtns">${Object.entries(TOKENS).map(([k, label]) => `<button class="wht ${k}" data-t="${k}">${label}</button>`).join('')}</div><button class="btn" id="got">🎉 Someone said it!</button>`;
   else if (v.phase === 'ask' && v.role === 'insider') h += `<div class="role insider"><h2>🤫 Insider</h2><p>The word is <b>${esc(v.word)}</b>. Nudge the group toward it, but blend in!</p></div>`;

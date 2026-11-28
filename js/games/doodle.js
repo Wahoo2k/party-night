@@ -64,14 +64,16 @@ function toPick(s, now, rnd) {
   s.phase = 'pick'; s.round++; s.deadline = now + TIMES.pick;
 }
 function reveal(s, now) {
-  const a = artist(s);
+  const a = artist(s), before = { ...s.scores };
   const right = Object.entries(s.picks).filter(([, id]) => id === 'real').map(([pid]) => pid);
   right.forEach(pid => (s.scores[pid] += 1000));
   s.scores[a] += 500 * right.length;
   const fooled = {};
   Object.entries(s.picks).forEach(([pid, id]) => { if (id !== 'real') { const o = s.options.find(x => x.id === id); [o.by, ...(o.also || [])].forEach(f => { s.scores[f] += 500; fooled[f] = (fooled[f] || 0) + 1; }); } });
-  s.result = { right: right.map(p => nameOf(s, p)), fooled, picks: { ...s.picks } };
-  s.phase = 'reveal'; s.round++; s.deadline = now + TIMES.reveal;
+  s.result = { right: right.map(p => nameOf(s, p)), fooled, picks: { ...s.picks }, before };
+  // The TV plays the reveal in beats (see beats()); scores and phones only show the outcome once it has finished.
+  s.settled = false; s.settleAt = now + beats(revealOptions(s)).total;
+  s.phase = 'reveal'; s.round++; s.deadline = s.settleAt + TIMES.reveal;
 }
 function next(s, now) {
   s.k++;
@@ -90,9 +92,9 @@ export function act(s, pid, a, now = Date.now(), rnd = Math.random) {
     s.fakes[pid] = r.text;
     if (others(s).every(o => s.fakes[o])) toPick(s, now, rnd);
   } else if (s.phase === 'pick' && pid !== artist(s) && a.type === 'pick') {
-    const o = s.options.find(x => x.id === a.id);
+    const o = s.options[+a.id];
     if (!o || o.by === pid || o.also?.includes(pid)) return s;
-    s.picks[pid] = a.id;
+    s.picks[pid] = o.id;
     if (others(s).every(x => s.picks[x] || s.lucky.includes(x))) reveal(s, now);
   }
   return s;
@@ -105,14 +107,17 @@ export function hostAct(s, a, now = Date.now(), rnd = Math.random) {
   else if (s.phase === 'reveal') next(s, now);
   return s;
 }
-export function tick(s, now = Date.now(), rnd = Math.random) { return s.deadline && now >= s.deadline ? hostAct(s, 'next', now, rnd) : s; }
+export function tick(s, now = Date.now(), rnd = Math.random) {
+  if (s.phase === 'reveal' && !s.settled && now >= s.settleAt) { s.settled = true; return s; }   // the reveal has played: scores and phones catch up
+  return s.deadline && now >= s.deadline ? hostAct(s, 'next', now, rnd) : s;
+}
 
 const ranking = s => s.players.map(p => ({ pid: p.pid, name: p.name, score: s.scores[p.pid] })).sort((a, b) => b.score - a.score);
 export function narration(s) {
   if (s.phase === 'draw') return 'Welcome to Doodle Bluff! Draw the title on your phone. Keep it secret!';
   if (s.phase === 'fake') return `${s.k === 0 ? 'Here is the first masterpiece. ' : ''}What's this drawing called? Write a fake title to fool everyone.`;
   if (s.phase === 'pick') return 'Which one is the real title?';
-  if (s.phase === 'reveal') return `The real title was: ${s.art[artist(s)].title}!`;
+  if (s.phase === 'reveal') return '';   // the reveal plays out on screen; saying the title here would give it away
   if (s.phase === 'over') return `${ranking(s)[0].name} wins Doodle Bluff!`;
   return '';
 }
@@ -120,7 +125,7 @@ export function cue(s) {
   if (s.phase === 'draw') return { sound: 'join', wait: 700, title: 'Doodle Bluff', sub: 'Draw your secret title' };
   if (s.phase === 'fake') return { sound: 'vote', wait: 400 };
   if (s.phase === 'pick') return { sound: 'vote', wait: 300 };
-  if (s.phase === 'reveal') return { sound: 'drumroll', after: 'safe', wait: 1700 };
+  if (s.phase === 'reveal') return s.settled ? null : { sound: 'drumroll', wait: 0 };
   if (s.phase === 'over') return { sound: 'win', wait: 1500, title: 'Game Over', sub: `${ranking(s)[0].name} wins`, tone: 'dawn', fx: 'confetti' };
   return null;
 }
@@ -131,6 +136,18 @@ export function botAct(v, rnd = Math.random) {
   return null;
 }
 
+// The reveal, option by option: fakes that fooled someone first (fewest picks first), the real title last.
+// For each: the people who picked it pop in one at a time, then the stamp. Times are ms from the start of the reveal.
+const revealOptions = s => s.options.map(o => ({ text: o.text, real: o.id === 'real', by: o.by ? [o.by, ...(o.also || [])].map(p => nameOf(s, p)) : [], pickers: Object.entries(s.result.picks).filter(([, id]) => id === o.id).map(([p]) => nameOf(s, p)) }));
+export function beats(options) {
+  const order = options.map((o, i) => i).filter(i => options[i].real || options[i].pickers.length).sort((a, b) => options[a].real - options[b].real || options[a].pickers.length - options[b].pickers.length);
+  let t = 900; const at = {};
+  for (const i of order) { const n = options[i].pickers.length, gap = Math.min(380, 2000 / Math.max(1, n)); at[i] = { start: t, gap, stamp: t + 500 + n * gap + 800 }; t = at[i].stamp + 1500; }
+  const last = at[order[order.length - 1]].stamp;
+  options.forEach((o, i) => { if (!at[i]) at[i] = { start: last, gap: 0, stamp: last + 300 }; });
+  return { at, order, total: t + 400 };
+}
+
 export function tvView(s, now = Date.now()) {
   const v = { phase: s.phase, scores: ranking(s), left: Math.max(0, Math.ceil((s.deadline - now) / 1000)) };
   if (s.phase === 'draw') { v.done = s.players.filter(p => s.art[p.pid].strokes).map(p => p.name); v.waiting = s.players.filter(p => !s.art[p.pid].strokes).map(p => p.name); }
@@ -138,7 +155,8 @@ export function tvView(s, now = Date.now()) {
   if (s.phase === 'pick') v.options = s.options.map(o => o.text);
   if (s.phase === 'reveal') {
     v.artist = nameOf(s, artist(s)); v.title = s.art[artist(s)].title;
-    v.options = s.options.map(o => ({ text: o.text, real: o.id === 'real', by: o.by ? [o.by, ...(o.also || [])].map(p => nameOf(s, p)) : [], pickers: Object.entries(s.result.picks).filter(([, id]) => id === o.id).map(([p]) => nameOf(s, p)) }));
+    v.options = revealOptions(s); v.settled = !!s.settled; v.artistGain = 500 * s.result.right.length;
+    if (!s.settled) v.scores = s.players.map(p => ({ pid: p.pid, name: p.name, score: s.result.before[p.pid] })).sort((a, b) => b.score - a.score);
     v.lucky = s.lucky.map(p => nameOf(s, p));
   }
   return v;
@@ -149,13 +167,14 @@ export function phoneView(s, pid) {
   if (s.phase === 'draw') { v.done = !!s.art[pid].strokes; if (!v.done) v.title = s.art[pid].title; }
   if (['fake', 'pick', 'reveal'].includes(s.phase)) v.mine = artist(s) === pid;
   if (s.phase === 'fake') v.sent = !!s.fakes[pid];
-  if (s.phase === 'pick') { v.lucky = s.lucky.includes(pid); v.picked = s.picks[pid] || null; v.options = s.options.map(o => ({ id: o.id, text: o.text, own: o.by === pid || !!o.also?.includes(pid) })); }
-  if (s.phase === 'reveal') { v.title = s.art[artist(s)].title; v.right = s.result.picks[pid] === 'real'; v.fooled = s.result.fooled[pid] || 0; }
+  if (s.phase === 'pick') { v.lucky = s.lucky.includes(pid); v.picked = s.picks[pid] ? s.options.findIndex(o => o.id === s.picks[pid]) : null; v.options = s.options.map((o, i) => ({ id: i, text: o.text, own: o.by === pid || !!o.also?.includes(pid) })); }
+  if (s.phase === 'reveal') { v.settled = !!s.settled; if (!s.settled) return v; v.title = s.art[artist(s)].title; v.right = s.result.picks[pid] === 'real'; v.fooled = s.result.fooled[pid] || 0; }
   if (s.phase === 'over') v.place = ranking(s).findIndex(x => x.pid === pid) + 1;
   return v;
 }
 
-let shownKey = '';
+let shownKey = '', revealKey = '', revealAt = 0, revealTimers = [], fooledTurn = 0;
+const FOOLED_SOUNDS = ['laugh', 'gasp', 'groan', 'sting-comic'];
 export function renderTV(v, el) {
   const key = ['fake', 'pick', 'reveal'].includes(v.phase) ? 'd' + v.k : '';
   const replay = v.phase === 'fake' && key !== shownKey;
@@ -169,7 +188,22 @@ export function renderTV(v, el) {
     let side = '';
     if (v.phase === 'fake') side = `<h2>What's this called?</h2><p class="say">Write a fake title on your phone that sounds real.</p><div class="meter"><span style="width:${(100 * v.n) / v.total}%"></span></div><p class="muted">${v.n} of ${v.total} <span class="clock">${v.left}</span></p><button class="btn ghost" data-host="next">Show the titles</button>`;
     if (v.phase === 'pick') side = `<h2>Which is real?</h2><div class="dbopts">${v.options.map((o, i) => `<div class="dbopt" style="animation-delay:${i * 0.08}s">${esc(o)}</div>`).join('')}</div><p class="muted">Pick on your phone <span class="clock">${v.left}</span></p>`;
-    if (v.phase === 'reveal') side = `<p class="cat">by ${esc(v.artist)}</p><div class="dbopts">${v.options.map(o => `<div class="dbopt ${o.real ? 'real' : ''}">${esc(o.text)}<small>${o.real ? 'THE REAL TITLE' : `fake by ${o.by.map(esc).join(', ')}`}${o.pickers.length ? ` · picked by ${o.pickers.map(esc).join(', ')}` : ''}</small></div>`).join('')}</div>${v.lucky.length ? `<p class="win">${v.lucky.map(esc).join(', ')} guessed the exact title!</p>` : ''}<button class="btn" data-host="next">Next drawing</button>`;
+    if (v.phase === 'reveal') {
+      const rk = 'r' + v.k, first = rk !== revealKey;
+      if (first) { revealKey = rk; revealAt = Date.now(); revealTimers.forEach(clearTimeout); revealTimers = []; }
+      const el = Date.now() - revealAt, b = beats(v.options);   // a redraw part-way through picks up where the reveal is
+      side = `<p class="cat">by ${esc(v.artist)}</p><div class="dbopts">${v.options.map((o, i) => { const a = b.at[i], pts = o.real ? (o.pickers.length ? 1000 : 0) : 500 * o.pickers.length; return `<div class="dbopt beat ${o.real ? 'real' : ''}" style="--stamp:${a.stamp - el}ms">${esc(o.text)}${o.pickers.length ? `<span class="dbpick">${o.pickers.map((n, k) => `<span class="chip" style="animation-delay:${a.start + 500 + k * a.gap - el}ms">${esc(n)}</span>`).join('')}</span>` : ''}<small class="dbtag">${o.real ? 'THE REAL TITLE' : `Fake by ${o.by.map(esc).join(' & ')}`}${pts ? `<b>+${pts.toLocaleString()}${o.real && o.pickers.length > 1 ? ' each' : ''}</b>` : ''}</small></div>`; }).join('')}</div>${v.artistGain ? `<p class="dbartist" style="animation-delay:${b.total - 900 - el}ms">${esc(v.artist)}'s drawing earns <b>+${v.artistGain.toLocaleString()}</b></p>` : ''}${v.lucky.length ? `<p class="win">${v.lucky.map(esc).join(', ')} guessed the exact title!</p>` : ''}<button class="btn" data-host="next">Next drawing</button>`;
+      if (first) import('../sfx.js').then(m => {
+        const at = (ms, fn) => revealTimers.push(setTimeout(fn, ms));
+        b.order.forEach(i => { const o = v.options[i], a = b.at[i];
+          o.pickers.forEach((_, k) => at(a.start + 500 + k * a.gap, () => m.play('pop')));
+          at(a.stamp, () => m.play('stamp'));
+          if (o.real) { at(a.stamp + 250, () => m.play(o.pickers.length ? 'win' : 'groan')); if (o.pickers.length) at(a.stamp + 700, () => m.play('cheer')); }
+          else at(a.stamp + 250, () => m.play(FOOLED_SOUNDS[fooledTurn++ % FOOLED_SOUNDS.length]));
+          if (o.pickers.length) at(a.stamp + 900, () => m.play('points'));
+        });
+      }).catch(() => {});
+    }
     h = `<p class="cat">Drawing ${v.k} of ${v.of}</p><div class="dbrow">${art}<div>${side}</div></div>`;
   }
   if (v.phase === 'over') h = `<h2 class="win">${esc(v.scores[0].name)} wins!</h2><div class="podium">${v.scores.slice(0, 3).map((p, i) => `<div class="pod p${i + 1}"><b>${esc(p.name)}</b><span>${p.score.toLocaleString()}</span></div>`).join('')}</div><div class="row"><button class="btn" data-host="again">Play again</button><button class="btn ghost" data-host="lobby">Back to lobby</button></div>`;
@@ -186,11 +220,12 @@ export function renderPhone(v, el, send) {
   else if (v.phase === 'fake' && v.sent) h += '<h2>Sent!</h2>';
   else if (v.phase === 'fake') { if (draft.round !== v.round) draft = { round: v.round, text: '' }; h += `<h2>Write a fake title</h2><p class="muted">Look at the TV. Make it sound like the real one!</p><form id="dbf"><input id="dbt" maxlength="45" autocomplete="off" value="${esc(draft.text)}" placeholder="A very nervous…"><p class="lose" id="err"></p><button class="btn" type="submit">Send</button></form>`; }
   else if (v.phase === 'pick' && v.lucky) h += '<h2>You wrote the real title! +500</h2><p class="say">Sit this one out.</p>';
-  else if (v.phase === 'pick') h += `<h2>Which is the real title?</h2><div class="opts">${v.options.map(o => `<button class="opt ${v.picked === o.id ? 'on' : ''}" ${o.own ? 'disabled' : `data-o="${esc(o.id)}"`}>${esc(o.text)}${o.own ? ' <small class="muted">(yours)</small>' : ''}</button>`).join('')}</div>`;
+  else if (v.phase === 'pick') h += `<h2>Which is the real title?</h2><div class="opts">${v.options.map(o => `<button class="opt ${v.picked === o.id ? 'on' : ''}" ${o.own ? 'disabled' : `data-o="${o.id}"`}>${esc(o.text)}${o.own ? ' <small class="muted">(yours)</small>' : ''}</button>`).join('')}</div>`;
+  else if (v.phase === 'reveal' && !v.settled) h += '<h2>Watch the TV…</h2><p class="say">Who fooled who?</p>';
   else if (v.phase === 'reveal') h += `<h2 class="${v.right ? 'win' : ''}">${v.mine ? 'Your drawing!' : v.right ? 'You found it! +1000' : 'Fooled!'}</h2><p class="say">Real title: <b>${esc(v.title)}</b>${v.fooled ? `. You fooled ${v.fooled}! +${v.fooled * 500}` : ''}</p>`;
   else if (v.phase === 'over') h += `<h2 class="${v.place === 1 ? 'win' : ''}">${v.place === 1 ? 'You won!' : `You came #${v.place}`}</h2>`;
   el.innerHTML = h;
   const f = el.querySelector('#dbf');
   if (f) { const inp = f.querySelector('#dbt'); inp.oninput = () => (draft.text = inp.value); f.onsubmit = e => { e.preventDefault(); const r = cleanTitle(inp.value); if (!r.ok) { f.querySelector('#err').textContent = r.why; return; } f.querySelector('button').disabled = true; send({ type: 'fake', text: r.text }); }; }
-  el.querySelectorAll('[data-o]').forEach(b => (b.onclick = () => send({ type: 'pick', id: b.dataset.o })));
+  el.querySelectorAll('[data-o]').forEach(b => (b.onclick = () => send({ type: 'pick', id: +b.dataset.o })));
 }
